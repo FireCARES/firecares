@@ -1,0 +1,2 @@
+# firecares
+The FireCARES application
