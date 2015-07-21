@@ -1,0 +1,11 @@
+{"markers":[
+  {"address":"301 w 4th Street, New York","image":"assets/images/demo-content/property-1.jpg","icon":"assets/images/marker-apartment.png", "price":"450,000", "status":"House for sale", "bedrooms":"3", "bathrooms":"2", "area":"140"},
+  {"address":"128 7th Ave S, New York","image":"assets/images/demo-content/property-2.jpg","icon":"assets/images/marker-commercial.png", "price":"650,000", "status":"House for sale", "bedrooms":"4", "bathrooms":"3", "area":"100"},
+  {"address":"Eve 55 W 8th St, New York","image":"assets/images/demo-content/property-3.jpg","icon":"assets/images/marker-flat.png", "price":"400,000", "status":"House for sale", "bedrooms":"3", "bathrooms":"2", "area":"140"},
+  {"address":"21 W 16th St New York","image":"assets/images/demo-content/property-4.jpg","icon":"assets/images/marker-apartment.png", "price":"700,000", "status":"House for sale", "bedrooms":"3", "bathrooms":"2", "area":"140"},
+  {"address":"Washington Square Fountain, New York","image":"assets/images/demo-content/property-5.jpg","icon":"assets/images/marker-house.png", "price":"350,000", "status":"House for sale", "bedrooms":"3", "bathrooms":"2", "area":"140"},
+  {"address":"Pinkberry - Chelsea 170 8th Ave, New York","image":"assets/images/demo-content/property-6.jpg","icon":"assets/images/marker-land.png", "price":"750,000", "status":"House for sale", "bedrooms":"3", "bathrooms":"2", "area":"140"},
+  {"address":"8 Charles Ln New York","image":"assets/images/demo-content/property-7.jpg","icon":"assets/images/marker-villa.png", "price":"300,000", "status":"House for sale", "bedrooms":"3", "bathrooms":"2", "area":"140"},
+  {"address":"74 Green St Brooklyn","image":"assets/images/demo-content/property-8.jpg","icon":"assets/images/marker-apartment.png", "price":"800,000", "status":"House for sale", "bedrooms":"3", "bathrooms":"2", "area":"140"},
+  {"address":"321 w 4th Street, New York","image":"assets/images/demo-content/property-9.jpg","icon":"assets/images/marker-commercial.png", "price":"1,000,000", "status":"House for sale", "bedrooms":"3", "bathrooms":"2", "area":"140"}
+]}

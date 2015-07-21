@@ -1,0 +1,138 @@
+//Fonts
+
+@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
+@import url(https://fonts.googleapis.com/css?family=Libre+Baskerville:400italic);
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700,800);
+
+@font-family-main: "Open Sans", sans-serif;
+@font-family-italic: "Libre Baskerville", serif;
+@font-family-sections: "Open Sans", sans-serif;
+@color-base: #1F2530;
+
+ body{
+   font-family: @font-family-main;
+ }
+
+p {
+  font-family: @font-family-sections;
+  font-size: 15px;
+  line-height: 21px;
+}
+
+a{
+  color: @color-base;
+  .ct-m-transition(all, 0.3s, ease);
+  &:hover{
+    color: @ct-motive;
+  }
+  &:hover, &:visited, &:focus{
+    text-decoration: none;
+  }
+}
+
+h1,h2,h3,h4,h5,h6{
+  margin: 0;
+  font-weight: 300;
+}
+
+h1, .h1{
+  font-size: @h1;
+}
+
+@media(max-width: @screen-xs){
+ h1{
+   font-size: 42px;
+ }
+}
+
+h2, .h2{
+  font-size: @h2;
+}
+h3, .h3{
+  font-size: @h3;
+}
+h4, .h4{
+  font-size: @h4;
+}
+h5, .h5{
+  font-size: @h5;
+}
+h6, .h6{
+  font-size: @h6;
+}
+
+.list-group{
+  .active{
+    background-color: @ct-motive;
+    border-color: @ct-motive;
+    &:hover{
+      background-color: @ct-motive;
+      border-color: @ct-motive;
+    }
+  }
+}
+
+ol{
+  list-style: none;
+}
+
+table{
+  > thead > tr > th{
+    background-color: @ct-motive;
+    color: #fff;
+    border-bottom: none!important;
+  }
+}
+
+.popover{
+  border: none;
+  padding: 0;
+  border-radius: 4px;
+  -webkit-box-shadow: 0 0 3px 0 rgba(4, 4, 4, 0.3);
+  -moz-box-shadow:    0 0 3px 0 rgba(4, 4, 4, 0.3);
+  box-shadow:         0 0 3px 0 rgba(4, 4, 4, 0.3);
+  .popover-title{
+    background-color: @ct-motive;
+    border: none;
+    color: #fff;
+  }
+  .popover-content{
+    border: none;
+  }
+}
+
+.ct-progressBar-title{
+  font-weight: bold;
+  line-height: 30px;
+  .ct-progressBar-text{
+    float: right;
+  }
+}
+
+.ct-progressBar-container{
+  .progress{
+    height: 10px;
+    border-radius: 2px;
+    box-shadow: none;
+    .progress-bar{
+      border-radius: 2px;
+    }
+  }
+}
+
+.progress-bar-primary{
+  background-color: @ct-motive;
+}
+
+.progress-bar-success{
+  background-color: #a2bf52;
+}
+
+.progress-bar-warning{
+  background-color: #eb8a21;
+}
+
+.progress-bar-danger{
+  background-color: #bf5252;
+}
+

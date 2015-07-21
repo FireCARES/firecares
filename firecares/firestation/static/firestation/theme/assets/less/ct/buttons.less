@@ -1,0 +1,179 @@
+
+.button-variant(@background; @border) {
+  color: #ffffff;
+  background-color: @background;
+  border-color: @border;
+  &:hover,
+  &:focus,
+  &:active,
+  &.active{
+    color: #ffffff;
+    background-color: @ct-motive;
+    border-color: @ct-motive;
+  }
+}
+
+button{
+  outline: none;
+}
+
+.btn{
+  padding: 6px 19px;
+  font-size: 14px;
+  line-height: 24px;
+  font-weight: bold;
+  border-radius: 3px;
+  border-width: 2px;
+  .ct-m-transition(all, 0.3s, ease);
+}
+
+.btn-default{
+  .button-variant(#fff,#fff);
+  color: #333;
+}
+
+.btn-primary{
+ background-color: @ct-motive;
+  border-color: @ct-motive;
+  &:hover,
+  &:focus,
+  &:active,
+  &.active{
+    background-color: #333;
+    border-color: #333;
+  }
+}
+
+.btn-success{
+  .button-variant(#a2bf52, #a2bf52);
+}
+
+.btn-info{
+  .button-variant(#5bc0de, #5bc0de);
+}
+
+.btn-warning{
+  .button-variant(#eb8a21, #eb8a21);
+}
+
+.btn-danger{
+  .button-variant(#e30000, #e30000);
+}
+
+.btn-dark{
+  .button-variant(#333, #333);
+}
+
+.btn-link{
+  color: #e30000;
+  &:hover{
+    color: inherit;
+  }
+}
+
+.btn-edit{
+  background-color: #e11e26;
+  color: #fff;
+  position: absolute;
+  top: -2px;
+  margin-left: 8px;
+  &:before{
+    content: "";
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 4.5px 3px 4.5px 0;
+    border-color: transparent #e11e25 transparent transparent;
+    position: absolute;
+    left: -5px;
+    border-radius: 2px;
+    .ct-m-transition(all, 0.3s, ease);
+  }
+  &:hover{
+    background-color: @ct-motive;
+    color: #fff;
+    &:before{
+      border-color: transparent @ct-motive transparent transparent;
+    }
+  }
+}
+
+.btn-transparent--border{
+  background: transparent;
+  &:hover,
+  &:focus,
+  &:active,
+  &.active{
+    background-color: @ct-motive;
+    border-color: @ct-motive;
+  }
+}
+
+.btn-lg{
+  padding: 15px 20px;
+}
+
+.btn-sm{
+  padding: 6px 11px;
+}
+
+.btn-xs{
+  font-size: 12px;
+  line-height: 10px;
+  padding: 3px 4px;
+}
+
+//Section Buttons
+
+.ct-sectioButton--square{
+  padding: 6px 10px;
+  background-color: @ct-motive;
+  display: block;
+  border-radius: 3px;
+  i{
+    font-size: 30px;
+    line-height: 24px;
+    color: #fff;
+  }
+  &:hover{
+    background-color: #fff;
+    i{
+      color: @ct-motive;
+    }
+  }
+}
+
+.btn.active{
+  box-shadow: none;
+}
+
+.btn-hoverWhite{
+  &:hover{
+    background-color: #fff;
+    border-color: #fff;
+    color: @ct-motive;
+  }
+}
+
+@media(max-width: @screen-lg){
+  .btn{
+   white-space: normal;
+  }
+}
+
+@media(max-width: @screen-sm){
+  .btn-edit{
+    position: relative;
+    display: inline-block!important;
+  }
+}
+
+.ct-buttons--right10{
+  .btn{
+    margin-right: 10px;
+    &:last-child{
+      margin-right: 0;
+    }
+  }
+}
+

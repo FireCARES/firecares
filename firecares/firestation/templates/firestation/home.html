@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<!--[if IE 8 ]>
+<html class="no-js ie8" lang="en"> <![endif]-->
+<!--[if IE 9 ]>
+<html class="no-js ie9" lang="en"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="description" content="FireCARES">
+    <meta name="author" content="IAFF">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <title>FireCARES - Fire Study Team</title>
+    {% include 'firestation/_favicon.html' %}
+
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/style.css">
+
+
+    <!--[if lt IE 9]>
+    <script src="{{STATIC_URL}}firestation/theme/assets/bootstrap/js/html5shiv.min.js"></script>
+    <script src="{{STATIC_URL}}firestation/theme/assets/bootstrap/js/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="{{STATIC_URL}}firestation/theme/assets/js/modernizr.custom.js"></script>
+</head>
+<body class="ct-headroom--fixedMenu cssAnimate onepager">
+
+<nav class="ct-menuMobile text-uppercase">
+    <ul class="ct-menuMobile-navbar">
+        <li class="onepage"><a href="{% url 'firestation_home' %}">Home</a></li>
+        <li class="onepage"><a href="#about">About Us</a></li>
+        <li class="onepage"><a href="#portfolio">Our work</a></li>
+        <li class="onepage"><a href="#whyus">Why us?</a></li>
+        <li class="onepage"><a href="#testimonials">testimonials</a></li>
+        <li class="onepage"><a href="#contact">Contact Us</a></li>
+    </ul>
+</nav>
+
+<form class="ct-searchFormMobile ct-u-marginBottom50" role="form">
+    <div class="form-group ">
+        <div class="ct-form--label--type1">
+            <div class="ct-u-displayTableVertical">
+                <div class="ct-u-displayTableCell">
+                    <div class="ct-input-group-btn">
+                        <button class="btn btn-primary">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="ct-u-displayTableCell text-center">
+                    <span class="text-uppercase">Search for property</span>
+                </div>
+            </div>
+        </div>
+        <div class="ct-u-displayTableVertical ct-u-marginBottom20">
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Property id</label>
+                    <input type="text" required class="form-control input-lg" placeholder="Any">
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Location</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">New York</option>
+                        <option value="2">New Jersey</option>
+                        <option value="3">Newark</option>
+                        <option value="4">Philadelphia</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Sub-Location</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">New York</option>
+                        <option value="2">Jersey</option>
+                        <option value="3">Newark</option>
+                        <option value="4">Philadelphia</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Property Status</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">Sale</option>
+                        <option value="2">New</option>
+                        <option value="3">Loan</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Property type </label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">Houses</option>
+                        <option value="2">Industrial</option>
+                        <option value="3">Retail</option>
+                        <option value="4">Apartments</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="ct-u-displayTableVertical ct-slider--row">
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Bedrooms</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3+</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Bathrooms</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3+</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell ct-u-marginBottom40">
+                <div class="ct-form--item ct-sliderAmount">
+                    <label>Price ($)</label>
+                    <input type="text" value="1000000" required class="form-control input-lg ct-js-slider-min ct-u-marginBottom20" placeholder="">
+                    <input type="text" class="slider ct-js-sliderAmount" value="" data-slider-tooltip="hide" data-slider-handle="square" data-slider-min="5000" data-slider-max="5000000" data-slider-step="5000" data-slider-value="[1000000,2000000]">
+                    <label class="pull-left">Min</label>
+                    <label class="pull-right">Max</label>
+                    <input type="text" value="2000000" required class="form-control input-lg ct-js-slider-max" placeholder="">
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <input type="text" class="slider ct-js-sliderTicks" value="" data-slider-handle="square" data-slider-min="0" data-slider-max="200" data-slider-step="20" data-slider-value="[60,120]"/>
+                <label class="text-center center-block">Area (m2)</label>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <button type="submit" class="btn btn-warning text-capitalize pull-right">search now</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div id="ct-js-wrapper" class="ct-pageWrapper">
+
+<div class="ct-navbarMobile">
+    <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="index.html">FireC </a>
+    <button type="button" class="searchForm-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span><i class="fa fa-search"></i></span>
+    </button>
+</div>
+
+{% include "firestation/_navbar.html" %}
+
+<div id="home" class="section"></div>
+<header class="ct-mediaSection text-center ct-u-text--white header-image">
+    <div class="ct-mediaSection-inner">
+        <div class="ct-headerText--normal">
+            <div class="container">
+                <img class="ct-u-marginBottom90" src="{{STATIC_URL}}static/" alt="">
+                <h1 class="text-uppercase ct-u-marginBottom40">Community Assessment Response Evaluation System</h1>
+                <a class="btn btn-default btn-transparent--border ct-u-text--white ct-js-btnScroll" href="{% url 'firedepartment_list_theme' %}">Search</a>
+            </div>
+        </div>
+    </div>
+</header>
+<section class="ct-u-paddingBoth30 ct-js-section ct-section--inline" data-bg-color="#60a7d4">
+    <div class="container">
+        <div class="ct-u-displayTableVertical">
+            <div class="ct-u-displayTableCell">
+                <div class="ct-u-displayTableCell">
+                    <img src="{{STATIC_URL}}firestation/theme/assets/images/content/logo-cta-2.png" alt="">
+                </div>
+                <div class="ct-u-displayTableCell">
+                    <h4 class="text-uppercase">PURCHASE ESTATO WORDPRESS THEME NOW!</h4>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-u-displayTableCell pull-right">
+                    <a class="btn btn-default btn-transparent--border ct-u-text--white btn-hoverWhite" href="blog-single.html">Read More</a>
+                    <a class="btn btn-dark btn-hoverWhite" href="demo/buy.php">Purchase Estato</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="about" class="text-center ct-u-paddingBoth100 section">
+    <div class="container">
+        <div class="ct-heading text-uppercase ct-u-marginBottom60">
+            <h2>About FireCARES</h2>
+        </div>
+        <div class="ct-textBox--section center-block ct-u-marginBottom60">
+                FireCARES allows you to analyze how fire department resources are deployed against a communities inherent risk level.
+        </div>
+        <div class="row">
+           <div class="ct-iconBoxContainer center-block">
+               <div class="col-md-4">
+                   <div class="ct-iconBox">
+                       <div class="ct-icon ct-iconContainer--circle ct-iconContainer--circleHoverLight center-block ct-u-marginBottom30">
+                           <i class="fa fa-crosshairs"></i>
+                       </div>
+                       <div class="ct-iconBox--description">
+                           <span class="ct-title ct-u-marginBottom20 ct-fw-600 text-uppercase">Identify Risks</span>
+                           <span class="ct-text ct-u-marginBottom20">Identify the socio-economic risk factors for your community.</span>
+                       </div>
+                   </div>
+               </div>
+               <div class="col-md-4">
+                   <div class="ct-iconBox">
+                       <div class="ct-icon ct-iconContainer--circle ct-iconContainer--circleHoverLight center-block ct-u-marginBottom30">
+                           <i class="fa fa-area-chart"></i>
+                       </div>
+                       <div class="ct-iconBox--description">
+                           <span class="ct-title ct-u-marginBottom20 ct-fw-600 text-uppercase">See the risks</span>
+                           <span class="ct-text ct-u-marginBottom20">Visualize the high-risk areas of your community.</span>
+                       </div>
+                   </div>
+               </div>
+               <div class="col-md-4">
+                   <div class="ct-iconBox">
+                       <div class="ct-icon ct-iconContainer--circle ct-iconContainer--circleHoverLight center-block ct-u-marginBottom30">
+                           <i class="fa fa-dashboard"></i>
+                       </div>
+                       <div class="ct-iconBox--description">
+                           <span class="ct-title ct-u-marginBottom20 ct-fw-600 text-uppercase">Measure the Impact</span>
+                           <span class="ct-text ct-u-marginBottom20">Articulate the risk and identify mitigation opportunities.</span>
+                       </div>
+                   </div>
+               </div>
+               <div class="clearfix"></div>
+           </div>
+        </div>
+    </div>
+</section>
+<section id="portfolio" class="section">
+    <div class="ct-mediaSection ct-u-paddingBoth100 ct-u-text--white text-center" data-stellar-background-ratio="0.3" data-height="295" data-type="parallax" data-bg-image="{{STATIC_URL}}firestation/theme/assets/images/content/portfolio-parallax.jpg" data-bg-image-mobile="{{STATIC_URL}}firestation/theme/assets/images/content/portfolio-parallax.jpg">
+        <div class="container">
+            <div class="ct-heading text-uppercase ct-u-marginBottom30">
+                <h2>Our work</h2>
+            </div>
+            <ul class="ct-gallery-filters list-unstyled list-inline">
+                <li><a data-filter="*" class="btn btn-default btn-transparent--border ct-u-text--white active">All</a></li>
+                <li><a data-filter=".creative" class="btn btn-default btn-transparent--border ct-u-text--white">Creative</a></li>
+                <li><a data-filter=".development" class="btn btn-default btn-transparent--border ct-u-text--white">Development</a></li>
+                <li><a data-filter=".print" class="btn btn-default btn-transparent--border ct-u-text--white">Print</a></li>
+            </ul>
+        </div>
+    </div>
+    <div id="ct-gallery" class="ct-gallery ct-gallery--col4">
+        <div class="ct-gallery-item ct-gallery-item--masonry hidden development">
+            <div class="ct-gallery-itemInner">
+                <a href="{{STATIC_URL}}firestation/theme/assets/images/content/portfolio-image-1.jpg" class="ct-js-magnificPopupImage">
+                    <img src="{{STATIC_URL}}firestation/theme/assets/images/content/portfolio-thumbnail-1.jpg" alt="Portfolio">
+                    <div class="ct-galleryBox-overlay"></div>
+                    <div class="ct-hover--text text-uppercase">
+                        <h4 class="ct-fw-600">Project name goes here</h4>
+                        <span class="ct-fw-600">Creative</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="ct-gallery-item ct-gallery-item--masonry hidden development print creative">
+            <div class="ct-gallery-itemInner">
+                <a href="{{STATIC_URL}}firestation/theme/assets/images/content/portfolio-image-2.jpg" class="ct-js-magnificPopupImage">
+                    <img src="{{STATIC_URL}}firestation/theme/assets/images/content/portfolio-thumbnail-2.jpg" alt="Portfolio">
+                    <div class="ct-galleryBox-overlay"></div>
+                    <div class="ct-hover--text text-uppercase">
+                        <h4 class="ct-fw-600">Project name goes here</h4>
+                        <span class="ct-fw-600">Creative</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="ct-gallery-item ct-gallery-item--masonry hidden creative">
+            <div class="ct-gallery-itemInner">
+                <a href="{{STATIC_URL}}firestation/theme/assets/images/content/portfolio-image-3.jpg" class="ct-js-magnificPopupImage">
+                    <img src="{{STATIC_URL}}firestation/theme/assets/images/content/portfolio-thumbnail-3.jpg" alt="Portfolio">
+                    <div class="ct-galleryBox-overlay"></div>
+                    <div class="ct-hover--text text-uppercase">
+                        <h4 class="ct-fw-600">Project name goes here</h4>
+                        <span class="ct-fw-600">Creative</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="ct-gallery-item ct-gallery-item--masonry hidden development">
+            <div class="ct-gallery-itemInner">
+                <a href="{{STATIC_URL}}firestation/theme/assets/images/content/portfolio-image-4.jpg" class="ct-js-magnificPopupImage">
+                    <img src="{{STATIC_URL}}firestation/theme/assets/images/content/portfolio-thumbnail-4.jpg" alt="Portfolio">
+                    <div class="ct-galleryBox-overlay"></div>
+                    <div class="ct-hover--text text-uppercase">
+                        <h4 class="ct-fw-600">Project name goes here</h4>
+                        <span class="ct-fw-600">Creative</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="ct-gallery-item ct-gallery-item--masonry hidden development">
+            <div class="ct-gallery-itemInner">
+                <a href="{{STATIC_URL}}firestation/theme/assets/images/content/portfolio-image-5.jpg" class="ct-js-magnificPopupImage">
+                    <img src="{{STATIC_URL}}firestation/theme/assets/images/content/portfolio-thumbnail-5.jpg" alt="Portfolio">
+                    <div class="ct-galleryBox-overlay"></div>
+                    <div class="ct-hover--text text-uppercase">
+                        <h4 class="ct-fw-600">Project name goes here</h4>
+                        <span class="ct-fw-600">Creative</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="ct-gallery-item ct-gallery-item--masonry hidden creative">
+            <div class="ct-gallery-itemInner">
+                <a href="{{STATIC_URL}}firestation/theme/assets/images/content/portfolio-image-6.jpg" class="ct-js-magnificPopupImage">
+                    <img src="{{STATIC_URL}}firestation/theme/assets/images/content/portfolio-thumbnail-6.jpg" alt="Portfolio">
+                    <div class="ct-galleryBox-overlay"></div>
+                    <div class="ct-hover--text text-uppercase">
+                        <h4 class="ct-fw-600">Project name goes here</h4>
+                        <span class="ct-fw-600">Creative</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="ct-gallery-item ct-gallery-item--masonry hidden print">
+            <div class="ct-gallery-itemInner">
+                <a href="{{STATIC_URL}}firestation/theme/assets/images/content/portfolio-image-7.jpg" class="ct-js-magnificPopupImage">
+                    <img src="{{STATIC_URL}}firestation/theme/assets/images/content/portfolio-thumbnail-7.jpg" alt="Portfolio">
+                    <div class="ct-galleryBox-overlay"></div>
+                    <div class="ct-hover--text text-uppercase">
+                        <h4 class="ct-fw-600">Project name goes here</h4>
+                        <span class="ct-fw-600">Creative</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="ct-gallery-item ct-gallery-item--masonry hidden development">
+            <div class="ct-gallery-itemInner">
+                <a href="{{STATIC_URL}}firestation/theme/assets/images/content/portfolio-image-8.jpg" class="ct-js-magnificPopupImage">
+                    <img src="{{STATIC_URL}}firestation/theme/assets/images/content/portfolio-thumbnail-8.jpg" alt="Portfolio">
+                    <div class="ct-galleryBox-overlay"></div>
+                    <div class="ct-hover--text text-uppercase">
+                        <h4 class="ct-fw-600">Project name goes here</h4>
+                        <span class="ct-fw-600">Creative</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+<div class="section"></div>
+<section id="whyus" class="ct-mediaSection text-center ct-u-paddingBoth100" data-stellar-background-ratio="0.3" data-height="765" data-type="parallax" data-bg-image="{{STATIC_URL}}firestation/theme/assets/images/content/iconBox-parallax.jpg" data-bg-image-mobile="{{STATIC_URL}}firestation/theme/assets/images/content/iconBox-parallax.jpg">
+    <div class="ct-mediaSection-inner">
+        <div class="container">
+            <div class="ct-heading ct-u-marginBottom60">
+                <h3 class="text-uppercase ct-u-text--white">Why estato?</h3>
+            </div>
+            <div class="ct-decoration center-block ct-u-marginBottom60">
+                <div class="ct-decoration--inner center-block"></div>
+            </div>
+            <div class="row ct-u-text--white">
+                <div class="col-sm-6 col-md-3">
+                    <div class="ct-iconBox">
+                        <div class="ct-icon ct-iconContainer--circle ct-iconContainer--circleHoverLight center-block ct-u-marginBottom30">
+                            <i class="fa fa-bolt"></i>
+                        </div>
+                        <div class="ct-iconBox--description">
+                            <span class="ct-title ct-u-marginBottom20 ct-fw-600">Powerfull</span>
+                            <span class="ct-text ct-u-marginBottom20">Estato is designed a way that it was flexible for different types of business.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="ct-iconBox">
+                        <div class="ct-icon ct-iconContainer--circle ct-iconContainer--circleHoverLight center-block ct-u-marginBottom30">
+                            <i class="fa fa-users"></i>
+                        </div>
+                        <div class="ct-iconBox--description">
+                            <span class="ct-title ct-u-marginBottom20 ct-fw-600">User Oriented</span>
+                            <span class="ct-text ct-u-marginBottom20">Estato is designed a way that it was flexible for different types of business.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="ct-iconBox">
+                        <div class="ct-icon ct-iconContainer--circle ct-iconContainer--circleHoverLight center-block ct-u-marginBottom30">
+                            <i class="fa fa-heart-o"></i>
+                        </div>
+                        <div class="ct-iconBox--description">
+                            <span class="ct-title ct-u-marginBottom20 ct-fw-600">Beautiful</span>
+                            <span class="ct-text ct-u-marginBottom20">Estato is designed a way that it was flexible for different types of business.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="ct-iconBox">
+                        <div class="ct-icon ct-iconContainer--circle ct-iconContainer--circleHoverLight center-block ct-u-marginBottom30">
+                            <i class="fa fa-life-ring"></i>
+                        </div>
+                        <div class="ct-iconBox--description">
+                            <span class="ct-title ct-u-marginBottom20 ct-fw-600">Fast support</span>
+                            <span class="ct-text ct-u-marginBottom20">Estato is designed a way that it was flexible for different types of business.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <a class="btn btn-primary btn-transparent--border ct-u-text--motive ct-u-marginTop80" href="">More Reasons to Buy Estato</a>
+        </div>
+    </div>
+</section>
+<section id="testimonials" class="ct-js-section ct-u-paddingBoth100 text-center section" data-bg-color="#60a7d4">
+    <div class="container">
+        <div class="ct-heading ct-u-marginBottom60">
+            <h3 class="text-uppercase ct-u-text--white">Testimonials</h3>
+        </div>
+        <div class="ct-testimonials">
+            <div class="row ct-u-marginBottom60">
+                <ul class="list-unstyled" role="tablist">
+                    <li role="presentation" class="col-xs-2 active ct-u-paddingBottom60"><a href="#testimonials-01" role="tab" data-toggle="tab"><img class="img-responsive" draggable="false" src="{{STATIC_URL}}firestation/theme/assets/images/content/content-testimonials-1.png" alt="Team Member"></a></li>
+                    <li role="presentation" class="col-xs-2 ct-u-paddingBottom60"><a href="#testimonials-02" role="tab" data-toggle="tab"><img class="img-responsive" src="{{STATIC_URL}}firestation/theme/assets/images/content/content-testimonials-2.png" alt="Team Member"></a></li>
+                    <li role="presentation" class="col-xs-2 ct-u-paddingBottom60"><a href="#testimonials-03" role="tab" data-toggle="tab"><img class="img-responsive" draggable="false" src="{{STATIC_URL}}firestation/theme/assets/images/content/content-testimonials-3.png" alt="Team Member"></a></li>
+                    <li role="presentation" class="col-xs-2 ct-u-paddingBottom60"><a href="#testimonials-04" role="tab" data-toggle="tab"><img class="img-responsive" src="{{STATIC_URL}}firestation/theme/assets/images/content/content-testimonials-4.png" alt="Team Member"></a></li>
+                    <li role="presentation" class="col-xs-2 ct-u-paddingBottom60"><a href="#testimonials-05" role="tab" data-toggle="tab"><img class="img-responsive" draggable="false" src="{{STATIC_URL}}firestation/theme/assets/images/content/content-testimonials-5.png" alt="Team Member"></a></li>
+                    <li role="presentation" class="col-xs-2 ct-u-paddingBottom60"><a href="#testimonials-06" role="tab" data-toggle="tab"><img class="img-responsive" src="{{STATIC_URL}}firestation/theme/assets/images/content/content-testimonials-6.png" alt="Team Member"></a></li>
+                </ul>
+            </div>
+            <div class="tab-content center-block">
+                <div role="tabpanel" class="tab-pane row" id="testimonials-01">
+                    <div class="animated fadeIn">
+                        <p class="">Totally impressed with Estato. Very easy to use and it really has a lot of features.</p>
+                        <span class="">John Doe - Company inc.</span>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane active row" id="testimonials-02">
+                    <div class="animated fadeIn">
+                        <p class="">Estato is exactly what our business has been lacking, impressed me on multiple levels. Estato should be nominated for service of the year.</p>
+                        <span class="">Anna Ferguson - Company inc.</span>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane row" id="testimonials-03">
+                    <div class="animated fadeIn">
+                        <p class="">Estato is the most valuable business resource we have EVER purchased. Great job, I will definitely be ordering again!</p>
+                        <span class="">Jane Foster - Company inc.</span>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane row" id="testimonials-04">
+                    <div class="animated fadeIn">
+                        <p class=" ct-u-marginBottom0">Thanks for the great service. Estato is both attractive and highly adaptable. I will recommend you to my colleagues.</p>
+                        <span class="">Raine Doe - Company inc.</span>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane row" id="testimonials-05">
+                    <div class="animated fadeIn">
+                        <p class="">I didn't even need training. Estato has completely surpassed our expectations, surpassed our expectations. We were treated like royalty.</p>
+                        <span class="">Alvera  Foster - Company inc.</span>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane row" id="testimonials-06">
+                    <div class=" animated fadeIn">
+                        <p class="">Estato is worth much more than I paid. If you want real marketing that works and effective implementation - Estato's got you covered</p>
+                        <span class="">Morena Doe - Company inc.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="ct-u-paddingBottom60 text-center">
+    <div class="container">
+        <div class="ct-heading ct-u-marginBoth60">
+            <h3 class="text-uppercase">our partners</h3>
+        </div>
+        <div class="ct-js-owl" data-items="6" data-navigation="false" data-autoPlay="true" data-single="false" data-pagination="false">
+            <div class="item"><img src="{{STATIC_URL}}firestation/theme/assets/images/content/content-partners-1.png" alt=""></div>
+            <div class="item"><img src="{{STATIC_URL}}firestation/theme/assets/images/content/content-partners-2.png" alt=""></div>
+            <div class="item"><img src="{{STATIC_URL}}firestation/theme/assets/images/content/content-partners-3.png" alt=""></div>
+            <div class="item"><img src="{{STATIC_URL}}firestation/theme/assets/images/content/content-partners-4.png" alt=""></div>
+            <div class="item"><img src="{{STATIC_URL}}firestation/theme/assets/images/content/content-partners-5.png" alt=""></div>
+            <div class="item"><img src="{{STATIC_URL}}firestation/theme/assets/images/content/content-partners-6.png" alt=""></div>
+            <div class="item"><img src="{{STATIC_URL}}firestation/theme/assets/images/content/content-partners-1.png" alt=""></div>
+            <div class="item"><img src="{{STATIC_URL}}firestation/theme/assets/images/content/content-partners-2.png" alt=""></div>
+        </div>
+    </div>
+</section>
+<section class="ct-mediaSection ct-u-paddingTop60 ct-u-paddingBottom90 ct-u-text--white" data-stellar-background-ratio="0.2" data-height="350" data-type="parallax" data-bg-image="{{STATIC_URL}}firestation/theme/assets/images/content/agency-parallax.jpg" data-bg-image-mobile="{{STATIC_URL}}firestation/theme/assets/images/content/agency-parallax.jpg">
+    <div class="ct-mediaSection-inner">
+        <div class="container">
+            <div class="ct-heading ct-u-marginBottom60 text-center">
+                <h3 class="text-uppercase">latest tweets</h3>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="twitterContainer text-center">
+                        <i class="fa fa-twitter ct-u-marginBottom50"></i>
+                        <div class="ct-js-twitter ct-twitter"></div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /container -->
+    </div>
+</section>
+<footer id="contact" class="section">
+    <div class="ct-footer--extended">
+        <div class="ct-leftColumn pull-left">
+            <form role="form" action="{{STATIC_URL}}firestation/theme/assets/form/send.php" method="post" class="contactForm validateIt ct-formContact--map ct-form--darkStyle" data-email-subject="Contact Form" data-show-errors="true">
+                <div class="form-group">
+                    <div class="ct-form--label--type2">
+                        <div class="ct-u-displayTableVertical">
+                            <div class="ct-u-displayTableCell">
+                                <div class="ct-input-group-btn">
+                                    <button class="btn btn-primary">
+                                        <i class="fa fa-envelope-o"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="ct-u-displayTableCell text-center">
+                                <span class="text-uppercase">Send us a message</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ct-form--item ct-u-marginBottom20">
+                        <label>Your Name</label>
+                        <input id="contact_name" name="field[]" type="text" required class="form-control input-lg" placeholder="">
+                    </div>
+                    <div class="ct-u-displayTableVertical">
+                        <div class="ct-u-displayTableCell">
+                            <div class="ct-form--item ct-u-marginBottom20">
+                                <label>Phone</label>
+                                <input id="contact_phone" type="text" required class="form-control input-lg" placeholder="">
+                            </div>
+                        </div>
+                        <div class="ct-u-displayTableCell">
+                            <div class="ct-form--item ct-u-marginBottom20">
+                                <label>Email</label>
+                                <input id="contact_email" name="field[]" type="email" required class="form-control input-lg" placeholder="">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ct-form--item ct-u-marginBottom20">
+                        <label>Choose Topic</label>
+                        <select class="ct-js-select ct-select-lg">
+                            <option value="general">General Inquiries</option>
+                            <option value="misc">Misc</option>
+                        </select>
+                    </div>
+                    <div class="ct-form--item ct-u-marginBottom20">
+                        <label>Message</label>
+                        <textarea id="contact_message" placeholder="How can we help you?" class="form-control input-lg" rows="4" name="field[]" required=""></textarea>
+                    </div>
+                    <div class="ct-form--item">
+                        <button type="submit" class="btn btn-warning center-block">Send Message</button>
+                    </div>
+                </div>
+            </form>
+            <div class="ct-js-googleMap ct-googleMap ct-js-googleMap--single" data-location="Richmond" data-icon="{{STATIC_URL}}firestation/theme/assets/images/marker-house.png" data-zoom="14" data-height="865" data-offset="-275" id="map"></div>
+        </div>
+        <div class="ct-rightColumn pull-right">
+            <img class="ct-u-marginBottom70" src="{{STATIC_URL}}firestation/theme/assets/images/content/logo-headerOnepager.png" alt="">
+            <div class="ct-heading text-uppercase ct-u-marginBottom30">
+                <h2>Our work</h2>
+            </div>
+            <ul class="list-unstyled ct-phoneNumbers ct-u-marginBottom30">
+                <li>
+                    <i class="fa fa-phone"></i>
+                    <span class="ct-fw-600">0 800 123 4567</span>
+                </li>
+                <li>
+                    <i class="fa fa-fax"></i>
+                    <span class="ct-fw-600">0 800 123 4562</span>
+                </li>
+                <li>
+                    <i class="fa fa-mobile"></i>
+                    <span class="ct-fw-600">+1 500 700 800</span>
+                </li>
+            </ul>
+            <ul class="ct-panel--socials ct-panel--navbar list-inline list-unstyled ct-u-marginBottom30">
+                <li><a href="https://www.facebook.com/createITpl"><div class="ct-socials ct-socials--circle"><i class="fa fa-facebook"></i></div></a></li>
+                <li><a href="https://twitter.com/createitpl"><div class="ct-socials ct-socials--circle"><i class="fa fa-twitter"></i></div></a></li>
+                <li><a href="#" data-toggle="tooltip"><div class="ct-socials ct-socials--circle"><i class="fa fa-instagram"></i></div></a></li>
+            </ul>
+            <div class="ct-contactList ">
+                <a href="#"><i class="fa fa-envelope-o"></i>questions@estato.com</a>
+                <a href="#"><i class="fa fa-envelope-o"></i>sales@estato.com</a>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="ct-postFooter ct-u-paddingBoth20">
+        <a href="#" class="ct-scrollUpButton ct-js-btnScrollUp">
+           <span class="ct-sectioButton--square">
+               <i class="fa fa-angle-double-up"></i>
+           </span>
+        </a>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6 col-md-6 col-sm-push-6">
+                    <div class="ct-newsletter text-right">
+                        <span class="text-uppercase ct-u-text--white ct-fw-600">Join our newsletter</span>
+                        <input id="newsletter" placeholder="Your E-mail Address" required type="text" name="field[]" class="form-control input-lg">
+                        <button type="submit" class="btn btn-primary btn-transparent--border ct-u-text--motive text-capitalize">Subscribe</button>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6 col-sm-pull-6">
+                    <span class="ct-copyright">&copy; 2015 Estato. All rights reserved.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+</div>
+<!-- JavaScripts -->
+
+<script src="{{STATIC_URL}}firestation/theme/assets/js/jquery.min.js"></script>
+<script src="{{STATIC_URL}}firestation/theme/assets/bootstrap/js/bootstrap.min.js"></script>
+<script src="{{STATIC_URL}}firestation/theme/assets/js/dependencies.js"></script>
+
+<script src="{{STATIC_URL}}firestation/theme/assets/js/select2/select2.min.js"></script>
+
+<script src="{{STATIC_URL}}firestation/theme/assets/js/onepager/jquery.pagescroller.lite.js"></script>
+<script src="{{STATIC_URL}}firestation/theme/assets/js/onepager/init.js"></script>
+
+<script src="{{STATIC_URL}}firestation/theme/assets/js/slider-bootstrap/bootstrap-slider.js"></script>
+
+<script src="{{STATIC_URL}}firestation/theme/assets/form/js/contact-form.js"></script>
+
+<script src="{{STATIC_URL}}firestation/theme/assets/js/ct-mediaSection/jquery.stellar.min.js"></script>
+
+<script src="{{STATIC_URL}}firestation/theme/assets/js/magnific-popup/jquery.magnific-popup.min.js"></script>
+<script src="{{STATIC_URL}}firestation/theme/assets/js/magnific-popup/init.js"></script>
+
+<script src="{{STATIC_URL}}firestation/theme/assets/js/portfolio/jquery.isotope.min.js"></script>
+<script src="{{STATIC_URL}}firestation/theme/assets/js/portfolio/imagesloaded.js"></script>
+<script src="{{STATIC_URL}}firestation/theme/assets/js/portfolio/init.js"></script>
+
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
+<script src="{{STATIC_URL}}firestation/theme/assets/js/gmaps/gmap3.min.js"></script>
+
+<script src="{{STATIC_URL}}firestation/theme/assets/js/owl/owl.carousel.min.js"></script>
+
+<script src="{{STATIC_URL}}firestation/theme/assets/js/main.js"></script>
+
+<script src="{{STATIC_URL}}firestation/theme/assets/twitter/js/jquery.tweet.js"></script>
+
+
+
+</body>
+</html>

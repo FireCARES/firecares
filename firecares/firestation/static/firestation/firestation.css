@@ -1,0 +1,125 @@
+.map-well {
+  padding: 0;
+}
+
+.map-well address {
+  padding: 6px;
+  margin: 0;
+  font-weight: 300;
+}
+
+h2 {
+  font-weight: 400;
+  line-height: 25px;
+}
+
+.response-capability-well {
+  background-color: white;
+  padding: 8px;
+  border: 0px;
+  box-shadow: none;
+  -webkit-box-shadow: none;
+}
+
+/*
+The .nav-action class mimics nav-tab links. Only used to avoid href="#"
+which moves the window when the user clicks on the link.
+*/
+.nav-action {
+  cursor: pointer;
+  color: #0a75b6;
+  padding: 8px 12px;
+  line-height: 20px;
+  border: 1px solid transparent;
+  -webkit-border-radius: 4px 4px 0 0;
+  -moz-border-radius: 4px 4px 0 0;
+  border-radius: 4px 4px 0 0;
+  margin-right: 2px;
+}
+
+.nav-action:hover {
+  border-color: #eeeeee #eeeeee #dddddd;
+  text-decoration: none;
+  background-color: #eeeeee;
+}
+
+input.ng-dirty, select.ng-dirty {
+  background-color: #dff0d8;
+}
+
+input.ng-pristine.ng-add,select.ng-pristine.ng-add {
+  background-color: white;
+
+}
+
+input.ng-invalid:focus,
+input.ng-invalid {
+  background-color: #FFFFFF;
+  color: #b94a48;
+  border-color: #ee5f5b;
+  box-shadow: 0 0 6px #f8b9b7;
+  -webkit-box-shadow: 0 0 6px #f8b9b7;
+  -moz-box-shadow: 0 0 6px #f8b9b7;
+}
+
+.apparatus-help{
+    padding: 14px;
+    color: gray;
+}
+
+
+.fire-station-header {
+    padding-bottom: 15px;
+}
+
+.fire-station-header h1,h2,h3{
+    line-height: 30px;
+}
+
+.firestation-breadcrumb hr {
+    margin: 7px 0;
+}
+
+.header-address {
+    font-size: 17.5px;
+    font-weight: 500;
+    margin-bottom: 0px;
+}
+
+.header-extra {
+    font-size: 14px;
+}
+
+.header-extra-attribute {
+    padding: 0 4px;
+}
+
+.header-extra-attribute:first-of-type {
+    padding-right:4px;
+    padding-left: 0;
+}
+
+.sidebar-stats {
+    padding-top: 20px;
+}
+
+.sidebar-stat {
+    padding-bottom: 17px;
+    text-align: center;
+}
+
+.sidebar-stat-title {
+    font-weight: bold;
+    font-stretch: condensed;
+    -webkit-font-smoothing: antialiased;
+    font-variant: small-caps;
+    color: #999;
+}
+
+.sidebar-stat-value {
+    font-size: 33px;
+    font-weight: bold;
+    margin-top: -5px;
+    color: #605e5e;
+    letter-spacing: -1px;
+}

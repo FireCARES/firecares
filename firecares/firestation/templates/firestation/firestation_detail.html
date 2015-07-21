@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load i18n humanize %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+<link rel="stylesheet" href="{{ STATIC_URL }}firestation/firestation.css" />
+{% endblock %}
+
+{% block extra_script %}
+    {{ super }}
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.12/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.12/angular-resource.min.js"></script>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+    <script src="{{ STATIC_URL }}firestation/Leaflet.FireCARESMarkers.js"></script>
+    <script src="{{ STATIC_URL }}firestation/firestation.js"></script>
+
+     <script type="text/javascript">
+    var config = {
+      geom: {{ object.district.json|safe|default:"null" }},
+      centroid: [{{ object.geom.y }}, {{ object.geom.x }}],
+      id: {{object.id}}
+    }
+    </script>
+
+{% endblock %}
+
+{% block body_outer %}
+    <div class="container" ng-controller="fireStationController" ng-app="fireStation">
+        <div class="row">
+               <div class="span12">
+                <div class="fire-station-header span7">
+                <h3>{{ object.name }}</h3>
+                <address class="header-address">{{ object.station_address.address_line1 }}, {{ object.station_address.city }}, {{ object.station_address.state_province }}</address>
+                <span class="header-extra">
+                    <span class="header-extra-attribute"><b>FDID:</b> {{ object.fdid|default:"Unknown" }} </span>
+                    {% if object.department %}
+                    <span class="header-extra-attribute">
+                        <b>Department:</b> <a href="{{ object.department.get_absolute_url }}">{{ object.department.name }}</a>
+                    </span>
+                    {% endif %}
+                </span>
+               </div>
+
+                <aside class="span4 pull-right">
+                    <div class="well map-well">
+                        <div id="map" style="height:200px"></div>
+                    </div>
+                    <div>
+                     <table class="table station-detail-table table-bordered table-striped">
+                      <tbody>
+                        <tr>
+                          <td class="station-detail-table-attribute">Department</td>
+                          <td><a href="{{ object.department.get_absolute_url  }}">{{ object.department }}</a></td>
+                        </tr>
+                        <tr>
+                          <td class="station-detail-table-attribute">State</td>
+                          <td>{{ object.state }}</td>
+                        </tr>
+                      <tr>
+                          <td class="station-detail-table-attribute">Edit Link</td>
+                          <td><a target="_blank" href="/admin/firestation/firestation/{{ object.id }}/">{{ object.name }}</a></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    </div>
+                </aside>
+                <div class="span7 well response-capability-well">
+                    <h4>Apparatus and Staffing</h4>
+                    <hr/>
+                    <div class="alert" ng-cloak id="response-capability-message" ng-class="'alert alert-' + message.message_class" ng-if="message.message">
+                      <button type="button" class="close" data-dismiss="alert">&times;</button>
+                      {[ message.message ]}
+                    </div>
+                    <ul class="nav nav-tabs apparatus-tabs">
+
+                      <li id="tab-{[ form.id ]}" ng-repeat="form in forms" ng-class="{'active': $last}">
+                          <a href="#{[ form.id ]}" data-toggle="tab">{[form.apparatus]} </a>
+                      </li>
+                      <li ng-click="AddForm()" id="" class="nav-action" data-toggle="tab">Add Apparatus</li>
+
+                    </ul>
+                    {% include "firestation/response_capability_inline.html" %}
+                </div>
+               </div>
+
+        </div>
+    </div>
+{%  endblock %}

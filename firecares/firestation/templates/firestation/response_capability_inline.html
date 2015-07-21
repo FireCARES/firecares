@@ -1,0 +1,83 @@
+<div class="tab-content">
+    <div class="tab-pane" id="{[form.id]}" ng-repeat="form in forms" ng-init="previousForm = form"
+            ng-class="{'active': $last}">
+        <div class="apparatus-help">
+            Use this form to populate the staffing for a unit.  Count each person on the apparatus once.
+        </div>
+
+        <form class="form-horizontal" name="apparatus_{[ form.id ]}" ng-submit="this['apparatus_' + form.id].$setPristine();UpdateForm(form)">
+          <div class="control-group">
+            <label class="control-label" for="apparatus">Apparatus</label>
+            <div class="controls">
+              <select ng-model="form.apparatus" name="apparatus" ng-options="opt for opt in choices"></select>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="firefighters">Firefighter Only</label>
+            <div class="controls">
+              <input  ng-model="form.firefighter" name="firefigthers" type="number" min="0" ng-minlength="1" ng-maxlength="2">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="firefighters">Firefighter/EMT</label>
+            <div class="controls">
+              <input  ng-model="form.firefighter_emt" name="firefigther_emts" type="number" min="0" ng-minlength="1" ng-maxlength="2">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="firefighter_emts">Firefighter/Paramedic</label>
+            <div class="controls">
+              <input  ng-model="form.firefighter_paramedic" name="firefigther_emts" type="number" min="0" ng-minlength="1" ng-maxlength="2">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="ems_emts">EMS-Only EMT</label>
+            <div class="controls">
+              <input  ng-model="form.ems_emt" name="ems_emts" type="number" min="0" ng-minlength="1" ng-maxlength="2">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="ems_paramedic">EMS-Only Paramedic</label>
+            <div class="controls">
+              <input  ng-model="form.ems_paramedic" name="ems_paramedic" type="number" min="0" ng-minlength="1" ng-maxlength="2">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="officer">Company/Unit Officer</label>
+            <div class="controls">
+              <input  ng-model="form.officer" name="officer" type="number" min="0" ng-minlength="1" ng-maxlength="2">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="officer_paramedic">Company/Unit Officer Paramedic</label>
+            <div class="controls">
+              <input  ng-model="form.officer_paramedic" name="offcier_paramedic" type="number" min="0" ng-minlength="1" ng-maxlength="2">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="ems_supervisor">EMS Supervisor</label>
+            <div class="controls">
+              <input  ng-model="form.ems_supervisor" name="ems_supervisor" type="number" min="0" ng-minlength="1" ng-maxlength="2">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="chief_officer">Chief Officer</label>
+            <div class="controls">
+              <input  ng-model="form.chief_officer" name="chief_officer" type="number" min="0" ng-minlength="1" ng-maxlength="2">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">Total personnel:</label>
+            <div class="controls">
+                <input type="number" ng-disabled="true" value="{[ form.firefighter + form.firefighter_emt + form.firefighter_paramedic +
+                form.ems_emt + form.ems_paramedic + form.officer + form.officer_paramedic +
+                form.ems_supervisor + form.chief ]}" />
+            </div>
+          </div>
+          <div class="pull-right">
+            <input type="submit" class="btn btn-success" value="Save" ng-disabled="!this['apparatus_' + form.id].$valid || !this['apparatus_' + form.id].$dirty" class="btn btn-primary"/>
+            <button type="button" ng-click="DeleteForm(form)" class="btn btn-danger">Delete</button>
+          </div>
+        </form>
+    </div>
+</div>

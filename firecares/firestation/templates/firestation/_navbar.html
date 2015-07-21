@@ -1,0 +1,37 @@
+<div class="ct-topBar ">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 col-md-12">
+                <div class="ct-panel--user ct-panel--right text-right">
+                    <div class="ct-panel--item ct-email">
+                        <a href="properties.html"><i class="fa fa-search"></i> Search</a>
+                    </div>
+                    <div class="ct-panel--item ct-email">
+                        <a href="login.html"><i class="fa fa-user"></i> Login</a>
+                    </div>
+                    <div class="ct-panel--item ct-email">
+                        <a href="registration.html"><i class="fa fa-plus-square"></i> Register</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<nav class="navbar yamm ct-navbar--hoverEffectLine" role="navigation" data-heighttopbar="40px" data-startnavbar="0">
+    <div class="container">
+        <div class="navbar-header ct-panel--navbar">
+            <a href="{% url 'firestation_home' %}" class="logo" rel="home"><h1>FireCARES</h1></a>
+        </div>
+        <div class="collapse navbar-collapse text-uppercase">
+            <ul class="nav navbar-nav ct-navbar--fadeInUp">
+                <li class="onepage"><a href="#about">About</a></li>
+                <li class="onepage"><a href="#about">Layers</a></li>
+                <li class="onepage"><a href="#portfolio">Map</a></li>
+                <li class="onepage"><a href="#whyus">People</a></li>
+                <li class="onepage active"><a href="{% url 'firedepartment_list_theme' %}">Fire Departments</a></li>
+            </ul>
+        </div>
+        <div class="clearfix"></div>
+        <div class="ct-shapeBottom"></div>
+    </div>
+</nav>

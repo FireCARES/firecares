@@ -1,0 +1,221 @@
+/* **************************************
+  MEDIA SECTIONS - VIDEO/PARALLAX/KENBURNS
+  **************************************** */
+
+video {
+  width:100%;
+}
+
+.ct-mediaSection{
+  background-color: #1f2530;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: none;
+  overflow: hidden;
+  video {
+    min-width:100%;
+    min-height:100%;
+    width: auto;
+  }
+  width: 100%;
+  position: relative;
+  .ct-mediaSection-inner{
+    position: relative;
+    vertical-align: middle;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@media(max-width: @screen-sm){
+  .ct-mediaSection{
+    width: 100%;
+    display: block !important;
+    .ct-mediaSection-inner{
+      display: block;
+      width: auto;
+    }
+  }
+}
+
+.ct-mediaSection[data-type="pattern"]{
+  background-repeat: repeat;
+  display: table;
+  .ct-mediaSection-inner{
+    display: table-cell;
+  }
+}
+
+.ct-mediaSection[data-type="parallax"]{
+  background-attachment: fixed;
+  display: table;
+  &.ct-mediaSection--stellar{
+    overflow: hidden;
+  }
+  .ct-mediaSection-inner{
+    display: table-cell;
+  }
+}
+
+.ct-mediaSection[data-type="video"]{
+  display: block;
+  .ct-u-displayTable{
+    height: 100%;
+    position: absolute;
+    top: 0;
+  }
+  .ct-mediaSection-inner{
+    display: table-cell;
+  }
+  .ct-mediaSection-video{
+    position: absolute;
+    min-width: 100%;
+    overflow: hidden;
+    top: 50%; left: 50%;
+    -webkit-transform: translate(-50%,-50%);
+    -ms-transform: translate(-50%,-50%);
+    transform: translate(-50%,-50%);
+  }
+}
+
+@media(max-width: @screen-sm){
+  .ct-mediaSection[data-type="video"]{
+    .ct-u-displayTable{
+      display: block;
+      position: relative;
+      .ct-mediaSection-inner {
+        display: block;
+      }
+    }
+  }
+}
+.ct-mediaSection[data-type="kenburns"]{
+  overflow: hidden;
+  display: table;
+  .ct-mediaSection-inner{
+    display: table-cell;
+  }
+  .ct-mediaSection-kenburnsImageContainer{
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    > img {
+      vertical-align: middle;
+      max-width: none;
+      position:absolute;
+      top: 50%;
+      margin-top: -550px;
+      max-width: none;
+      min-width: 120%;
+      min-height: 100%;
+      .ct-m-opacity(0);
+      &.singlefx{
+        .ct-m-opacity(1);
+      }
+      margin-left: -5%;
+      -webkit-transition-property: opacity, -webkit-transform;
+      -webkit-transition-duration: 3s, 8s;
+      -moz-transition-property: opacity, -moz-transform;
+      -moz-transition-duration: 3s, 8s;
+      -o-transition-property: opacity, -o-transform;
+      -o-transition-duration: 3s, 8s;
+      transition-property: opacity, transform;
+      transition-duration: 3s, 8s;
+    }
+  }
+}
+
+.ct-mediaSection[data-type="kenburns"] .ct-mediaSection-kenburnsImageContainer > img  {
+  -webkit-transform-origin: bottom left;
+  -moz-transform-origin: bottom left;
+  -o-transform-origin: bottom left;
+  transform-origin: bottom left;
+}
+.ct-mediaSection[data-type="kenburns"] .ct-mediaSection-kenburnsImageContainer :nth-child(2n+1) {
+  -webkit-transform-origin: top right;
+  -moz-transform-origin: top right;
+  -o-transform-origin: top right;
+  transform-origin: top right;
+}
+.ct-mediaSection[data-type="kenburns"] .ct-mediaSection-kenburnsImageContainer :nth-child(3n+1) {
+  -webkit-transform-origin: top left;
+  -moz-transform-origin: top left;
+  -o-transform-origin: top left;
+  transform-origin: top left;
+}
+.ct-mediaSection[data-type="kenburns"] .ct-mediaSection-kenburnsImageContainer :nth-child(4n+1) {
+  -webkit-transform-origin: bottom right;
+  -moz-transform-origin: bottom right;
+  -o-transform-origin: bottom right;
+  transform-origin: bottom right;
+}
+.ct-mediaSection[data-type="kenburns"] .ct-mediaSection-kenburnsImageContainer .fx:first-child + img ~ img  {
+  z-index:-1;
+}
+.ct-mediaSection[data-type="kenburns"] .ct-mediaSection-kenburnsImageContainer .fx {
+  .ct-m-opacity(1);
+  -webkit-transform: scale(1.1) translate(30px);
+  -moz-transform: scale(1.1) translate(30px);
+  -o-transform: scale(1.1) translate(30px);
+  transform: scale(1.1) translate(30px);
+}
+
+.ct-mediaSection[data-type="kenburns"] .ct-mediaSection-kenburnsImageContainer .singlefx {
+  -webkit-animation: singleimageloop 20s infinite; /* Safari 4+ */
+  -moz-animation:    singleimageloop 20s infinite; /* Fx 5+ */
+  -o-animation:      singleimageloop 20s infinite; /* Opera 12+ */
+  animation:         singleimageloop 20s infinite; /* IE 10+ */
+}
+
+@-webkit-keyframes singleimageloop {
+  0%   {
+    -webkit-transform: scale(1) translate(0px);
+  }
+  50% {
+    -webkit-transform: scale(1.1) translate(30px);
+  }
+  100% {
+    -webkit-transform: scale(1) translate(0px);
+  }
+}
+@-moz-keyframes singleimageloop {
+  0%   {
+    -moz-transform: scale(1) translate(0px);
+  }
+  50% {
+    -moz-transform: scale(1.1) ct-m-translate(30px);
+  }
+  100% {
+    -moz-transform: scale(1) translate(0px);
+  }
+}
+@-o-keyframes singleimageloop {
+  0%   {
+    -o-transform: scale(1) translate(0px);
+  }
+  50% {
+    -o-transform: scale(1.1) translate(30px);
+  }
+  100% {
+    -o-transform: scale(1) translate(0px);
+  }
+}
+@keyframes singleimageloop {
+  0%   {
+    transform: scale(1) translate(0px);
+  }
+  50% {
+    transform: scale(1.1) translate(30px);
+  }
+  100% {
+    transform: scale(1) translate(0px);
+  }
+}
+
+
+.ct-mediaSection-stellarObject{
+  position: absolute;
+}

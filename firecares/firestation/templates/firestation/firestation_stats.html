@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n humanize %}
+
+{% block body_outer %}
+    <div class="container">
+        <div class="row">
+            <div class="span12"></div>
+               <div class="span12">
+                <h2>Statistics</h2>
+                <hr/>
+                <div class="stat"><b>Total Fire Stations:</b> {{ stations.count | intcomma }}</div>
+                <div class="stat"><b>Total Fire Departments:</b> {{ departments.count | intcomma}}</div>
+                <div class="stat"><b>Fire departments with no jurisdictions:</b> {{ departments_with_government_unit.count | intcomma}}</div>
+                <div class="stat"><b>Fire stations with FDIDs set:</b> {{ stations_with_fdid.count | intcomma}}</div>
+                <div class="stat"><b>Fire stations with Departments:</b> {{ stations_with_departments.count | intcomma}}</div>
+               </div>
+
+        </div>
+    </div>
+{%  endblock %}

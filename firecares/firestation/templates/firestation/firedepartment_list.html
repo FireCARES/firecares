@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load i18n humanize %}
+
+{% comment %}
+{% block extra_head %}
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+<link rel="stylesheet" href="{{ STATIC_URL }}firestation/firestation.css" />
+{% endblock %}
+
+
+{% block extra_script %}
+    {{ super }}
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.12/angular.min.js"></script>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+    <script src="{{ STATIC_URL }}firestation/firestation.js"></script>
+
+     <script type="text/javascript">
+    var config = {
+      geom: {{ object.geom.json|safe|default:"null" }},
+      centroid: [{{ object.headquarters_address.geom.centroid.y }}, {{ object.headquarters_address.geom.centroid.x }}],
+      id: {{object.id}}
+    }
+    </script>
+{% endblock %}
+{% endcomment %}
+
+{% block body_outer %}
+    <div class="container">
+        <div class="row">
+            <div class="span12"></div>
+               <div class="span12">
+
+               <div class="fire-station-header">
+                <h3>Fire Departments</h3>
+
+                <span class="header-extra">
+                    <span class="header-extra-attribute">{{ paginator.count | intcomma }} results.</span>
+                </span>
+
+                <table class="table">
+                      <thead>
+                      <tr>
+                          <td><b>Station Name</b></td>
+                          <td><b>Location</b></td>
+                          <td><b>Department Type</b></td>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      {% for department in object_list %}
+                          <tr>
+                              <td><a href="{{ department.get_absolute_url }}">{{ department.name }}</a></td>
+                              <td>{{ department.headquarters_address.city }}, {{ department.headquarters_address.state_province }}</td>
+                              <td>{{ department.department_type }}</td>
+                          </tr>
+                      </tbody>
+                  {% endfor %}
+                </table>
+
+                <div class="pull-left">
+                </div>
+
+                </div>
+               </div>
+        </div>
+    </div>
+{%  endblock %}
