@@ -5,10 +5,12 @@ from django.shortcuts import get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.http.response import HttpResponseRedirect
+from django.db.models import Max, Min
 from django.db.models.fields import FieldDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from random import randint
 import urllib
+
 
 
 class DepartmentDetailView(DetailView):
@@ -34,6 +36,9 @@ class DepartmentDetailView(DetailView):
             stations = paginator.page(paginator.num_pages)
 
         context['firestations'] = stations
+        metrics = FireDepartment.objects.all().aggregate(Max('dist_model_score'), Min('dist_model_score'))
+        context['dist_max'] = metrics['dist_model_score__max']
+        context['dist_min'] = metrics['dist_model_score__min']
         return context
 
 

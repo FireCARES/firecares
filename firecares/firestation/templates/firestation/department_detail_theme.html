@@ -27,6 +27,7 @@
     <script src="{{ STATIC_URL }}firestation/js/services/factories.js"></script>
     <script src="{{ STATIC_URL }}firestation/js/services/mapService.js"></script>
     <script src="{{ STATIC_URL }}firestation/js/controllers/departmentDetail.js"></script>
+    <script src="{{ STATIC_URL }}firestation/js/directives/gauge.js"></script>
     <script src="{{ STATIC_URL }}firestation/js/app.js"></script>
 
     <link rel="stylesheet" href="{{ STATIC_URL }}/leaflet/leaflet.css" />
@@ -399,18 +400,9 @@
                         <div class="row">
                             <div class="col-sm-6 col-md-12 ct-u-marginBottom30">
                                 <!-- TODO: Programmer to sprinkle magic on the dynamic elements to make it functional -->
-                                <div class="gauge">
-                                    <div class="masked"></div>
-                                    <div class="inset"></div>
-                                    <div class="dial">
-                                        <div class="dial-inset"></div>
-                                    </div>
-                                    <div class="needle"></div>
-                                </div>
-                                <div class="gauge-description">
-                                    <h4>Risk Score</h4>
-                                    <p>Number of fires based on socio-economic factors</p>
-                                </div>
+                                <gauge description="This department is {{ object.dist_model_score|floatformat }} seconds over the standard."
+                                       metric-title="Response Score" min="{{ dist_min|floatformat }}"
+                                       max="{{ dist_max|floatformat }}" value="{{ object.dist_model_score|floatformat }}" inverse></gauge>
                             </div>
                         </div>
                     </div>

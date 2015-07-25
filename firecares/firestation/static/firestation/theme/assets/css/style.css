@@ -10650,24 +10650,27 @@ table.residential-fires {
   position: relative;
   border: 1px solid white;
 }
-.gauge:before {
-  content: '0';
+.gauge-inverse {
+  background: #74ac49;
+  background: -webkit-linear-gradient(left, #74ac49, #febe00 50%, #f6542f);
+  background: -moz-linear-gradient(left, #74ac49, #febe00 50%, #f6542f);
+  /* FF3.6+ */
+  background: -o-linear-gradient(left, #74ac49, #febe00 50%, #f6542f);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff74ac49', endColorstr='#fff6542f', GradientType=1);
+}
+.guage-min {
   font-size: 14px;
   color: #a6a6a6;
   position: absolute;
   bottom: -4px;
   left: -15px;
 }
-.gauge:after {
-  content: '100';
+.guage-max {
   font-size: 14px;
   color: #a6a6a6;
   position: absolute;
   bottom: -4px;
   right: -30px;
-}
-.gauge:hover .needle {
-  transform: rotate(87deg);
 }
 .masked {
   position: absolute;
@@ -10702,17 +10705,6 @@ table.residential-fires {
   box-sizing: border-box;
   z-index: 100;
 }
-.dial:after {
-  content: '26';
-  color: white;
-  display: block;
-  font-size: 23px;
-  font-weight: 600;
-  text-align: center;
-  position: relative;
-  top: 50%;
-  transform: translateY(-50%);
-}
 .dial-inset {
   position: absolute;
   top: 20px;
@@ -10722,6 +10714,15 @@ table.residential-fires {
   bottom: 20px;
   right: 20px;
   z-index: 3;
+}
+.dial-inset-value {
+  color: white;
+  display: block;
+  font-size: 23px;
+  font-weight: 600;
+  text-align: center;
+  position: relative;
+  top: 50%;
 }
 .needle {
   content: "";
@@ -10734,9 +10735,9 @@ table.residential-fires {
   bottom: 0;
   left: 50%;
   margin-left: -20px;
-  transform: rotate(-40deg);
+  transform: rotate(-87deg);
   transform-origin: 50% 100%;
-  transition: all 0.7s ease-in-out;
+  transition: transform 0.7s ease-in-out;
 }
 .gauge-description {
   text-align: center;

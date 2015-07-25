@@ -149,29 +149,26 @@ table.residential-fires{
     border:1px solid silver;
     position:relative;
     border:1px solid white;
+}
 
-    &:before {
-        content: '0';
-        font-size: @font-size-small - 2;
-        color: @gray-lighter;
-        position: absolute;
-        bottom: -4px;
-        left: -15px;
-    }
+.gauge-inverse {
+  .tri-gradient(@start-color: #74AC49; @mid-color: #FEBE00; @color-stop: 50%; @end-color: #F6542F);
+}
 
-    &:after {
-        content: '100';
-        font-size: @font-size-small - 2;
-        color: @gray-lighter;
-        position: absolute;
-        bottom: -4px;
-        right: -30px;
-    }
+.guage-min {
+  font-size: @font-size-small - 2;
+  color: @gray-lighter;
+  position: absolute;
+  bottom: -4px;
+  left: -15px;
+}
 
-    // TODO: Remove this on hover example...for demonstration purposes only.
-    &:hover .needle {
-        transform:rotate(87deg); // Move our needle with transform property
-    }
+.guage-max {
+  font-size: @font-size-small - 2;
+  color: @gray-lighter;
+  position: absolute;
+  bottom: -4px;
+  right: -30px;
 }
 
 .masked {
@@ -208,18 +205,6 @@ table.residential-fires{
     border-radius:50%;
     box-sizing:border-box;
     z-index:100;
-    
-    &:after {
-        content: '26'; // TODO: Dynamically update with risk score number
-        color: white;
-        display: block;
-        font-size: @font-size-large;
-        font-weight: 600;
-        text-align: center;
-        position: relative;
-        top: 50%;
-        transform: translateY(-50%);
-    }
 }
 
 .dial-inset {
@@ -233,20 +218,30 @@ table.residential-fires{
     z-index:3;
 }
 
+.dial-inset-value {
+    color: white;
+    display: block;
+    font-size: @font-size-large;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+    top: 50%;
+}
+
 .needle{
     content:"";
     width: 0; 
     height: 0; 
     border-left: 20px solid transparent; 
     border-right: 20px solid transparent; 
-    border-bottom: 60px solid #FA841A; // TODO: Dynamically change to corresponding color from the gauge gradient
+    border-bottom: 60px solid #FA841A;
     position:absolute;
     bottom:0;
     left:50%;
     margin-left:-20px;
-    transform:rotate(-40deg); // -87deg = 0
+    transform:rotate(-87deg); // -87deg = 0
     transform-origin: 50% 100%;
-    transition: all 0.7s ease-in-out;
+    transition: transform .7s ease-in-out;
 }
 
 .gauge-description {

@@ -4,7 +4,8 @@
   angular.module('fireStation', ['ngResource',
       'fireStation.factories',
       'fireStation.departmentDetailController',
-      'fireStation.mapService'
+      'fireStation.mapService',
+      'fireStation.gauge'
   ])
 
   .config(function($interpolateProvider, $httpProvider, $resourceProvider) {
