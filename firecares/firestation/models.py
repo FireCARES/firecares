@@ -17,7 +17,6 @@ from django.db.utils import IntegrityError
 from firecares.firecares_core.models import Address
 from phonenumber_field.modelfields import PhoneNumberField
 from firecares.firecares_core.models import Country
-from firecares.firecares_core.validators import validate_choice
 from genericm2m.models import RelatedObjectsDescriptor
 
 class USGSStructureData(models.Model):
@@ -225,7 +224,7 @@ class FireDepartment(models.Model):
     organization_type = models.CharField(max_length=75, null=True, blank=True)
     website = models.URLField(null=True, blank=True)
     state = models.CharField(max_length=2)
-    region = models.CharField(max_length=20, choices=REGION_CHOICES, validators=[validate_choice(REGION_CHOICES)], null=True, blank=True)
+    region = models.CharField(max_length=20, choices=REGION_CHOICES, null=True, blank=True)
     geom = models.MultiPolygonField(null=True, blank=True)
     objects = models.GeoManager()
     priority_departments = PriorityDepartmentsManager()
