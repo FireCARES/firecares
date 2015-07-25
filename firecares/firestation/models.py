@@ -233,7 +233,7 @@ class FireDepartment(models.Model):
     population = models.IntegerField(null=True, blank=True)
 
     class Meta:
-        ordering = ('state', 'name')
+        ordering = ('name',)
 
     @property
     def government_unit_objects(self):

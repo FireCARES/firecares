@@ -28,5 +28,5 @@ class PriorityDepartmentsManager(models.Manager):
     def get_priority_cities_filter(self):
         return reduce(operator.or_, [Q(**value) for key, value in self.DEPARTMENTS.items()])
 
-    def get_query_set(self):
-        return super(PriorityDepartmentsManager, self).get_query_set().filter(self.get_priority_cities_filter())
+    def get_queryset(self):
+        return super(PriorityDepartmentsManager, self).get_queryset().filter(self.get_priority_cities_filter())
