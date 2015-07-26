@@ -172,12 +172,12 @@
 
 {% include "firestation/_navbar.html" %}
 
-<div id="home" class="section"></div>
+<div id="header"></div>
 <header class="ct-mediaSection text-center ct-u-text--white header-image">
     <div class="ct-mediaSection-inner">
         <div class="ct-headerText--normal">
             <div class="container">
-                <img class="ct-u-marginBottom90" src="{{STATIC_URL}}static/" alt="">
+                <img class="ct-u-marginBottom90" src="{{STATIC_URL}}firestation/theme/assets/images/content/logo-headerOnepager.png" alt="">
                 <h1 class="text-uppercase ct-u-marginBottom40">Community Assessment Response Evaluation System</h1>
                 <a class="btn btn-default btn-transparent--border ct-u-text--white ct-js-btnScroll" href="{% url 'firedepartment_list_theme' %}">Search</a>
             </div>
@@ -618,7 +618,7 @@
                     </div>
                 </div>
                 <div class="col-sm-6 col-md-6 col-sm-pull-6">
-                    <span class="ct-copyright">&copy; 2015 Estato. All rights reserved.</span>
+                    {% include "firestation/_copywrite.html" %}
                 </div>
             </div>
         </div>
