@@ -1,9 +1,13 @@
 {% load humanize %}
 {% load firecares %}
 <div class="ct-itemProducts ct-u-marginBottom30 ct-hover fire-department-card">
-    <label class="control-label sale">
-        Recently updated
-    </label>
+
+    {% if object.recently_updated %}
+        <label class="control-label sale">
+            Recently updated
+        </label>
+    {% endif %}
+
     <a href="{{ department.get_absolute_url }}">
         <div class="ct-main-content">
             <div class="ct-imageBox">

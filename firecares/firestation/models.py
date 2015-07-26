@@ -11,6 +11,7 @@ from .managers import PriorityDepartmentsManager
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point, MultiPolygon
 from django.core.validators import MaxValueValidator
+from firecares.firecares_core.models import RecentlyUpdatedMixin
 from django.core.urlresolvers import reverse
 from django.db.transaction import rollback
 from django.db.utils import IntegrityError
@@ -192,7 +193,7 @@ class USGSStructureData(models.Model):
                 return local_count - upstream_count
 
 
-class FireDepartment(models.Model):
+class FireDepartment(RecentlyUpdatedMixin, models.Model):
     """
     Models Fire Departments.
     """

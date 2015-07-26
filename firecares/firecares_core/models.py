@@ -4,6 +4,26 @@ from geopy.geocoders import GoogleV3
 from geopy.exc import GeocoderQuotaExceeded
 from jsonfield import JSONField
 from time import sleep
+from django.utils import timezone
+
+
+class RecentlyUpdatedMixin(models.Model):
+    """
+    A mixin which adds a property that returns a boolean which represents if object was recently updated.
+    """
+
+    DAYS_CONSIDERED_RECENT = 10
+
+    @property
+    def recently_updated(self):
+        try:
+            diff = timezone.now() - self.modified
+            return diff.days <= self.DAYS_CONSIDERED_RECENT
+        except:
+            return False
+
+    class Meta:
+        abstract = True
 
 
 class Country(models.Model):

@@ -1,16 +1,18 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
-
-Replace this with more appropriate tests for your application.
-"""
-
+from datetime import timedelta
 from django.test import TestCase
+from django.utils import timezone
+from .models import RecentlyUpdatedMixin
 
 
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
+class CoreTests(TestCase):
+    def test_recently_updated(self):
         """
-        Tests that 1 + 1 always equals 2.
+        Tests the Recently Updated Mixin.
         """
-        self.assertEqual(1 + 1, 2)
+
+        rum = RecentlyUpdatedMixin()
+        rum.modified = timezone.now() - timedelta(days=11)
+        self.assertFalse(rum.recently_updated)
+
+        rum.modified = timezone.now() - timedelta(days=10)
+        self.assertTrue(rum.recently_updated)
