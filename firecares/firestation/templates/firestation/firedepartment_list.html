@@ -1,66 +1,519 @@
-{% extends "base.html" %}
-{% load i18n humanize %}
+{% load firecares %}
 
-{% comment %}
-{% block extra_head %}
-<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
-<link rel="stylesheet" href="{{ STATIC_URL }}firestation/firestation.css" />
-{% endblock %}
+<!DOCTYPE html>
+<!--[if IE 8 ]>
+<html class="no-js ie8" lang="en"> <![endif]-->
+<!--[if IE 9 ]>
+<html class="no-js ie9" lang="en"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="description" content="FireCARES search results">
+    <meta name="author" content="CreateIT">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <title>FireCARES - Search Results</title>
+    {% include 'firestation/_favicon.html' %}
+
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/style.css">
 
 
-{% block extra_script %}
-    {{ super }}
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.12/angular.min.js"></script>
-    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-    <script src="{{ STATIC_URL }}firestation/firestation.js"></script>
+    <!--[if lt IE 9]>
+    <script src="{{STATIC_URL}}firestation/theme/assets/bootstrap/js/html5shiv.min.js"></script>
+    <script src="{{STATIC_URL}}firestation/theme/assets/bootstrap/js/respond.min.js"></script>
+    <![endif]-->
 
-     <script type="text/javascript">
-    var config = {
-      geom: {{ object.geom.json|safe|default:"null" }},
-      centroid: [{{ object.headquarters_address.geom.centroid.y }}, {{ object.headquarters_address.geom.centroid.x }}],
-      id: {{object.id}}
-    }
-    </script>
-{% endblock %}
-{% endcomment %}
+    <script src="{{STATIC_URL}}firestation/theme/assets/js/modernizr.custom.js"></script>
 
-{% block body_outer %}
-    <div class="container">
-        <div class="row">
-            <div class="span12"></div>
-               <div class="span12">
+</head>
+<body class="ct-headroom--fixedTopBar cssAnimate">
 
-               <div class="fire-station-header">
-                <h3>Fire Departments</h3>
+{% include "firestation/_navbar.html" %}
 
-                <span class="header-extra">
-                    <span class="header-extra-attribute">{{ paginator.count | intcomma }} results.</span>
-                </span>
-
-                <table class="table">
-                      <thead>
-                      <tr>
-                          <td><b>Station Name</b></td>
-                          <td><b>Location</b></td>
-                          <td><b>Department Type</b></td>
-                      </tr>
-                      </thead>
-                      <tbody>
-                      {% for department in object_list %}
-                          <tr>
-                              <td><a href="{{ department.get_absolute_url }}">{{ department.name }}</a></td>
-                              <td>{{ department.headquarters_address.city }}, {{ department.headquarters_address.state_province }}</td>
-                              <td>{{ department.department_type }}</td>
-                          </tr>
-                      </tbody>
-                  {% endfor %}
-                </table>
-
-                <div class="pull-left">
+<form class="ct-searchFormMobile ct-u-marginBottom50" role="form">
+    <div class="form-group ">
+        <div class="ct-form--label--type1">
+            <div class="ct-u-displayTableVertical">
+                <div class="ct-u-displayTableCell">
+                    <div class="ct-input-group-btn">
+                        <button class="btn btn-primary">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
                 </div>
-
+                <div class="ct-u-displayTableCell text-center">
+                    <span class="text-uppercase">Search for property</span>
                 </div>
-               </div>
+            </div>
+        </div>
+        <div class="ct-u-displayTableVertical ct-u-marginBottom20">
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Property id</label>
+                    <input type="text" required class="form-control input-lg" placeholder="Any">
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Location</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">New York</option>
+                        <option value="2">New Jersey</option>
+                        <option value="3">Newark</option>
+                        <option value="4">Philadelphia</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Sub-Location</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">New York</option>
+                        <option value="2">Jersey</option>
+                        <option value="3">Newark</option>
+                        <option value="4">Philadelphia</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Property Status</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">Sale</option>
+                        <option value="2">New</option>
+                        <option value="3">Loan</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Property type </label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">Houses</option>
+                        <option value="2">Industrial</option>
+                        <option value="3">Retail</option>
+                        <option value="4">Apartments</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="ct-u-displayTableVertical ct-slider--row">
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Bedrooms</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3+</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Bathrooms</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3+</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell ct-u-marginBottom40">
+                <div class="ct-form--item ct-sliderAmount">
+                    <label>Price ($)</label>
+                    <input type="text" value="1000000" required class="form-control input-lg ct-js-slider-min ct-u-marginBottom20" placeholder="">
+                    <input type="text" class="slider ct-js-sliderAmount" value="" data-slider-tooltip="hide" data-slider-handle="square" data-slider-min="5000" data-slider-max="5000000" data-slider-step="5000" data-slider-value="[1000000,2000000]">
+                    <label class="pull-left">Min</label>
+                    <label class="pull-right">Max</label>
+                    <input type="text" value="2000000" required class="form-control input-lg ct-js-slider-max" placeholder="">
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <input type="text" class="slider ct-js-sliderTicks" value="" data-slider-handle="square" data-slider-min="0" data-slider-max="200" data-slider-step="20" data-slider-value="[60,120]"/>
+                <label class="text-center center-block">Area (m2)</label>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <button type="submit" class="btn btn-warning text-capitalize pull-right">search now</button>
+            </div>
         </div>
     </div>
-{%  endblock %}
+</form>
+
+
+<div id="ct-js-wrapper" class="ct-pageWrapper">
+
+
+<div class="ct-site--map">
+    <div class="container">
+        <a href="{% url 'firestation_home' %}">Home</a>
+        <a href="{% url 'firedepartment_list' %}">Search Results</a>
+    </div>
+</div>
+<section class="ct-u-paddingTop50 ct-u-paddingBottom60">
+<div class="container">
+<div class="ct-section--products">
+<div class="row">
+<div class="col-md-4 col-lg-3">
+    <div class="ct-js-sidebar">
+        <div class="row">
+            <div class="col-sm-6 col-md-12">
+                <div class="widget">
+                    <div class="widget-inner">
+                        <form class="ct-formSearch--extended" role="form">
+                            <div class="ct-form--label--type3">
+                                <div class="ct-u-displayTableVertical">
+                                    <div class="ct-u-displayTableCell">
+                                        <div class="ct-input-group-btn">
+                                            <button class="btn btn-primary">
+                                                <i class="fa fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="ct-u-displayTableCell text-center">
+                                        <span class="text-uppercase">Search for property</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group ">
+                                <div class="ct-form--item ct-u-marginBoth10">
+                                    <label>Property id</label>
+                                    <input type="text" required class="form-control input-lg" placeholder="Any">
+                                </div>
+                                <div class="ct-form--item ct-u-marginBottom10">
+                                    <label>Location</label>
+                                    <select class="ct-js-select ct-select-lg">
+                                        <option value="any">Any</option>
+                                        <option value="1">New York</option>
+                                        <option value="2">New Jersey</option>
+                                        <option value="3">Newark</option>
+                                        <option value="4">Philadelphia</option>
+                                    </select>
+                                </div>
+                                <div class="ct-form--item ct-u-marginBottom10">
+                                    <label>Sub-Location</label>
+                                    <select class="ct-js-select ct-select-lg">
+                                        <option value="any">Any</option>
+                                        <option value="1">New York</option>
+                                        <option value="2">New Jersey</option>
+                                        <option value="3">Newark</option>
+                                        <option value="4">Philadelphia</option>
+                                    </select>
+                                </div>
+                                <div class="ct-form--item ct-u-marginBottom10">
+                                    <label>Property Status</label>
+                                    <select class="ct-js-select ct-select-lg">
+                                        <option value="any">Any</option>
+                                        <option value="1">Sale</option>
+                                        <option value="2">New</option>
+                                        <option value="3">Loan</option>
+                                    </select>
+                                </div>
+                                <div class="ct-form--item ct-u-marginBottom10">
+                                    <label>Property type </label>
+                                    <select class="ct-js-select ct-select-lg">
+                                        <option value="any">Any</option>
+                                        <option value="1">Houses</option>
+                                        <option value="2">Industrial</option>
+                                        <option value="3">Retail</option>
+                                        <option value="4">Apartments</option>
+                                    </select>
+                                </div>
+                                <div class="ct-u-displayTableVertical ct-slider--row ct-u-marginBottom10">
+                                    <div class="ct-u-displayTableCell">
+                                        <div class="ct-form--item">
+                                            <label>Bedrooms</label>
+                                            <select class="ct-js-select ct-select-lg">
+                                                <option value="any">Any</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3+</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="ct-u-displayTableCell">
+                                        <div class="ct-form--item">
+                                            <label>Bathrooms</label>
+                                            <select class="ct-js-select ct-select-lg">
+                                                <option value="any">Any</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3+</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ct-form--item ct-u-marginBoth40">
+                                    <input type="text" class="slider ct-js-sliderTicks" value="" data-slider-handle="square" data-slider-min="5000" data-slider-max="5000000" data-slider-step="100000" data-slider-value="[1000000,2000000]"/>
+                                    <label class="text-center center-block">Price ($)</label>
+                                </div>
+                                <div class="ct-u-displayTableCell">
+                                    <input type="text" class="slider ct-js-sliderTicks" value="" data-slider-handle="square" data-slider-min="0" data-slider-max="200" data-slider-step="20" data-slider-value="[60,120]"/>
+                                    <label class="text-center center-block">Area (m2)</label>
+                                </div>
+                                <button type="submit" class="btn btn-warning ct-u-marginTop10">Search or Filter Now</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-12">
+                <div class="widget ct-widget--featuredItems">
+                    <div class="widget-inner">
+                        <h4 class="text-uppercase">Featured</h4>
+                        <div class="ct-itemProducts--small ct-itemProducts--small-type1">
+                            <a href="product-single.html">
+                                <div class="ct-main-content">
+                                    <div class="ct-imageBox">
+                                        <img src="{{STATIC_URL}}firestation/theme/assets/images/content/recently-reduced-thumbnail-1.jpg" alt="">
+                                    </div>
+                                    <div class="ct-main-text">
+                                        <div class="ct-product--tilte">
+                                            8553 Fallen Creek Bend, North Carolina
+                                        </div>
+                                        <div class="ct-product--price">
+                                            <span>$ 450,000</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="ct-itemProducts--small ct-itemProducts--small-type1">
+                            <a href="product-single.html">
+                                <div class="ct-main-content">
+                                    <div class="ct-imageBox">
+                                        <img src="{{STATIC_URL}}firestation/theme/assets/images/content/recently-reduced-thumbnail-2.jpg" alt="">
+                                    </div>
+                                    <div class="ct-main-text">
+                                        <div class="ct-product--tilte">
+                                            9544 Umber View, Inspiration
+                                        </div>
+                                        <div class="ct-product--price">
+                                            <span>$ 450,000</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="ct-itemProducts--small ct-itemProducts--small-type1">
+                            <a href="product-single.html">
+                                <div class="ct-main-content">
+                                    <div class="ct-imageBox">
+                                        <img src="{{STATIC_URL}}firestation/theme/assets/images/content/recently-reduced-thumbnail-3.jpg" alt="">
+                                    </div>
+                                    <div class="ct-main-text">
+                                        <div class="ct-product--tilte">
+                                            4079 Broad Falls, Turkeytown
+                                        </div>
+                                        <div class="ct-product--price">
+                                            <span>$ 450,000</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="ct-itemProducts--small ct-itemProducts--small-type1">
+                            <a href="product-single.html">
+                                <div class="ct-main-content">
+                                    <div class="ct-imageBox">
+                                        <img src="{{STATIC_URL}}firestation/theme/assets/images/content/recently-reduced-thumbnail-4.jpg" alt="">
+                                    </div>
+                                    <div class="ct-main-text">
+                                        <div class="ct-product--tilte">
+                                            046 Merry Landing, High Lonesome Wells
+                                        </div>
+                                        <div class="ct-product--price">
+                                            <span>$ 450,000</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="ct-itemProducts--small ct-itemProducts--small-type1">
+                            <a href="product-single.html">
+                                <div class="ct-main-content">
+                                    <div class="ct-imageBox">
+                                        <img src="{{STATIC_URL}}firestation/theme/assets/images/content/recently-reduced-thumbnail-5.jpg" alt="">
+                                    </div>
+                                    <div class="ct-main-text">
+                                        <div class="ct-product--tilte">
+                                            8606 Quaking Grove Highway, Blackfalds
+                                        </div>
+                                        <div class="ct-product--price">
+                                            <span>$ 450,000</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-12">
+                <div class="widget ct-widget--recentlyReduced">
+                    <div class="widget-inner">
+                        <h4 class="text-uppercase">Recently Reduced</h4>
+                        <div class="ct-itemProducts--small ct-itemProducts--small-type1">
+                            <a href="product-single.html">
+                                <div class="ct-main-content">
+                                    <div class="ct-imageBox">
+                                        <img src="{{STATIC_URL}}firestation/theme/assets/images/content/recently-reduced-thumbnail-6.jpg" alt="">
+                                    </div>
+                                    <div class="ct-main-text">
+                                        <div class="ct-product--tilte">
+                                            837 Sunny Embers Townline, Koshkonong
+                                        </div>
+                                        <div class="ct-product--price">
+                                            <span class="ct-price--Old">$ 450,000</span>
+                                            <span>$ 390,000</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="ct-itemProducts--small ct-itemProducts--small-type1">
+                            <a href="product-single.html">
+                                <div class="ct-main-content">
+                                    <div class="ct-imageBox">
+                                        <img src="{{STATIC_URL}}firestation/theme/assets/images/content/recently-reduced-thumbnail-7.jpg" alt="">
+                                    </div>
+                                    <div class="ct-main-text">
+                                        <div class="ct-product--tilte">
+                                            4079 Broad Falls, Turkeytown
+                                        </div>
+                                        <div class="ct-product--price">
+                                            <span class="ct-price--Old">$ 450,000</span>
+                                            <span>$ 390,000</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="ct-itemProducts--small ct-itemProducts--small-type1">
+                            <a href="product-single.html">
+                                <div class="ct-main-content">
+                                    <div class="ct-imageBox">
+                                        <img src="{{STATIC_URL}}firestation/theme/assets/images/content/recently-reduced-thumbnail-8.jpg" alt="">
+                                    </div>
+                                    <div class="ct-main-text">
+                                        <div class="ct-product--tilte">
+                                            5469 Clear Rise, Little Otter
+                                        </div>
+                                        <div class="ct-product--price">
+                                            <span class="ct-price--Old">$ 450,000</span>
+                                            <span>$ 390,000</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <a class="btn btn-primary btn-transparent--border ct-u-text--motive" href="properties.html">View More Reduced Properties</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-md-8 col-lg-9">
+<div class="ct-sortingBar ct-u-paddingRight10 ct-u-paddingLeft10 ct-u-marginBottom30">
+    <div class="ct-sortingTitle pull-left">
+        <h3>Search Results<span> ({{ object_list.count }})</span></h3>
+    </div>
+    <ul class="list-inline list-unstyled pull-right ct-u-paddingBoth15">
+        <li>
+            <form>
+                <select id="sort-select" class="ct-js-select">
+                    <option value="price">Sort by</option>
+                    {% for verbose_name, url in sort_by_fields %}
+                    <option value="{{ url }}">{{ verbose_name|title }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </li>
+        <li>
+            <form>
+                <select id="limit-select" class="ct-js-select">
+                    <option value="?{% url_replace request 'limit' 15 %}">15 items</option>
+                    <option value="?{% url_replace request 'limit' 30 %}">30 items</option>
+                    <option value="?{% url_replace request 'limit' 60 %}">60 items</option>
+                    <option value="?{% url_replace request 'limit' 90 %}">90 items</option>
+                </select>
+            </form>
+        </li>
+    </ul>
+    <ul class="ct-showPages list-inline list-unstyled pull-right ct-u-paddingBoth15">
+        <li class="ct-showElements is-active" id="ct-js-showTiles">
+            <a href="#">
+                <i class="fa fa-th fa-fw"></i>
+            </a>
+        </li>
+        <li class="ct-showElements" id="ct-js-showList">
+            <a href="#">
+                <i class="fa fa-th-list fa-fw"></i>
+            </a>
+        </li>
+    </ul>
+    <div class="clearfix"></div>
+</div>
+<div class="row ct-js-search-results ct-showProducts--default">
+
+{% for department in object_list %}
+    <div class="col-sm-6 col-md-6 col-lg-4">
+        {% include "firestation/_fire_department_card.html" %}
+    </div>
+{% endfor %}
+
+
+
+<div class="clearfix visible-md"></div>
+</div>
+
+{% include 'firestation/_pagination.html' %}
+
+</div>
+</div>
+</div>
+</div>
+</section>
+
+
+{% include "firestation/_footer.html" %}
+
+</div>
+<!-- JavaScripts -->
+
+<script src="{{STATIC_URL}}firestation/theme/assets/js/jquery.min.js"></script>
+<script src="{{STATIC_URL}}firestation/theme/assets/bootstrap/js/bootstrap.min.js"></script>
+<script src="{{STATIC_URL}}firestation/theme/assets/js/dependencies.js"></script>
+
+<script src="{{STATIC_URL}}firestation/theme/assets/js/select2/select2.min.js"></script>
+
+<script src="{{STATIC_URL}}firestation/theme/assets/js/slider-bootstrap/bootstrap-slider.js"></script>
+
+
+
+<script src="{{STATIC_URL}}firestation/theme/assets/js/ct-mediaSection/jquery.stellar.min.js"></script>
+
+<script src="{{STATIC_URL}}firestation/theme/assets/js/owl/owl.carousel.min.js"></script>
+
+<script src="{{STATIC_URL}}firestation/theme/assets/js/main.js"></script>
+
+<script type="text/javascript">
+      $('#sort-select').on("select2-selecting", function(e) {
+        window.location.href = e.choice.id;
+       });
+      $('#limit-select').on("select2-selecting", function(e) {
+        window.location.href = e.choice.id;
+       });
+    </script>
+
+</body>
+</html>
