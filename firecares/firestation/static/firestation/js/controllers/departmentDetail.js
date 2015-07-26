@@ -55,5 +55,9 @@
           } else {
               departmentMap.setView(config.centroid, 13);
           }
+
+          $scope.toggleFullScreenMap = function() {
+              departmentMap.toggleFullscreen();
+          }
       })
 })();

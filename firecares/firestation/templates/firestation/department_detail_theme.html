@@ -16,13 +16,14 @@
     <title>FireCARES - {{ object.name }}</title>
     {% include 'firestation/_favicon.html' %}
 
-
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}leaflet-fullscreen/leaflet.fullscreen.css">
     <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/style.css">
 
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.12/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.12/angular-resource.min.js"></script>
     <script src="{{ STATIC_URL }}/leaflet/leaflet.js"></script>
+    <script src="{{ STATIC_URL }}/leaflet-fullscreen/Leaflet.fullscreen.min.js"></script>
     <script src="{{ STATIC_URL }}firestation/Leaflet.FireCARESMarkers.js"></script>
     <script src="{{ STATIC_URL }}firestation/js/services/factories.js"></script>
     <script src="{{ STATIC_URL }}firestation/js/services/mapService.js"></script>
@@ -224,7 +225,7 @@
                             <i class="fa fa-clock-o"></i><h6>Last Updated: {{ object.modified }}</h6>
                         </div>
                         <div class="ct-u-displayTableCell text-right">
-                            <a href=""><i class="fa fa-arrows-alt"></i> View Fullscreen Map</a>
+                            <a href="" ng-click="toggleFullScreenMap()"><i class="fa fa-arrows-alt"></i> View Fullscreen Map</a>
                         </div>
                     </div>
                 </div>
@@ -399,7 +400,6 @@
                     <div class="ct-js-sidebar">
                         <div class="row">
                             <div class="col-sm-6 col-md-12 ct-u-marginBottom30">
-                                <!-- TODO: Programmer to sprinkle magic on the dynamic elements to make it functional -->
                                 <gauge description="This department is {{ object.dist_model_score|floatformat }} seconds over the standard."
                                        metric-title="Response Score" min="{{ dist_min|floatformat }}"
                                        max="{{ dist_max|floatformat }}" value="{{ object.dist_model_score|floatformat }}" inverse></gauge>
