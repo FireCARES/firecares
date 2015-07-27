@@ -7,10 +7,11 @@ import os
 import us
 
 from .managers import PriorityDepartmentsManager
-
+from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point, MultiPolygon
 from django.core.validators import MaxValueValidator
+from django.utils.text import slugify
 from firecares.firecares_core.models import RecentlyUpdatedMixin
 from django.core.urlresolvers import reverse
 from django.db.transaction import rollback
@@ -307,6 +308,32 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
             similar = similar.filter(region=self.region)
 
         return similar
+
+    @property
+    def thumbnail_name(self):
+        return slugify(' '.join(['us', self.state, self.name])) + '.png'
+
+    @property
+    def thumbnail(self):
+        return 'https://s3.amazonaws.com/firecares-static/department-thumbnails/{0}'.format(self.thumbnail_name)
+
+    @property
+    def generate_thumbnail(self):
+        geom = None
+        if self.geom:
+            geom = self.geom.centroid
+        elif self.headquarters_address and self.headquarters_address.geom:
+            geom = self.headquarters_address.geom
+        else:
+            return '/static/firestation/theme/assets/images/content/property-1.jpg'
+
+        return 'http://api.tiles.mapbox.com/v4/garnertb.mmlochkh/pin-l-embassy+0074D9({geom.x},{geom.y})/' \
+               '{geom.x},{geom.y},8/500x300.png?access_token={access_token}'.format(geom=geom,
+                                                                                    access_token=getattr(settings, 'MAPBOX_ACCESS_TOKEN', ''))
+
+
+
+
 
     def set_geometry_from_government_unit(self):
         objs = self.government_unit_objects

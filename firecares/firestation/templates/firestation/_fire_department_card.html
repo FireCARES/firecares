@@ -11,14 +11,7 @@
     <a href="{{ department.get_absolute_url }}">
         <div class="ct-main-content">
             <div class="ct-imageBox">
-                {% if department.geom %}
-                    <img src="http://api.tiles.mapbox.com/v4/garnertb.mmlochkh/pin-l-embassy+0074D9({{ department.geom.centroid.x }},{{ department.geom.centroid.y }})/{{ department.geom.centroid.x }},{{ department.geom.centroid.y }},8/500x300.png?access_token=pk.eyJ1IjoiZ2FybmVydGIiLCJhIjoiNW5ZYkExNCJ9.sIFdyxQ4n1UQFEenEJ1RGg" alt=""><i class="fa fa-eye"></i>
-                {% elif department.headquarters_address.geom %}
-                    <img src="http://api.tiles.mapbox.com/v4/garnertb.mmlochkh/pin-l-embassy+0074D9({{ department.headquarters_address.geom.centroid.x }},{{ department.headquarters_address.geom.centroid.y }})/{{ department.headquarters_address.geom.centroid.x }},{{ department.headquarters_address.geom.centroid.y }},8/500x300.png?access_token=pk.eyJ1IjoiZ2FybmVydGIiLCJhIjoiNW5ZYkExNCJ9.sIFdyxQ4n1UQFEenEJ1RGg" alt=""><i class="fa fa-eye"></i>
-                {% else %}
-                    <img src="{{STATIC_URL}}firestation/theme/assets/images/content/property-1.jpg" alt=""><i class="fa fa-eye"></i>
-                {% endif %}
-
+                <img src="{{ department.thumbnail }}" alt=""><i class="fa fa-eye"></i>
             </div>
             <div class="ct-main-text">
                 <div class="ct-product--tilte">
