@@ -16,7 +16,7 @@
     <title>FireCARES - {{ object.name }}</title>
     {% include 'firestation/_favicon.html' %}
 
-    {% include "firestation/_firecares_static.html" %}
+
 
     <script type="text/javascript">
     var config = {
@@ -404,24 +404,8 @@
 </section>
 {% include 'firestation/_footer.html' %}
 </div>
-<!-- JavaScripts -->
 
-<script src="{{STATIC_URL}}firestation/theme/assets/js/jquery.min.js"></script>
-<script src="{{STATIC_URL}}firestation/theme/assets/bootstrap/js/bootstrap.min.js"></script>
-<script src="{{STATIC_URL}}firestation/theme/assets/js/dependencies.js"></script>
-
-<script src="{{STATIC_URL}}firestation/theme/assets/js/select2/select2.min.js"></script>
-
-<script src="{{STATIC_URL}}firestation/theme/assets/js/slider-bootstrap/bootstrap-slider.js"></script>
-
-<script src="{{STATIC_URL}}firestation/theme/assets/js/ct-mediaSection/jquery.stellar.min.js"></script>
-
-<script src="{{STATIC_URL}}firestation/theme/assets/js/owl/owl.carousel.min.js"></script>
-
-<script src="{{STATIC_URL}}firestation/theme/assets/form/js/contact-form.js"></script>
-
-<script src="{{STATIC_URL}}firestation/theme/assets/js/main.js"></script>
-
+{% include "firestation/_firecares_static.html" %}
 
 
 </body>
