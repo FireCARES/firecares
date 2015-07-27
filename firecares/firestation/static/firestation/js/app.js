@@ -5,7 +5,8 @@
       'fireStation.factories',
       'fireStation.departmentDetailController',
       'fireStation.mapService',
-      'fireStation.gauge'
+      'fireStation.gauge',
+      'fireStation.search'
   ])
 
   .config(function($interpolateProvider, $httpProvider, $resourceProvider) {

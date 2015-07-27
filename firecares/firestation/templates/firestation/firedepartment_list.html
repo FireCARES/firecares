@@ -1,4 +1,4 @@
-{% load firecares %}
+{% load firecares humanize %}
 
 <!DOCTYPE html>
 <!--[if IE 8 ]>
@@ -6,7 +6,7 @@
 <!--[if IE 9 ]>
 <html class="no-js ie9" lang="en"> <![endif]-->
 <!--[if (gt IE 9)|!(IE)]><!-->
-<html class="no-js" lang="en"> <!--<![endif]-->
+<html class="no-js" lang="en" ng-app="fireStation"> <!--<![endif]-->
 <head lang="en">
     <meta charset="UTF-8">
     <meta name="description" content="FireCARES search results">
@@ -16,20 +16,17 @@
 
     <title>FireCARES - Search Results</title>
     {% include 'firestation/_favicon.html' %}
-
-    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/style.css">
-
-
-    <!--[if lt IE 9]>
-    <script src="{{STATIC_URL}}firestation/theme/assets/bootstrap/js/html5shiv.min.js"></script>
-    <script src="{{STATIC_URL}}firestation/theme/assets/bootstrap/js/respond.min.js"></script>
-    <![endif]-->
-
-    <script src="{{STATIC_URL}}firestation/theme/assets/js/modernizr.custom.js"></script>
+    {% include "firestation/_firecares_static.html" %}
 
 </head>
-<body class="ct-headroom--fixedTopBar cssAnimate">
+
+<body class="ct-headroom--fixedTopBar cssAnimate search"
+      sort-by="{{ request.GET.sortBy }}"
+      limit="{{ request.GET.limit }}"
+      fdid="{{ request.GET.fdid }}"
+      state="{{ request.GET.state }}"
+      region="{{ request.GET.region }}"
+      sort-fields='{{ sort_by_fields|safe }}'>
 
 {% include "firestation/_navbar.html" %}
 
@@ -142,7 +139,7 @@
                 <label class="text-center center-block">Area (m2)</label>
             </div>
             <div class="ct-u-displayTableCell">
-                <button type="submit" class="btn btn-warning text-capitalize pull-right">search now</button>
+                <button id="searchButton" type="submit" class="btn btn-warning text-capitalize pull-right">search now</button>
             </div>
         </div>
     </div>
@@ -168,7 +165,7 @@
             <div class="col-sm-6 col-md-12">
                 <div class="widget">
                     <div class="widget-inner">
-                        <form class="ct-formSearch--extended" role="form">
+                        <form class="ct-formSearch--extended" role="form" id="searchForm">
                             <div class="ct-form--label--type3">
                                 <div class="ct-u-displayTableVertical">
                                     <div class="ct-u-displayTableCell">
@@ -179,87 +176,42 @@
                                         </div>
                                     </div>
                                     <div class="ct-u-displayTableCell text-center">
-                                        <span class="text-uppercase">Search for property</span>
+                                        <span class="text-uppercase">Search for departments</span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group ">
+                            <div class="form-group">
                                 <div class="ct-form--item ct-u-marginBoth10">
-                                    <label>Property id</label>
-                                    <input type="text" required class="form-control input-lg" placeholder="Any">
+                                    <label>FDID</label>
+                                    <input name="fdid" type="text" class="form-control input-lg" placeholder="Any" ng-model="params.fdid">
                                 </div>
                                 <div class="ct-form--item ct-u-marginBottom10">
-                                    <label>Location</label>
-                                    <select class="ct-js-select ct-select-lg">
-                                        <option value="any">Any</option>
-                                        <option value="1">New York</option>
-                                        <option value="2">New Jersey</option>
-                                        <option value="3">Newark</option>
-                                        <option value="4">Philadelphia</option>
-                                    </select>
+                                    <label>State</label>
+                                    <ui-select theme="bootstrap" name="state" class="ct-select-lg" ng-model="params.state">
+                                        <ui-select-match placeholder="Any">{[$select.selected.name]}</ui-select-match>
+                                        <ui-select-choices repeat="state.abbr as state in states | orderBy: 'name' | filter: $select.search">
+                                            <span ng-bind-html="state.name | highlight: $select.search"></span>
+                                        </ui-select-choices>
+                                    </ui-select>
                                 </div>
                                 <div class="ct-form--item ct-u-marginBottom10">
-                                    <label>Sub-Location</label>
-                                    <select class="ct-js-select ct-select-lg">
-                                        <option value="any">Any</option>
-                                        <option value="1">New York</option>
-                                        <option value="2">New Jersey</option>
-                                        <option value="3">Newark</option>
-                                        <option value="4">Philadelphia</option>
-                                    </select>
-                                </div>
-                                <div class="ct-form--item ct-u-marginBottom10">
-                                    <label>Property Status</label>
-                                    <select class="ct-js-select ct-select-lg">
-                                        <option value="any">Any</option>
-                                        <option value="1">Sale</option>
-                                        <option value="2">New</option>
-                                        <option value="3">Loan</option>
-                                    </select>
-                                </div>
-                                <div class="ct-form--item ct-u-marginBottom10">
-                                    <label>Property type </label>
-                                    <select class="ct-js-select ct-select-lg">
-                                        <option value="any">Any</option>
-                                        <option value="1">Houses</option>
-                                        <option value="2">Industrial</option>
-                                        <option value="3">Retail</option>
-                                        <option value="4">Apartments</option>
-                                    </select>
-                                </div>
-                                <div class="ct-u-displayTableVertical ct-slider--row ct-u-marginBottom10">
-                                    <div class="ct-u-displayTableCell">
-                                        <div class="ct-form--item">
-                                            <label>Bedrooms</label>
-                                            <select class="ct-js-select ct-select-lg">
-                                                <option value="any">Any</option>
-                                                <option value="1">1</option>
-                                                <option value="2">2</option>
-                                                <option value="3">3+</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="ct-u-displayTableCell">
-                                        <div class="ct-form--item">
-                                            <label>Bathrooms</label>
-                                            <select class="ct-js-select ct-select-lg">
-                                                <option value="any">Any</option>
-                                                <option value="1">1</option>
-                                                <option value="2">2</option>
-                                                <option value="3">3+</option>
-                                            </select>
-                                        </div>
-                                    </div>
+                                    <label>Region</label>
+                                    <ui-select theme="bootstrap" name="region" class="ct-select-lg" ng-model="params.region">
+                                        <ui-select-match placeholder="Select region">{[$select.selected]}</ui-select-match>
+                                        <ui-select-choices repeat="region in regions | filter: $select.search">
+                                            <span ng-bind-html="region | highlight: $select.search"></span>
+                                        </ui-select-choices>
+                                    </ui-select>
                                 </div>
                                 <div class="ct-form--item ct-u-marginBoth40">
-                                    <input type="text" class="slider ct-js-sliderTicks" value="" data-slider-handle="square" data-slider-min="5000" data-slider-max="5000000" data-slider-step="100000" data-slider-value="[1000000,2000000]"/>
-                                    <label class="text-center center-block">Price ($)</label>
+                                    <input name="dist_model_score" type="text" ng-model="bar" class="slider ct-js-sliderTicks" data-slider-handle="square" data-slider-min="{{ dist_min|floatformat|default:0 }}" data-slider-max="{{ dist_max|floatformat|default:1000 }}" data-slider-step="1" data-slider-value="[{{ dist_min|floatformat|default:0 }},{{ dist_max|floatformat|default:1000 }}]"/>
+                                    <label class="text-center center-block">DIST Score (s)</label>
                                 </div>
                                 <div class="ct-u-displayTableCell">
-                                    <input type="text" class="slider ct-js-sliderTicks" value="" data-slider-handle="square" data-slider-min="0" data-slider-max="200" data-slider-step="20" data-slider-value="[60,120]"/>
-                                    <label class="text-center center-block">Area (m2)</label>
+                                    <input name="population" type="text" class="slider ct-js-sliderTicks" value="" data-slider-handle="square" data-slider-min="0" data-slider-max="200" data-slider-step="20" data-slider-value="[60,120]"/>
+                                    <label class="text-center center-block">Protected Population</label>
                                 </div>
-                                <button type="submit" class="btn btn-warning ct-u-marginTop10">Search or Filter Now</button>
+                                <button type="submit" class="btn btn-warning ct-u-marginTop10" ng-click="search()">Search or Filter Now</button>
                             </div>
                         </form>
                     </div>
@@ -425,27 +377,27 @@
 <div class="col-md-8 col-lg-9">
 <div class="ct-sortingBar ct-u-paddingRight10 ct-u-paddingLeft10 ct-u-marginBottom30">
     <div class="ct-sortingTitle pull-left">
-        <h3>Search Results<span> ({{ object_list.count }})</span></h3>
+        <h4 class="text-uppercase">Search Results<span> ({{ object_list.count }})</span></h4>
     </div>
     <ul class="list-inline list-unstyled pull-right ct-u-paddingBoth15">
         <li>
             <form>
-                <select id="sort-select" class="ct-js-select">
-                    <option value="price">Sort by</option>
-                    {% for verbose_name, url in sort_by_fields %}
-                    <option value="{{ url }}">{{ verbose_name|title }}</option>
-                    {% endfor %}
-                </select>
+                <ui-select theme="select2" name="sortBy"  id="sort-select" ng-model="params.sortBy" ng-change="search()">
+                    <ui-select-match placeholder="Sort results.">Sort: {[$select.selected.name]}</ui-select-match>
+                    <ui-select-choices repeat="sort.field as sort in sortFields | orderBy: 'name' | filter: $select.search">
+                        <span ng-bind-html="sort.name | highlight: $select.search"></span>
+                    </ui-select-choices>
+                </ui-select>
             </form>
         </li>
         <li>
             <form>
-                <select id="limit-select" class="ct-js-select">
-                    <option value="?{% url_replace request 'limit' 15 %}">15 items</option>
-                    <option value="?{% url_replace request 'limit' 30 %}">30 items</option>
-                    <option value="?{% url_replace request 'limit' 60 %}">60 items</option>
-                    <option value="?{% url_replace request 'limit' 90 %}">90 items</option>
-                </select>
+                <ui-select theme="select2" name="limitBy" id="limit-select" ng-model="params.limit" ng-change="search()">
+                    <ui-select-match placeholder="Results per page.">Results per page.</ui-select-match>
+                    <ui-select-choices repeat="limit in limits">
+                        <span ng-bind-html="limit + ' results'"></span>
+                    </ui-select-choices>
+                </ui-select>
             </form>
         </li>
     </ul>
@@ -490,21 +442,7 @@
 </div>
 <!-- JavaScripts -->
 
-<script src="{{STATIC_URL}}firestation/theme/assets/js/jquery.min.js"></script>
-<script src="{{STATIC_URL}}firestation/theme/assets/bootstrap/js/bootstrap.min.js"></script>
-<script src="{{STATIC_URL}}firestation/theme/assets/js/dependencies.js"></script>
 
-<script src="{{STATIC_URL}}firestation/theme/assets/js/select2/select2.min.js"></script>
-
-<script src="{{STATIC_URL}}firestation/theme/assets/js/slider-bootstrap/bootstrap-slider.js"></script>
-
-
-
-<script src="{{STATIC_URL}}firestation/theme/assets/js/ct-mediaSection/jquery.stellar.min.js"></script>
-
-<script src="{{STATIC_URL}}firestation/theme/assets/js/owl/owl.carousel.min.js"></script>
-
-<script src="{{STATIC_URL}}firestation/theme/assets/js/main.js"></script>
 
 <script type="text/javascript">
       $('#sort-select').on("select2-selecting", function(e) {

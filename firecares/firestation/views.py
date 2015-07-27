@@ -1,3 +1,4 @@
+import json
 from .models import FireStation, FireDepartment
 from django.views.generic import DetailView, ListView, TemplateView
 from firecares.usgs.models import StateorTerritoryHigh, CountyorEquivalent, IncorporatedPlace
@@ -12,8 +13,19 @@ from random import randint
 import urllib
 
 
+class DISTScoreContextMixin(object):
 
-class DepartmentDetailView(DetailView):
+    @staticmethod
+    def add_dist_values_to_context():
+        context = {}
+        metrics = FireDepartment.objects.all().aggregate(Max('dist_model_score'), Min('dist_model_score'))
+        context['dist_max'] = metrics['dist_model_score__max']
+        context['dist_min'] = metrics['dist_model_score__min']
+
+        return context
+
+
+class DepartmentDetailView(DISTScoreContextMixin, DetailView):
     model = FireDepartment
     template_name = 'firestation/department_detail.html'
     page = 1
@@ -36,9 +48,7 @@ class DepartmentDetailView(DetailView):
             stations = paginator.page(paginator.num_pages)
 
         context['firestations'] = stations
-        metrics = FireDepartment.objects.all().aggregate(Max('dist_model_score'), Min('dist_model_score'))
-        context['dist_max'] = metrics['dist_model_score__max']
-        context['dist_min'] = metrics['dist_model_score__min']
+        context.update(self.add_dist_values_to_context())
         return context
 
 
@@ -72,7 +82,7 @@ class SafeSortMixin(object):
         Runs the sortqueryset method on the current queryset.
         """
         queryset = super(SafeSortMixin, self).get_queryset()
-        return self.sort_queryset(queryset, self.request.GET.get('sort_by'))
+        return self.sort_queryset(queryset, self.request.GET.get('sortBy'))
 
     def sort_queryset(self, queryset, order_by):
         """
@@ -80,6 +90,10 @@ class SafeSortMixin(object):
         """
         if self.model_field_valid(order_by, choices=[name for name, verbose_name in self.sort_by_fields]):
             queryset = queryset.order_by(order_by)
+
+            if order_by == '-population':
+                queryset = queryset.filter(population__gt=0, population__isnull=False)
+
         return queryset
 
     def get_sort_context(self, context):
@@ -91,8 +105,9 @@ class SafeSortMixin(object):
         for field, verbose_name in self.sort_by_fields:
             get_params = self.request.GET.copy()
             get_params['sort_by'] = field
-            context['sort_by_fields'].append((verbose_name, self.request.path + '?' + urllib.urlencode(get_params)))
+            context['sort_by_fields'].append(dict(name=verbose_name, field=field))
 
+        context['sort_by_fields'] = json.dumps(context['sort_by_fields'])
         return context
 
 
@@ -135,10 +150,10 @@ class LimitMixin(object):
 
 
 
-class FireDepartmentListView(ListView, SafeSortMixin, LimitMixin):
+class FireDepartmentListView(ListView, SafeSortMixin, LimitMixin, DISTScoreContextMixin):
     model = FireDepartment
     paginate_by = 30
-    queryset = FireDepartment.priority_departments.all()
+    queryset = FireDepartment.objects.all()
     sort_by_fields = [
         ('name', 'Name Ascending'),
         ('-name', 'Name Descending'),
@@ -150,15 +165,24 @@ class FireDepartmentListView(ListView, SafeSortMixin, LimitMixin):
         ('-population', 'Largest Population')
         ]
 
+    search_fields = ['fdid', 'state', 'region']
+
+
     def get_queryset(self):
         queryset = super(FireDepartmentListView, self).get_queryset()
-        queryset = self.sort_queryset(queryset, self.request.GET.get('sort_by'))
+        queryset = self.sort_queryset(queryset, self.request.GET.get('sortBy'))
         self.limit_queryset(self.request.GET.get('limit'))
+
+        for field, value in self.request.GET.items():
+            if value and value.lower() != 'any' and field in self.search_fields:
+                queryset = queryset.filter(**{field: value})
+
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super(FireDepartmentListView, self).get_context_data(**kwargs)
         context = self.get_sort_context(context)
+        context.update(self.add_dist_values_to_context())
         return context
 
 

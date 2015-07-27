@@ -151,7 +151,7 @@ function makekenburns($element) {
         var select2 = $('.ct-js-select');
 
         if(select2.length > 0){
-            select2.select2();
+            //select2.select2();
         }
 
         // Media Sections // ------------------------------------------------
@@ -292,7 +292,8 @@ function makekenburns($element) {
 
         // Snapper Disable //--------------------------------------------
 
-        if ($devicewidth > 767 && document.getElementById('ct-js-wrapper')) {
+        if ($devicewidth > 767 && document.getElementById('ct-js-wrapper') && snapper != null) {
+
             snapper.disable();
         }
         $(".ct-js-owl").attr("data-snap-ignore", true)

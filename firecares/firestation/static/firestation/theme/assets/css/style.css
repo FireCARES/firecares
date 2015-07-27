@@ -10568,6 +10568,9 @@ you can use the generic selector below, but it's slower:
 .overflow-y-scroll {
   overflow-y: scroll;
 }
+.ui-select-choices {
+  z-index: 10001;
+}
 .navbar {
   box-shadow: none;
   font-weight: 300;
