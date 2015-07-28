@@ -26,7 +26,8 @@
       fdid="{{ request.GET.fdid }}"
       state="{{ request.GET.state }}"
       region="{{ request.GET.region }}"
-      sort-fields='{{ sort_by_fields|safe }}'>
+      sort-fields='{{ sort_by_fields|safe }}'
+      name="{{ request.GET.name }}">
 
 {% include "firestation/_navbar.html" %}
 
@@ -181,6 +182,10 @@
                                 </div>
                             </div>
                             <div class="form-group">
+                                <div class="ct-form--item ct-u-marginBoth10">
+                                    <label>Department name</label>
+                                    <input name="name" type="text" class="form-control input-lg" placeholder="Any" ng-model="params.name">
+                                </div>
                                 <div class="ct-form--item ct-u-marginBoth10">
                                     <label>FDID</label>
                                     <input name="fdid" type="text" class="form-control input-lg" placeholder="Any" ng-model="params.fdid">

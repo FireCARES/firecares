@@ -174,7 +174,7 @@ class FireDepartmentListView(ListView, SafeSortMixin, LimitMixin, DISTScoreConte
         ('-population', 'Largest Population')
         ]
 
-    search_fields = ['fdid', 'state', 'region']
+    search_fields = ['fdid', 'state', 'region', 'name']
 
 
     def get_queryset(self):
@@ -184,6 +184,8 @@ class FireDepartmentListView(ListView, SafeSortMixin, LimitMixin, DISTScoreConte
 
         for field, value in self.request.GET.items():
             if value and value.lower() != 'any' and field in self.search_fields:
+                if field.lower().endswith('name'):
+                    field += '__icontains'
                 queryset = queryset.filter(**{field: value})
 
         return queryset

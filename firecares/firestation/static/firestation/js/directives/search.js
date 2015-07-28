@@ -19,6 +19,10 @@
                       scope.params.state = attrs.state;
                     });
 
+                    attrs.$observe('name', function() {
+                      scope.params.name = attrs.name;
+                    });
+
                     attrs.$observe('region', function() {
                       scope.params.region = attrs.region;
                     });
