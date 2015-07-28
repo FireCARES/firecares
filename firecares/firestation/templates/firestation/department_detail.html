@@ -8,12 +8,12 @@
 <html class="no-js" lang="en"> <!--<![endif]-->
 <head lang="en">
     <meta charset="UTF-8">
-    <meta name="description" content="FireCARES assessment of the {{ object.name }}">
-    <meta name="author" content="CreateIT">
+    <meta name="description" content="{{ object.description }} Learn more about this community's risks.">
+    <meta name="author" content="Prominent Edge LLC">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-    <title>FireCARES - {{ object.name }}</title>
+    <title>FireCARES - Community Assessment: {{ object.name }}</title>
     {% include 'firestation/_favicon.html' %}
 
 
@@ -286,7 +286,7 @@
                                 <h3>Description</h3>
                             </div>
                             <p class="ct-u-marginBottom50">
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus. Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis vel hendrerit interdum, dui ligula ultricies purus, sed posuere.
+                                {{ object.description }}
                             </p>
                             <div class="community-stats ct-u-marginBottom40">
                                 <div class="row">

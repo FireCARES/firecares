@@ -378,6 +378,25 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
         self.region = region
         self.save()
 
+    @property
+    def description(self):
+        """
+        A text description of the department used for displaying on the client side.
+        """
+
+        name = self.name
+
+        if not self.name.lower().endswith('department') and not self.name.lower().endswith('district'):
+            name += ' fire department'
+
+
+
+        return "The {name} is a {department_type} department located in the {object.region} NFPA region and headquartered in " \
+               "{object.headquarters_address.city}, {object.headquarters_address.state_province}."\
+            .format(name=name,
+                    department_type=self.department_type.lower(),
+                    object=self).strip()
+
     def residential_structure_fire_counts(self):
         return self.nfirsstatistic_set.filter(metric='residential_structure_fires')\
             .extra(select={
