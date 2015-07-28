@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
+from django.views.decorators.cache import cache_page
 from .firestation.views import Home
-
 from .firestation.api import StaffingResource, FireStationResource
 from tastypie.api import Api
 from firestation.views import Home
@@ -13,7 +13,7 @@ v1_api.register(FireStationResource())
 
 urlpatterns = patterns('',
     # Examples:
-    url(r'^$', Home.as_view(), name='firestation_home'),
+    url(r'^$', cache_page(60*15)(Home.as_view()), name='firestation_home'),
     url(r'^', include('firecares.firestation.urls')),
     (r'^api/', include(v1_api.urls)),
     # Uncomment the admin/doc line below to enable admin documentation:

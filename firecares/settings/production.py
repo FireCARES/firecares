@@ -22,3 +22,10 @@ STATSD_PATCHES = [
         'django_statsd.patches.db',
         'django_statsd.patches.cache',
 ]
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}

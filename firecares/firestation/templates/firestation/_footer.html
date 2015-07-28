@@ -1,6 +1,6 @@
+{% load cache %}
 
-
-
+{% cache 600 footer %}
 <footer>
     <div class="ct-footer--extended ct-u-paddingBoth60">
         <div class="container">
@@ -113,3 +113,4 @@
         </div>
     </div>
 </footer>
+{% endcache %}

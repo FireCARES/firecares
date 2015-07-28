@@ -16,6 +16,7 @@ from firecares.firecares_core.models import RecentlyUpdatedMixin
 from django.core.urlresolvers import reverse
 from django.db.transaction import rollback
 from django.db.utils import IntegrityError
+from django.utils.functional import cached_property
 from firecares.firecares_core.models import Address
 from phonenumber_field.modelfields import PhoneNumberField
 from firecares.firecares_core.models import Country
@@ -383,7 +384,7 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
         self.region = region
         self.save()
 
-    @property
+    @cached_property
     def description(self):
         """
         A text description of the department used for displaying on the client side.
