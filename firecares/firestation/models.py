@@ -230,12 +230,17 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
     geom = models.MultiPolygonField(null=True, blank=True)
     objects = models.GeoManager()
     priority_departments = PriorityDepartmentsManager()
-    dist_model_score = models.FloatField(null=True, blank=True, editable=False)
+    dist_model_score = models.FloatField(null=True, blank=True, editable=False, db_index=True)
     government_unit = RelatedObjectsDescriptor()
     population = models.IntegerField(null=True, blank=True)
+    featured = models.BooleanField(default=False, db_index=True)
 
     class Meta:
         ordering = ('name',)
+        index_together = [
+            ['population', 'id', 'region'],
+            ['population', 'region']
+        ]
 
     @property
     def government_unit_objects(self):
