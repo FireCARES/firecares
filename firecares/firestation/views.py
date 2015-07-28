@@ -25,6 +25,15 @@ class DISTScoreContextMixin(object):
         return context
 
 
+class FeaturedDepartmentsMixin(object):
+    """
+    Mixin to add featured departments to a request.
+    """
+    @staticmethod
+    def get_featured_departments():
+        return {'featured_departments': FireDepartment.priority_departments.all().order_by('?')[:5]}
+
+
 class DepartmentDetailView(DISTScoreContextMixin, DetailView):
     model = FireDepartment
     template_name = 'firestation/department_detail.html'
@@ -150,7 +159,7 @@ class LimitMixin(object):
 
 
 
-class FireDepartmentListView(ListView, SafeSortMixin, LimitMixin, DISTScoreContextMixin):
+class FireDepartmentListView(ListView, SafeSortMixin, LimitMixin, DISTScoreContextMixin, FeaturedDepartmentsMixin):
     model = FireDepartment
     paginate_by = 30
     queryset = FireDepartment.objects.all()
@@ -183,6 +192,7 @@ class FireDepartmentListView(ListView, SafeSortMixin, LimitMixin, DISTScoreConte
         context = super(FireDepartmentListView, self).get_context_data(**kwargs)
         context = self.get_sort_context(context)
         context.update(self.add_dist_values_to_context())
+        context.update(self.get_featured_departments())
         return context
 
 

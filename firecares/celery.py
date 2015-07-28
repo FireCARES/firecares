@@ -42,17 +42,22 @@ def debug_task(self):
     print('Request: {0!r}'.format(self.request))
 
 @app.task(rate_limit=10)
-def cache_thumbnail(id, upload_to_s3=False):
+def cache_thumbnail(id, upload_to_s3=False, marker=True):
     try:
         import shutil
         print settings.MAPBOX_ACCESS_TOKEN
         from firecares.firestation.models import FireDepartment
         department = FireDepartment.objects.get(id=id)
-        filename = slugify(' '.join(['us', department.state, department.name])) + '.png'
+
+        filename = department.thumbnail_name
+
+        if not marker:
+            filename = department.thumbnail_name_no_marker
+
         full_filename = os.path.join('/home/firecares/department-thumbnails', filename)
 
         if not department.thumbnail.startswith('/static'):
-            download_file(department.generate_thumbnail, full_filename)
+            download_file(department.generate_thumbnail(marker=marker), full_filename)
         else:
             shutil.copy('/webapps/firecares/firecares/firecares/firestation/static/firestation/theme/assets/images/content/property-1.jpg', full_filename)
 

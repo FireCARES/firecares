@@ -221,153 +221,17 @@
                 <div class="widget ct-widget--featuredItems">
                     <div class="widget-inner">
                         <h4 class="text-uppercase">Featured</h4>
-                        <div class="ct-itemProducts--small ct-itemProducts--small-type1">
-                            <a href="product-single.html">
-                                <div class="ct-main-content">
-                                    <div class="ct-imageBox">
-                                        <img src="{{STATIC_URL}}firestation/theme/assets/images/content/recently-reduced-thumbnail-1.jpg" alt="">
-                                    </div>
-                                    <div class="ct-main-text">
-                                        <div class="ct-product--tilte">
-                                            8553 Fallen Creek Bend, North Carolina
-                                        </div>
-                                        <div class="ct-product--price">
-                                            <span>$ 450,000</span>
-                                        </div>
-                                    </div>
+                        {% for department in featured_departments %}
+                        <div class="ct-itemProducts--small ct-itemProducts--small-type1 featured-department-map" style="background-image: url({{ department.thumbnail_no_marker }});">
+                            <a href="{{ department.get_absolute_url }}">
+                                <div class="ct-main-content featured-department-transparency" style="">
+                                    <label class="featured-department-map-label control-label sale">
+                                            {{ department.name }}
+                                    </label>
                                 </div>
                             </a>
                         </div>
-                        <div class="ct-itemProducts--small ct-itemProducts--small-type1">
-                            <a href="product-single.html">
-                                <div class="ct-main-content">
-                                    <div class="ct-imageBox">
-                                        <img src="{{STATIC_URL}}firestation/theme/assets/images/content/recently-reduced-thumbnail-2.jpg" alt="">
-                                    </div>
-                                    <div class="ct-main-text">
-                                        <div class="ct-product--tilte">
-                                            9544 Umber View, Inspiration
-                                        </div>
-                                        <div class="ct-product--price">
-                                            <span>$ 450,000</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="ct-itemProducts--small ct-itemProducts--small-type1">
-                            <a href="product-single.html">
-                                <div class="ct-main-content">
-                                    <div class="ct-imageBox">
-                                        <img src="{{STATIC_URL}}firestation/theme/assets/images/content/recently-reduced-thumbnail-3.jpg" alt="">
-                                    </div>
-                                    <div class="ct-main-text">
-                                        <div class="ct-product--tilte">
-                                            4079 Broad Falls, Turkeytown
-                                        </div>
-                                        <div class="ct-product--price">
-                                            <span>$ 450,000</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="ct-itemProducts--small ct-itemProducts--small-type1">
-                            <a href="product-single.html">
-                                <div class="ct-main-content">
-                                    <div class="ct-imageBox">
-                                        <img src="{{STATIC_URL}}firestation/theme/assets/images/content/recently-reduced-thumbnail-4.jpg" alt="">
-                                    </div>
-                                    <div class="ct-main-text">
-                                        <div class="ct-product--tilte">
-                                            046 Merry Landing, High Lonesome Wells
-                                        </div>
-                                        <div class="ct-product--price">
-                                            <span>$ 450,000</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="ct-itemProducts--small ct-itemProducts--small-type1">
-                            <a href="product-single.html">
-                                <div class="ct-main-content">
-                                    <div class="ct-imageBox">
-                                        <img src="{{STATIC_URL}}firestation/theme/assets/images/content/recently-reduced-thumbnail-5.jpg" alt="">
-                                    </div>
-                                    <div class="ct-main-text">
-                                        <div class="ct-product--tilte">
-                                            8606 Quaking Grove Highway, Blackfalds
-                                        </div>
-                                        <div class="ct-product--price">
-                                            <span>$ 450,000</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 col-md-12">
-                <div class="widget ct-widget--recentlyReduced">
-                    <div class="widget-inner">
-                        <h4 class="text-uppercase">Recently Reduced</h4>
-                        <div class="ct-itemProducts--small ct-itemProducts--small-type1">
-                            <a href="product-single.html">
-                                <div class="ct-main-content">
-                                    <div class="ct-imageBox">
-                                        <img src="{{STATIC_URL}}firestation/theme/assets/images/content/recently-reduced-thumbnail-6.jpg" alt="">
-                                    </div>
-                                    <div class="ct-main-text">
-                                        <div class="ct-product--tilte">
-                                            837 Sunny Embers Townline, Koshkonong
-                                        </div>
-                                        <div class="ct-product--price">
-                                            <span class="ct-price--Old">$ 450,000</span>
-                                            <span>$ 390,000</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="ct-itemProducts--small ct-itemProducts--small-type1">
-                            <a href="product-single.html">
-                                <div class="ct-main-content">
-                                    <div class="ct-imageBox">
-                                        <img src="{{STATIC_URL}}firestation/theme/assets/images/content/recently-reduced-thumbnail-7.jpg" alt="">
-                                    </div>
-                                    <div class="ct-main-text">
-                                        <div class="ct-product--tilte">
-                                            4079 Broad Falls, Turkeytown
-                                        </div>
-                                        <div class="ct-product--price">
-                                            <span class="ct-price--Old">$ 450,000</span>
-                                            <span>$ 390,000</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="ct-itemProducts--small ct-itemProducts--small-type1">
-                            <a href="product-single.html">
-                                <div class="ct-main-content">
-                                    <div class="ct-imageBox">
-                                        <img src="{{STATIC_URL}}firestation/theme/assets/images/content/recently-reduced-thumbnail-8.jpg" alt="">
-                                    </div>
-                                    <div class="ct-main-text">
-                                        <div class="ct-product--tilte">
-                                            5469 Clear Rise, Little Otter
-                                        </div>
-                                        <div class="ct-product--price">
-                                            <span class="ct-price--Old">$ 450,000</span>
-                                            <span>$ 390,000</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        <a class="btn btn-primary btn-transparent--border ct-u-text--motive" href="properties.html">View More Reduced Properties</a>
+                        {% endfor %}
                     </div>
                 </div>
             </div>

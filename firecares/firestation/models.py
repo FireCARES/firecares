@@ -314,12 +314,22 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
         return slugify(' '.join(['us', self.state, self.name])) + '.png'
 
     @property
+    def thumbnail_name_no_marker(self):
+        return slugify(' '.join(['us', self.state, self.name, 'no marker'])) + '.png'
+
+    @property
     def thumbnail(self):
         return 'https://s3.amazonaws.com/firecares-static/department-thumbnails/{0}'.format(self.thumbnail_name)
 
     @property
-    def generate_thumbnail(self):
+    def thumbnail_no_marker(self):
+        return 'https://s3.amazonaws.com/firecares-static/department-thumbnails/{0}' \
+            .format(self.thumbnail_name_no_marker)
+
+    def generate_thumbnail(self, marker=True):
         geom = None
+        marker = ''
+
         if self.geom:
             geom = self.geom.centroid
         elif self.headquarters_address and self.headquarters_address.geom:
@@ -327,8 +337,12 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
         else:
             return '/static/firestation/theme/assets/images/content/property-1.jpg'
 
-        return 'http://api.tiles.mapbox.com/v4/garnertb.mmlochkh/pin-l-embassy+0074D9({geom.x},{geom.y})/' \
-               '{geom.x},{geom.y},8/500x300.png?access_token={access_token}'.format(geom=geom,
+        if marker:
+            marker = 'pin-l-embassy+0074D9({geom.x},{geom.y})/'
+
+        return 'http://api.tiles.mapbox.com/v4/garnertb.mmlochkh/{marker}' \
+               '{geom.x},{geom.y},8/500x300.png?access_token={access_token}'.format(marker=marker,
+                                                                                    geom=geom,
                                                                                     access_token=getattr(settings, 'MAPBOX_ACCESS_TOKEN', ''))
 
 

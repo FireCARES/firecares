@@ -10619,6 +10619,20 @@ you can use the generic selector below, but it's slower:
   margin: 0 5px 0 24px;
   padding: 24px 0 24px 0;
 }
+.featured-department-map {
+  background-position: 50% 45%;
+  height: 90px;
+}
+.featured-department-transparency {
+  background-color: rgba(255, 255, 255, 0.65);
+  height: 90px;
+}
+.featured-department-transparency:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+.featured-department-map-label {
+  top: 3px !important;
+}
 .community-stats i {
   font-size: 40px;
   margin-right: 15px;
