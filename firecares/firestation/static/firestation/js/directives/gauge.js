@@ -62,6 +62,37 @@
           }
         };
       });
+
+  module.directive('barGauge',
+      function() {
+        return {
+          restrict: 'E',
+          replace: true,
+          templateUrl: '/static/firestation/js/directives/partial/bar-gauge.tpl.html',
+          scope: {
+             value: '@?',
+             min: '@?',
+             max: '@?'
+          },
+          // The linking function will add behavior to the template
+          link: function(scope, element, attrs) {
+            var element = element;
+            var gauge = $(element[0].querySelector('.bar-gauge'));
+            var needle = $(element[0].querySelector('.bar-gauge-needle'));
+            scope.inverse = attrs.hasOwnProperty('inverse');
+
+            scope.$watch('value', function() {
+               if (scope.min == null || scope.max == null || scope.value == null) {
+                   return
+               }
+
+               var location = scope.value / scope.max;
+                needle.css({left: location * (gauge.width() - 5) + 'px'});
+            });
+
+          }
+        };
+      });
 }());
 
 

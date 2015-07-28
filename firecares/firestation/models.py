@@ -345,10 +345,6 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
                                                                                     geom=geom,
                                                                                     access_token=getattr(settings, 'MAPBOX_ACCESS_TOKEN', ''))
 
-
-
-
-
     def set_geometry_from_government_unit(self):
         objs = self.government_unit_objects
 
@@ -383,7 +379,13 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
         self.save()
 
     def residential_structure_fire_counts(self):
-        return self.nfirsstatistic_set.filter(metric='residential_structure_fires')
+        return self.nfirsstatistic_set.filter(metric='residential_structure_fires')\
+            .extra(select={
+                    'year_max': 'SELECT MAX(COUNT) FROM firestation_nfirsstatistic b WHERE b.year = firestation_nfirsstatistic.year and b.metric=firestation_nfirsstatistic.metric'
+                   })\
+            .extra(select={
+                    'year_min': 'SELECT MIN(COUNT) FROM firestation_nfirsstatistic b WHERE b.year = firestation_nfirsstatistic.year and b.metric=firestation_nfirsstatistic.metric'
+                   })
 
     @classmethod
     def load_from_usfa_csv(cls):

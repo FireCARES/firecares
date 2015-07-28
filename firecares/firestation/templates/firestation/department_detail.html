@@ -312,17 +312,19 @@
                                 <table class="table table-striped residential-fires">
                                     <thead class="ct-fw-700">
                                         <tr>
-                                            <td>Year</td>
-                                            <td>Fires</td>
-                                            <td>Rank</td>
+                                            <td align="left">Year</td>
+                                            <td align="left">Fires</td>
+                                            <td align="center">Rank</td>
                                         </tr>
                                     </thead>
                                     <tbody>
                                     {% for stat in object.residential_structure_fire_counts %}
                                     <tr>
-                                        <td>{{ stat.year }}</td>
-                                        <td>{{ stat.count|intcomma }}</td>
-                                        <td>N/A</td>
+                                        <td align="left">{{ stat.year }}</td>
+                                        <td align="left">{{ stat.count|intcomma }}</td>
+                                        <td align="center" style="width: 70px">
+                                            <bar-gauge min="{{ stat.year_min|floatformat}}" max="{{ stat.year_max|floatformat }}" value="{{ stat.count }}" inverse></bar-gauge>
+                                        </td>
                                     </tr>
                                     {% endfor %}
                                     </tbody>

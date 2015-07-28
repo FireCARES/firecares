@@ -10771,6 +10771,48 @@ table.residential-fires {
   opacity: 0.5;
   padding-top: 5px;
 }
+.bar-gauge {
+  background: #f6542f;
+  background: -webkit-linear-gradient(left, #f6542f, #febe00 50%, #74ac49);
+  background: -moz-linear-gradient(left, #f6542f, #febe00 50%, #74ac49);
+  /* FF3.6+ */
+  background: -o-linear-gradient(left, #f6542f, #febe00 50%, #74ac49);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff6542f', endColorstr='#ff74ac49', GradientType=1);
+  height: 7px;
+  width: 150px;
+}
+.bar-gauge-inverse {
+  background: #74ac49;
+  background: -webkit-linear-gradient(left, #74ac49, #febe00 50%, #f6542f);
+  background: -moz-linear-gradient(left, #74ac49, #febe00 50%, #f6542f);
+  /* FF3.6+ */
+  background: -o-linear-gradient(left, #74ac49, #febe00 50%, #f6542f);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff74ac49', endColorstr='#fff6542f', GradientType=1);
+}
+.bar-gauge-label {
+  font-size: 10px;
+  color: #a6a6a6;
+  position: absolute;
+  cursor: default;
+  padding-top: 5px;
+}
+.bar-gauge-label-min {
+  left: 0px;
+}
+.bar-gauge-label-max {
+  right: 0px;
+}
+.bar-gauge-wrapper {
+  position: relative;
+}
+.bar-gauge-needle {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid black;
+  position: absolute;
+}
 .ct-pageWrapper {
   z-index: 3;
   background-color: #ffffff;
