@@ -606,7 +606,7 @@ class Staffing(models.Model):
                          ('Chief', 'Chief'),
                          ('Other', 'Other')]
 
-    int_field_defaults = dict(null=True, blank=True, max_length=2, default=0, validators=[MaxValueValidator(99)])
+    int_field_defaults = dict(null=True, blank=True, default=0, validators=[MaxValueValidator(99)])
 
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
