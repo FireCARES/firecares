@@ -82,12 +82,14 @@
             scope.inverse = attrs.hasOwnProperty('inverse');
 
             scope.$watch('value', function() {
-               if (scope.min == null || scope.max == null || scope.value == null) {
-                   return
+               if (scope.min == null || scope.min === '' || scope.max == null || scope.max === ''
+                   || scope.value == null || scope.value === '') {
+                 needle.css({display: 'none'});
+                 return
+               } else {
+                 var location = scope.value / scope.max;
+                 needle.css({left: location * (gauge.width() - 5) + 'px'});
                }
-
-               var location = scope.value / scope.max;
-                needle.css({left: location * (gauge.width() - 5) + 'px'});
             });
 
           }
