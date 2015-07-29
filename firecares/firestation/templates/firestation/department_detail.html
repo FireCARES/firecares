@@ -292,12 +292,20 @@
                                 <div class="row">
                                     <div class="col-md-6 ct-u-marginBottom20">
                                         <i class="icon-shield pull-left"></i>
-                                        <h4>{{ object.population|intcomma }}</h4>
+                                        {% if object.population %}
+                                            <h4>{{ object.population|intcomma }}</h4>
+                                        {% else %}
+                                            <h4>Not Available</h4>
+                                        {% endif %}
                                         <h5>Protected Population</h5>
                                     </div>
                                     <div class="col-md-6 ct-u-marginBottom20">
                                         <i class="icon-users pull-left"></i>
-                                        <h4>{{ object.geom_area|floatformat:"2"|intcomma}} <span>km&sup2;</span></h4>
+                                        {% if object.geom_area %}
+                                            <h4>{{ object.geom_area|floatformat:"2"|intcomma}} <span>km&sup2;</span></h4>
+                                        {% else %}
+                                            <h4>Not Available</h4>
+                                        {% endif %}
                                         <h5>Community Size</h5>
                                     </div>
                                 </div>
