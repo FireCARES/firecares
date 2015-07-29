@@ -321,17 +321,21 @@
                                     <thead class="ct-fw-700">
                                         <tr>
                                             <td align="left">Year</td>
-                                            <td align="left">Fires</td>
-                                            <td align="center">Rank</td>
+                                            <td align="left">Residential Fires</td>
+                                            <td align="center">Call Volume</td>
                                         </tr>
                                     </thead>
                                     <tbody>
                                     {% for stat in object.residential_structure_fire_counts %}
                                     <tr>
                                         <td align="left">{{ stat.year }}</td>
-                                        <td align="left">{{ stat.count|intcomma }}</td>
+                                        {% if stat.count %}
+                                            <td align="left">{{ stat.count|intcomma|default:"Not Available" }}</td>
+                                        {% else %}
+                                            <td align="left">Not Available</td>
+                                        {% endif %}
                                         <td align="center" style="width: 70px">
-                                            <bar-gauge min="{{ stat.year_min|floatformat}}" max="{{ stat.year_max|floatformat }}" value="{{ stat.count }}" inverse></bar-gauge>
+                                            <bar-gauge min="{{ stat.year_min|floatformat}}" max="{{ stat.year_max|floatformat }}" value="{{ stat.count|default_if_none:'' }}" inverse></bar-gauge>
                                         </td>
                                     </tr>
                                     {% endfor %}
