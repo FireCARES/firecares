@@ -339,8 +339,14 @@
                                 </table>
                             </div>
 
+                            {% if not firestations %}
                             <div class="ct-heading ct-u-marginBottom20">
-                                <h3>Stations</h3>
+                            <h3>No stations linked to this department </h3>
+                            </div>
+                            {% else %}
+
+                            <div class="ct-heading ct-u-marginBottom20">
+                                <h3 class="text-uppercase"> {{ firestations.paginator.count }} Stations</h3>
                             </div>
                             <div class="ct-section--products ct-section--products2col ct-u-marginBottom30">
                                 <table class="table table-striped" style="font-size:14px;">
@@ -360,6 +366,7 @@
                                     </tbody>
                                 </table>
                             </div>
+
                         <div class="ct-pagination text-center ct-u-marginBottom30">
                             <ul class="pagination">
                                 {% if firestations.has_previous %}
@@ -379,9 +386,11 @@
                                 {% endif %}
                                 </ul>
                             </div>
+                            {% endif %} <!-- if not firestations --> 
                         </div>
                     </div>
                 </div>
+
                 <div class="col-md-4 col-lg-3">
                     <div class="ct-js-sidebar">
                         <div class="row">
