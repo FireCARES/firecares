@@ -6,8 +6,12 @@ import mimetypes
 import requests
 from celery import Celery
 from django.conf import settings
+from django.db import connections
+from django.db.utils import ConnectionDoesNotExist
 from django.utils.text import slugify
 from firecares.utils.s3put import singlepart_upload
+from firecares.firestation.models import FireDepartment
+from firecares.firestation.models import NFIRSStatistic as nfirs
 from celery.task import current
 
 # set the default Django settings module for the 'celery' program.
@@ -83,3 +87,62 @@ def cache_thumbnail(id, upload_to_s3=False, marker=True):
     except Exception as exc:
         if current.request.retries < 3:
             current.retry(exc=exc, countdown=min(2 ** current.request.retries, 128))
+
+@app.task
+def update_nfirs_counts(id):
+
+        if not id:
+            return
+
+        try:
+            fd = FireDepartment.objects.get(id=id)
+            cursor = connections['nfirs'].cursor()
+
+        except (FireDepartment.DoesNotExist, ConnectionDoesNotExist):
+            return
+
+        civilan_casualities = {2002: None,
+                               2003: None,
+                               2004: None,
+                               2005: None,
+                               2006: None,
+                               2007: None,
+                               2008: None,
+                               2009: None,
+                               2010: None,
+                               2011: None,
+                               2012: None}
+
+        cursor.execute("select extract(year from inc_date) as year, count(*) from civiliancasualty where fdid=%s and state=%s"
+                              "  group by year order by year desc;", (fd.fdid, fd.state))
+
+        results = cursor.fetchall()
+        for year, count in results:
+            civilan_casualities[year] = count
+
+        for year, count in civilan_casualities.items():
+            nfirs.objects.update_or_create(year=year, defaults={'count': count},
+                                           fire_department=fd, metric='civilian_casualties')
+
+        residential_fires = {2002: None,
+                             2003: None,
+                             2004: None,
+                             2005: None,
+                             2006: None,
+                             2007: None,
+                             2008: None,
+                             2009: None,
+                             2010: None,
+                             2011: None,
+                             2012: None}
+
+        cursor.execute("select extract(year from inc_date) as year, count(*) from buildingfires where fdid=%s and state=%s"
+                              "  group by year order by year desc;", (fd.fdid, fd.state))
+
+        results = cursor.fetchall()
+        for year, count in results:
+            residential_fires[year] = count
+
+        for year, count in residential_fires.items():
+            nfirs.objects.update_or_create(year=year, defaults={'count': count},
+                                           fire_department=fd, metric='residential_structure_fires')
