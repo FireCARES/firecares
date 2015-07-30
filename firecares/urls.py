@@ -1,11 +1,12 @@
 from django.conf.urls import patterns, include, url
+from django.contrib import admin
 from django.views.decorators.cache import cache_page
 from .firestation.views import Home
 from .firestation.api import StaffingResource, FireStationResource
 from tastypie.api import Api
 from firestation.views import Home
 
-#admin.autodiscover()
+admin.autodiscover()
 v1_api = Api(api_name='v1')
 v1_api.register(StaffingResource())
 v1_api.register(FireStationResource())
@@ -20,5 +21,5 @@ urlpatterns = patterns('',
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    # url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', include(admin.site.urls)),
 )
