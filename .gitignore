@@ -55,3 +55,4 @@ docs/_build/
 
 # PyBuilder
 target/
+firecares/settings/local_settings.py
