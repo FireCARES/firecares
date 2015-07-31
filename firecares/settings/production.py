@@ -36,3 +36,9 @@ COMPRESS_URL = "https://s3.amazonaws.com/firecares-static/"
 COMPRESS_STORAGE = "firecares.utils.CachedS3BotoStorage"
 STATICFILES_STORAGE = "firecares.utils.CachedS3BotoStorage"
 STATIC_URL = COMPRESS_URL
+DEBUG = False
+
+try:
+    from local_settings import *  # noqa
+except ImportError:
+    pass
