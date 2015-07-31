@@ -14,3 +14,5 @@ git+https://github.com/django-tastypie/django-tastypie#egg=TastyPie
 boto==2.38.0
 ipdb==0.8.1
 Pillow==2.9.0
+django-storages==1.1.8
+django-compressor==1.5
