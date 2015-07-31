@@ -12,6 +12,7 @@ from django.utils.text import slugify
 from firecares.utils.s3put import singlepart_upload
 from firecares.firestation.models import FireDepartment
 from firecares.firestation.models import NFIRSStatistic as nfirs
+from firecares.utils import convert_png_to_jpg
 from celery.task import current
 
 # set the default Django settings module for the 'celery' program.
@@ -54,14 +55,16 @@ def cache_thumbnail(id, upload_to_s3=False, marker=True):
         department = FireDepartment.objects.get(id=id)
 
         filename = department.thumbnail_name
+        generate_thumbnail = department.generate_thumbnail(marker=marker)
 
         if not marker:
             filename = department.thumbnail_name_no_marker
 
         full_filename = os.path.join('/home/firecares/department-thumbnails', filename)
 
-        if not department.thumbnail.startswith('/static'):
-            download_file(department.generate_thumbnail(marker=marker), full_filename)
+        if not generate_thumbnail.startswith('/static'):
+            f = download_file(generate_thumbnail, full_filename.replace('jpg', 'png'))
+            full_filename = convert_png_to_jpg(f)
         else:
             shutil.copy('/webapps/firecares/firecares/firecares/firestation/static/firestation/theme/assets/images/content/property-1.jpg', full_filename)
 

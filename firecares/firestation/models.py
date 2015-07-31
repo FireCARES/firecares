@@ -317,11 +317,11 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
 
     @property
     def thumbnail_name(self):
-        return slugify(' '.join(['us', self.state, self.name])) + '.png'
+        return slugify(' '.join(['us', self.state, self.name])) + '.jpg'
 
     @property
     def thumbnail_name_no_marker(self):
-        return slugify(' '.join(['us', self.state, self.name, 'no marker'])) + '.png'
+        return slugify(' '.join(['us', self.state, self.name, 'no marker'])) + '.jpg'
 
     @property
     def thumbnail(self):
