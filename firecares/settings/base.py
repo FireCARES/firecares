@@ -101,7 +101,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.template.context_processors.media",
     "django.template.context_processors.static",
     "django.template.context_processors.tz",
-    "django.contrib.messages.context_processors.messages"
+    "django.contrib.messages.context_processors.messages",
+    "firecares.firecares_core.context_processors.third_party_tracking_ids",
 )
 
 MIDDLEWARE_CLASSES = (
@@ -182,3 +183,4 @@ AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', None)
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', None)
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', None)
 MAPBOX_ACCESS_TOKEN = os.getenv('MAPBOX_ACCESS_TOKEN', None)
+GOOGLE_ANALYTICS_TRACKING_ID = os.getenv('GOOGLE_ANALYTICS_TRACKING_ID', None)
