@@ -32,3 +32,11 @@ can run collect static from the `firecares-ansible` directory on the host machin
 
 `ansible-playbook vagrant.yml -i vagrant_server --tags django.collectstatic`
 
+
+
+#### Generating CSS
+
+This project uses LESS CSS pre-processor to generate CSS rules.  To make a modification to a CSS rule, follow these steps:
+
+1. Make the modification in the appropriate LESS file.  For example: [style.less](firecares/firestation/static/firestation/theme/assets/less/style.less)
+2. Use the `lessc` command to compile the CSS from LESS and pipe the output to the appropriate location `lessc style.less > ../css/style.css`.
