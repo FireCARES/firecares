@@ -37,6 +37,7 @@ COMPRESS_STORAGE = "firecares.utils.CachedS3BotoStorage"
 STATICFILES_STORAGE = "firecares.utils.CachedS3BotoStorage"
 STATIC_URL = COMPRESS_URL
 DEBUG = False
+AWS_QUERYSTRING_AUTH = False
 
 try:
     from local_settings import *  # noqa
