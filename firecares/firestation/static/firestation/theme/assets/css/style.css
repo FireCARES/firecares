@@ -10723,14 +10723,14 @@ table.residential-fires {
   z-index: 100;
 }
 .dial-inset {
-  position: absolute;
+  position: relative;
   top: 20px;
-  left: 20px;
-  display: block;
+/*  left: 20px;
+*/  display: block;
   border-radius: 50%;
   bottom: 20px;
-  right: 20px;
-  z-index: 3;
+/*  right: 20px;
+*/  z-index: 3;
 }
 .dial-inset-value {
   color: white;
