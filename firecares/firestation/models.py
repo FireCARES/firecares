@@ -463,9 +463,13 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
                     counter += 1
 
                 assert counter == cls.objects.all().count()
+    
+    @cached_property
+    def slug(self):
+        return slugify(self.name)
 
     def get_absolute_url(self):
-        return reverse('firedepartment_detail', kwargs=dict(pk=self.id))
+        return reverse('firedepartment_detail_slug', kwargs=dict(pk=self.id, slug=self.slug))
 
     def find_jurisdiction(self):
         from firecares.usgs.models import CountyorEquivalent, IncorporatedPlace, UnincorporatedPlace
