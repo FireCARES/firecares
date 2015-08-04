@@ -1,12 +1,14 @@
 'use strict';
 
 (function() {
-  angular.module('fireStation', ['ngResource',
+  angular.module('fireStation', [
+      'ngResource',
       'fireStation.factories',
       'fireStation.departmentDetailController',
       'fireStation.mapService',
       'fireStation.gauge',
-      'fireStation.search'
+      'fireStation.search',
+      'fireStation.graphs'
   ])
 
   .config(function($interpolateProvider, $httpProvider, $resourceProvider) {

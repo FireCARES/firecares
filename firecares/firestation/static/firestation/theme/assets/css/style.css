@@ -10824,6 +10824,39 @@ table.residential-fires {
   margin: 0 5px 0 -15px;
   color: #bf5252;
 }
+.firecares-graph .nvd3 text {
+  font: 300 14px "Open Sans";
+  color: #2d3a51;
+}
+.firecares-graph .nvd3 .nv-axis path.domain {
+  stroke-opacity: 1;
+  stroke: #eeeeee;
+}
+.firecares-graph .nvd3 .nv-axis .nv-axisMaxMin text {
+  font-size: 12px;
+  color: #a6a6a6;
+  font-weight: 500;
+  fill: #a6a6a6;
+}
+.metric-description {
+  text-align: center;
+  margin-top: 55px;
+  margin-top: 5px;
+}
+.metric-description h4 {
+  font-weight: 500;
+}
+.metric-description p {
+  font-size: 13px;
+  line-height: 16px;
+  margin: 0 auto;
+  max-width: 60%;
+  opacity: 0.5;
+  padding-top: 5px;
+}
+.metric-value-location {
+  fill: #F6542F;
+}
 .ct-pageWrapper {
   z-index: 3;
   background-color: #ffffff;

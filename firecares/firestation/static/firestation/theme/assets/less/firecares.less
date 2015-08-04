@@ -340,3 +340,34 @@ padding-top: 5px;
     color: #bf5252;
     }
 }
+
+.firecares-graph {
+  // all chart text
+  .nvd3 text {
+    font: 300 14px "Open Sans";
+    color: @text-color;
+  }
+
+  // chart axis lines
+  .nvd3 .nv-axis path.domain {
+    stroke-opacity: 1;
+    stroke: @gray-lightest;
+  }
+
+  // chart legend text
+  .nvd3 .nv-axis .nv-axisMaxMin text {
+    font-size: 12px;
+    color: @gray-lighter;
+    font-weight: 500;
+    fill: @gray-lighter;
+  }
+}
+
+.metric-description {
+  .gauge-description;
+  margin-top: 5px;
+}
+
+.metric-value-location {
+  fill: #F6542F;
+}

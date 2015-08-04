@@ -58,6 +58,7 @@
 
           $scope.toggleFullScreenMap = function() {
               departmentMap.toggleFullscreen();
-          }
+          };
+
       })
 })();

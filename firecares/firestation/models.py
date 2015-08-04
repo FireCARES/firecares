@@ -232,9 +232,26 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
     objects = models.GeoManager()
     priority_departments = PriorityDepartmentsManager()
     dist_model_score = models.FloatField(null=True, blank=True, editable=False, db_index=True)
+
+    risk_model_deaths = models.FloatField(null=True, blank=True, db_index=True,
+                                          verbose_name='Predicted deaths per year.')
+
+    risk_model_injuries = models.FloatField(null=True, blank=True, db_index=True,
+                                            verbose_name='Predicted injuries per year.')
+
+    risk_model_fires_room = models.FloatField(null=True, blank=True, db_index=True,
+                                              verbose_name='Predicted fires confined to the room of origin.')
+
+    risk_model_fires_floor = models.FloatField(null=True, blank=True, db_index=True,
+                                               verbose_name='Predicted fires confined to the floor of origin.')
+
+    risk_model_fires_structure = models.FloatField(null=True, blank=True, db_index=True,
+                                                   verbose_name='Predicted fires beyond the structure of origin.')
+
     government_unit = RelatedObjectsDescriptor()
     population = models.IntegerField(null=True, blank=True)
     featured = models.BooleanField(default=False, db_index=True)
+
 
     class Meta:
         ordering = ('name',)

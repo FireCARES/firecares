@@ -1,6 +1,4 @@
 from django.contrib.gis.db import models
-from django.db.models import Q
-import operator
 
 
 class PriorityDepartmentsManager(models.Manager):

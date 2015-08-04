@@ -1,14 +1,17 @@
 {% load compress %}
 
 {% compress css %}
-<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/imports.css">
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}leaflet-fullscreen/leaflet.fullscreen.css">
-<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/bootstrap.css">
-<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/style.css">
-<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/js/ui-select2/ui-select2.css">
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/imports.css"/>
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}nvd3/nv.d3.min.css"/>
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}leaflet-fullscreen/leaflet.fullscreen.css"/>
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/bootstrap.css"/>
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/style.css"/>
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/js/ui-select2/ui-select2.css"/>
 <link rel="stylesheet" href="{{ STATIC_URL }}leaflet/leaflet.css" />
 <link rel="stylesheet" href="{{ STATIC_URL }}firestation/firestation.css" />
 {% endcompress %}
+
+
 
 {% compress js %}
 <script src="{{STATIC_URL}}angularjs/angular.min.js"></script>
@@ -19,11 +22,15 @@
 <script src="{{ STATIC_URL }}leaflet/leaflet.js"></script>
 <script src="{{ STATIC_URL }}leaflet-fullscreen/Leaflet.fullscreen.min.js"></script>
 <script src="{{ STATIC_URL }}firestation/Leaflet.FireCARESMarkers.js"></script>
+<script src="{{ STATIC_URL }}d3/d3.min.js"></script>
+<script src="{{ STATIC_URL }}nvd3/nv.d3.js"></script>
+
 <script src="{{ STATIC_URL }}firestation/js/services/factories.js"></script>
 <script src="{{ STATIC_URL }}firestation/js/services/mapService.js"></script>
 <script src="{{ STATIC_URL }}firestation/js/controllers/departmentDetail.js"></script>
 <script src="{{ STATIC_URL }}firestation/js/directives/gauge.js"></script>
 <script src="{{ STATIC_URL }}firestation/js/directives/search.js"></script>
+<script src="{{ STATIC_URL }}firestation/js/directives/graphs.js"></script>
 <script src="{{ STATIC_URL }}firestation/js/app.js"></script>
 <script src="{{STATIC_URL}}firestation/theme/assets/js/select2/select2.min.js"></script>
 <script src="{{STATIC_URL}}firestation/theme/assets/js/ui-select2/ui-select2.min.js"></script>
