@@ -141,7 +141,8 @@ INSTALLED_APPS = (
     'firecares.usgs',
     'jsonfield',
     'compressor',
-    'storages'
+    'storages',
+    'widget_tweaks'
 )
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
@@ -184,3 +185,6 @@ AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', None)
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', None)
 MAPBOX_ACCESS_TOKEN = os.getenv('MAPBOX_ACCESS_TOKEN', None)
 GOOGLE_ANALYTICS_TRACKING_ID = os.getenv('GOOGLE_ANALYTICS_TRACKING_ID', None)
+
+LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/login'

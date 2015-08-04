@@ -7,10 +7,16 @@
                         <a href="{% url 'firedepartment_list' %}"><i class="fa fa-search"></i> Search</a>
                     </div>
                     <div class="ct-panel--item ct-email">
-                        <a href="login.html"><i class="fa fa-user"></i> Login</a>
+                        {% if request.user.is_anonymous %}
+                            <a href="{% url 'login' %}"><i class="fa fa-user"></i> Login</a>
+                        {% else %}
+                            <a href="{% url 'logout' %}"><i class="fa fa-user"></i> Logout</a>
+                        {% endif %}
                     </div>
                     <div class="ct-panel--item ct-email">
-                        <a href="registration.html"><i class="fa fa-plus-square"></i> Register</a>
+                        {% if request.user.is_anonymous %}
+                            <a href="registration.html"><i class="fa fa-plus-square"></i> Register</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

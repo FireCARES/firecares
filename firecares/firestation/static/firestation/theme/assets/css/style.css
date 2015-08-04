@@ -10809,6 +10809,21 @@ table.residential-fires {
   border-bottom: 5px solid black;
   position: absolute;
 }
+.form-error {
+  border-color: #bf5252;
+}
+.errorlist {
+  color: #bf5252;
+}
+.errorlist li {
+  list-style: none;
+}
+.errorlist li:before {
+  font-family: 'FontAwesome';
+  content: '\f00d';
+  margin: 0 5px 0 -15px;
+  color: #bf5252;
+}
 .ct-pageWrapper {
   z-index: 3;
   background-color: #ffffff;
