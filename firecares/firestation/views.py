@@ -10,7 +10,6 @@ from django.http.response import HttpResponseRedirect
 from django.db.models import Max, Min, Count
 from django.db.models.fields import FieldDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from numpy import histogram
 from random import randint
 import urllib
 
@@ -42,11 +41,6 @@ class DepartmentDetailView(DISTScoreContextMixin, DetailView):
     page = 1
     objects_per_page = 10
 
-    def get_histogram(self, field, bins=400):
-        hist = histogram(list(FireDepartment.objects.filter(**{'{0}__isnull'.format(field): False})
-                         .values_list(field, flat=True)), bins=bins)
-        return json.dumps(zip(hist[1], hist[0]), separators=(',', ':'))
-
     def get_context_data(self, **kwargs):
         context = super(DepartmentDetailView, self).get_context_data(**kwargs)
 
@@ -73,27 +67,27 @@ class DepartmentDetailView(DISTScoreContextMixin, DetailView):
         risk_model_fires_structure = cache.get('all_risk_model_fires_structure__count')
 
         if not performance_data:
-            performance_data = self.get_histogram('dist_model_score')
+            performance_data = FireDepartment.get_histogram('dist_model_score')
             cache.set('all_dist_score_model__count', performance_data, timeout=60 * 60 * 24)
 
         if not risk_model_death:
-            risk_model_death = self.get_histogram('risk_model_deaths')
+            risk_model_death = FireDepartment.get_histogram('risk_model_deaths')
             cache.set('all_risk_model_death__count', risk_model_death, timeout=60 * 60 * 24)
 
         if not risk_model_injuries:
-            risk_model_injuries = self.get_histogram('risk_model_injuries')
+            risk_model_injuries = FireDepartment.get_histogram('risk_model_injuries')
             cache.set('all_risk_model_injuries__count', risk_model_injuries, timeout=60 * 60 * 24)
 
         if not risk_model_fires_room:
-            risk_model_fires_room = self.get_histogram('risk_model_fires_room')
+            risk_model_fires_room = FireDepartment.get_histogram('risk_model_fires_room')
             cache.set('risk_model_fires_room__count', risk_model_fires_room, timeout=60 * 60 * 24)
 
         if not risk_model_fires_floor:
-            risk_model_fires_floor = self.get_histogram('risk_model_fires_floor')
+            risk_model_fires_floor = FireDepartment.get_histogram('risk_model_fires_floor')
             cache.set('risk_model_fires_floor__count', risk_model_fires_floor, timeout=60 * 60 * 24)
 
         if not risk_model_fires_structure:
-            risk_model_fires_structure = self.get_histogram('risk_model_fires_structure')
+            risk_model_fires_structure = FireDepartment.get_histogram('risk_model_fires_structure')
             cache.set('risk_model_fires_structure__count', risk_model_fires_structure, timeout=60 * 60 * 24)
 
         context['performance_data'] = performance_data

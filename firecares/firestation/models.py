@@ -18,6 +18,7 @@ from django.db.transaction import rollback
 from django.db.utils import IntegrityError
 from django.utils.functional import cached_property
 from firecares.firecares_core.models import Address
+from numpy import histogram
 from phonenumber_field.modelfields import PhoneNumberField
 from firecares.firecares_core.models import Country
 from genericm2m.models import RelatedObjectsDescriptor
@@ -402,6 +403,12 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
             self.population = None
 
         self.save()
+
+    @classmethod
+    def get_histogram(cls, field, bins=400):
+        hist = histogram(list(cls.objects.filter(**{'{0}__isnull'.format(field): False})
+                         .values_list(field, flat=True)), bins=bins)
+        return json.dumps(zip(hist[1], hist[0]), separators=(',', ':'))
 
     def set_region(self, region):
         validate_choice(FireDepartment.REGION_CHOICES)(region)

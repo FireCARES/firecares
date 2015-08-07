@@ -1,4 +1,5 @@
 from firecares.settings.base import *
+from celery.schedules import crontab
 
 INSTALLED_APPS = (
     'django_statsd',
@@ -38,6 +39,14 @@ STATICFILES_STORAGE = "firecares.utils.CachedS3BotoStorage"
 STATIC_URL = COMPRESS_URL
 DEBUG = False
 AWS_QUERYSTRING_AUTH = False
+
+CELERYBEAT_SCHEDULE = {
+    # Executes nightly at midnight.
+    'cache_every_minute': {
+        'task': 'tasks.cache.cache_histogram_data',
+        'schedule': crontab(),
+    },
+}
 
 try:
     from local_settings import *  # noqa

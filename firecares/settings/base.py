@@ -1,4 +1,5 @@
 import os
+from kombu import Queue
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -142,7 +143,8 @@ INSTALLED_APPS = (
     'jsonfield',
     'compressor',
     'storages',
-    'widget_tweaks'
+    'widget_tweaks',
+    'firecares.tasks'
 )
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
@@ -188,3 +190,21 @@ GOOGLE_ANALYTICS_TRACKING_ID = os.getenv('GOOGLE_ANALYTICS_TRACKING_ID', None)
 
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login'
+
+CELERY_DEFAULT_QUEUE = "default"
+CELERY_DEFAULT_EXCHANGE = "default"
+CELERY_DEFAULT_EXCHANGE_TYPE = "direct"
+CELERY_DEFAULT_ROUTING_KEY = "default"
+CELERY_CREATE_MISSING_QUEUES = True
+
+CELERY_IMPORTS = (
+    'firecares.tasks.cache',
+)
+
+CELERY_QUEUES = [
+    Queue('default', routing_key='default'),
+    Queue('cache', routing_key='cache'),
+    Queue('update', routing_key='update'),
+    Queue('email', routing_key='email'),
+]
+
