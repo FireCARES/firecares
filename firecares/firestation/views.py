@@ -236,6 +236,19 @@ class FireDepartmentListView(ListView, SafeSortMixin, LimitMixin, DISTScoreConte
         context = self.get_sort_context(context)
         context.update(self.add_dist_values_to_context())
         context.update(self.get_featured_departments())
+
+	page_obj = context['page_obj']
+	paginator = page_obj.paginator
+	min_page = page_obj.number - 5
+	min_page = max(1, min_page)
+	max_page = page_obj.number + 6
+	max_page = min(paginator.num_pages, max_page)
+	context['windowed_range'] = range(min_page,max_page)
+	if min_page > 1:
+        	context['first_page'] = 1
+	if max_page < paginator.num_pages:
+       		context['last_page'] = paginator.num_pages
+
         return context
 
 
