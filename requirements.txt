@@ -18,3 +18,4 @@ django-storages==1.1.8
 django-compressor==1.5
 django-widget-tweaks==1.4.1
 numpy==1.9.2
+git+https://github.com/FireCARES/fire-risk.git

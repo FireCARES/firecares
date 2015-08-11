@@ -30,3 +30,14 @@ class CachedS3BotoStorage(S3BotoStorage):
         name = super(CachedS3BotoStorage, self).save(name, content)
         self.local_storage._save(name, content)
         return name
+
+
+def dictfetchall(cursor):
+    """
+    Returns all rows from a cursor as a dict
+    """
+    desc = cursor.description
+    return [
+        dict(zip([col[0] for col in desc], row))
+        for row in cursor.fetchall()
+    ]
