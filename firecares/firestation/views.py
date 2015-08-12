@@ -62,9 +62,10 @@ class DepartmentDetailView(DISTScoreContextMixin, DetailView):
         performance_data = cache.get('all_dist_score_model__count')
         risk_model_death = cache.get('all_risk_model_death__count')
         risk_model_injuries = cache.get('all_risk_model_injuries__count')
-        risk_model_fires_room = cache.get('all_risk_model_fires_room__count')
-        risk_model_fires_floor = cache.get('all_risk_model_fires_floor__count')
-        risk_model_fires_structure = cache.get('all_risk_model_fires_structure__count')
+        risk_model_fires = cache.get('all_risk_model_fires__count')
+        risk_model_fires_size0 = cache.get('all_risk_model_fires_size0__count')
+        risk_model_fires_size1 = cache.get('all_risk_model_fires_size1__count')
+        risk_model_fires_size2 = cache.get('all_risk_model_fires_size2__count')
 
         if not performance_data:
             performance_data = FireDepartment.get_histogram('dist_model_score')
@@ -78,25 +79,29 @@ class DepartmentDetailView(DISTScoreContextMixin, DetailView):
             risk_model_injuries = FireDepartment.get_histogram('risk_model_injuries')
             cache.set('all_risk_model_injuries__count', risk_model_injuries, timeout=60 * 60 * 24)
 
-        if not risk_model_fires_room:
-            risk_model_fires_room = FireDepartment.get_histogram('risk_model_fires_room')
-            cache.set('risk_model_fires_room__count', risk_model_fires_room, timeout=60 * 60 * 24)
+        if not risk_model_fires:
+            risk_model_fires = FireDepartment.get_histogram('risk_model_fires')
+            cache.set('risk_model_fires__count', risk_model_fires, timeout=60 * 60 * 24)
 
-        if not risk_model_fires_floor:
-            risk_model_fires_floor = FireDepartment.get_histogram('risk_model_fires_floor')
-            cache.set('risk_model_fires_floor__count', risk_model_fires_floor, timeout=60 * 60 * 24)
+        if not risk_model_fires_size0:
+            risk_model_fires_size0 = FireDepartment.get_histogram('risk_model_fires_size0')
+            cache.set('risk_model_fires_size0__count', risk_model_fires_size0, timeout=60 * 60 * 24)
 
-        if not risk_model_fires_structure:
-            risk_model_fires_structure = FireDepartment.get_histogram('risk_model_fires_structure')
-            cache.set('risk_model_fires_structure__count', risk_model_fires_structure, timeout=60 * 60 * 24)
+        if not risk_model_fires_size1:
+            risk_model_fires_size1 = FireDepartment.get_histogram('risk_model_fires_size1')
+            cache.set('risk_model_fires_size1__count', risk_model_fires_size1, timeout=60 * 60 * 24)
+
+        if not risk_model_fires_size2:
+            risk_model_fires_size2 = FireDepartment.get_histogram('risk_model_fires_size2')
+            cache.set('risk_model_fires_size2__count', risk_model_fires_size2, timeout=60 * 60 * 24)
 
         context['performance_data'] = performance_data
         context['risk_deaths_data'] = risk_model_death
         context['risk_injuries_data'] = risk_model_injuries
-        context['risk_model_fires_room'] = risk_model_fires_room
-        context['risk_model_fires_floor'] = risk_model_fires_floor
-        context['risk_model_fires_structure'] = risk_model_fires_structure
-
+        context['risk_model_fires'] = risk_model_fires
+        context['risk_model_fires_size0'] = risk_model_fires_size0
+        context['risk_model_fires_size1'] = risk_model_fires_size1
+        context['risk_model_fires_size2'] = risk_model_fires_size2
 
         context.update(self.add_dist_values_to_context())
         return context

@@ -423,22 +423,22 @@
                                       value="{{ object.risk_model_injuries }}"
                                       color="#F5C97E"></div>
                                 <div class="line-chart firecares-graph" id="risk_fires"
-                                      data="{{ risk_model_fires_room }}"
-                                      description="This department is predicted to have {{ object.risk_model_fires_room|floatformat|default:"an unknown number of" }} fires confined to the room of origin per year."
+                                      data="{{ risk_model_fires }}"
+                                      description="This department is predicted to have {{ object.risk_model_fires|floatformat|default:"an unknown number of" }} fires confined to the room of origin per year."
                                       metric-title="Predicted fires confined to room of origin"
-                                      value="{{ object.risk_model_fires_room }}"
+                                      value="{{ object.risk_model_fires }}"
                                       color="#F5C97E"></div>
                                 <div class="line-chart firecares-graph" id="risk_fires_floor"
-                                      data="{{ risk_model_fires_floor }}"
-                                      description="This department is predicted to have {{ object.risk_model_fires_floor|floatformat|default:"an unknown number of" }} fires confined to the floor of origin per year."
+                                      data="{{ risk_model_fires_size1 }}"
+                                      description="This department is predicted to have {{ object.risk_model_fires_size1|floatformat|default:"an unknown number of" }} fires confined to the floor of origin per year."
                                       metric-title="Predicted fires confined to floor of origin"
-                                      value="{{ object.risk_model_fires_floor }}"
+                                      value="{{ object.risk_model_fires_size1 }}"
                                       color="#F5C97E"></div>
-                                <div class="line-chart firecares-graph" id="risk_fires_strictire"
-                                      data="{{ risk_model_fires_structure }}"
-                                      description="This department is predicted to have {{ object.risk_model_fires_structure|floatformat|default:"an unknown number of" }} fires beyond the structure of origin per year."
+                                <div class="line-chart firecares-graph" id="risk_fires_structure"
+                                      data="{{ risk_model_fires_size2 }}"
+                                      description="This department is predicted to have {{ object.risk_model_fires_size2|floatformat|default:"an unknown number of" }} fires beyond the structure of origin per year."
                                       metric-title="Predicted fires beyond the structure of origin"
-                                      value="{{ object.risk_model_fires_structure }}"
+                                      value="{{ object.risk_model_fires_size2 }}"
                                       color="#F5C97E"></div>
                             </div>
 

@@ -4,9 +4,8 @@ import requests
 import sys
 import csv
 import os
-import us
 
-from .managers import PriorityDepartmentsManager
+from .managers import PriorityDepartmentsManager, CalculationManager
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point, MultiPolygon
@@ -216,6 +215,19 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
         (None, '')
     ]
 
+    POPULATION_CLASSES = [
+        (0, 'Population less than 2,500.'),
+        (1, 'Population between 2,500 and 4,999.'),
+        (2, 'Population between 5,000 and 9,999.'),
+        (3, 'Population between 10,000 and 24,999.'),
+        (4, 'Population between 25,000 and 49,999.'),
+        (5, 'Population between 50,000 and 99,999.'),
+        (6, 'Population between 100,000 and 249,999.'),
+        (7, 'Population between 250,000 and 499,999.'),
+        (8, 'Population between 500,000 and 999,999.'),
+        (9, 'Population greater than 1,000,000.'),
+    ]
+
     created = models.DateTimeField(auto_now=True)
     modified = models.DateTimeField(auto_now=True)
     fdid = models.CharField(max_length=10)
@@ -230,7 +242,7 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
     state = models.CharField(max_length=2)
     region = models.CharField(max_length=20, choices=REGION_CHOICES, null=True, blank=True)
     geom = models.MultiPolygonField(null=True, blank=True)
-    objects = models.GeoManager()
+    objects = CalculationManager()
     priority_departments = PriorityDepartmentsManager()
     dist_model_score = models.FloatField(null=True, blank=True, editable=False, db_index=True)
 
@@ -240,25 +252,30 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
     risk_model_injuries = models.FloatField(null=True, blank=True, db_index=True,
                                             verbose_name='Predicted injuries per year.')
 
-    risk_model_fires_room = models.FloatField(null=True, blank=True, db_index=True,
-                                              verbose_name='Predicted fires confined to the room of origin.')
+    risk_model_fires = models.FloatField(null=True, blank=True, db_index=True,
+                                         verbose_name='Predicted number of fires per year.')
 
-    risk_model_fires_floor_percentage = models.FloatField(null=True, blank=True,
-                                                          verbose_name='Percentage of fires confined to the'
-                                                                       ' floor of origin.')
+    risk_model_fires_size0 = models.FloatField(null=True, blank=True, db_index=True,
+                                               verbose_name='Predicted number of size 0 fires.')
 
-    risk_model_fires_floor = models.FloatField(null=True, blank=True, db_index=True,
-                                               verbose_name='Predicted fires confined to the floor of origin.')
+    risk_model_fires_size0_percentage = models.FloatField(null=True, blank=True,
+                                                          verbose_name='Percentage of size 0 fires.')
 
-    risk_model_fires_structure = models.FloatField(null=True, blank=True, db_index=True,
-                                                   verbose_name='Predicted fires beyond the structure of origin.')
+    risk_model_fires_size1 = models.FloatField(null=True, blank=True, db_index=True,
+                                               verbose_name='Predicted number of size 1 fires.')
 
-    risk_model_fires_structure_percentage = models.FloatField(null=True, blank=True,
-                                                              verbose_name='Percentage of fires spread beyond the '
-                                                                           'building of origin')
+    risk_model_fires_size1_percentage = models.FloatField(null=True, blank=True,
+                                                          verbose_name='Percentage of size 1 fires.')
+
+    risk_model_fires_size2 = models.FloatField(null=True, blank=True, db_index=True,
+                                                   verbose_name='Predicted number of size 2 firese.')
+
+    risk_model_fires_size2_percentage = models.FloatField(null=True, blank=True,
+                                                          verbose_name='Percentage of size 2 fires.')
 
     government_unit = RelatedObjectsDescriptor()
     population = models.IntegerField(null=True, blank=True)
+    population_class = models.IntegerField(null=True, blank=True, choices=POPULATION_CLASSES)
     featured = models.BooleanField(default=False, db_index=True)
 
     class Meta:
@@ -299,6 +316,44 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
             except:
                 return
 
+    def get_population_class(self):
+        """
+        Returns the population class of a department based on NFPA community sizes categories as an integer.
+
+        9: > 1,000,000
+        8: (500000, 999999)
+        7: (250000, 499999)
+        6: (100000, 249999)
+        5: (50000, 99999)
+        4: (25000, 49999)
+        3: (10000, 24999)
+        2: (5000, 9999)
+        1: (2500, 4999)
+        0: < 2500
+        """
+        if self.population is None:
+            return
+
+        if self.population < 2500:
+            return 0
+
+        if self.population >= 1000000:
+            return 9
+
+        community_sizes = [
+                (500000, 999999),
+                (250000, 499999),
+                (100000, 249999),
+                (50000, 99999),
+                (25000, 49999),
+                (10000, 24999),
+                (5000, 9999),
+                (2500, 4999)]
+
+        for clazz, min_max in zip(reversed(range(1, 9)), community_sizes):
+            if min_max[0] <= self.population <= min_max[1]:
+                return clazz
+
     @property
     def similar_departments(self, ignore_regions_min=1000000):
         """
@@ -307,14 +362,16 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
 
         params = {}
 
-        if self.population >= 250000:
-            params['population__gte'] = 250000
+        if self.population >= 1000000:
+            params['population__gte'] = 1000000
 
         elif self.population < 2500:
             params['population__lt'] = 2500
 
         else:
             community_sizes = [
+                (500000, 999999),
+                (250000, 499999),
                 (100000, 249999),
                 (50000, 99999),
                 (25000, 49999),

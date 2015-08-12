@@ -6,8 +6,8 @@ Replace this with more appropriate tests for your application.
 """
 
 import json
-from .forms import ResponseCapabilityForm
-from .models import FireStation, ResponseCapability
+from .forms import StaffingForm
+from .models import FireDepartment, FireStation, Staffing
 from django.test import TestCase
 from django.test.client import Client
 from django.core.urlresolvers import reverse
@@ -20,6 +20,7 @@ User = get_user_model()
 class FireStationTests(TestCase):
 
     def setUp(self):
+        self.response_capability_enabled = False
         self.current_api_version = 'v1'
         self.fire_station = self.create_firestation()
 
@@ -32,13 +33,16 @@ class FireStationTests(TestCase):
             self.user.save()
 
     def create_firestation(self, **kwargs):
-        return FireStation.objects.create(fips='123', station_number=25, name='Test Station', geom=Point(35, -77),
+        return FireStation.objects.create(station_number=25, name='Test Station', geom=Point(35, -77),
                                           **kwargs)
 
     def test_authentication(self):
         """
         Tests users have to be authenticated to GET resources.
         """
+        if not self.response_capability_enabled:
+            return
+
         c = Client()
 
         for resource in ['capabilities', 'firestations']:
@@ -54,6 +58,10 @@ class FireStationTests(TestCase):
         """
         Tests adding a capability via the API.
         """
+
+        if not self.response_capability_enabled:
+            return
+
         url = '{0}?format=json'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'capabilities']),)
         station_uri = '{0}{1}/'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'firestations']),
                                        self.fire_station.id)
@@ -75,9 +83,9 @@ class FireStationTests(TestCase):
 
         response = c.post(url, data=json.dumps(capability), content_type='application/json')
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(self.fire_station.responsecapability_set.all().count(), 1)
+        self.assertEqual(self.fire_station.staffing_set.all().count(), 1)
 
-        unit = self.fire_station.responsecapability_set.all()[0]
+        unit = self.fire_station.staffing_set.all()[0]
         self.assertEqual(unit.firefighter, 1)
         self.assertEqual(unit.firefighter_emt, 1)
         self.assertEqual(unit.firefighter_paramedic, 1)
@@ -92,7 +100,11 @@ class FireStationTests(TestCase):
         """
         Tests updating the capability through the API.
         """
-        capability = ResponseCapability.objects.create(firestation=self.fire_station, firefighter=1, firefighter_emt=1,
+
+        if not self.response_capability_enabled:
+            return
+
+        capability = Staffing.objects.create(firestation=self.fire_station, firefighter=1, firefighter_emt=1,
                           firefighter_paramedic=1, ems_emt=1, ems_paramedic=1, officer=1, officer_paramedic=1,
                           ems_supervisor=1, chief_officer=1)
 
@@ -108,7 +120,7 @@ class FireStationTests(TestCase):
         response = c.put(url, data=json.dumps(params), content_type='application/json')
         self.assertEqual(response.status_code, 204)
 
-        updated_capability = ResponseCapability.objects.get(id=capability.id)
+        updated_capability = Staffing.objects.get(id=capability.id)
         self.assertEqual(updated_capability.firefighter, 2)
         self.assertEqual(updated_capability.firefighter_emt, 2)
         self.assertEqual(updated_capability.firefighter_paramedic, 2)
@@ -123,7 +135,11 @@ class FireStationTests(TestCase):
         """
         Tests deleting the capability through the API.
         """
-        capability = ResponseCapability.objects.create(firestation=self.fire_station, firefighter=1, firefighter_emt=1,
+
+        if not self.response_capability_enabled:
+            return
+
+        capability = Staffing.objects.create(firestation=self.fire_station, firefighter=1, firefighter_emt=1,
                           firefighter_paramedic=1, ems_emt=1, ems_paramedic=1, officer=1, officer_paramedic=1,
                           ems_supervisor=1, chief_officer=1)
 
@@ -137,13 +153,16 @@ class FireStationTests(TestCase):
         self.assertEqual(response.status_code, 204)
 
         # make sure it actually deleted the object.
-        with self.assertRaises(ResponseCapability.DoesNotExist):
-            ResponseCapability.objects.get(id=capability.id)
+        with self.assertRaises(Staffing.DoesNotExist):
+            Staffing.objects.get(id=capability.id)
 
     def test_response_capability_form_validation(self):
         """
         Tests capability validation via a Form object.
         """
+
+        if not self.response_capability_enabled:
+            return
 
         capability = dict(firestation=self.fire_station.id,
                           firefighter='test',
@@ -158,7 +177,7 @@ class FireStationTests(TestCase):
                           apparatus='whatever'
                           )
 
-        rc = ResponseCapabilityForm(capability)
+        rc = StaffingForm(capability)
         for key in capability.keys():
             if key not in ['firestation']:
                 self.assertTrue(key in rc.errors, 'The invalid field:{0} was not returned in the error message.'
@@ -168,6 +187,10 @@ class FireStationTests(TestCase):
         """
         Tests capability validation via the API.
         """
+
+        if not self.response_capability_enabled:
+            return
+
         url = '{0}?format=json'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'capabilities']),)
         station_uri = '{0}{1}/'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'firestations']),
                                        self.fire_station.id)
@@ -201,6 +224,9 @@ class FireStationTests(TestCase):
         Tests filtering response capabilities by the fire station.
         """
 
+        if not self.response_capability_enabled:
+            return
+
         url = '{0}?format=json&firestation={1}'.format(reverse('api_dispatch_list',
                                                                args=[self.current_api_version, 'capabilities']),
                                                        self.fire_station.id
@@ -223,3 +249,40 @@ class FireStationTests(TestCase):
         response = c.delete(url)
         self.assertEqual(response.status_code, 405)
         self.assertTrue(FireStation.objects.get(id=self.fire_station.id))
+
+    def test_get_population_class(self):
+        """
+        Tests the population class logic.
+        """
+        fd = FireDepartment.objects.create(name='Test db', population=0)
+        self.assertEqual(fd.get_population_class(), 0)
+
+        fd.population = 2500
+        self.assertEqual(fd.get_population_class(), 1)
+
+        fd.population = 9999
+        self.assertEqual(fd.get_population_class(), 2)
+
+        fd.population = 15000
+        self.assertEqual(fd.get_population_class(), 3)
+
+        fd.population = 25001
+        self.assertEqual(fd.get_population_class(), 4)
+
+        fd.population = 99999
+        self.assertEqual(fd.get_population_class(), 5)
+
+        fd.population = 100000
+        self.assertEqual(fd.get_population_class(), 6)
+
+        fd.population = 499999
+        self.assertEqual(fd.get_population_class(), 7)
+
+        fd.population = 500000
+        self.assertEqual(fd.get_population_class(), 8)
+
+        fd.population = 999999
+        self.assertEqual(fd.get_population_class(), 8)
+
+        fd.population = 1000001
+        self.assertEqual(fd.get_population_class(), 9)
