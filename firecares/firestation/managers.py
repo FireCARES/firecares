@@ -1,5 +1,5 @@
 from django.contrib.gis.db import models
-from django.db.models import Func
+from django.db.models import Func, Case, When
 
 
 class PriorityDepartmentsManager(models.Manager):
@@ -10,7 +10,7 @@ class PriorityDepartmentsManager(models.Manager):
 
 class Ntile(Func):
     function = 'ntile'
-    template = '%(function)s(%(expressions)s) over (order by %(order_by)s)'
+    template = '%(function)s(%(expressions)s) over (partition by %(order_by)s is not null order by %(order_by)s)'
 
 
 class CalculationsQuerySet(models.QuerySet):
@@ -20,8 +20,7 @@ class CalculationsQuerySet(models.QuerySet):
         for field in 'dist_model_score risk_model_deaths risk_model_injuries risk_model_fires_size0 \
                       risk_model_fires_size1 risk_model_fires_size2 risk_model_fires'.split():
 
-            params = {field+'_quartile': Ntile(4, output_field=models.IntegerField(), order_by=field)}
-            qs = qs.annotate(**params)
+            qs = qs.annotate(**{field+'_quartile': Case(When(**{field+'__isnull': False, 'then': Ntile(4, output_field=models.IntegerField(), order_by=field)}), output_field=models.IntegerField(), default=None)})
 
         return qs
 

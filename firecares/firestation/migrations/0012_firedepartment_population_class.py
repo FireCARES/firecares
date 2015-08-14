@@ -24,6 +24,6 @@ class Migration(migrations.Migration):
         migrations.RunSQL("UPDATE firestation_firedepartment set population_class=5 where population>=50000 and population<=99999;"),
         migrations.RunSQL("UPDATE firestation_firedepartment set population_class=6 where population>=100000 and population<=249999;"),
         migrations.RunSQL("UPDATE firestation_firedepartment set population_class=7 where population>=250000 and population<=499999;"),
-        migrations.RunSQL("UPDATE firestation_firedepartment set population_class=7 where population>=500000 and population<=999999;"),
+        migrations.RunSQL("UPDATE firestation_firedepartment set population_class=8 where population>=500000 and population<=999999;"),
         migrations.RunSQL("UPDATE firestation_firedepartment set population_class=9 where population>=1000000;"),
     ]
