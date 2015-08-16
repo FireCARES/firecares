@@ -1,0 +1,20 @@
+language: python
+
+python:
+  - "2.7_with_system_site_packages"
+
+before_install:
+  - sudo apt-get -qq -y update
+  - sudo apt-get install -y libxml2-dev git libpq-dev python-dev python-pip python-pycurl python-psycopg2
+  - sudo apt-get install -y binutils libproj-dev gdal-bin python-gdal libpng-dev libfreetype6-dev pkg-config
+  - sudo apt-get install -y libblas-dev liblapack-dev libatlas-base-dev gfortran python-numpy python-scipy python-matplotlib
+
+install:
+  - travis_wait "pip install -r requirements.txt"
+
+before_script:
+  - psql -c "CREATE EXTENSION postgis" -U postgres
+  - psql -c "CREATE ROLE firecares WITH PASSWORD 'password' CREATEDB SUPERUSER LOGIN" -U postgres
+
+script:
+  - python manage.py test
