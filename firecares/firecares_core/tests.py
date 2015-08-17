@@ -3,13 +3,36 @@ from .models import RecentlyUpdatedMixin
 from datetime import timedelta
 from django.contrib.auth import get_user_model, authenticate
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import Client, TestCase
 from django.utils import timezone
 
 User = get_user_model()
 
 
 class CoreTests(TestCase):
+
+    def test_home_requires_login(self):
+        """
+        Ensures the home page requires login.
+        Note: This is just until we improve the home page.
+        """
+
+        c = Client()
+        response = c.get('/')
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue('login' in response.url)
+
+    def test_departments_requires_login(self):
+        """
+        Ensures the home page requires login.
+        Note: This is just until we are out of closed beta.
+        """
+
+        c = Client()
+        response = c.get('/departments')
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue('login' in response.url)
+
     def test_recently_updated(self):
         """
         Tests the Recently Updated Mixin.

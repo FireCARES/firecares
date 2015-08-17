@@ -1,6 +1,7 @@
 import json
 from .models import FireStation, FireDepartment
 from django.views.generic import DetailView, ListView, TemplateView
+from firecares.firecares_core.mixins import LoginRequiredMixin, CacheMixin
 from firecares.usgs.models import StateorTerritoryHigh, CountyorEquivalent, IncorporatedPlace
 from django.shortcuts import get_object_or_404
 from django.contrib.contenttypes.models import ContentType
@@ -35,11 +36,12 @@ class FeaturedDepartmentsMixin(object):
         return {'featured_departments': FireDepartment.priority_departments.all().order_by('?')[:5]}
 
 
-class DepartmentDetailView(DISTScoreContextMixin, DetailView):
+class DepartmentDetailView(LoginRequiredMixin, CacheMixin, DISTScoreContextMixin, DetailView):
     model = FireDepartment
     template_name = 'firestation/department_detail.html'
     page = 1
     objects_per_page = 10
+    cache_timeout = 60 * 15
 
     def get_context_data(self, **kwargs):
         context = super(DepartmentDetailView, self).get_context_data(**kwargs)
@@ -204,8 +206,7 @@ class LimitMixin(object):
         return context
 
 
-
-class FireDepartmentListView(ListView, SafeSortMixin, LimitMixin, DISTScoreContextMixin, FeaturedDepartmentsMixin):
+class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitMixin, DISTScoreContextMixin, FeaturedDepartmentsMixin):
     model = FireDepartment
     paginate_by = 30
     queryset = FireDepartment.objects.all()
@@ -221,7 +222,6 @@ class FireDepartmentListView(ListView, SafeSortMixin, LimitMixin, DISTScoreConte
         ]
 
     search_fields = ['fdid', 'state', 'region', 'name']
-
 
     def get_queryset(self):
         queryset = super(FireDepartmentListView, self).get_queryset()
@@ -259,6 +259,7 @@ class FireDepartmentListView(ListView, SafeSortMixin, LimitMixin, DISTScoreConte
 
 class FireStationDetailView(DetailView):
     model = FireStation
+
 
 class SpatialIntersectView(ListView):
     model = FireStation
@@ -302,7 +303,7 @@ class SetDistrictView(DetailView):
             return HttpResponseRedirect(reverse('set_fire_district', args=[county.id]))
 
 
-class Stats(TemplateView):
+class Stats(LoginRequiredMixin, TemplateView):
     template_name='firestation/firestation_stats.html'
 
     def get_context_data(self, **kwargs):
@@ -314,5 +315,6 @@ class Stats(TemplateView):
         context['departments_with_government_unit'] = FireDepartment.objects.filter(object_id__isnull=True)
         return context
 
-class Home(TemplateView):
+
+class Home(LoginRequiredMixin, TemplateView):
     template_name = 'firestation/home.html'

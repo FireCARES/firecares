@@ -286,3 +286,27 @@ class FireStationTests(TestCase):
 
         fd.population = 1000001
         self.assertEqual(fd.get_population_class(), 9)
+
+    def test_department_detail_view_requires_login(self):
+        """
+        Ensures the department pages require login.
+        Note: This is just until we are out of closed beta.
+        """
+
+        fd = FireDepartment.objects.create(name='Test db', population=0)
+        c = Client()
+        response = c.get(fd.get_absolute_url())
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue('login' in response.url)
+
+    def test_department_list_view_requires_login(self):
+        """
+        Ensures the department list view requires login.
+        Note: This is just until we are out of closed beta.
+        """
+
+        fd = FireDepartment.objects.create(name='Test db', population=0)
+        c = Client()
+        response = c.get('/departments')
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue('login' in response.url)

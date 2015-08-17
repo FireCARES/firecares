@@ -10,7 +10,7 @@
 <html class="no-js" lang="en"> <!--<![endif]-->
 <head lang="en">
     <meta charset="UTF-8">
-    <meta name="description" content="Login to FireCARES.">
+    <meta name="description" content="Welcome to FireCARES, created by the Fire Fighter Safety and Deployment Study.  Login to learn how fire department resources are deployed to match your community risks.">
     <meta name="author" content="Prominent Edge LLC">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -313,14 +313,6 @@
                                     </div>
                                 </div>
                             </div>
-                        {% comment %}
-                            {% for field in form %}
-                                <div class="ct-form--item ct-u-marginBottom20">
-                                    <span style='color:#b94a48'>{{ field.errors }}</span>
-                                    {{ field.label_tag }} {{ field }}
-                                </div>
-                            {% endfor %}
-                            {% endcomment %}
                             {% with WIDGET_ERROR_CLASS='form-error' %}
                             <div class="ct-form--item ct-u-marginBottom20 form-group">
                                 <label>Your Username</label>
