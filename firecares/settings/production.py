@@ -1,3 +1,4 @@
+import os
 from firecares.settings.base import *
 from celery.schedules import crontab
 
@@ -27,7 +28,7 @@ STATSD_PATCHES = [
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': '127.0.0.1:11211',
+        'LOCATION': os.getenv('MEMCACHE_LOCATION', '127.0.0.1:11211'),
     }
 }
 
@@ -42,7 +43,7 @@ AWS_QUERYSTRING_AUTH = False
 
 CELERYBEAT_SCHEDULE = {
     # Executes nightly at midnight.
-    'cache_every_minute': {
+    'cache_every_midnight': {
         'task': 'tasks.cache.cache_histogram_data',
         'schedule': crontab(),
     },
