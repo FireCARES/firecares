@@ -1,0 +1,26 @@
+{% extends 'registration/registration_base.html' %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <a href="#">Activation Complete</a>
+{% endblock %}
+
+{% block content %}
+<div class="col-md-8">
+    <div class="ct-headerText--normal">
+        <h2 class="text-uppercase ct-fw-600 ct-u-marginBottom50">
+            Success:<span class="ct-u-text--dark"> Activation complete!</span>
+        </h2>
+        <span class="ct-u-marginBottom50">You can now use FireCARES to analyze how fire department resources are deployed to match a community's risks.</span>
+        <div class="ct-u-marginBottom20">
+            <input id="search2" placeholder="Search FireCARES" required type="text" name="field[]" class="form-control input-lg ct-input--transparent ">
+            <button class="btn btn-default btn-hoverWhite">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+        <span class="ct-u-marginBottom20">or</span>
+        <a href="{% url 'firestation_home' %}" class="btn btn-default btn-hoverWhite">Go to Homepage</a>
+    </div>
+</div>
+
+{% endblock %}

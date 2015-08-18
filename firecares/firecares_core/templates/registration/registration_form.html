@@ -1,0 +1,48 @@
+{% extends 'registration/registration_base.html' %}
+{% load humanize %}
+{% load widget_tweaks %}
+
+{% block form %}
+    <div class="form-group">
+        <div class="ct-form--label--type2">
+            <div class="ct-u-displayTableVertical">
+                <div class="ct-u-displayTableCell">
+                    <div class="ct-input-group-btn">
+                        <button class="btn btn-primary">
+                            <i class="fa fa-user"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="ct-u-displayTableCell text-center">
+                    <span class="text-uppercase">Register for FIRECARES</span>
+                </div>
+            </div>
+        </div>
+        {% with WIDGET_ERROR_CLASS='form-error' %}
+        <div class="ct-form--item ct-u-marginBottom20 form-group">
+            <label>Your Username</label>
+            {% render_field form.username type="text" class+="form-control input-lg" %}
+            {{ form.username.errors }}
+        </div>
+        <div class="ct-form--item ct-u-marginBottom20 form-group">
+            <label>Your Email</label>
+            {% render_field form.email type="text" class+="form-control input-lg" %}
+            {{ form.email.errors }}
+        </div>
+        <div class="ct-form--item ct-u-marginBottom20 form-group">
+            <label>Password</label>
+            {% render_field form.password1 type="password" class+="form-control input-lg" %}
+            {{ form.password1.errors }}
+        </div>
+        <div class="ct-form--item ct-u-marginBottom20 form-group">
+            <label>Password Confirmation</label>
+            {% render_field form.password2 type="password" class+="form-control input-lg" %}
+            {{ form.password2.errors }}
+        </div>
+        {{ form.non_field_errors }}
+        {% endwith %}
+        <div class="ct-form--item">
+            <button type="submit" class="btn btn-warning center-block">Register</button>
+        </div>
+    </div>
+{% endblock %}

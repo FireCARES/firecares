@@ -152,7 +152,8 @@ INSTALLED_APPS = (
     'compressor',
     'storages',
     'widget_tweaks',
-    'firecares.tasks'
+    'firecares.tasks',
+    'registration'
 )
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
@@ -216,3 +217,5 @@ CELERY_QUEUES = [
     Queue('email', routing_key='email'),
 ]
 
+ACCOUNT_ACTIVATION_DAYS = 7
+REGISTRATION_OPEN = False

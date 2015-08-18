@@ -1,0 +1,385 @@
+{% load humanize %}
+{% load widget_tweaks %}
+
+<!DOCTYPE html>
+<!--[if IE 8 ]>
+<html class="no-js ie8" lang="en"> <![endif]-->
+<!--[if IE 9 ]>
+<html class="no-js ie9" lang="en"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="description" content="Welcome to FireCARES, created by the Fire Fighter Safety and Deployment Study.  Login to learn how fire department resources are deployed to match your community risks.">
+    <meta name="author" content="Prominent Edge LLC">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <title>FireCARES - Login</title>
+    {% include 'firestation/_favicon.html' %}
+
+    {% include "firestation/_firecares_static.html" %}
+
+</head>
+
+<body class="ct-headroom--fixedTopBar cssAnimate">
+
+
+
+<nav class="ct-menuMobile">
+    <ul class="ct-menuMobile-navbar">
+        <li class="dropdown"><a>Home<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="index.html">Home V1 - Portal Slider</a></li>
+                <li><a href="index2.html">Home V2 - Portal Map</a></li>
+                <li><a href="index3.html">Home V3 - Portal Map (Light)</a></li>
+                <li><a href="index4.html">Home V4 - Real Estate Agency</a></li>
+                <li><a href="index5.html">Home V5 - Property Slider</a></li>
+                <li><a href="index6.html">Home V6 - Simple Onepager</a></li>
+                <li><a href="index7.html">Home V7 - Onepager Video</a></li>
+                <li><a href="index8.html">Home V8 - Side Map</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"><a>Properties<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="product-single.html">Property Page V1</a></li>
+                <li><a href="product-single2.html">Property Page V2</a></li>
+                <li><a href="search-grid.html">Properties Page - Grid</a></li>
+                <li><a href="search-list.html">Properties Page - Listing</a></li>
+                <li><a href="properties.html">My Properties Page</a></li>
+                <li><a href="product-singleEdit.html">Front Editing - Property Page V1</a></li>
+                <li><a href="product-single2Edit.html">Front Editing - Property Page V2</a></li>
+                <li><a href="submission.html">Submission Page</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"><a>Agents<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="agency.html">Agency Page</a></li>
+                <li><a href="agent.html">Agent's Profile</a></li>
+                <li><a href="about.html">About Us</a></li>
+                <li><a href="agency-edit.html">Front Editing - Agency Page</a></li>
+                <li><a href="agent-edit.html">Front Editing - Agent's Profile</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"><a>Features<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="features-grid.html"><i class="fa fa-fw fa-th"></i> Grid System</a></li>
+                <li><a href="features-typography.html"><i class="fa fa-fw fa-font"></i> Typography</a></li>
+                <li><a href="features-buttons.html"><i class="fa fa-fw fa-link"></i> Buttons</a></li>
+                <li><a href="features-forms.html"><i class="fa fa-fw fa-align-justify"></i> Forms</a></li>
+                <li><a href="features-tables.html"><i class="fa fa-fw fa-table"></i> Tables</a></li>
+                <li><a href="features-sliders.html"><i class="fa fa-fw fa-navicon"></i> Sliders</a></li>
+                <li><a href="features-pricetables.html"><i class="fa fa-fw fa-money"></i> Pricing Tables</a>
+                </li>
+                <li><a href="features-iconboxes.html"><i class="fa fa-fw fa-th-large"></i> Icon Boxes</a>
+                </li>
+                <li><a href="features-personboxes.html"><i class="fa fa-fw fa-users"></i> Person Boxes</a>
+                </li>
+                <li><a href="features-counters.html"><i class="fa fa-fw fa-plus"></i> Counters</a></li>
+                <li><a href="features-toggable.html"><i class="fa fa-fw fa-toggle-on"></i> Toggables</a>
+                </li>
+                <li><a href="features-m-sections.html"><i class="fa fa-fw fa-play"></i> Media Sections</a>
+                </li>
+                <li><a href="features-charts.html"><i class="fa fa-fw fa-area-chart"></i> Charts</a></li>
+                <li><a href="features-p-bars.html"><i class="fa fa-fw fa-bars"></i> Progress Bars</a></li>
+                <li><a href="features-p-icons.html"><i class="fa fa-fw fa-star-half-full"></i> Progress
+                    Icons</a></li>
+                <li><a href="features-lists.html"><i class="fa fa-fw fa-list"></i> Lists Simple</a></li>
+                <li><a href="features-lists2.html"><i class="fa fa-fw fa-list"></i> Lists Icons</a></li>
+                <li><a href="features-developers.html"><i class="fa fa-fw fa-code"></i> For developers</a>
+                </li>
+            </ul>
+        </li>
+        <li class="dropdown active"><a>Pages<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="pricing.html">Pricing Tables</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+                <li><a href="terms.html">Terms</a></li>
+                <li><a href="policy.html">Privacy Policy</a></li>
+                <li><a href="blog.html">Blog</a></li>
+                <li><a href="blog-single.html">Blog Single</a></li>
+                <li><a href="registration.html">Registration</a></li>
+                <li class="active"><a href="login.html">Login</a></li>
+                <li><a href="404.html">404</a></li>
+                <li><a href="maintenance.html">Maintenance</a></li>
+            </ul>
+        </li>
+        <li class="dropdown">
+            <a>Gallery<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="gallery1.html">Gallery - Three Colums</a></li>
+                <li><a href="gallery2.html">Gallery - Four Colums</a></li>
+                <li><a href="gallery3.html">Gallery - Five Colums</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"><a href="contact.html">Contact Us</a></li>
+    </ul>
+</nav>
+
+<form class="ct-searchFormMobile ct-u-marginBottom50" role="form">
+    <div class="form-group ">
+        <div class="ct-form--label--type1">
+            <div class="ct-u-displayTableVertical">
+                <div class="ct-u-displayTableCell">
+                    <div class="ct-input-group-btn">
+                        <button class="btn btn-primary">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="ct-u-displayTableCell text-center">
+                    <span class="text-uppercase">Search for property</span>
+                </div>
+            </div>
+        </div>
+        <div class="ct-u-displayTableVertical ct-u-marginBottom20">
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Property id</label>
+                    <input type="text" required class="form-control input-lg" placeholder="Any">
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Location</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">New York</option>
+                        <option value="2">New Jersey</option>
+                        <option value="3">Newark</option>
+                        <option value="4">Philadelphia</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Sub-Location</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">New York</option>
+                        <option value="2">Jersey</option>
+                        <option value="3">Newark</option>
+                        <option value="4">Philadelphia</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Property Status</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">Sale</option>
+                        <option value="2">New</option>
+                        <option value="3">Loan</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Property type </label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">Houses</option>
+                        <option value="2">Industrial</option>
+                        <option value="3">Retail</option>
+                        <option value="4">Apartments</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="ct-u-displayTableVertical ct-slider--row">
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Bedrooms</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3+</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Bathrooms</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3+</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell ct-u-marginBottom40">
+                <div class="ct-form--item ct-sliderAmount">
+                    <label>Price ($)</label>
+                    <input type="text" value="1000000" required class="form-control input-lg ct-js-slider-min ct-u-marginBottom20" placeholder="">
+                    <input type="text" class="slider ct-js-sliderAmount" value="" data-slider-tooltip="hide" data-slider-handle="square" data-slider-min="5000" data-slider-max="5000000" data-slider-step="5000" data-slider-value="[1000000,2000000]">
+                    <label class="pull-left">Min</label>
+                    <label class="pull-right">Max</label>
+                    <input type="text" value="2000000" required class="form-control input-lg ct-js-slider-max" placeholder="">
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <input type="text" class="slider ct-js-sliderTicks" value="" data-slider-handle="square" data-slider-min="0" data-slider-max="200" data-slider-step="20" data-slider-value="[60,120]"/>
+                <label class="text-center center-block">Area (m2)</label>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <button type="submit" class="btn btn-warning text-capitalize pull-right">search now</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<div id="ct-js-wrapper" class="ct-pageWrapper">
+
+<div class="ct-navbarMobile">
+    <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="index.html"><img src="assets/images/content/logo.png" alt="Estato"> </a>
+    <button type="button" class="searchForm-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span><i class="fa fa-search"></i></span>
+    </button>
+</div>
+
+{% include 'firestation/_navbar.html' %}
+
+<div class="ct-site--map">
+    <div class="container">
+        {% block breadcrumbs %}
+            <a href="{% url 'firestation_home' %}">Home</a>
+            <a href="{% url 'registration_register' %}">Register</a>
+        {% endblock %}
+    </div>
+</div>
+<header class="ct-mediaSection" data-stellar-background-ratio="0.3" data-height="630" data-type="parallax" data-bg-image="assets/images/content/registration-parallax.jpg" data-bg-image-mobile="assets/images/content/registration-parallax.jpg">
+    <div class="ct-mediaSection-inner">
+        <div class="container">
+            <div class="row">
+                {% block content %}
+                  <div class="col-md-6">
+                    <div class="ct-headerText--normal">
+                        <h2 class="text-uppercase ct-fw-600 ct-u-marginBottom70">
+                            What is your
+                            <span class="ct-u-text--motive">SafeGrade?</span>
+                        </h2>
+                    </div>
+                    <div class="ct-iconBox ct-u-marginBottom40 ct-iconBox--2col">
+                        <div class="ct-icon text-center ct-iconContainer--circle ct-iconContainer--circleHoverLight">
+                            <i class="fa fa-warning"></i>
+                        </div>
+                        <div class="ct-iconBox--description">
+                            <span class="ct-title text-uppercase ct-fw-600">See your risks.</span>
+                            <span class="ct-text">Learn about the socio-economic risk factors in your community.</span>
+                        </div>
+                    </div>
+                    <div class="ct-iconBox ct-u-marginBottom40 ct-iconBox--2col">
+                        <div class="ct-icon text-center ct-iconContainer--circle ct-iconContainer--circleHoverLight">
+                            <i class="fa fa-bar-chart"></i>
+                        </div>
+                        <div class="ct-iconBox--description">
+                            <span class="ct-title text-uppercase ct-fw-600">Analyze your performance.</span>
+                            <span class="ct-text">Compare your department's response performance to similar departments.</span>
+                        </div>
+                    </div>
+                    <div class="ct-iconBox ct-iconBox--2col">
+                        <div class="ct-icon text-center ct-iconContainer--circle ct-iconContainer--circleHoverLight">
+                            <i class="fa fa-dashboard"></i>
+                        </div>
+                        <div class="ct-iconBox--description">
+                            <span class="ct-title text-uppercase ct-fw-600">Get your grade.</span>
+                            <span class="ct-text">Learn if your performance is adequate for your community's risk level.</span>
+                        </div>
+                    </div>
+                </div>
+                  <div class="col-md-6">
+                    <div class="row">
+                    <form role="form" class="ct-formRegister pull-right" method="post">
+                        {% csrf_token %}
+                        {% block form %}
+                            <div class="form-group">
+                            <div class="ct-form--label--type2">
+                                <div class="ct-u-displayTableVertical">
+                                    <div class="ct-u-displayTableCell">
+                                        <div class="ct-input-group-btn">
+                                            <button class="btn btn-primary">
+                                                <i class="fa fa-user"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="ct-u-displayTableCell text-center">
+                                        <span class="text-uppercase">LOGIN TO FIRECARES</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% with WIDGET_ERROR_CLASS='form-error' %}
+                            <div class="ct-form--item ct-u-marginBottom20 form-group">
+                                <label>Your Username</label>
+                                {% render_field form.username type="text" class+="form-control input-lg" %}
+                                {{ form.username.errors }}
+                            </div>
+                            <div class="ct-form--item ct-u-marginBottom20 form-group">
+                                <label>Password</label>
+                                {% render_field form.password type="password" class+="form-control input-lg" %}
+                                {{ form.password.errors }}
+                            </div>
+                            {{ form.non_field_errors }}
+                            {% endwith %}
+                            <div class="ct-form--item ct-u-marginBottom20">
+                                <a href="">Forgot Username / Password ?</a>
+                            </div>
+                            <div class="ct-form--item">
+                                <button type="submit" class="btn btn-warning center-block">Login</button>
+                            </div>
+                        </div>
+                        {% endblock %}
+                    </form>
+                    </div>
+                </div>
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+</header>
+<section class="ct-u-paddingBoth30 ct-js-section ct-section--inline" data-bg-color="#60a7d4">
+    <div class="container">
+        <div class="ct-u-displayTableVertical">
+            <div class="ct-u-displayTableCell">
+                <div class="ct-u-displayTableCell">
+                    <img src="assets/images/content/logo-cta.png" alt="">
+                </div>
+                <div class="ct-u-displayTableCell">
+                    <h4 class="text-uppercase">PURCHASE ESTATO WORDPRESS THEME NOW!</h4>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-u-displayTableCell pull-right">
+                    <a class="btn btn-default btn-transparent--border ct-u-text--white btn-hoverWhite" href="blog-single.html">Read More</a>
+                    <a class="btn btn-dark btn-hoverWhite" href="demo/buy.php">Purchase Estato</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="ct-u-paddingBottom60 text-center">
+    <div class="container">
+
+        {% include 'firestation/_partners.html' %}
+
+    </div>
+</section>
+<script src="{{STATIC_URL}}firestation/theme/assets/js/main.js"></script>
+{% include 'firestation/_footer.html' %}
+
+</div>
+
+{% include 'google_analytics.html' %}
+
+</body>
+</html>

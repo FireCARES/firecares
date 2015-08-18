@@ -1,0 +1,26 @@
+{% extends 'registration/registration_base.html' %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <a href="{% url 'registration_complete' %}">Registration Complete</a>
+{% endblock %}
+
+{% block content %}
+<div class="col-md-8">
+
+    <div class="ct-headerText--normal">
+        <h2 class="text-uppercase ct-fw-600 ct-u-marginBottom70">
+            <i class="fa fa-check"></i>
+            Thank you for your interest!
+        </h2>
+    </div>
+    <div class="ct-iconBox ct-u-marginBottom40 ct-iconBox--2col">
+        <div class="ct-iconBox--description">
+            <span class="ct-title text-uppercase ct-fw-600">What's next?</span>
+            <span class="ct-text">
+                You will receive a validation email with a link that will validate your email.
+            </span>
+        </div>
+    </div>
+</div>
+{% endblock %}

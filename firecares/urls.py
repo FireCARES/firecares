@@ -17,8 +17,8 @@ urlpatterns = patterns('',
     url(r'^$', cache_page(60*15)(Home.as_view()), name='firestation_home'),
     url(r'^', include('firecares.firestation.urls')),
     (r'^api/', include(v1_api.urls)),
+    (r'^accounts/', include('registration.backends.default.urls')),
     url(r'^login/$', 'django.contrib.auth.views.login', name='login', kwargs={'template_name': 'accounts/login.html'}),
     url(r'^logout/$', 'django.contrib.auth.views.logout_then_login', name='logout'),
-
     url(r'^admin/', include(admin.site.urls)),
 )

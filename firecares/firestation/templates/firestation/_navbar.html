@@ -15,7 +15,7 @@
                     </div>
                     <div class="ct-panel--item ct-email">
                         {% if request.user.is_anonymous %}
-                            <a href="registration.html"><i class="fa fa-plus-square"></i> Register</a>
+                            <a href="{% url 'registration_register' %}"><i class="fa fa-plus-square"></i> Register</a>
                         {% endif %}
                     </div>
                 </div>

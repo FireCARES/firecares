@@ -2,7 +2,9 @@ from .models import RecentlyUpdatedMixin
 
 from datetime import timedelta
 from django.contrib.auth import get_user_model, authenticate
+from django.core import mail
 from django.core.management import call_command
+from django.core.urlresolvers import reverse
 from django.test import Client, TestCase
 from django.utils import timezone
 
@@ -79,3 +81,53 @@ class CoreTests(TestCase):
         # Make sure no error is thrown when creating a user that already exists
         call_command('add_user', username='foo_admin1', password='bar', email='foo@bar.com', is_staff=True,
                      is_active=False)
+
+    def test_registration_views(self):
+        """
+        Tests the registration view.
+        """
+
+        c = Client()
+
+        with self.settings(REGISTRATION_OPEN=True):
+            response = c.get(reverse('registration_register'))
+            self.assertTrue(response.status_code, 200)
+
+            c.post(reverse('registration_register'), data={'username': 'test',
+                                                           'password1': 'test',
+                                                           'password2': 'test',
+                                                           'email': 'test@example.com'
+                                                           })
+
+            self.assertTrue(len(mail.outbox), 1)
+            user = User.objects.get(username='test')
+            self.assertFalse(user.is_active)
+            self.assertFalse(user.is_superuser)
+            self.assertFalse(user.is_staff)
+            self.assertFalse(user.registrationprofile.activation_key_expired())
+
+            response = c.get(reverse('registration_activate', kwargs={'activation_key':
+                                                                      user.registrationprofile.activation_key}))
+            # A 302 here means the activation succeeded
+            self.assertEqual(response.status_code, 302)
+
+            user = User.objects.get(username='test')
+            self.assertTrue(user.is_active)
+            self.assertTrue(user.registrationprofile.activation_key_expired())
+            self.assertFalse(user.is_superuser)
+            self.assertFalse(user.is_staff)
+
+            # Check a bad activation code
+            response = c.get(reverse('registration_activate', kwargs={'activation_key': 'nowaysdfsdfs'}))
+
+            # A 200 here means the activation failed
+            self.assertEqual(response.status_code, 200)
+
+        # Make sure the user is forwarded to the registration closed page when REGISTRATION_OPEN is False
+        with self.settings(REGISTRATION_OPEN=False):
+            response = c.get(reverse('registration_register'))
+            self.assertTrue(response.status_code, 302)
+
+            response = c.get(reverse('registration_register'), follow=True)
+            self.assertTrue(response.status_code, 200)
+            self.assertEqual(response.request['PATH_INFO'], '/accounts/register/closed/')
