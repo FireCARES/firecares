@@ -276,7 +276,7 @@ p {
 font-size: 13px;
 line-height: 16px;
 margin: 0 auto;
-max-width: 60%;
+max-width: 90%;
 opacity: 0.5;
 padding-top: 5px;
 }
@@ -319,6 +319,11 @@ padding-top: 5px;
   border-right: 5px solid transparent;
   border-bottom: 5px solid black;
   position: absolute;
+}
+
+.number-gauge {
+  height: 50px;
+  position: relative;
 }
 
 .form-error {
@@ -370,4 +375,19 @@ padding-top: 5px;
 
 .metric-value-location {
   fill: #F6542F;
+}
+
+.bullet-chart {
+  & svg {height: 50px}
+
+  & .bullet { font-size: 14px; fill: #a6a6a6}
+  & .bullet .marker { stroke: #000; stroke-width: 2px; }
+  & .bullet .tick line { stroke: #666; stroke-width: .5px; }
+  & .bullet .range.s0 { fill: #eee; }
+  & .bullet .range.s1 { fill: #ddd; }
+  & .bullet .range.s2 { fill: #ccc; }
+  & .bullet .range.s3 { fill: #bbb; }
+  & .bullet .measure.s0 { fill: steelblue; }
+  & .bullet .title { font-size: 14px; font-weight: bold; }
+  & .bullet .subtitle { fill: #999; }
 }

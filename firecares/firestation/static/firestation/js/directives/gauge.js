@@ -3,6 +3,23 @@
 (function() {
   var module = angular.module('fireStation.gauge', []);
 
+  module.filter('ordinal', function() {
+      return function(i) {
+            var j = i % 10,
+                k = i % 100;
+            if (j == 1 && k != 11) {
+                return i + "st";
+            }
+            if (j == 2 && k != 12) {
+                return i + "nd";
+            }
+            if (j == 3 && k != 13) {
+                return i + "rd";
+            }
+            return i + "th";
+        }
+  });
+
   module.directive('gauge',
       function() {
         return {
@@ -95,6 +112,48 @@
           }
         };
       });
+
+    module.directive('numberGauge',
+      function() {
+        return {
+          restrict: 'E',
+          replace: true,
+          templateUrl: '/static/firestation/js/directives/partial/number-gauge.tpl.html',
+          scope: {
+             value: '@',
+             metricTitle: '@?',
+             description: '@?'
+          },
+          // The linking function will add behavior to the template
+          link: function(scope, element, attrs) {
+            scope.inverse = attrs.hasOwnProperty('inverse');
+            scope.color = '#f6542f';
+
+            if (scope.value === '1') {
+                scope.color = "#74AC49";
+            } else if (scope.value === '2') {
+                scope.color = "#CBB71B";
+            } else if (scope.value === '3') {
+                scope.color = "#FA9014";
+            }
+
+          }
+        };
+      });
+
+    module.filter('numberGaugePosition', function() {
+      return function(i) {
+            if (i === 1) {
+                return 'lowest';
+            } else if (i === 2) {
+                return 'second lowest';
+            } else if (i === 3) {
+                return 'second highest';
+            } else if (i === 4) {
+                return 'highest';
+            }
+        }
+  });
 }());
 
 

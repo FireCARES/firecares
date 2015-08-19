@@ -10,6 +10,12 @@ from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point, MultiPolygon
 from django.core.validators import MaxValueValidator
+from django.core.cache import cache
+from django.db import connections
+from django.db.models import Avg, Max, Min
+from django.db.models.loading import get_model
+from django.db.models.signals import post_migrate
+from django.db.utils import ConnectionDoesNotExist
 from django.utils.text import slugify
 from firecares.firecares_core.models import RecentlyUpdatedMixin
 from django.core.urlresolvers import reverse
@@ -17,10 +23,13 @@ from django.db.transaction import rollback
 from django.db.utils import IntegrityError
 from django.utils.functional import cached_property
 from firecares.firecares_core.models import Address
+from firecares.utils import dictfetchall
 from numpy import histogram
 from phonenumber_field.modelfields import PhoneNumberField
 from firecares.firecares_core.models import Country
 from genericm2m.models import RelatedObjectsDescriptor
+
+
 
 class USGSStructureData(models.Model):
     """
@@ -286,6 +295,74 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
         ]
 
     @property
+    def size2_and_greater_percentile_sum(self):
+        """
+        Convenience method to sum
+        """
+        if self.risk_model_fires_size1_percentage is None and self.risk_model_fires_size2_percentage is None:
+            return
+
+        return (self.risk_model_fires_size1_percentage or 0) + (self.risk_model_fires_size2_percentage or 0)
+
+    @property
+    def deaths_and_injuries_sum(self):
+
+        if self.risk_model_deaths is None and self.risk_model_injuries is None:
+            return
+
+        return (self.risk_model_deaths or 0) + (self.risk_model_injuries or 0)
+
+    def population_class_stats(self):
+        """
+        Returns summary statistics for calculation fields in the same population class.
+        """
+
+        if not self.population_class:
+            return []
+
+        cache_key = 'population_class_{0}_stats'.format(self.population_class)
+        cached = cache.get(cache_key)
+
+        if cached:
+            return cached
+
+        fields = ['dist_model_score', 'risk_model_fires', 'risk_model_deaths_injuries_sum',
+                  'risk_model_size1_percent_size2_percent_sum']
+        aggs = []
+
+        for field in fields:
+            aggs.append(Min(field))
+            aggs.append(Max(field))
+            aggs.append(Avg(field))
+
+        results = self.population_metrics_table.objects.filter(population_class=self.population_class).aggregate(*aggs)
+        cache.set(cache_key, results, timeout=60 * 60 * 24)
+        return results
+
+    @property
+    def population_metrics_table(self):
+        """
+        Returns the appropriate population metrics table for this object.
+        """
+        try:
+            return get_model('firestation.PopulationClass{0}Quartile'.format(self.population_class))
+        except LookupError:
+            return None
+
+    @property
+    def population_metrics_row(self):
+        """
+        Returns the matching row from the population metrics table.
+        """
+
+        population_table = self.population_metrics_table
+
+        if not population_table:
+            return
+
+        return population_table.objects.get(id=self.id)
+
+    @property
     def government_unit_objects(self):
         """
         Memoize the government_unit generic key lookup.
@@ -477,19 +554,19 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
         """
         A text description of the department used for displaying on the client side.
         """
+        try:
+            name = self.name
 
-        name = self.name
+            if not self.name.lower().endswith('department') and not self.name.lower().endswith('district'):
+                name += ' fire department'
 
-        if not self.name.lower().endswith('department') and not self.name.lower().endswith('district'):
-            name += ' fire department'
-
-
-
-        return "The {name} is a {department_type} department located in the {object.region} NFPA region and headquartered in " \
-               "{object.headquarters_address.city}, {object.headquarters_address.state_province}."\
-            .format(name=name,
-                    department_type=self.department_type.lower(),
-                    object=self).strip()
+            return "The {name} is a {department_type} department located in the {object.region} NFPA region and headquartered in " \
+                   "{object.headquarters_address.city}, {object.headquarters_address.state_province}."\
+                .format(name=name,
+                        department_type=self.department_type.lower(),
+                        object=self).strip()
+        except:
+            return 'No description for Fire Department'
 
     def residential_structure_fire_counts(self):
         return self.nfirsstatistic_set.filter(metric='residential_structure_fires')\
@@ -736,3 +813,145 @@ class NFIRSStatistic(models.Model):
     class Meta:
         unique_together = ['fire_department', 'year', 'metric']
         ordering = ['-year',]
+
+
+class PopulationClassQuartile(models.Model):
+    """
+    Population Quartile Views
+    """
+
+    id = models.ForeignKey(FireDepartment, db_column='id', primary_key=True)
+    created = models.DateTimeField(editable=False)
+    created = models.DateTimeField(editable=False)
+    modified = models.DateTimeField(editable=False)
+    fdid = models.CharField(max_length=10, editable=False)
+    name = models.CharField(max_length=100, editable=False)
+    headquarters_address = models.ForeignKey(Address, null=True, blank=True, editable=False, related_name='+')
+    mail_address = models.ForeignKey(Address, null=True, blank=True, editable=False, related_name='+')
+    headquarters_phone = PhoneNumberField(null=True, blank=True, editable=False)
+    headquarters_fax = PhoneNumberField(null=True, blank=True, editable=False)
+    department_type = models.CharField(max_length=20, null=True, blank=True, editable=False)
+    organization_type = models.CharField(max_length=75, null=True, blank=True, editable=False)
+    website = models.URLField(null=True, blank=True, editable=False)
+    state = models.CharField(max_length=2, editable=False)
+    region = models.CharField(max_length=20, null=True, blank=True, editable=False)
+    geom = models.MultiPolygonField(null=True, blank=True, editable=False)
+    objects = CalculationManager()
+    dist_model_score = models.FloatField(null=True, blank=True, editable=False)
+
+    risk_model_deaths = models.FloatField(null=True, blank=True, editable=False,
+                                          verbose_name='Predicted deaths per year.')
+
+    risk_model_injuries = models.FloatField(null=True, blank=True, editable=False,
+                                            verbose_name='Predicted injuries per year.')
+
+    risk_model_fires = models.FloatField(null=True, blank=True, editable=False,
+                                         verbose_name='Predicted number of fires per year.')
+
+    risk_model_fires_size0 = models.FloatField(null=True, blank=True, editable=False,
+                                               verbose_name='Predicted number of size 0 fires.')
+
+    risk_model_fires_size0_percentage = models.FloatField(null=True, blank=True, editable=False,
+                                                          verbose_name='Percentage of size 0 fires.')
+
+    risk_model_fires_size1 = models.FloatField(null=True, blank=True, editable=False,
+                                               verbose_name='Predicted number of size 1 fires.')
+    risk_model_fires_size1_percentage = models.FloatField(null=True, blank=True, editable=False,
+                                                          verbose_name='Percentage of size 1 fires.')
+    risk_model_fires_size2 = models.FloatField(null=True, blank=True, editable=False,
+                                                   verbose_name='Predicted number of size 2 firese.')
+    risk_model_fires_size2_percentage = models.FloatField(null=True, blank=True, editable=False,
+                                                          verbose_name='Percentage of size 2 fires.')
+    population = models.IntegerField(null=True, blank=True, editable=False)
+    population_class = models.IntegerField(null=True, blank=True, editable=False)
+    featured = models.BooleanField(default=False, editable=False)
+    dist_model_score_quartile = models.IntegerField()
+    risk_model_deaths_quartile = models.IntegerField()
+    risk_model_injuries_quartile = models.IntegerField()
+    risk_model_fires_size0_quartile = models.IntegerField()
+    risk_model_fires_size1_quartile = models.IntegerField()
+    risk_model_fires_size2_quartile = models.IntegerField()
+    risk_model_fires_quartile = models.IntegerField()
+    risk_model_size1_percent_size2_percent_sum_quartile = models.IntegerField()
+    risk_model_size1_percent_size2_percent_sum = models.FloatField(null=True, blank=True)
+    risk_model_deaths_injuries_sum = models.FloatField(null=True, blank=True)
+    risk_model_deaths_injuries_sum_quartile = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        managed = False
+        abstract = True
+
+
+class PopulationClass0Quartile(PopulationClassQuartile):
+
+    class Meta(PopulationClassQuartile.Meta):
+        db_table = 'population_class_0_quartiles'
+
+
+class PopulationClass1Quartile(PopulationClassQuartile):
+
+    class Meta(PopulationClassQuartile.Meta):
+        db_table = 'population_class_1_quartiles'
+
+
+class PopulationClass2Quartile(PopulationClassQuartile):
+
+    class Meta(PopulationClassQuartile.Meta):
+        db_table = 'population_class_2_quartiles'
+
+
+class PopulationClass3Quartile(PopulationClassQuartile):
+
+    class Meta(PopulationClassQuartile.Meta):
+        db_table = 'population_class_3_quartiles'
+
+
+class PopulationClass4Quartile(PopulationClassQuartile):
+
+    class Meta(PopulationClassQuartile.Meta):
+        db_table = 'population_class_4_quartiles'
+
+
+class PopulationClass5Quartile(PopulationClassQuartile):
+
+    class Meta(PopulationClassQuartile.Meta):
+        db_table = 'population_class_5_quartiles'
+
+
+class PopulationClass6Quartile(PopulationClassQuartile):
+
+    class Meta(PopulationClassQuartile.Meta):
+        db_table = 'population_class_6_quartiles'
+
+
+class PopulationClass7Quartile(PopulationClassQuartile):
+
+    class Meta(PopulationClassQuartile.Meta):
+        db_table = 'population_class_7_quartiles'
+
+
+class PopulationClass8Quartile(PopulationClassQuartile):
+
+    class Meta(PopulationClassQuartile.Meta):
+        db_table = 'population_class_8_quartiles'
+
+
+class PopulationClass9Quartile(PopulationClassQuartile):
+
+    class Meta(PopulationClassQuartile.Meta):
+        db_table = 'population_class_9_quartiles'
+
+
+def create_quartile_views(sender, **kwargs):
+    """
+    Creates DB views based on quartile queries.
+    """
+    for population_class in [choice[0] for choice in FireDepartment.POPULATION_CLASSES]:
+        query = str(FireDepartment.objects.filter(population_class=population_class).as_quartiles().query)
+        cursor = connections['default'].cursor()
+
+        # CREATE OR REPLACE does not
+        cursor.execute("DROP VIEW IF EXISTS population_class_%s_quartiles;".format(query), [population_class])
+        cursor.execute("CREATE VIEW population_class_%s_quartiles AS ({0});".format(query), [population_class])
+
+post_migrate.connect(create_quartile_views)

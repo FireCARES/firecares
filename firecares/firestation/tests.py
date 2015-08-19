@@ -1,18 +1,12 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
-
-Replace this with more appropriate tests for your application.
-"""
-
 import json
 from .forms import StaffingForm
-from .models import FireDepartment, FireStation, Staffing
+from .models import FireDepartment, FireStation, Staffing, PopulationClass1Quartile
 from django.test import TestCase
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 from django.contrib.gis.geos import Point
 from django.contrib.auth import get_user_model
+from firecares.firestation.templatetags.firecares import quartile_text
 
 User = get_user_model()
 
@@ -287,6 +281,20 @@ class FireStationTests(TestCase):
         fd.population = 1000001
         self.assertEqual(fd.get_population_class(), 9)
 
+    def test_population_metrics_table(self):
+        """
+        Ensure the population_metrics_table method returns expected results.
+        """
+
+        fd = FireDepartment.objects.create(name='Test db', population=0)
+
+        for i in range(0, 10):
+            fd.population_class = i
+            self.assertIsNotNone(fd.population_metrics_table)
+
+        fd.population_class = 11
+        self.assertIsNone(fd.population_metrics_table)
+
     def test_department_detail_view_requires_login(self):
         """
         Ensures the department pages require login.
@@ -310,3 +318,57 @@ class FireStationTests(TestCase):
         response = c.get('/departments')
         self.assertEqual(response.status_code, 302)
         self.assertTrue('login' in response.url)
+
+    def test_convenience_methods(self):
+        """
+        Make sure the size2_and_greater_percentile_sum and deaths_and_injuries_sum methods do not throw errors.
+        """
+        fd = FireDepartment.objects.create(name='Test db',
+                                           population=0,
+                                           population_class=1,
+                                           department_type='test')
+
+        self.assertIsNone(fd.size2_and_greater_percentile_sum)
+        self.assertIsNone(fd.deaths_and_injuries_sum)
+
+        fd.risk_model_deaths = 1
+        self.assertEqual(fd.deaths_and_injuries_sum, 1)
+
+        fd.risk_model_injuries = 1
+        self.assertEqual(fd.deaths_and_injuries_sum, 2)
+
+        fd.risk_model_fires_size1_percentage = 1
+        self.assertEqual(fd.size2_and_greater_percentile_sum, 1)
+
+        fd.risk_model_fires_size2_percentage = 1
+        self.assertEqual(fd.size2_and_greater_percentile_sum, 2)
+
+    def test_population_metric_views(self):
+        """
+        Tests the population metric views.
+        """
+        fd = FireDepartment.objects.create(name='Test db',
+                                           population=0,
+                                           population_class=1,
+                                           department_type='test')
+        self.assertTrue(PopulationClass1Quartile.objects.get(id=fd.id))
+
+        # make sure the population class logic works
+        self.assertTrue(fd.population_class_stats())
+
+        # make sure the department page does not return an error
+        c = Client()
+        c.login(**{'username': 'admin', 'password': 'admin'})
+        response = c.get(fd.get_absolute_url())
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_quartile_text(self):
+        """
+        Tests the quartile text template tag.
+        """
+        self.assertEqual('lowest', quartile_text(1))
+        self.assertEqual('second lowest', quartile_text(2))
+        self.assertEqual('second highest', quartile_text(3))
+        self.assertEqual('highest', quartile_text(4))
+        self.assertIsNone(quartile_text(5))

@@ -42,7 +42,6 @@ def abbreviatedintword(value):
     except (TypeError, ValueError):
         return value
 
-
     def _check_for_i18n(value, float_formatted, string_formatted):
         """
         Use the i18n enabled defaultfilters.floatformat if possible
@@ -70,3 +69,12 @@ def url_replace(request, field, value):
     dict_ = request.GET.copy()
     dict_[field] = value
     return dict_.urlencode()
+
+@register.filter(is_safe=False)
+def quartile_text(value):
+    """
+    Replaces or creates a GET parameter in a URL.
+    """
+
+    return dict(zip(range(1, 5), ['lowest', 'second lowest', 'second highest', 'highest'])).get(value)
+
