@@ -1,12 +1,12 @@
 import json
 from .forms import StaffingForm
-from .models import FireDepartment, FireStation, Staffing, PopulationClass1Quartile
+from .models import FireDepartment, FireStation, Staffing, PopulationClass1Quartile, PopulationClass9Quartile
 from django.test import TestCase
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 from django.contrib.gis.geos import Point
 from django.contrib.auth import get_user_model
-from firecares.firestation.templatetags.firecares import quartile_text
+from firecares.firestation.templatetags.firecares import quartile_text, risk_level
 
 User = get_user_model()
 
@@ -349,12 +349,12 @@ class FireStationTests(TestCase):
         """
         fd = FireDepartment.objects.create(name='Test db',
                                            population=0,
-                                           population_class=1,
+                                           population_class=9,
                                            department_type='test')
-        self.assertTrue(PopulationClass1Quartile.objects.get(id=fd.id))
+        self.assertTrue(PopulationClass9Quartile.objects.get(id=fd.id))
 
         # make sure the population class logic works
-        self.assertTrue(fd.population_class_stats())
+        self.assertTrue(fd.population_class_stats)
 
         # make sure the department page does not return an error
         c = Client()
@@ -372,3 +372,13 @@ class FireStationTests(TestCase):
         self.assertEqual('second highest', quartile_text(3))
         self.assertEqual('highest', quartile_text(4))
         self.assertIsNone(quartile_text(5))
+
+    def test_risk_level(self):
+        """
+        Tests the quartile text template tag.
+        """
+        self.assertEqual('low', risk_level(1))
+        self.assertEqual('medium', risk_level(2))
+        self.assertEqual('medium', risk_level(3))
+        self.assertEqual('high', risk_level(4))
+        self.assertIsNone(risk_level(5))

@@ -217,6 +217,81 @@
                     <div class="ct-gallery ct-u-marginBottom30">
                         <div id="map"></div>
                     </div>
+                    <div class="ct-heading ct-u-marginBottom20">
+                        <h3>Community Risk Assessment</h3>
+                    </div>
+                    <div class="row ct-u-marginBottom30">
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="diamond-control-label diamond-{{object.population_metrics_row.risk_model_fires_quartile | risk_level | default_if_none:'unavailable'}}">
+                                        <div>{{ object.population_metrics_row.risk_model_fires_quartile | risk_level | default_if_none:'n/a'}}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <div class="risk-card">
+                                        <div class="main-content">
+                                            <div class="main-text">
+                                                <div class="ct-product--tilte">
+                                                    Predicted Number of Fires
+                                                </div>
+                                                <div class="description">
+                                                    This department falls into the {{ object.population_metrics_row.risk_model_fires_quartile|risk_level|default:'unknown' }} risk category for structure fires when compared to other fire departments with communities of the same size classification.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="diamond-control-label diamond-{{object.population_metrics_row.risk_model_size1_percent_size2_percent_sum_quartile | risk_level | default_if_none:'unavailable'}}">
+                                        <div>{{ object.population_metrics_row.risk_model_size1_percent_size2_percent_sum_quartile | risk_level | default_if_none:'n/a'}}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <div class="risk-card">
+                                        <div class="main-content">
+                                            <div class="main-text">
+                                                <div class="ct-product--tilte">
+                                                    Predicted Fire Spread
+                                                </div>
+                                                <div class="description">
+                                                    This department falls into the {{ object.population_metrics_row.risk_model_size1_percent_size2_percent_sum_quartile|risk_level|default:'unknown' }} risk category for the number of fires spread beyond room of origin when compared to other fire departments with communities of the same size classification.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="diamond-control-label diamond-{{object.population_metrics_row.risk_model_deaths_injuries_sum_quartile | risk_level | default_if_none:'unavailable'}}">
+                                        <div>{{ object.population_metrics_row.risk_model_deaths_injuries_sum_quartile | risk_level | default_if_none:'n/a'}}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <div class="risk-card">
+                                        <div class="main-content">
+                                            <div class="main-text">
+                                                <div class="ct-product--tilte">
+                                                    Predicted Injury & Death
+                                                </div>
+                                                <div class="description">
+                                                    This department falls into the {{ object.population_metrics_row.risk_model_deaths_injuries_sum_quartile|risk_level|default:'unknown' }} risk category for the number of fire-related deaths and injuries when compared to other fire departments with communities of the same size classification.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-4">
                             <div class="ct-heading ct-u-marginBottom20">
@@ -405,10 +480,185 @@
                                        max="{{ population_stats.dist_model_score__max|floatformat }}" value="{{ object.dist_model_score|floatformat }}" inverse></gauge>
                             </div>
                             <div class="col-sm-6 col-md-12 ct-u-marginBottom10">
-                                <number-gauge description="This department is in the {{ object.population_metrics_row.risk_model_fires_quartile|quartile_text|default:'unknown' }} risk quartile for structure fires in its population class." metric-title="Predicted Number of Fires Risk" value="{{ object.population_metrics_row.risk_model_fires_quartile }}"></number-gauge>
-                                <number-gauge description="This department is in the {{ object.population_metrics_row.risk_model_size1_percent_size2_percent_sum_quartile|quartile_text|default:'unknown' }} risk quartile for fires spread beyond room of origin in its population class." metric-title="Predicted Fire Spread Risk" value="{{ object.population_metrics_row.risk_model_size1_percent_size2_percent_sum_quartile }}"></number-gauge>
-                                <number-gauge description="This department is in the {{ object.population_metrics_row.risk_model_deaths_injuries_sum_quartile|quartile_text|default:'unknown' }} risk quartile for fire-related deaths and injuries its population class." metric-title="Predicted Injury and Death Risk" value="{{ object.population_metrics_row.risk_model_deaths_injuries_sum_quartile }}"></number-gauge>
+                                <!-- Safe Grade Cards -->
+                                <div class="metric-cards-title">
+                                    <h4>Safe Grades</h4>
+                                </div>
 
+                                <div class="metric-card">
+                                    <label class="control-label {{ dist_model_residential_fires_quartile|risk_level|default_if_none:"unavailable"  }}">{{ dist_model_residential_fires_quartile|grade|default_if_none:"not available"  }}</label>
+                                    <div class="main-content">
+                                        <div class="main-text">
+                                            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                                                Assessment of performance score based on the number of fires.
+                                            </div>
+                                            <div class="description">
+                                                This department's performance score is {{ dist_model_residential_fires_quartile|grade|default_if_none:"not available"  }} when compared to other fire departments with communities of the same size classification and in the {{ object.population_metrics_row.risk_model_fires_quartile|risk_level|default:'unknown' }} risk category for the number of fires.
+                                            </div>
+
+                                            <!-- Dist Score compared against departments in the same population class with a similar fire risk -->
+                                            <!--
+                                            <div class="bullet-chart firecares-graph ct-u-marginBottom10 ct-u-marginTop40" id="dist_model_by_fires" style="height: 100%"
+                                                  ranges="{{dist_model_residential_fires_quartile_breaks }}"
+                                                  measures="[{{ object.dist_model_score}}]"
+                                                  markers="[{{ dist_model_residential_fires_quartile_avg }}]"
+                                                  description="POPULATE THIS DESCRIPTION"
+                                                  metric-title="Performance score comparison against departments in a similar risk category."></div>-->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="metric-card">
+                                    <label class="control-label {{ dist_model_risk_model_greater_than_size_2_quartile|risk_level|default_if_none:"unavailable" }}">{{ dist_model_risk_model_greater_than_size_2_quartile|grade|default_if_none:"not available" }}</label>
+                                    <div class="main-content">
+                                        <div class="main-text">
+                                            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                                                Assessment of performance score based on fire spread risk.
+                                            </div>
+                                            <div class="description">
+                                                This department's performance score is {{ dist_model_risk_model_greater_than_size_2_quartile|grade|default_if_none:"not available"  }} when compared to other fire departments with communities of the same size classification and in the {{ object.population_metrics_row.risk_model_size1_percent_size2_percent_sum_quartile|risk_level|default:'unknown' }} risk category for the number of fires spread beyond room of origin.
+                                            </div>
+
+                                            <!-- Dist Score compared against departments in the same population class with the fire spread risk -->
+                                            <!--
+                                            <div class="bullet-chart firecares-graph ct-u-marginBottom10 ct-u-marginTop40" id="dist_model_by_fire_spread" style="height: 100%"
+                                                  ranges="{{dist_model_risk_model_greater_than_size_2_quartile_breaks }}"
+                                                  measures="[{{ object.dist_model_score}}]"
+                                                  markers="[{{ dist_model_risk_model_greater_than_size_2_quartile_avg }}]"
+                                                  description="POPULATE THIS DESCRIPTION"
+                                                  metric-title="Performance score comparison against departments with a similar fire-spread risk category."></div>-->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="metric-card">
+                                    <label class="control-label {{ dist_model_risk_model_deaths_injuries_quartile|risk_level|default_if_none:"unavailable"  }}">{{ dist_model_risk_model_deaths_injuries_quartile|grade|default_if_none:"not available"  }}</label>
+                                    <div class="main-content">
+                                        <div class="main-text">
+                                            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                                                Assessment of performance score based on the risk of death and injury.
+                                            </div>
+                                            <div class="description">
+                                                This department's performance score is {{ dist_model_risk_model_deaths_injuries_quartile|risk_level|default_if_none:"not available"  }} when compared to other fire departments with communities of the same size classification and in the {{ object.population_metrics_row.risk_model_size1_percent_size2_percent_sum_quartile|risk_level|default:'unknown' }} risk category for the number of fires spread beyond room of origin.
+                                                This department's performance score is {{ dist_model_risk_model_deaths_injuries_quartile|risk_level|default_if_none:"not available"  }} compared to other departments with a similar population size and fire spread risk category.
+                                            </div>
+                                            <!-- Dist Score compared against departments in the same population class with the same death and injury risk -->
+                                            <!--
+                                            <div class="bullet-chart firecares-graph ct-u-marginBottom10 ct-u-marginTop40" id="dist_model_by_death_injury" style="height: 100%"
+                                                  ranges="{{dist_model_risk_model_deaths_injuries_quartile_breaks }}"
+                                                  measures="[{{ object.dist_model_score}}]"
+                                                  markers="[{{ dist_model_risk_model_deaths_injuries_quartile_avg }}]"
+                                                  description="POPULATE THIS DESCRIPTION"
+                                                  metric-title="Performance score comparison against departments with a similar death and injury risk category."></div>-->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="metric-card">
+                                    <label class="control-label {{ national_risk_model_size1_percent_size2_percent_sum_quartile|risk_level|default_if_none:"unavailable"  }}">{{ national_risk_model_size1_percent_size2_percent_sum_quartile|grade|default_if_none:"not available"  }}</label>
+                                    <div class="main-content">
+                                        <div class="main-text">
+                                            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                                                National assessment of performance score based on the fire spread.
+                                            </div>
+                                            <div class="description">
+                                                This department's performance score is {{ national_risk_model_size1_percent_size2_percent_sum_quartile|risk_level|default_if_none:"not available"  }} compared to other departments with a similar population size and risk category.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="metric-card">
+                                    <label class="control-label {{ national_risk_model_deaths_injuries_sum_quartile|risk_level|default_if_none:"unavailable"  }}">{{ national_risk_model_deaths_injuries_sum_quartile|grade|default_if_none:"not available"  }}</label>
+                                    <div class="main-content">
+                                        <div class="main-text">
+                                            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                                                National assessment of performance score based on the death and injury risk.
+                                            </div>
+                                            <div class="description">
+                                                This department's performance score is {{ national_risk_model_deaths_injuries_sum_quartile|risk_level|default_if_none:"not available"  }} compared to other departments with a similar population size and risk category.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="main-content">
+                                        <div class="main-text container-fluid">
+                                            <div class="row">
+                                                <div class="col-xs-12">
+                                                    <span class="ct-fw-600 text-left">Number of fires</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-xs-9">
+                                                    <span class="text-left ct-u-paddingLeft20">Actual</span>
+                                                </div>
+                                                <div class="col-xs-3">
+                                                    <span class="text-right">{{ object.residential_fires_3_year_avg|floatformat|default:"N/A" }}</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-xs-9">
+                                                    <span class="text-left ct-u-paddingLeft20">Predicted</span>
+                                                </div>
+                                                <div class="col-xs-3">
+                                                    <span class="text-right">{{ object.risk_model_fires|floatformat|default:"N/A" }}</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-xs-9">
+                                                    <span class="text-left ct-u-paddingLeft40">Beyond room</span>
+                                                </div>
+                                                <div class="col-xs-3">
+                                                    <span class="text-right">{{ object.size0_and_greater_sum|floatformat|default:"N/A" }}</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-xs-9">
+                                                    <span class="text-left ct-u-paddingLeft40">Beyond floor</span>
+                                                </div>
+                                                <div class="col-xs-3">
+                                                    <span class="text-right">{{ object.size1_and_greater_sum|floatformat|default:"N/A" }}</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-xs-9">
+                                                    <span class="text-left ct-u-paddingLeft40">Beyond structure</span>
+                                                </div>
+                                                <div class="col-xs-3">
+                                                    <span class="text-right">{{ object.size2_and_greater_sum|floatformat|default:"N/A" }}</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="row" style="margin-top: 20px;">
+                                                <div class="col-xs-12">
+                                                    <span class="ct-fw-600 text-left">Deaths & injuries</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-xs-9">
+                                                    <span class="text-left ct-u-paddingLeft20">Actual</span>
+                                                </div>
+                                                <div class="col-xs-3">
+                                                    <span class="text-right">{{ object.nfirs_deaths_and_injuries_sum|floatformat|default:"N/A" }}</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-xs-9">
+                                                    <span class="text-left ct-u-paddingLeft20">Predicted</span>
+                                                </div>
+                                                <div class="col-xs-3">
+                                                    <span class="text-right">{{ object.deaths_and_injuries_sum|floatformat|default:"N/A" }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- End Safe Grade Cards -->
                               {% comment %}
                               <div class="line-chart firecares-graph ct-u-marginBottom10" id="dist"
                                       data="{{ performance_data }}"
@@ -435,28 +685,6 @@
                                       value="{{ object.risk_model_fires }}"
                                       color="#F5C97E"></div>
                                  {% endcomment %}
-                                <div class="bullet-chart firecares-graph ct-u-marginBottom10" id="residential_fires" style="height: 100%"
-                                      ranges="{{risk_model_fires_breaks|default:"[]" }}"
-                                      measures="[{{ object.risk_model_fires }}]"
-                                      markers="[{{ population_stats.risk_model_fires__avg|default:0 }}]"
-                                      description="This department is predicted to have {{ object.risk_model_fires|floatformat|default:"an unknown number of" }} fires per year."
-                                      metric-title="Predicted residential fires per year."
-                                      value="{{ object.risk_model_fires }}"
-                                      color="#F5C97E"></div>
-
-                                <div class="bullet-chart firecares-graph ct-u-marginBottom10 ct-u-marginTop40" id="size2_plus_fires" style="height: 100%"
-                                      ranges="{{risk_model_greater_than_size_2_breaks|default:"[]" }}"
-                                      measures="[{{ object.size2_and_greater_percentile_sum}}]"
-                                      markers="[{{ population_stats.risk_model_size1_percent_size2_percent_sum__avg }}]"
-                                      description="This department is predicted to have {{ object.risk_model_fires_size1|add:object.risk_model_fires_size2|floatformat|default:"an unknown number of" }} fires that spread beyond the room of origin per year."
-                                      metric-title="Portion of residential fires that spread beyond room of origin per year."></div>
-
-                                <div class="bullet-chart firecares-graph ct-u-marginBottom10 ct-u-marginTop40" id="deaths_and_injuries" style="height: 100%"
-                                      ranges="{{risk_model_deaths_injuries_breaks|default:"[]" }}"
-                                      measures="[{{ object.deaths_and_injuries_sum}}]"
-                                      markers="[{{ population_stats.risk_model_deaths_injuries_sum__avg }}]"
-                                      description="This department is predicted to have {{ object.deaths_and_injuries_sum|floatformat|default:"an unknown number of" }} fire-related deaths and injuries per year."
-                                      metric-title="Predicted fire-related deaths and injuries per year."></div>
                             </div>
 
 

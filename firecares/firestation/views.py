@@ -1,8 +1,7 @@
 import json
-from .models import FireStation, FireDepartment
+import pandas as pd
+import urllib
 from django.views.generic import DetailView, ListView, TemplateView
-from firecares.firecares_core.mixins import LoginRequiredMixin, CacheMixin
-from firecares.usgs.models import StateorTerritoryHigh, CountyorEquivalent, IncorporatedPlace
 from django.shortcuts import get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
@@ -11,8 +10,11 @@ from django.http.response import HttpResponseRedirect
 from django.db.models import Max, Min, Count
 from django.db.models.fields import FieldDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from random import randint
-import urllib
+from django.db.models import IntegerField
+from firecares.firecares_core.mixins import LoginRequiredMixin, CacheMixin
+from firecares.firestation.managers import Ntile, Case, When, Avg
+from firecares.firestation.models import FireStation, FireDepartment
+from firecares.usgs.models import StateorTerritoryHigh, CountyorEquivalent, IncorporatedPlace
 
 
 class DISTScoreContextMixin(object):
@@ -61,61 +63,14 @@ class DepartmentDetailView(LoginRequiredMixin, CacheMixin, DISTScoreContextMixin
 
         context['firestations'] = stations
 
-        # this pulls in histogram data for line charts which have been temporarily removed.
-        if False:
-            performance_data = cache.get('all_dist_score_model__count')
-            risk_model_death = cache.get('all_risk_model_death__count')
-            risk_model_injuries = cache.get('all_risk_model_injuries__count')
-            risk_model_fires = cache.get('all_risk_model_fires__count')
-            risk_model_fires_size0 = cache.get('all_risk_model_fires_size0__count')
-            risk_model_fires_size1 = cache.get('all_risk_model_fires_size1__count')
-            risk_model_fires_size2 = cache.get('all_risk_model_fires_size2__count')
-
-            if not performance_data:
-                performance_data = FireDepartment.get_histogram('dist_model_score')
-                cache.set('all_dist_score_model__count', performance_data, timeout=60 * 60 * 24)
-
-            if not risk_model_death:
-                risk_model_death = FireDepartment.get_histogram('risk_model_deaths')
-                cache.set('all_risk_model_death__count', risk_model_death, timeout=60 * 60 * 24)
-
-            if not risk_model_injuries:
-                risk_model_injuries = FireDepartment.get_histogram('risk_model_injuries')
-                cache.set('all_risk_model_injuries__count', risk_model_injuries, timeout=60 * 60 * 24)
-
-            if not risk_model_fires:
-                risk_model_fires = FireDepartment.get_histogram('risk_model_fires')
-                cache.set('risk_model_fires__count', risk_model_fires, timeout=60 * 60 * 24)
-
-            if not risk_model_fires_size0:
-                risk_model_fires_size0 = FireDepartment.get_histogram('risk_model_fires_size0')
-                cache.set('risk_model_fires_size0__count', risk_model_fires_size0, timeout=60 * 60 * 24)
-
-            if not risk_model_fires_size1:
-                risk_model_fires_size1 = FireDepartment.get_histogram('risk_model_fires_size1')
-                cache.set('risk_model_fires_size1__count', risk_model_fires_size1, timeout=60 * 60 * 24)
-
-            if not risk_model_fires_size2:
-                risk_model_fires_size2 = FireDepartment.get_histogram('risk_model_fires_size2')
-                cache.set('risk_model_fires_size2__count', risk_model_fires_size2, timeout=60 * 60 * 24)
-
-            context['performance_data'] = performance_data
-            context['risk_deaths_data'] = risk_model_death
-            context['risk_injuries_data'] = risk_model_injuries
-            context['risk_model_fires'] = risk_model_fires
-            context['risk_model_fires_size0'] = risk_model_fires_size0
-            context['risk_model_fires_size1'] = risk_model_fires_size1
-            context['risk_model_fires_size2'] = risk_model_fires_size2
-
         # population stats provide summary statistics for fields within the current objects population class
-        context['population_stats'] = self.object.population_class_stats()
+        context['population_stats'] = self.object.population_class_stats
         population_quartiles = self.object.population_metrics_table
 
         if population_quartiles:
-
             # risk model fire count breaks for the bullet chart
-            vals = population_quartiles.objects.get_field_stats('risk_model_fires', group_by='risk_model_fires_quartile')
-            context['risk_model_fires_breaks'] = [n['max'] for n in vals]
+            vals = population_quartiles.objects.get_field_stats('residential_fires_avg_3_years', group_by='residential_fires_avg_3_years_quartile')
+            context['residential_fires_avg_3_years_breaks'] = [n['max'] for n in vals]
 
             # size 2 or above fire breaks for the bullet chart
             vals = population_quartiles.objects.get_field_stats('risk_model_size1_percent_size2_percent_sum', group_by='risk_model_size1_percent_size2_percent_sum_quartile')
@@ -124,6 +79,74 @@ class DepartmentDetailView(LoginRequiredMixin, CacheMixin, DISTScoreContextMixin
             # deaths and injuries for the bullet chart
             vals = population_quartiles.objects.get_field_stats('risk_model_deaths_injuries_sum', group_by='risk_model_deaths_injuries_sum_quartile')
             context['risk_model_deaths_injuries_breaks'] = [n['max'] for n in vals]
+
+            # This should be a table with risk quartiles already identified
+            report_card_peers = population_quartiles.objects.all()
+
+            # this should be an object that has the current department quartile values
+            object_values = self.object.population_metrics_row
+
+            report_card_peers = report_card_peers.annotate(dist_model_residential_fires_quartile=Case(When(**{'dist_model_score__isnull': False, 'residential_fires_avg_3_years_quartile': object_values.residential_fires_avg_3_years_quartile, 'then': Ntile(4, output_field=IntegerField(), partition_by='dist_model_score is not null, residential_fires_avg_3_years_quartile', order_by='dist_model_score')}), output_field=IntegerField(), default=None))
+            report_card_peers = report_card_peers.annotate(dist_model_risk_model_greater_than_size_2_quartile=Case(When(**{'dist_model_score__isnull': False, 'risk_model_size1_percent_size2_percent_sum_quartile': object_values.risk_model_size1_percent_size2_percent_sum_quartile, 'then': Ntile(4, output_field=IntegerField(), partition_by='dist_model_score is not null, risk_model_size1_percent_size2_percent_sum_quartile', order_by='dist_model_score')}), output_field=IntegerField(), default=None))
+            report_card_peers = report_card_peers.annotate(dist_model_risk_model_deaths_injuries_quartile=Case(When(**{'dist_model_score__isnull': False, 'risk_model_deaths_injuries_sum_quartile': object_values.risk_model_deaths_injuries_sum_quartile, 'then': Ntile(4, output_field=IntegerField(), partition_by='dist_model_score is not null, risk_model_deaths_injuries_sum_quartile', order_by='dist_model_score')}), output_field=IntegerField(), default=None))
+
+            df = pd.DataFrame(list(report_card_peers.values('id',
+                                                            'dist_model_score',
+                                                            'dist_model_residential_fires_quartile',
+                                                            'dist_model_risk_model_greater_than_size_2_quartile',
+                                                            'dist_model_risk_model_deaths_injuries_quartile')))
+
+
+            context['dist_model_risk_model_greater_than_size_2_quartile_avg'] = df.dist_model_risk_model_greater_than_size_2_quartile.mean()
+            context['dist_model_risk_model_deaths_injuries_quartile_avg'] = df.dist_model_risk_model_deaths_injuries_quartile.mean()
+            context['dist_model_residential_fires_quartile_avg'] = df.dist_model_residential_fires_quartile.mean()
+
+            context['dist_model_risk_model_greater_than_size_2_quartile_breaks'] = df.groupby(['dist_model_risk_model_greater_than_size_2_quartile']).max()['dist_model_score'].tolist()
+            context['dist_model_risk_model_deaths_injuries_quartile_breaks'] = df.groupby(['dist_model_risk_model_deaths_injuries_quartile']).max()['dist_model_score'].tolist()
+            context['dist_model_residential_fires_quartile_breaks'] = df.groupby(['dist_model_residential_fires_quartile']).max()['dist_model_score'].tolist()
+
+            context['dist_model_residential_fires_quartile'] = df.loc[df['id']==self.object.id].dist_model_residential_fires_quartile.values[0]
+            context['dist_model_risk_model_greater_than_size_2_quartile'] = df.loc[df['id']==self.object.id].dist_model_risk_model_greater_than_size_2_quartile.values[0]
+            context['dist_model_risk_model_deaths_injuries_quartile'] = df.loc[df['id']==self.object.id].dist_model_risk_model_deaths_injuries_quartile.values[0]
+
+            #national_risk_band
+            from django.db import connections
+            cursor = connections['default'].cursor()
+            query = FireDepartment.objects.filter(dist_model_score__isnull=False).as_quartiles().values('id', 'risk_model_size1_percent_size2_percent_sum_quartile', 'risk_model_deaths_injuries_sum_quartile').query.__str__()
+
+            qu ="""
+            WITH results as (
+            SELECT "firestation_firedepartment"."id",
+             "firestation_firedepartment"."dist_model_score",
+            CASE WHEN ("firestation_firedepartment"."risk_model_fires_size1_percentage" IS NOT NULL OR "firestation_firedepartment"."risk_model_fires_size2_percentage" IS NOT NULL) THEN ntile(4) over (partition by COALESCE(risk_model_fires_size1_percentage,0)+COALESCE(risk_model_fires_size2_percentage,0) != 0 order by COALESCE(risk_model_fires_size1_percentage,0)+COALESCE(risk_model_fires_size2_percentage,0)) ELSE NULL END AS "risk_model_size1_percent_size2_percent_sum_quartile", CASE WHEN ("firestation_firedepartment"."risk_model_deaths" IS NOT NULL OR "firestation_firedepartment"."risk_model_injuries" IS NOT NULL) THEN ntile(4) over (partition by COALESCE(risk_model_deaths,0)+COALESCE(risk_model_injuries,0) != 0 order by COALESCE(risk_model_deaths,0)+COALESCE(risk_model_injuries,0)) ELSE NULL END AS "risk_model_deaths_injuries_sum_quartile" FROM "firestation_firedepartment" WHERE "firestation_firedepartment"."dist_model_score" IS NOT NULL ORDER BY "firestation_firedepartment"."name" ASC
+            ),
+              row as (
+            SELECT * from results where results.id={id}
+            )
+
+            select ntile_results.ntile
+            from
+            (select results.id, ntile(4) over (order by results.dist_model_score asc)
+            from results
+            inner join row on results.{field}=row.{field}) as ntile_results
+            where ntile_results.id={id};
+
+            """
+            cursor.execute(qu.format(query=query.strip(), id=self.object.id, field='risk_model_size1_percent_size2_percent_sum_quartile'))
+            try:
+                context['national_risk_model_size1_percent_size2_percent_sum_quartile'] = cursor.fetchone()[0]
+            except (KeyError, TypeError):
+                context['national_risk_model_size1_percent_size2_percent_sum_quartile'] = None
+
+            cursor.execute(qu.format(query=query.strip(), id=self.object.id, field='risk_model_deaths_injuries_sum_quartile'))
+
+            try:
+                context['national_risk_model_deaths_injuries_sum_quartile'] = cursor.fetchone()[0]
+            except (KeyError, TypeError):
+                context['national_risk_model_deaths_injuries_sum_quartile'] = None
+
+
+
 
         context.update(self.add_dist_values_to_context())
         return context

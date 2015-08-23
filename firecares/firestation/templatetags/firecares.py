@@ -70,6 +70,46 @@ def url_replace(request, field, value):
     dict_[field] = value
     return dict_.urlencode()
 
+
+@register.filter(is_safe=False)
+def risk_level(value):
+    """
+    Returns a string based risk level from a number.
+    1: Low
+    2: Medium
+    3: Medium
+    4: High
+    """
+
+    if value == 1:
+        return 'low'
+
+    if value == 2 or value == 3:
+        return 'medium'
+
+    if value == 4:
+        return 'high'
+
+@register.filter(is_safe=False)
+def grade(value):
+    """
+    Returns a string based grade from a number.
+    1: God
+    2: Fair
+    3: Fair
+    4: Poor
+    """
+
+    if value == 1:
+        return 'good'
+
+    if value == 2 or value == 3:
+        return 'fair'
+
+    if value == 4:
+        return 'poor'
+
+
 @register.filter(is_safe=False)
 def quartile_text(value):
     """

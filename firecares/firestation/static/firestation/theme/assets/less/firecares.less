@@ -288,6 +288,38 @@ padding-top: 5px;
   width: 150px;
 }
 
+.high {
+  background-color: #F6542F;
+  padding-left: 10px;
+  &:before{
+    border-color: transparent saddlebrown transparent transparent;
+  }
+}
+
+.medium {
+  background-color: #FA8E15;
+  padding-left: 10px;
+  &:before{
+    border-color: transparent sienna transparent transparent;
+  }
+}
+
+.low {
+  background-color: #74AC49;
+  padding-left: 10px;
+  &:before{
+    border-color: transparent darkolivegreen transparent transparent;
+  }
+}
+
+.unavailable {
+  background-color: #DDDDDD;
+  padding-left: 10px;
+  &:before{
+    border-color: transparent #AAAAAA transparent transparent;
+  }
+}
+
 .bar-gauge-inverse {
   .gauge-inverse
 }
@@ -391,3 +423,122 @@ padding-top: 5px;
   & .bullet .title { font-size: 14px; font-weight: bold; }
   & .bullet .subtitle { fill: #999; }
 }
+
+.metric-card {
+
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  display: inline-block;
+  border-radius: 4px;
+  width: 100%;
+  position: relative;
+  border-top: 1px solid #ddd;
+
+
+  &:first-child {
+    border-top: 0px;
+  }
+
+  .ct-product--tilte {
+    line-height: 1;
+  }
+
+  .main-text {
+    background-color: #F7F7F7;
+    padding: 15px;
+  }
+
+  .description {
+    font-size: 13px;
+    font-family: "Open Sans", sans-serif;
+    opacity: .6;
+    padding-top: 4px;
+  }
+  .main-content {
+    position: relative;
+    border: none;
+    border-radius: 2px;
+  }
+
+}
+
+.metric-cards-title {
+  background-color: #F7F7F7;
+  text-align: center;
+  padding: 7px;
+  font-weight: 600;
+}
+
+.ct-u-paddingLeft40 {
+  padding-left: 30px;
+}
+.ct-u-paddingLeft20 {
+  padding-left: 15px;
+}
+
+.diamond-control-label {
+  position: relative;
+  -webkit-transform: rotateZ(-45deg);
+  width: 50px;
+  height: 50px;
+  border: 2px solid pink;
+  color: pink;
+  z-index: 1000;
+}
+.diamond-control-label div {
+  -webkit-transform: rotateZ(45deg);
+  display: table-cell;
+  width: 46px;
+  height: 46px;
+  vertical-align: middle;
+  text-align: center;
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-shadow: 0px 0px 0px #000000;
+}
+.diamond-high {
+  border: 2px solid #F6542F;
+  color: #F6542F;
+}
+.diamond-medium {
+  border: 2px solid #FA8E15;
+  color: #FA8E15;
+}
+.diamond-low {
+  border: 2px solid #74AC49;
+  color: #74AC49;
+}
+.diamond-unavailable {
+  border: 2px solid #DDDDDD;
+  color: #DDDDDD;
+}
+
+.risk-card {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  display: inline-block;
+  border-radius: 4px;
+  width: 100%;
+  position: relative;
+  border-top: 1px solid #ddd;
+}
+.risk-card:first-child {
+  border-top: 0px;
+}
+.risk-card .main-text {
+  padding: 15px;
+}
+.risk-card .description {
+  font-size: 13px;
+  font-family: "Open Sans", sans-serif;
+  opacity: .6;
+  padding-top: 4px;
+}
+.risk-card .main-content {
+  position: relative;
+  border: none;
+  border-radius: 2px;
+}
+
+
