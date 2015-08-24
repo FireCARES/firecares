@@ -2,6 +2,7 @@ from celery import task
 from django.db import connections
 from django.db.utils import ConnectionDoesNotExist
 from firecares.firestation.models import FireDepartment
+from firecares.firestation.models import NFIRSStatistic as nfirs
 from fire_risk.models import DIST, NotEnoughRecords
 from fire_risk.models.DIST.providers.ahs import ahs_building_areas
 from fire_risk.models.DIST.providers.iaff import response_time_distributions
@@ -70,5 +71,53 @@ def update_performance_score(id, dry_run=False):
         return
 
     fd.save()
+
+
+@task(queue='update')
+def update_nfirs_counts(id):
+    """
+    Queries the NFIRS database for statics.
+    """
+
+    if not id:
+        return
+
+    try:
+        fd = FireDepartment.objects.get(id=id)
+        cursor = connections['nfirs'].cursor()
+
+    except (FireDepartment.DoesNotExist, ConnectionDoesNotExist):
+        return
+
+    years = {}
+    # get a list of years populated in the NFIRS database
+    years_query = "select distinct(extract(year from inc_date)) as year from buildingfires;"
+    cursor.execute(years_query)
+
+    # default years to None
+    map(years.setdefault, [int(n[0]) for n in cursor.fetchall()])
+
+    queries = (
+        ('civilian_casualties', "select extract(year from inc_date) as year, count(*) from civiliancasualty where"
+                               " fdid=%s and state=%s group by year order by year desc;", (fd.fdid, fd.state)),
+        ('residential_structure_fires', "select extract(year from inc_date) as year, count(*) from buildingfires"
+                                        " where fdid=%s and state=%s group by year order by year desc;",
+         (fd.fdid, fd.state)),
+        ('firefighter_casualties', "select right(inc_date, 4) as year, count(*) from ffcasualty where"
+                               " fdid=%s and state=%s group by year order by year desc;", (fd.fdid, fd.state)),
+    )
+
+    for statistic, query, params in queries:
+        counts = years.copy()
+        cursor.execute(query, params)
+
+        for year, count in cursor.fetchall():
+            counts[year] = count
+
+        for year, count in counts.items():
+            nfirs.objects.update_or_create(year=year, defaults={'count': count},
+                                           fire_department=fd, metric=statistic)
+
+    print fd.nfirs_deaths_and_injuries_sum
 
 
