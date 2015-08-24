@@ -573,7 +573,7 @@
                                                 Assessment of performance score based on the risk of death and injury.
                                             </div>
                                             <div class="description">
-                                                This department's performance score is {{ dist_model_risk_model_deaths_injuries_quartile|risk_level|default_if_none:"not available"  }} when compared to other fire departments with communities of the same size classification and in the {{ object.population_metrics_row.risk_model_size1_percent_size2_percent_sum_quartile|risk_level|default:'unknown' }} risk category for the number of fires spread beyond room of origin.
+                                                This department's performance score is {{ dist_model_risk_model_deaths_injuries_quartile|grade|default_if_none:"not available"  }} when compared to other fire departments with communities of the same size classification and in the {{ object.population_metrics_row.risk_model_size1_percent_size2_percent_sum_quartile|risk_level|default:'unknown' }} risk category for the number of fires spread beyond room of origin.
                                             </div>
                                             <!-- Dist Score compared against departments in the same population class with the same death and injury risk -->
                                             <!--
