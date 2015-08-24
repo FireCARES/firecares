@@ -9,13 +9,16 @@ from fire_risk.models.DIST.providers.iaff import response_time_distributions
 from fire_risk.backends.queries import RESIDENTIAL_FIRES_BY_FDID_STATE
 from fire_risk.utils import LogNormalDraw
 from firecares.utils import dictfetchall
-
+from celery import shared_task
+from firecares.celery import app
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'firecares.settings.local')
 
 def update_scores():
     for fd in FireDepartment.objects.all():
         update_performance_score.delay(fd.id)
 
-@task(queue='update')
+@app.task(queue='update')
 def update_performance_score(id, dry_run=False):
     """
     Updates department performance scores.
@@ -73,7 +76,7 @@ def update_performance_score(id, dry_run=False):
     fd.save()
 
 
-@task(queue='update')
+@app.task(queue='update')
 def update_nfirs_counts(id):
     """
     Queries the NFIRS database for statics.
