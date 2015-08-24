@@ -10971,6 +10971,8 @@ table.residential-fires {
 .diamond-control-label {
   position: relative;
   -webkit-transform: rotateZ(-45deg);
+  -moz-transform: rotateZ(-45deg);
+  -ms-transform: rotateZ(-45deg);
   width: 50px;
   height: 50px;
   border: 2px solid pink;
@@ -10979,6 +10981,8 @@ table.residential-fires {
 }
 .diamond-control-label div {
   -webkit-transform: rotateZ(45deg);
+  -moz-transform: rotateZ(45deg);
+  -ms-transform: rotateZ(45deg);
   display: table-cell;
   width: 46px;
   height: 46px;
