@@ -1,4 +1,4 @@
-from celery import task
+from firecares.celery import app
 from django.db import connections
 from django.db.utils import ConnectionDoesNotExist
 from firecares.firestation.models import FireDepartment
@@ -9,10 +9,7 @@ from fire_risk.models.DIST.providers.iaff import response_time_distributions
 from fire_risk.backends.queries import RESIDENTIAL_FIRES_BY_FDID_STATE
 from fire_risk.utils import LogNormalDraw
 from firecares.utils import dictfetchall
-from celery import shared_task
-from firecares.celery import app
-import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'firecares.settings.local')
+
 
 def update_scores():
     for fd in FireDepartment.objects.all():
