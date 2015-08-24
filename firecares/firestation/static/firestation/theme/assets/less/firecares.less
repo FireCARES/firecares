@@ -554,7 +554,6 @@ padding-top: 5px;
 }
 
 .community-risk-legend {
-  width: 100%;
   padding-top: 10px;
   padding-left: 18px;
   line-height: 1.2;
@@ -572,3 +571,29 @@ padding-top: 5px;
 }
 
 
+.circle {
+	border-radius: 50%;
+}
+
+
+.safe-grade-legend-icon {
+  .circle;
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  opacity: .6;
+  margin: 1px;
+}
+
+.safe-grade-legend {
+  padding-top: 0;
+  padding-left: 0;
+  line-height: .94;
+  & div {
+    padding: 5px;
+  }
+
+  .help-text-category {
+    padding-left: 1px;
+  }
+}

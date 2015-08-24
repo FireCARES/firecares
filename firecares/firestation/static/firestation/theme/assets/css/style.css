@@ -11042,7 +11042,6 @@ table.residential-fires {
   border-radius: 2px;
 }
 .community-risk-legend {
-  width: 100%;
   padding-top: 10px;
   padding-left: 18px;
   line-height: 1.2;
@@ -11055,6 +11054,28 @@ table.residential-fires {
 .community-risk-legend .help-text-category {
   font-weight: bold;
   padding-left: 3px;
+}
+.circle {
+  border-radius: 50%;
+}
+.safe-grade-legend-icon {
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  opacity: .6;
+  margin: 1px;
+}
+.safe-grade-legend {
+  padding-top: 0;
+  padding-left: 0;
+  line-height: .94;
+}
+.safe-grade-legend div {
+  padding: 5px;
+}
+.safe-grade-legend .help-text-category {
+  padding-left: 1px;
 }
 .ct-pageWrapper {
   z-index: 3;

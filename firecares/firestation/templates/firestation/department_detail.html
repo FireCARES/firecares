@@ -500,6 +500,26 @@
                                 <div class="metric-cards-title">
                                     <h4>Safe Grades</h4>
                                 </div>
+                                <div class="metric-card">
+                                    <div class="main-content">
+                                        <div class="main-text">
+                                            <div class="community-risk-legend safe-grade-legend">
+                                               <div>
+                                                <div class="safe-grade-legend-icon low"></div>
+                                                <span class="help-text"><span class="help-text-category">Good</span><span>: less than 25% of departments have an equal or smaller performance score.</span></span>
+                                               </div>
+                                               <div>
+                                                <div class="safe-grade-legend-icon medium"></div>
+                                                <span class="help-text"><span class="help-text-category">Fair</span><span>: 25-75% of departments have a smaller performance score.</span></span>
+                                                </div>
+                                               <div>
+                                                <div class="safe-grade-legend-icon high"></div>
+                                                <span class="help-text"><span class="help-text-category">Poor</span><span>: over 75% of departments have an equal or smaller performance score.</span></span>
+                                               </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <div class="metric-card">
                                     <label class="control-label {{ dist_model_residential_fires_quartile|risk_level|default_if_none:"unavailable"  }}">{{ dist_model_residential_fires_quartile|grade|default_if_none:"not available"  }}</label>
