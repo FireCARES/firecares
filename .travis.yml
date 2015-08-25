@@ -3,13 +3,25 @@ language: python
 python:
   - "2.7_with_system_site_packages"
 
+addons:
+  postgresql: "9.4"
+
 before_install:
+  - sudo rm /etc/apt/sources.list.d/ubuntugis-stable-source.list
   - sudo apt-get -qq -y update
   - sudo apt-get install -y libxml2-dev git libpq-dev python-dev python-pip python-pycurl python-psycopg2
-  - sudo apt-get install -y binutils libproj-dev gdal-bin python-gdal libpng-dev libfreetype6-dev pkg-config
+  - sudo apt-get install -y binutils gdal-bin python-gdal libpng-dev libfreetype6-dev pkg-config
   - sudo apt-get install -y libblas-dev liblapack-dev libatlas-base-dev gfortran python-numpy python-scipy python-matplotlib
 
 install:
+  - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b
+  - export PATH=/home/travis/miniconda/bin:$PATH
+  - conda update --yes conda
+  - conda create --yes -n condaenv python=2.7
+  - conda install --yes -n condaenv pip scipy
+  - source activate condaenv
   - travis_wait "pip install -r requirements.txt"
 
 before_script:
