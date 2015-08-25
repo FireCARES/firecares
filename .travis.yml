@@ -30,3 +30,6 @@ before_script:
 
 script:
   - python manage.py test
+
+notifications:
+  slack: prominentedge:9VnNQcaSr6mHKSC2XHwEjkam

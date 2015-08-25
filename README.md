@@ -1,4 +1,4 @@
-FireCARES
+FireCARES [![Build Status](https://travis-ci.org/FireCARES/firecares.svg?branch=master)](https://travis-ci.org/FireCARES/firecares)
 =========
 The FireCARES application
 
