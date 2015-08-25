@@ -1,6 +1,7 @@
 import json
 from .forms import StaffingForm
 from .models import FireDepartment, FireStation, Staffing, PopulationClass1Quartile, PopulationClass9Quartile
+from django.db import connections
 from django.test import TestCase
 from django.test.client import Client
 from django.core.urlresolvers import reverse
@@ -351,6 +352,11 @@ class FireStationTests(TestCase):
                                            population=0,
                                            population_class=9,
                                            department_type='test')
+
+        # update materialized view manually after adding new record
+        cursor = connections['default'].cursor()
+        cursor.execute("REFRESH MATERIALIZED VIEW population_class_9_quartiles;")
+
         self.assertTrue(PopulationClass9Quartile.objects.get(id=fd.id))
 
         # make sure the population class logic works
