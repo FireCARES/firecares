@@ -833,7 +833,7 @@ class Staffing(models.Model):
     officer = models.PositiveIntegerField(verbose_name='Company/Unit Officer', **int_field_defaults)
     officer_paramedic = models.PositiveIntegerField(verbose_name='Company/Unit Officer Paramedic', **int_field_defaults)
     ems_supervisor = models.PositiveIntegerField(verbose_name='EMS Supervisor', **int_field_defaults)
-    chief_officer = models.PositiveIntegerField(verbose_name='Cheif Officer', **int_field_defaults)
+    chief_officer = models.PositiveIntegerField(verbose_name='Chief Officer', **int_field_defaults)
 
     def __unicode__(self):
         return '{0} response capability for {1}'.format(self.apparatus, self.firestation)
