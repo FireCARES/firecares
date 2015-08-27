@@ -182,12 +182,18 @@
 					' : ' + 
 					this.formater(this.value[1])
 				);
+
+				this.element.val(this.formater(this.value[0]) + 
+					' , ' + 
+					this.formater(this.value[1])).trigger('input');
+
 				this.tooltip[0].style[this.stylePos] = this.size * (this.percentage[0] + (this.percentage[1] - this.percentage[0])/2)/100 - (this.orientation === 'vertical' ? this.tooltip.outerHeight()/2 : this.tooltip.outerWidth()/2) +'px';
 
 			} else {
 				this.tooltipInner.text(
 					this.formater(this.value[0])
 				);
+				this.element.val(this.formater(this.value[0])).trigger('input');
 				this.tooltip[0].style[this.stylePos] = this.size * this.percentage[0]/100 - (this.orientation === 'vertical' ? this.tooltip.outerHeight()/2 : this.tooltip.outerWidth()/2) +'px';
 			}
 		},

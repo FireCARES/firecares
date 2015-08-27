@@ -1,6 +1,7 @@
 'use strict';
 
 (function() {
+
     angular.module('fireStation.search', ['ui.select', 'ngSanitize'])
 
     .directive('search', function() {
@@ -26,6 +27,17 @@
                     attrs.$observe('region', function() {
                       scope.params.region = attrs.region;
                     });
+
+
+                    attrs.$observe('population', function() {
+                      scope.params.population = attrs.population;
+                    });
+
+
+                   attrs.$observe('distModelScore', function() {
+                      scope.params.dist_model_score = attrs['distModelScore']; 
+                   });
+
 
                     attrs.$observe('sortBy', function() {
                       scope.params.sortBy = attrs['sortBy'];

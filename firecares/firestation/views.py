@@ -22,9 +22,13 @@ class DISTScoreContextMixin(object):
     @staticmethod
     def add_dist_values_to_context():
         context = {}
-        metrics = FireDepartment.objects.all().aggregate(Max('dist_model_score'), Min('dist_model_score'))
-        context['dist_max'] = metrics['dist_model_score__max']
-        context['dist_min'] = metrics['dist_model_score__min']
+        score_metrics = FireDepartment.objects.all().aggregate(Max('dist_model_score'), Min('dist_model_score'))
+        context['dist_max'] = score_metrics['dist_model_score__max']
+        context['dist_min'] = score_metrics['dist_model_score__min']
+
+        population_metrics = FireDepartment.objects.all().aggregate(Max('population'), Min('population'))
+        context['population_max'] = population_metrics['population__max']/1000
+        context['population_min'] = population_metrics['population__min']/1000
 
         return context
 
@@ -266,17 +270,38 @@ class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitM
         ]
 
     search_fields = ['fdid', 'state', 'region', 'name']
+    range_fields = ['population','dist_model_score']
+
 
     def get_queryset(self):
         queryset = super(FireDepartmentListView, self).get_queryset()
         queryset = self.sort_queryset(queryset, self.request.GET.get('sortBy'))
         self.limit_queryset(self.request.GET.get('limit'))
+        
 
         for field, value in self.request.GET.items():
             if value and value.lower() != 'any' and field in self.search_fields:
                 if field.lower().endswith('name'):
                     field += '__icontains'
                 queryset = queryset.filter(**{field: value})
+
+            #range is passed as pair of comma delimited min and max values for example 12,36
+            if  field in self.range_fields and value and "," in value:
+                min_max = value.split(",")
+                Min = int(min_max[0])
+                Max = int(min_max[1])
+
+                # population values received in thousands need to convert
+                if field == 'population':
+                    Min *= 1000;
+                    Max *= 1000;
+
+                if Min:
+                    queryset = queryset.filter(**{field+'__gte': Min})
+                
+                if Max:
+                    queryset = queryset.filter(**{field+'__lte': Max})
+            
 
         return queryset
 
