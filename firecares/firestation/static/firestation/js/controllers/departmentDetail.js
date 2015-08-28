@@ -17,7 +17,8 @@
                  $scope.stations = data.objects;
 
                   var stationMarkers = [];
-                  for (var i = 0; i < $scope.stations.length; i++) {
+                  var numFireStations = $scope.stations.length;
+                  for (var i = 0; i < numFireStations; i++) {
                       var station = $scope.stations[i];
                       var marker = L.marker(station.geom.coordinates.reverse(), {icon: stationIcon});
                       marker.bindPopup('<b>' + station.name + '</b><br/>' + station.address + ', ' + station.city + ' ' +
@@ -25,21 +26,23 @@
                       stationMarkers.push(marker);
                   }
 
-                  var stationLayer = L.featureGroup(stationMarkers);
-
-                  // Uncomment to show Fire Stations by default
-                  // stationLayer.addTo(departmentMap);
-
-                  layersControl.addOverlay(stationLayer, 'Fire Stations');
-
-                  if (config.geom === null) {
-                    departmentMap.fitBounds(stationLayer.getBounds(), fitBoundsOptions);
-                  }
+				 if (numFireStations > 0) {
+					var stationLayer = L.featureGroup(stationMarkers);
+	
+					// Uncomment to show Fire Stations by default
+					// stationLayer.addTo(departmentMap);
+	
+					layersControl.addOverlay(stationLayer, 'Fire Stations');
+	
+					if (config.geom === null) {
+						departmentMap.fitBounds(stationLayer.getBounds(), fitBoundsOptions);
+					}
+			     }
               });
           }
 
           if (config.centroid != null) {
-           var headquarters = L.marker(config.centroid, {icon: headquartersIcon});
+           var headquarters = L.marker(config.centroid, {icon: headquartersIcon,zIndexOffset:1000});
            headquarters.addTo(departmentMap);
            layersControl.addOverlay(headquarters, 'Headquarters Location');
           };
