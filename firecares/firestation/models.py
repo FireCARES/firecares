@@ -12,7 +12,7 @@ from django.contrib.gis.geos import Point, MultiPolygon
 from django.core.validators import MaxValueValidator
 from django.core.cache import cache
 from django.db import connections
-from django.db.models import Avg, Max, Min
+from django.db.models import Avg, Max, Min, Q
 from django.db.models.loading import get_model
 from django.db.models.signals import post_migrate
 from django.db.utils import ConnectionDoesNotExist
@@ -422,9 +422,8 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
 
     @cached_property
     def nfirs_deaths_and_injuries_sum(self):
-
-        return self.nfirsstatistic_set.filter(fire_department=self,
-                                              metric='civilian_casualties',
+        return self.nfirsstatistic_set.filter(Q(metric='civilian_casualties') | Q(metric='firefighter_casualties'),
+                                              fire_department=self,
                                               year__gte=2010).aggregate(Avg('count'))
 
     @cached_property
@@ -834,7 +833,7 @@ class Staffing(models.Model):
     officer = models.PositiveIntegerField(verbose_name='Company/Unit Officer', **int_field_defaults)
     officer_paramedic = models.PositiveIntegerField(verbose_name='Company/Unit Officer Paramedic', **int_field_defaults)
     ems_supervisor = models.PositiveIntegerField(verbose_name='EMS Supervisor', **int_field_defaults)
-    chief_officer = models.PositiveIntegerField(verbose_name='Cheif Officer', **int_field_defaults)
+    chief_officer = models.PositiveIntegerField(verbose_name='Chief Officer', **int_field_defaults)
 
     def __unicode__(self):
         return '{0} response capability for {1}'.format(self.apparatus, self.firestation)

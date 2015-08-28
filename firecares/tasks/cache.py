@@ -1,9 +1,9 @@
-from celery import task
+from firecares.celery import app
 from django.core.cache import cache
 from firecares.firestation.models import FireDepartment
 
 
-@task(queue='cache')
+@app.task(queue='cache')
 def cache_histogram_data():
     """
     Adds histogram data to the cache.

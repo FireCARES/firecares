@@ -1,4 +1,7 @@
 @charset "UTF-8";
+@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
+@import url(https://fonts.googleapis.com/css?family=Libre+Baskerville:400italic);
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700,800);
 /*------------------------------------------------------------------
 Project:	Estato - Developers HTML Template
 Version:	1.0
@@ -52,9 +55,6 @@ Licensed under the MIT license - http://opensource.org/licenses/MIT
 
 Copyright (c) 2014 Daniel Eden
 */
-@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
-@import url(https://fonts.googleapis.com/css?family=Libre+Baskerville:400italic);
-@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700,800);
 .animated {
   -webkit-animation-duration: 1s;
   animation-duration: 1s;
@@ -10971,6 +10971,8 @@ table.residential-fires {
 .diamond-control-label {
   position: relative;
   -webkit-transform: rotateZ(-45deg);
+  -moz-transform: rotateZ(-45deg);
+  -ms-transform: rotateZ(-45deg);
   width: 50px;
   height: 50px;
   border: 2px solid pink;
@@ -10979,6 +10981,8 @@ table.residential-fires {
 }
 .diamond-control-label div {
   -webkit-transform: rotateZ(45deg);
+  -moz-transform: rotateZ(45deg);
+  -ms-transform: rotateZ(45deg);
   display: table-cell;
   width: 46px;
   height: 46px;
@@ -11005,6 +11009,12 @@ table.residential-fires {
   border: 2px solid #DDDDDD;
   color: #DDDDDD;
 }
+.diamond-legend {
+  width: 10px;
+  height: 10px;
+  opacity: .5;
+  display: inline-block;
+}
 .risk-card {
   -webkit-box-shadow: none;
   box-shadow: none;
@@ -11030,6 +11040,42 @@ table.residential-fires {
   position: relative;
   border: none;
   border-radius: 2px;
+}
+.community-risk-legend {
+  padding-top: 10px;
+  padding-left: 18px;
+  line-height: 1.2;
+}
+.community-risk-legend .help-text {
+  opacity: .6;
+  font-size: 11px;
+  padding-right: 15px;
+}
+.community-risk-legend .help-text-category {
+  font-weight: bold;
+  padding-left: 3px;
+}
+.circle {
+  border-radius: 50%;
+}
+.safe-grade-legend-icon {
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  opacity: .6;
+  margin: 1px;
+}
+.safe-grade-legend {
+  padding-top: 0;
+  padding-left: 0;
+  line-height: .94;
+}
+.safe-grade-legend div {
+  padding: 5px;
+}
+.safe-grade-legend .help-text-category {
+  padding-left: 1px;
 }
 .ct-pageWrapper {
   z-index: 3;

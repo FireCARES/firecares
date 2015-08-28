@@ -479,6 +479,8 @@ padding-top: 5px;
 .diamond-control-label {
   position: relative;
   -webkit-transform: rotateZ(-45deg);
+  -moz-transform: rotateZ(-45deg);
+  -ms-transform: rotateZ(-45deg);
   width: 50px;
   height: 50px;
   border: 2px solid pink;
@@ -487,6 +489,8 @@ padding-top: 5px;
 }
 .diamond-control-label div {
   -webkit-transform: rotateZ(45deg);
+  -moz-transform: rotateZ(45deg);
+  -ms-transform: rotateZ(45deg);
   display: table-cell;
   width: 46px;
   height: 46px;
@@ -513,6 +517,14 @@ padding-top: 5px;
   border: 2px solid #DDDDDD;
   color: #DDDDDD;
 }
+
+.diamond-legend {
+  width: 10px;
+  height: 10px;
+  opacity: .5;
+  display: inline-block
+}
+
 
 .risk-card {
   -webkit-box-shadow: none;
@@ -541,4 +553,47 @@ padding-top: 5px;
   border-radius: 2px;
 }
 
+.community-risk-legend {
+  padding-top: 10px;
+  padding-left: 18px;
+  line-height: 1.2;
 
+  & .help-text {
+    opacity: .6;
+    font-size: 11px;
+    padding-right: 15px;
+  }
+
+  & .help-text-category {
+    font-weight: bold;
+    padding-left: 3px;
+  }
+}
+
+
+.circle {
+	border-radius: 50%;
+}
+
+
+.safe-grade-legend-icon {
+  .circle;
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  opacity: .6;
+  margin: 1px;
+}
+
+.safe-grade-legend {
+  padding-top: 0;
+  padding-left: 0;
+  line-height: .94;
+  & div {
+    padding: 5px;
+  }
+
+  .help-text-category {
+    padding-left: 1px;
+  }
+}
