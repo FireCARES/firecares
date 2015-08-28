@@ -118,3 +118,4 @@ def quartile_text(value):
 
     return dict(zip(range(1, 5), ['lowest', 'second lowest', 'second highest', 'highest'])).get(value)
 
+

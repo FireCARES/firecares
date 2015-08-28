@@ -1,4 +1,5 @@
 import json
+import requests
 from .forms import StaffingForm
 from .models import FireDepartment, FireStation, Staffing, PopulationClass1Quartile, PopulationClass9Quartile
 from django.db import connections
@@ -388,3 +389,21 @@ class FireStationTests(TestCase):
         self.assertEqual('medium', risk_level(3))
         self.assertEqual('high', risk_level(4))
         self.assertIsNone(risk_level(5))
+
+
+    def test_performance_model_urls(self):
+        """
+        Make HEAD requests to ensure external sites work.
+        """
+
+        urls = [
+            'http://www.nist.gov/el/fire_research/upload/Report-on-Residential-Fireground-Field-Experiments.pdf',  # NIST TN 1661
+            'http://nvlpubs.nist.gov/nistpubs/TechnicalNotes/NIST.TN.1797.pdf',  # NIST TN 1797
+            'http://www.nfpa.org/codes-and-standards/document-information-pages?mode=code&code=1710'  # NFPA 1710
+        ]
+
+        for url in urls:
+            response = requests.head(url)
+            self.assertEqual(response.status_code, 200, 'Url: {0} did not return a 200.'.format(url))
+
+

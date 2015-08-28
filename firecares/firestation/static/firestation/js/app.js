@@ -5,6 +5,7 @@
       'ngResource',
       'fireStation.factories',
       'fireStation.departmentDetailController',
+      'fireStation.performanceScoreController',
       'fireStation.mapService',
       'fireStation.gauge',
       'fireStation.search',

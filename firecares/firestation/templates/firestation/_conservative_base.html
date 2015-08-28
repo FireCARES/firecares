@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<!--[if IE 8 ]>
+<html class="no-js ie8" lang="en"> <![endif]-->
+<!--[if IE 9 ]>
+<html class="no-js ie9" lang="en"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head lang="en">
+   <meta charset="UTF-8">
+    <meta name="description" content="{% block description %}{% endblock %}">
+    <meta name="author" content="Prominent Edge LLC">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <title>FireCARES - {% block page_title %}{% endblock %}</title>
+    {% include 'firestation/_favicon.html' %}
+
+
+    <!--[if lt IE 9]>
+    <script src="assets/bootstrap/js/html5shiv.min.js"></script>
+    <script src="assets/bootstrap/js/respond.min.js"></script>
+    <![endif]-->
+
+    {% block extra_head %}
+    {% endblock %}
+
+</head>
+<body class="ct-headroom--fixedTopBar cssAnimate" data-spy="scroll" data-target=".ct-js-navigation" data-offset="100">
+
+
+
+<nav class="ct-menuMobile">
+    <ul class="ct-menuMobile-navbar">
+        <li class="dropdown"><a>Home<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="index.html">Home V1 - Portal Slider</a></li>
+                <li><a href="index2.html">Home V2 - Portal Map</a></li>
+                <li><a href="index3.html">Home V3 - Portal Map (Light)</a></li>
+                <li><a href="index4.html">Home V4 - Real Estate Agency</a></li>
+                <li><a href="index5.html">Home V5 - Property Slider</a></li>
+                <li><a href="index6.html">Home V6 - Simple Onepager</a></li>
+                <li><a href="index7.html">Home V7 - Onepager Video</a></li>
+                <li><a href="index8.html">Home V8 - Side Map</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"><a>Properties<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="product-single.html">Property Page V1</a></li>
+                <li><a href="product-single2.html">Property Page V2</a></li>
+                <li><a href="search-grid.html">Properties Page - Grid</a></li>
+                <li><a href="search-list.html">Properties Page - Listing</a></li>
+                <li><a href="properties.html">My Properties Page</a></li>
+                <li><a href="product-singleEdit.html">Front Editing - Property Page V1</a></li>
+                <li><a href="product-single2Edit.html">Front Editing - Property Page V2</a></li>
+                <li><a href="submission.html">Submission Page</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"><a>Agents<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="agency.html">Agency Page</a></li>
+                <li><a href="agent.html">Agent's Profile</a></li>
+                <li><a href="about.html">About Us</a></li>
+                <li><a href="agency-edit.html">Front Editing - Agency Page</a></li>
+                <li><a href="agent-edit.html">Front Editing - Agent's Profile</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"><a>Features<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="features-grid.html"><i class="fa fa-fw fa-th"></i> Grid System</a></li>
+                <li><a href="features-typography.html"><i class="fa fa-fw fa-font"></i> Typography</a></li>
+                <li><a href="features-buttons.html"><i class="fa fa-fw fa-link"></i> Buttons</a></li>
+                <li><a href="features-forms.html"><i class="fa fa-fw fa-align-justify"></i> Forms</a></li>
+                <li><a href="features-tables.html"><i class="fa fa-fw fa-table"></i> Tables</a></li>
+                <li><a href="features-sliders.html"><i class="fa fa-fw fa-navicon"></i> Sliders</a></li>
+                <li><a href="features-pricetables.html"><i class="fa fa-fw fa-money"></i> Pricing Tables</a>
+                </li>
+                <li><a href="features-iconboxes.html"><i class="fa fa-fw fa-th-large"></i> Icon Boxes</a>
+                </li>
+                <li><a href="features-personboxes.html"><i class="fa fa-fw fa-users"></i> Person Boxes</a>
+                </li>
+                <li><a href="features-counters.html"><i class="fa fa-fw fa-plus"></i> Counters</a></li>
+                <li><a href="features-toggable.html"><i class="fa fa-fw fa-toggle-on"></i> Toggables</a>
+                </li>
+                <li><a href="features-m-sections.html"><i class="fa fa-fw fa-play"></i> Media Sections</a>
+                </li>
+                <li><a href="features-charts.html"><i class="fa fa-fw fa-area-chart"></i> Charts</a></li>
+                <li><a href="features-p-bars.html"><i class="fa fa-fw fa-bars"></i> Progress Bars</a></li>
+                <li><a href="features-p-icons.html"><i class="fa fa-fw fa-star-half-full"></i> Progress
+                    Icons</a></li>
+                <li><a href="features-lists.html"><i class="fa fa-fw fa-list"></i> Lists Simple</a></li>
+                <li><a href="features-lists2.html"><i class="fa fa-fw fa-list"></i> Lists Icons</a></li>
+                <li><a href="features-developers.html"><i class="fa fa-fw fa-code"></i> For developers</a>
+                </li>
+            </ul>
+        </li>
+        <li class="dropdown active"><a>Pages<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="pricing.html">Pricing Tables</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+                <li><a href="terms.html">Terms</a></li>
+                <li class="active"><a href="policy.html">Privacy Policy</a></li>
+                <li><a href="blog.html">Blog</a></li>
+                <li><a href="blog-single.html">Blog Single</a></li>
+                <li><a href="registration.html">Registration</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="404.html">404</a></li>
+                <li><a href="maintenance.html">Maintenance</a></li>
+            </ul>
+        </li>
+        <li class="dropdown">
+            <a>Gallery<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="gallery1.html">Gallery - Three Colums</a></li>
+                <li><a href="gallery2.html">Gallery - Four Colums</a></li>
+                <li><a href="gallery3.html">Gallery - Five Colums</a></li>
+            </ul>
+        </li>
+        <li class="dropdown"><a href="contact.html">Contact Us</a></li>
+    </ul>
+</nav>
+
+<form class="ct-searchFormMobile ct-u-marginBottom50" role="form">
+    <div class="form-group ">
+        <div class="ct-form--label--type1">
+            <div class="ct-u-displayTableVertical">
+                <div class="ct-u-displayTableCell">
+                    <div class="ct-input-group-btn">
+                        <button class="btn btn-primary">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="ct-u-displayTableCell text-center">
+                    <span class="text-uppercase">Search for property</span>
+                </div>
+            </div>
+        </div>
+        <div class="ct-u-displayTableVertical ct-u-marginBottom20">
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Property id</label>
+                    <input type="text" required class="form-control input-lg" placeholder="Any">
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Location</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">New York</option>
+                        <option value="2">New Jersey</option>
+                        <option value="3">Newark</option>
+                        <option value="4">Philadelphia</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Sub-Location</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">New York</option>
+                        <option value="2">Jersey</option>
+                        <option value="3">Newark</option>
+                        <option value="4">Philadelphia</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Property Status</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">Sale</option>
+                        <option value="2">New</option>
+                        <option value="3">Loan</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Property type </label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">Houses</option>
+                        <option value="2">Industrial</option>
+                        <option value="3">Retail</option>
+                        <option value="4">Apartments</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="ct-u-displayTableVertical ct-slider--row">
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Bedrooms</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3+</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <div class="ct-form--item">
+                    <label>Bathrooms</label>
+                    <select class="ct-js-select ct-select-lg">
+                        <option value="any">Any</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3+</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell ct-u-marginBottom40">
+                <div class="ct-form--item ct-sliderAmount">
+                    <label>Price ($)</label>
+                    <input type="text" value="1000000" required class="form-control input-lg ct-js-slider-min ct-u-marginBottom20" placeholder="">
+                    <input type="text" class="slider ct-js-sliderAmount" value="" data-slider-tooltip="hide" data-slider-handle="square" data-slider-min="5000" data-slider-max="5000000" data-slider-step="5000" data-slider-value="[1000000,2000000]">
+                    <label class="pull-left">Min</label>
+                    <label class="pull-right">Max</label>
+                    <input type="text" value="2000000" required class="form-control input-lg ct-js-slider-max" placeholder="">
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <input type="text" class="slider ct-js-sliderTicks" value="" data-slider-handle="square" data-slider-min="0" data-slider-max="200" data-slider-step="20" data-slider-value="[60,120]"/>
+                <label class="text-center center-block">Area (m2)</label>
+            </div>
+            <div class="ct-u-displayTableCell">
+                <button type="submit" class="btn btn-warning text-capitalize pull-right">search now</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<div id="ct-js-wrapper" class="ct-pageWrapper">
+
+<div class="ct-navbarMobile">
+    <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="index.html"><img src="assets/images/content/logo.png" alt="Estato"> </a>
+    <button type="button" class="searchForm-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span><i class="fa fa-search"></i></span>
+    </button>
+</div>
+
+{% include "firestation/_navbar.html" %}
+
+
+<div class="ct-site--map">
+    <div class="container">
+        {% block breadcrumbs %}
+            <a href="index.html">Home</a>
+            <a href="faq.html">Privacy Policy</a>
+        {% endblock %}
+    </div>
+</div>
+
+<header class="ct-mediaSection" data-stellar-background-ratio="0.3" data-height="140" data-type="parallax" data-bg-image="assets/images/content/agency-parallax.jpg" data-bg-image-mobile="assets/images/content/agency-parallax.jpg">
+    <div class="ct-mediaSection-inner">
+        <div class="container">
+            <div class="ct-heading--main text-center">
+                <h3 class="text-uppercase ct-u-text--white">{% block title %}Privacy Policy{% endblock %}</h3>
+            </div>
+        </div>
+    </div>
+</header>
+
+{% block section %}
+<section class="ct-u-paddingBoth60">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-4 col-md-3">
+                <div class="ct-navigation nav ct-js-navigation text-capitalize">
+                    <ul class="nav nav-tabs" role="tablist">
+                        {% block scrollspy %}
+                        <li class="active"><a class="ct-js-btnScroll" href="#one">Introduction</a></li>
+                        <li><a class="ct-js-btnScroll" href="#two">General Terms</a></li>
+                        <li><a class="ct-js-btnScroll" href="#three">Data Handling</a></li>
+                        <li><a class="ct-js-btnScroll" href="#four"> Fees</a></li>
+                        <li><a class="ct-js-btnScroll" href="#five">Miscellaneous</a></li>
+                        {% endblock %}
+                    </ul>
+                </div>
+            </div>
+            <div class="col-sm-8 col-md-9">
+                {% block content %}
+                <div class="ct-heading ct-u-marginBottom20">
+                    <h3 class="text-uppercase" id="one">Introduction</h3>
+                </div>
+                <p class="ct-u-marginBottom50">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus. Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis vel hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci. Nam congue, pede vitae dapibus aliquet, elit magna vulputate arcu, vel tempus metus leo non est. Etiam sit amet lectus quis est congue mollis. Phasellus congue lacus eget neque. Phasellus ornare, ante vitae consectetuer consequat, purus sapien ultricies dolor, et mollis pede metus eget nisi. Praesent sodales velit quis augue. Cras suscipit, urna at aliquam rhoncus, urna quam viverra nisi, in interdum massa nibh nec erat.</p>
+
+                <div class="ct-heading ct-u-marginBottom20">
+                    <h3 class="text-uppercase" id="two">General Terms</h3>
+                </div>
+
+                <p class="ct-u-marginBottom50">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus. Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis vel hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci.<br><br>
+
+                    Nam congue, pede vitae dapibus aliquet, elit magna vulputate arcu, vel tempus metus leo non est. Etiam sit amet lectus quis est congue mollis. Phasellus congue lacus eget neque. Phasellus ornare, ante vitae consectetuer consequat, purus sapien ultricies dolor, et mollis pede metus eget nisi. Praesent sodales velit quis augue. Cras suscipit, urna at aliquam rhoncus, urna quam viverra nisi, in interdum massa nibh nec erat.<br><br>
+
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus. Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis vel hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci. Nam congue, pede vitae dapibus aliquet, elit magna vulputate arcu, vel tempus metus leo non est. Etiam sit amet lectus quis est congue mollis. Phasellus congue lacus eget neque. Phasellus ornare, ante vitae consectetuer consequat, purus sapien ultricies dolor, et mollis pede metus eget nisi. Praesent sodales velit quis augue. Cras suscipit, urna at aliquam rhoncus, urna quam viverra nisi, in interdum massa nibh nec erat.</p>
+
+                <div class="ct-heading ct-u-marginBottom20">
+                    <h3 class="text-uppercase" id="three">Data Handling</h3>
+                </div>
+
+                <p class="ct-u-marginBottom50">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus. Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis vel hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci.<br><br>
+
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus. Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis vel hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci. Nam congue, pede vitae dapibus aliquet, elit magna vulputate arcu, vel tempus metus leo non est. Etiam sit amet lectus quis est congue mollis. Phasellus congue lacus eget neque. Phasellus ornare, ante vitae consectetuer consequat, purus sapien ultricies dolor, et mollis pede metus eget nisi. Praesent sodales velit quis augue. Cras suscipit, urna at aliquam rhoncus, urna quam viverra nisi, in interdum massa nibh nec erat.</p>
+
+                <div class="ct-heading ct-u-marginBottom20">
+                    <h3 class="text-uppercase" id="four">Fees</h3>
+                </div>
+
+                <p class="ct-u-marginBottom50">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus. Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis vel hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci.<br><br>
+
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus. Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis vel hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci. Nam congue, pede vitae dapibus aliquet, elit magna vulputate arcu, vel tempus metus leo non est. Etiam sit amet lectus quis est congue mollis. Phasellus congue lacus eget neque. Phasellus ornare, ante vitae consectetuer consequat, purus sapien ultricies dolor, et mollis pede metus eget nisi. Praesent sodales velit quis augue. Cras suscipit, urna at aliquam rhoncus, urna quam viverra nisi, in interdum massa nibh nec erat.<br><br>
+
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus. Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis vel hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci. Nam congue, pede vitae dapibus aliquet, elit magna vulputate arcu, vel tempus metus leo non est. Etiam sit amet lectus quis est congue mollis. Phasellus congue lacus eget neque. Phasellus ornare, ante vitae consectetuer consequat, purus sapien ultricies dolor, et mollis pede metus eget nisi. Praesent sodales velit quis augue. Cras suscipit, urna at aliquam rhoncus, urna quam viverra nisi, in interdum massa nibh nec erat.</p>
+
+                <div class="ct-heading ct-u-marginBottom20">
+                    <h3 class="text-uppercase" id="five">Exceptions</h3>
+                </div>
+
+                <p class="ct-u-marginBottom50">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus. Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis vel hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci.<br><br>
+
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus. Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis vel hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci. Nam congue, pede vitae dapibus aliquet, elit magna vulputate arcu, vel tempus metus leo non est. Etiam sit amet lectus quis est congue mollis. Phasellus congue lacus eget neque. Phasellus ornare, ante vitae consectetuer consequat, purus sapien ultricies dolor, et mollis pede metus eget nisi. Praesent sodales velit quis augue. Cras suscipit, urna at aliquam rhoncus, urna quam viverra nisi, in interdum massa nibh nec erat.<br><br>
+
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus. Phasellus pharetra nulla ac diam. Quisque semper justo at risus. Donec venenatis, turpis vel hendrerit interdum, dui ligula ultricies purus, sed posuere libero dui id orci. Nam congue, pede vitae dapibus aliquet, elit magna vulputate arcu, vel tempus metus leo non est. Etiam sit amet lectus quis est congue mollis. Phasellus congue lacus eget neque. Phasellus ornare, ante vitae consectetuer consequat, purus sapien ultricies dolor, et mollis pede metus eget nisi. Praesent sodales velit quis augue. Cras suscipit, urna at aliquam rhoncus, urna quam viverra nisi, in interdum massa nibh nec erat.</p>
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% include 'firestation/_footer.html' %}
+
+</div>
+
+{% include "firestation/_firecares_static.html" %}
+{% include 'google_analytics.html' %}
+
+</body>
+</html>

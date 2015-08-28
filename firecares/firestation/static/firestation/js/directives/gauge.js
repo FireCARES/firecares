@@ -31,7 +31,8 @@
              description: '@?',
              value: '@?',
              min: '@?',
-             max: '@?'
+             max: '@?',
+             learnMore: '@?'
           },
           // The linking function will add behavior to the template
           link: function(scope, element, attrs) {

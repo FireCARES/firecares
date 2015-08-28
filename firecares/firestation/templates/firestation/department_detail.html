@@ -493,7 +493,7 @@
                             <div class="col-sm-6 col-md-12 ct-u-marginBottom30">
                                 <gauge description="This department is {{ object.dist_model_score|floatformat }} seconds over the industry standard."
                                        metric-title="Performance Score" min="{{ population_stats.dist_model_score__min|floatformat }}"
-                                       max="{{ population_stats.dist_model_score__max|floatformat }}" value="{{ object.dist_model_score|floatformat }}" inverse></gauge>
+                                       max="{{ population_stats.dist_model_score__max|floatformat }}" value="{{ object.dist_model_score|floatformat }}" inverse learn-more="{% url 'models_performance_score' %}"></gauge>
                             </div>
                             <div class="col-sm-6 col-md-12 ct-u-marginBottom10">
                                 <!-- Safe Grade Cards -->
