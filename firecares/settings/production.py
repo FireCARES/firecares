@@ -40,6 +40,7 @@ STATICFILES_STORAGE = "firecares.utils.CachedS3BotoStorage"
 STATIC_URL = COMPRESS_URL
 DEBUG = False
 AWS_QUERYSTRING_AUTH = False
+EMAIL_USE_TLS=True
 
 CELERYBEAT_SCHEDULE = {
     # Executes nightly at midnight.
