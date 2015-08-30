@@ -145,9 +145,6 @@ class DepartmentDetailView(LoginRequiredMixin, CacheMixin, DISTScoreContextMixin
             except (KeyError, TypeError):
                 context['national_risk_model_deaths_injuries_sum_quartile'] = None
 
-
-
-
         context.update(self.add_dist_values_to_context())
         return context
 
@@ -192,7 +189,11 @@ class SafeSortMixin(object):
             queryset = queryset.order_by(order_by)
 
             if order_by == '-population':
-                queryset = queryset.filter(population__gt=0, population__isnull=False)
+                queryset = queryset.filter(population__gte=0, population__isnull=False)
+
+        # default sorting to -population
+        else:
+            queryset = queryset.filter(population__gte=0, population__isnull=False).order_by('-population')
 
         return queryset
 
