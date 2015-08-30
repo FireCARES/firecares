@@ -9,7 +9,8 @@
       'fireStation.mapService',
       'fireStation.gauge',
       'fireStation.search',
-      'fireStation.graphs'
+      'fireStation.graphs',
+      'ui.bootstrap'
   ])
 
   .config(function($interpolateProvider, $httpProvider, $resourceProvider) {

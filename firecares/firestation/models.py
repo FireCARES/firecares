@@ -295,6 +295,18 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
         ]
 
     @property
+    def predicted_fires_sum(self):
+        """
+        Convenience method to sum
+        """
+        if self.risk_model_fires_size0 is None and self.risk_model_fires_size1 is None \
+                and self.risk_model_fires_size2 is None:
+            return
+
+        return (self.risk_model_fires_size0 or 0) + (self.risk_model_fires_size1 or 0) + \
+               (self.risk_model_fires_size2 or 0)
+
+    @property
     def size2_and_greater_sum(self):
         """
         Convenience method to sum

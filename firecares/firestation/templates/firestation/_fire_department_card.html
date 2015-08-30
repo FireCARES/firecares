@@ -20,21 +20,27 @@
                 <div class="ct-product--tilte">
                     {{ department.name }}
                 </div>
-                <div class="ct-product--description">
-                    {{ department.station_address.address_line1 }}
-                </div>
             </div>
         </div>
         <div class="ct-product--meta">
             <div class="ct-icons">
-                <span>
-                    <i class="fa fa-building-o"></i> {{ department.firestation_set.count }}
+                <span tooltip="Predicted number of fires" tooltip-append-to-body="true" tooltip-popup-delay="700">
+                    <i class="fa fa-fire"></i>
+                    {{ department.predicted_fires_sum|floatformat:"0"|intcomma|default:"N/A" }}
                 </span>
-                <span>
-                    <i class="fa fa-clock-o"></i> {{ department.dist_model_score|floatformat:"0" }}s
+                <span tooltip="Performance score" tooltip-append-to-body="true" tooltip-popup-delay="700">
+                    <i class="fa fa-clock-o"></i>
+                    {% if department.dist_model_score %}
+                        {{ department.dist_model_score|floatformat:"0" }}s
+                    {% else %}
+                        N/A
+                    {% endif %}
                 </span>
-                <span>
+                <span tooltip="Protected population" tooltip-append-to-body="true" tooltip-popup-delay="700">
                     <i class="fa fa-users"></i> {{ department.population|abbreviatedintword }}
+                </span>
+                <span tooltip="State" tooltip-append-to-body="true" tooltip-popup-delay="700">
+                    <i class="fa fa-map-pin"></i> {{ department.state }}
                 </span>
             </div>
             <div class="ct-text"></div>
