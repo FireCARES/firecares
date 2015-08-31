@@ -74,9 +74,9 @@ def update_performance_score(id, dry_run=False):
 
 
 @app.task(queue='update')
-def update_nfirs_counts(id):
+def update_nfirs_counts(id, year=None):
     """
-    Queries the NFIRS database for statics.
+    Queries the NFIRS database for statistics.
     """
 
     if not id:
@@ -90,21 +90,23 @@ def update_nfirs_counts(id):
         return
 
     years = {}
-    # get a list of years populated in the NFIRS database
-    years_query = "select distinct(extract(year from inc_date)) as year from buildingfires;"
-    cursor.execute(years_query)
-
-    # default years to None
-    map(years.setdefault, [int(n[0]) for n in cursor.fetchall()])
+    if not year:
+        # get a list of years populated in the NFIRS database
+        years_query = "select distinct(extract(year from inc_date)) as year from buildingfires;"
+        cursor.execute(years_query)
+        # default years to None
+        map(years.setdefault, [int(n[0]) for n in cursor.fetchall()])
+    else:
+        years[year] = None
 
     queries = (
         ('civilian_casualties', "select extract(year from inc_date) as year, count(*) from civiliancasualty where"
-                               " fdid=%s and state=%s group by year order by year desc;", (fd.fdid, fd.state)),
+                               " fdid=%s and state=%s and extract(year from inc_date) in %s group by year order by year desc;", (fd.fdid, fd.state, tuple(years.keys()))),
         ('residential_structure_fires', "select extract(year from inc_date) as year, count(*) from buildingfires"
-                                        " where fdid=%s and state=%s group by year order by year desc;",
-         (fd.fdid, fd.state)),
+                                        " where fdid=%s and state=%s and extract(year from inc_date) in %s group by year order by year desc;",
+         (fd.fdid, fd.state, tuple(years.keys()))),
         ('firefighter_casualties', "select right(inc_date, 4) as year, count(*) from ffcasualty where"
-                               " fdid=%s and state=%s group by year order by year desc;", (fd.fdid, fd.state)),
+                               " fdid=%s and state=%s and right(inc_date, 4)::integer in %s group by year order by year desc;", (fd.fdid, fd.state, tuple(years.keys()))),
     )
 
     for statistic, query, params in queries:
@@ -115,9 +117,4 @@ def update_nfirs_counts(id):
             counts[year] = count
 
         for year, count in counts.items():
-            nfirs.objects.update_or_create(year=year, defaults={'count': count},
-                                           fire_department=fd, metric=statistic)
-
-    print fd.nfirs_deaths_and_injuries_sum
-
-
+            nfirs.objects.update_or_create(year=year, defaults={'count': count}, fire_department=fd, metric=statistic)
