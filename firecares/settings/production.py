@@ -8,6 +8,7 @@ INSTALLED_APPS = (
 
 STATSD_HOST = 'stats.garnertb.com'
 STATSD_PREFIX = 'firecares'
+STATSD_CELERY_SIGNALS = True
 
 STATSD_PATCHES = [
     'django_statsd.patches.db',
