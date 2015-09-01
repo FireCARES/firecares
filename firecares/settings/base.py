@@ -210,6 +210,7 @@ CELERY_CREATE_MISSING_QUEUES = True
 CELERY_IMPORTS = (
     'firecares.tasks.cache',
     'firecares.tasks.update',
+    'firecares.tasks.email',
 )
 
 CELERY_QUEUES = [
