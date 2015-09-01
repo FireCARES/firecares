@@ -123,3 +123,9 @@ input.ng-invalid {
     color: #605e5e;
     letter-spacing: -1px;
 }
+
+.nav > li > a:hover, .nav > li > a:focus {
+    color: inherit;
+    background-color: inherit;
+    outline: none;
+}
