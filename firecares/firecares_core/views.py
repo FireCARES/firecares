@@ -1,13 +1,11 @@
-from django.http import HttpResponseRedirect
-from django.views.generic import View
-from django.shortcuts import render
-from django.core.urlresolvers import reverse
-from django.core.mail import send_mail
+from .forms import ForgotUsernameForm
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-from .forms import ForgotUsernameForm
-from django.template.loader import render_to_string
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.views.generic import View
+
 
 class ForgotUsername(View):
     form_class = ForgotUsernameForm
@@ -24,13 +22,14 @@ class ForgotUsername(View):
             if user:
                 context = {'username': user.username,
                            'login': request.build_absolute_uri(reverse('login'))}
-                form.send_mail('Your Firecares Username',
+                form.send_mail('Your FireCARES Username',
                                'registration/forgot_username_email.txt',
                                context,
                                settings.DEFAULT_FROM_EMAIL,
                                user.email)
             return HttpResponseRedirect(reverse('username_sent'))
         return render(request, self.template_name, {'form': form})
+
 
 class UsernameSent(View):
     template_name = 'registration/username_sent.html'

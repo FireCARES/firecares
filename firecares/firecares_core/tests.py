@@ -164,6 +164,7 @@ class CoreTests(TestCase):
         self.assertEqual(resolve(urlsplit(resp.url).path).url_name, 'password_reset_complete')
 
         resp = c.post(reverse('login'), {'username': 'tester_mcgee', 'password': 'mynewpassword'})
+
         # User is returned to the login page on error vs redirected by default
         self.assertEqual(resp.status_code, 302)
         self.assertNotEqual(resolve(urlsplit(resp.url).path).url_name, 'login')
