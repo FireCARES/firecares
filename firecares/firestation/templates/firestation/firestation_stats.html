@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% load i18n humanize %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{{ STATIC_URL }}firestation/firestation.css" />
+{% endblock %}
+
 {% block body_outer %}
     <div class="container">
         <div class="row">
