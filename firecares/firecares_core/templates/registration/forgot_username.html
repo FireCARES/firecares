@@ -18,28 +18,20 @@
                 </div>
             </div>
             <div class="ct-u-displayTableCell text-center">
-                <span class="text-uppercase">LOGIN TO FIRECARES</span>
+                <span class="text-uppercase">FORGOT USERNAME</span>
             </div>
         </div>
     </div>
     {% with WIDGET_ERROR_CLASS='form-error' %}
     <div class="ct-form--item ct-u-marginBottom20 form-group">
-        <label>Your Username</label>
-        {% render_field form.username type="text" class+="form-control input-lg" %}
-        {{ form.username.errors }}
-    </div>
-    <div class="ct-form--item ct-u-marginBottom20 form-group">
-        <label>Password</label>
-        {% render_field form.password type="password" class+="form-control input-lg" %}
-        {{ form.password.errors }}
+        <label>Your Email</label>
+        {% render_field form.email type="email" class+="form-control input-lg" %}
+        {{ form.email.errors }}
     </div>
     {{ form.non_field_errors }}
     {% endwith %}
-    <div class="ct-form--item ct-u-marginBottom20">
-         <a href="{% url 'password_reset' %}">Forgot Password</a> <a href="{% url 'forgot_username' %}">or Username</a>
-    </div>
     <div class="ct-form--item">
-        <button type="submit" class="btn btn-warning center-block">Login</button>
+        <button type="submit" class="btn btn-warning center-block">Send username to my email</button>
     </div>
 </div>
 {% endblock %}
