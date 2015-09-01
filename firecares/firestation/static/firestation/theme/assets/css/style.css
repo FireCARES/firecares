@@ -11302,6 +11302,12 @@ table.residential-fires {
 .safe-grade-legend .help-text-category {
   padding-left: 1px;
 }
+.nav > li > a:hover,
+.nav > li > a:focus {
+  color: inherit;
+  background-color: inherit;
+  outline: none;
+}
 .ct-pageWrapper {
   z-index: 3;
   background-color: #ffffff;
