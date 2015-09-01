@@ -30,7 +30,10 @@ DEBUG_TOOLBAR_CONFIG = {
     "SHOW_TOOLBAR_CALLBACK" : show_toolbar,
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+CELERY_ALWAYS_EAGER = True
 
 try:
     from local_settings import *  # noqa

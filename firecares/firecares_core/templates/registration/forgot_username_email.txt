@@ -1,0 +1,3 @@
+Your username is: {{ username }}
+
+You can login with your username at: {{ login }}
