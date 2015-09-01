@@ -1,10 +1,11 @@
 from .models import RecentlyUpdatedMixin
 
 from datetime import timedelta
+from urlparse import urlsplit
 from django.contrib.auth import get_user_model, authenticate
 from django.core import mail
 from django.core.management import call_command
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, resolve
 from django.test import Client, TestCase
 from django.utils import timezone
 
@@ -12,6 +13,7 @@ User = get_user_model()
 
 
 class CoreTests(TestCase):
+    fixtures = ['test_forgot.json']
 
     def test_home_requires_login(self):
         """
@@ -131,3 +133,54 @@ class CoreTests(TestCase):
             response = c.get(reverse('registration_register'), follow=True)
             self.assertTrue(response.status_code, 200)
             self.assertEqual(response.request['PATH_INFO'], '/accounts/register/closed/')
+
+    def test_password_reset(self):
+        """
+        Tests the forgotten/reset password workflow.
+        """
+
+        c = Client()
+
+        resp = c.get(reverse('password_reset'))
+        self.assertTrue(resp.status_code, 200)
+
+        resp = c.post(reverse('password_reset'), data={'email': 'test@example.com'})
+        self.assertEqual(resp.status_code, 302)
+
+        self.assertTrue(len(mail.outbox), 1)
+        user = User.objects.get(username='tester_mcgee')
+
+        token = resp.context[0]['token']
+        uid = resp.context[0]['uid']
+
+        # Grab the token and uidb64 so that we can hit the reset url
+        resp = c.get(reverse('password_reset_confirm', kwargs={'token': token, 'uidb64': uid}))
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.template_name.endswith('password_reset_confirm.html'))
+
+        resp = c.post(reverse('password_reset_confirm', kwargs={'token': token, 'uidb64': uid}),
+                      {'new_password1': 'mynewpassword', 'new_password2': 'mynewpassword'})
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resolve(urlsplit(resp.url).path).url_name, 'password_reset_complete')
+
+        resp = c.post(reverse('login'), {'username': 'tester_mcgee', 'password': 'mynewpassword'})
+        # User is returned to the login page on error vs redirected by default
+        self.assertEqual(resp.status_code, 302)
+        self.assertNotEqual(resolve(urlsplit(resp.url).path).url_name, 'login')
+
+    def test_forgot_username(self):
+        """
+        Tests the forgot username workflow.
+        """
+
+        c = Client()
+        resp = c.get(reverse('forgot_username'))
+        self.assertTrue(resp.status_code, 200)
+
+        resp = c.post(reverse('forgot_username'), {'email': 'test@example.com'})
+        self.assertTrue(resp.status_code, 302)
+        self.assertEqual(resolve(urlsplit(resp.url).path).url_name, 'username_sent')
+
+        self.assertTrue(len(mail.outbox), 1)
+        # Make sure that the username is actually in the email (otherwise what's the point?)
+        self.assertTrue('tester_mcgee' in mail.outbox[0].body)

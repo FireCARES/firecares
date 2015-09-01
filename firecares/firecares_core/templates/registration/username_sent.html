@@ -1,0 +1,34 @@
+{% extends 'registration/registration_base.html' %}
+{% load widget_tweaks %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'firestation_home' %}">Home</a>
+    <a href="{% url 'login' %}">Login</a>
+{% endblock %}
+
+{% block form %}
+    <div class="form-group">
+    <div class="ct-form--label--type2">
+        <div class="ct-u-displayTableVertical">
+            <div class="ct-u-displayTableCell">
+                <div class="ct-input-group-btn">
+                    <button class="btn btn-primary">
+                        <i class="fa fa-user"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="ct-u-displayTableCell text-center">
+                <span class="text-uppercase">USERNAME</span>
+            </div>
+        </div>
+    </div>
+    <div class="ct-form--item ct-u-marginBottom20 form-group">
+        <label>If a user with your email address exists, an email will be sent with your username.</label>
+    </div>
+    <div class="ct-form--item form-group">
+      <div class="ct-form--item">
+        <a href="{% url 'login' %}" class="btn btn-warning center-block">Login</a>
+      </div>
+    </div>
+</div>
+{% endblock %}
