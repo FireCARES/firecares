@@ -254,7 +254,8 @@ class LimitMixin(object):
         return context
 
 
-class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitMixin, DISTScoreContextMixin, FeaturedDepartmentsMixin):
+class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitMixin, DISTScoreContextMixin,
+                             FeaturedDepartmentsMixin):
     model = FireDepartment
     paginate_by = 30
     queryset = FireDepartment.objects.all()
@@ -270,11 +271,15 @@ class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitM
         ]
 
     search_fields = ['fdid', 'state', 'region', 'name']
-    range_fields = ['population','dist_model_score']
-
+    range_fields = ['population', 'dist_model_score']
 
     def get_queryset(self):
         queryset = super(FireDepartmentListView, self).get_queryset()
+
+        # If there is a 'q' argument, this is a full text search.
+        if self.request.GET.get('q'):
+            queryset = queryset.full_text_search(self.request.GET.get('q'))
+
         queryset = self.sort_queryset(queryset, self.request.GET.get('sortBy'))
         self.limit_queryset(self.request.GET.get('limit'))
         
@@ -301,7 +306,6 @@ class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitM
                 
                 if Max:
                     queryset = queryset.filter(**{field+'__lte': Max})
-            
 
         return queryset
 

@@ -33,6 +33,10 @@
                       scope.params.population = attrs.population;
                     });
 
+                    attrs.$observe('q', function() {
+                      scope.params.q = attrs.q;
+                    });
+
 
                    attrs.$observe('distModelScore', function() {
                       scope.params.dist_model_score = attrs['distModelScore']; 

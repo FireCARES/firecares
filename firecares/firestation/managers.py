@@ -1,3 +1,5 @@
+import re
+import string
 from django.contrib.gis.db import models
 from django.db.models import Func, Case, When, Q, Min, Max, Avg
 from django.db.models.expressions import RawSQL
@@ -60,6 +62,63 @@ class CalculationsQuerySet(models.QuerySet):
 
         return qs
 
+    @staticmethod
+    def _sanitize_full_text_search(term):
+        """
+        Sanitizes terms before sending to PostGRES FTS.
+        """
+        allowed_punctuation = set(['&', '|', '"', "'"])
+        all_punctuation = set(string.punctuation)
+        punctuation = "".join(all_punctuation - allowed_punctuation)
+        term = re.sub(r"[{}]+".format(re.escape(punctuation)), " ", term)
+
+        # Substitute all double quotes to single quotes.
+        term = term.replace('"', "'")
+        term = re.sub(r"[']+", "'", term)
+
+        # Create regex to find strings within quotes.
+        quoted_strings_re = re.compile(r"('[^']*')")
+        space_between_words_re = re.compile(r'([^ &|])[ ]+([^ &|])')
+        spaces_surrounding_letter_re = re.compile(r'[ ]+([^ &|])[ ]+')
+        multiple_operator_re = re.compile(r"[ &]+(&|\|)[ &]+")
+
+        tokens = quoted_strings_re.split(term)
+        processed_tokens = []
+
+        for token in tokens:
+            # Remove all surrounding whitespace.
+            token = token.strip()
+
+            if token in ['', "'"]:
+                continue
+
+            if token[0] != "'":
+                # Surround single letters with &'s
+                token = spaces_surrounding_letter_re.sub(r' & \1 & ', token)
+
+                # Specify '&' between words that have neither | or & specified.
+                token = space_between_words_re.sub(r'\1 & \2', token)
+
+                # Add a prefix wildcard to every search term.
+                token = re.sub(r'([^ &|]+)', r'\1:*', token)
+
+            processed_tokens.append(token)
+
+        term = " & ".join(processed_tokens)
+
+        # Replace ampersands or pipes surrounded by ampersands.
+        term = multiple_operator_re.sub(r" \1 ", term)
+
+        # Escape single quotes
+        return term.replace("'", "''")
+
+    def full_text_search(self, search_term):
+        """
+        Filters results based on PostGRES Full Text Search.
+        """
+        return self.extra(where=["firestation_firedepartment.fts_document @@ to_tsquery('simple', %s)"],
+                          params=[self._sanitize_full_text_search(search_term)])
+
 
 class CalculationManager(models.GeoManager):
     """
@@ -86,8 +145,3 @@ class CalculationManager(models.GeoManager):
             qs = qs.values(group_by)
 
         return qs.annotate(min=Min(field), max=Max(field), avg=Avg(field))
-
-
-#SELECT
-#CASE WHEN "population_class_5_quartiles"."dist_model_score" IS NOT NULL
-#    THEN ntile(4) over (partition by dist_model_score is not null, residential_fires_avg_3_years_quartile  order by residential_fires_avg_3_years_quartile) ELSE NULL END AS "risk_model_fires_size0_quartile" from population_class_5_quartiles

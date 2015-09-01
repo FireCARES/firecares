@@ -1,5 +1,6 @@
 import json
 import requests
+import string
 from .forms import StaffingForm
 from .models import FireDepartment, FireStation, Staffing, PopulationClass1Quartile, PopulationClass9Quartile
 from django.db import connections
@@ -9,6 +10,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.gis.geos import Point
 from django.contrib.auth import get_user_model
 from firecares.firestation.templatetags.firecares import quartile_text, risk_level
+from firecares.firestation.managers import CalculationsQuerySet
 
 User = get_user_model()
 
@@ -390,7 +392,6 @@ class FireStationTests(TestCase):
         self.assertEqual('high', risk_level(4))
         self.assertIsNone(risk_level(5))
 
-
     def test_performance_model_urls(self):
         """
         Make HEAD requests to ensure external sites work.
@@ -405,5 +406,110 @@ class FireStationTests(TestCase):
         for url in urls:
             response = requests.head(url)
             self.assertEqual(response.status_code, 200, 'Url: {0} did not return a 200.'.format(url))
+
+    def test_fts_functions_exist(self):
+        """
+        Ensures the Full Text Search functions exist.
+        """
+
+        cursor = connections['default'].cursor()
+        cursor.execute("select specific_name from information_schema.routines where specific_name like 'department_fts_document%';")
+        self.assertEqual(len(cursor.fetchall()), 3)
+
+    def test_fts_triggers_exist(self):
+        """
+        Ensures the Full Text Search triggers exist.
+        """
+
+        cursor = connections['default'].cursor()
+        # Ensure fts update trigger exists
+        cursor.execute("select trigger_name from information_schema.triggers where trigger_name='department_fts_update_trigger'")
+        self.assertEqual(len(cursor.fetchall()), 1)
+
+        # Ensure fts insert trigger exists
+        cursor.execute("select trigger_name from information_schema.triggers where trigger_name='department_fts_insert_trigger'")
+        self.assertEqual(len(cursor.fetchall()), 1)
+
+    def test_full_text_search_insert_trigger(self):
+        """
+        Tests the insert trigger for Full Text Search.
+        """
+
+        FireDepartment.objects.create(name='Test db',
+                                      population=0,
+                                      population_class=9,
+                                      department_type='test',
+                                      state='VA')
+
+
+        dep = FireDepartment.objects.all().extra(select={'val':'select fts_document from firestation_firedepartment a where a.id=firestation_firedepartment.id'})
+        self.assertEqual(dep[0].val, "'db':2 'test':1 'va':3")
+
+    def test_full_text_search_update_trigger(self):
+        """
+        Tests the insert trigger for Full Text Search.
+        """
+        fd = FireDepartment.objects.create(name='Test db', population=0, population_class=9, department_type='test',
+                                           state='VA')
+
+        fts_query = 'select fts_document from firestation_firedepartment a where a.id=firestation_firedepartment.id'
+
+        dep = FireDepartment.objects.all().extra(select={'vector': fts_query})
+        vector = dep[0].vector
+
+        fd.name = 'New york'
+        fd.save()
+
+        dep = FireDepartment.objects.all().extra(select={'vector': fts_query})
+        self.assertNotEqual(vector, dep[0].vector)
+
+    def test_full_text_search_method(self):
+        """
+        Tests the Full Text Search method on the FireDepartment object.
+        """
+
+        rfd = FireDepartment.objects.create(name='Richmond', population=0, population_class=9, state='VA')
+        lafd = FireDepartment.objects.create(name='Los Angeles', population=0, population_class=9, state='CA')
+
+        results = FireDepartment.objects.all().full_text_search('Ca')
+        self.assertTrue(lafd in results)
+        self.assertFalse(rfd in results)
+
+        results = FireDepartment.objects.all().full_text_search('Ca|va')
+        self.assertTrue(lafd in results)
+        self.assertTrue(rfd in results)
+
+    def test_sanitize_fts_term(self):
+        """
+        Tests the logic to sanitize full text search terms.
+        """
+        sanitize = CalculationsQuerySet._sanitize_full_text_search
+
+        # Test escaping single-quotes
+        self.assertEqual(sanitize("'Testing'"), "''Testing''")
+
+        # Test replacing double-quotes with single quotes
+        self.assertEqual(sanitize('"Testing"'), "''Testing''")
+
+        # Test replacing double-quotes with single quotes
+        self.assertEqual(sanitize('Test  double spaces.'), "Test:* & double:* & spaces:*")
+
+        # Test punctuation (!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~) stripping
+        self.assertEqual(sanitize(string.punctuation), "'' &'' & |")
+
+    def test_department_list_with_fts(self):
+        """
+        Tests the departments list view with FTS search.
+        """
+
+        lafd = FireDepartment.objects.create(name='Los Angeles', population=0, population_class=9, state='CA')
+        rfd = FireDepartment.objects.create(name='Richmond', population=0, population_class=9, state='VA')
+
+        c = Client()
+        c.login(**{'username': 'admin', 'password': 'admin'})
+        response = c.get(reverse('firedepartment_list'), {'q': 'Ca'})
+        self.assertTrue(lafd in response.context['object_list'])
+        self.assertFalse(rfd in response.context['object_list'])
+
 
 
