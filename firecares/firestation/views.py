@@ -39,7 +39,7 @@ class FeaturedDepartmentsMixin(object):
     """
     @staticmethod
     def get_featured_departments():
-        return {'featured_departments': FireDepartment.priority_departments.all().order_by('?')[:5]}
+        return FireDepartment.priority_departments.all()
 
 
 class DepartmentDetailView(LoginRequiredMixin, CacheMixin, DISTScoreContextMixin, DetailView):
@@ -313,7 +313,7 @@ class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitM
         context = super(FireDepartmentListView, self).get_context_data(**kwargs)
         context = self.get_sort_context(context)
         context.update(self.add_dist_values_to_context())
-        context.update(self.get_featured_departments())
+        context['featured_departments'] = self.get_featured_departments().order_by('?')[:5]
 
         page_obj = context['page_obj']
         paginator = page_obj.paginator
@@ -389,5 +389,6 @@ class Stats(LoginRequiredMixin, TemplateView):
         return context
 
 
-class Home(LoginRequiredMixin, TemplateView):
+class Home(LoginRequiredMixin, TemplateView, FeaturedDepartmentsMixin):
     template_name = 'firestation/home.html'
+

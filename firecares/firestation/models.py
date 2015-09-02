@@ -295,6 +295,10 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
         ]
 
     @property
+    def headquarders_geom(self):
+        return getattr(self.headquarters_address, 'geom', None)
+
+    @property
     def predicted_fires_sum(self):
         """
         Convenience method to sum

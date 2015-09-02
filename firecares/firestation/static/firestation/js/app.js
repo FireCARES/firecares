@@ -4,6 +4,7 @@
   angular.module('fireStation', [
       'ngResource',
       'fireStation.factories',
+      'fireStation.homeController',
       'fireStation.departmentDetailController',
       'fireStation.performanceScoreController',
       'fireStation.mapService',

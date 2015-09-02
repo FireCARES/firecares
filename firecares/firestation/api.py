@@ -52,6 +52,7 @@ class FireDepartmentResource(ModelResource):
     """
     The Fire Department API.
     """
+
     class Meta:
         resource_name = 'fire-departments'
         queryset = FireDepartment.objects.all()
@@ -60,8 +61,9 @@ class FireDepartmentResource(ModelResource):
         cache = SimpleCache()
         list_allowed_methods = ['get']
         detail_allowed_methods = ['get']
-        filtering = {'state': ALL}
+        filtering = {'state': ALL, 'featured': ALL}
         serializer = PrettyJSONSerializer()
+        limit = 120
 
 
 class FireStationResource(ModelResource):
