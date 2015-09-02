@@ -62,15 +62,67 @@
       position: relative; // overrides the utility menu behavior
     }
 
+    & .ct-input--search {
+     line-height: 30px;
+     width: 225px;
+    }
+
+    & .search-wrapper {
+      position: relative;
+      overflow: hidden;
+      width: 250px;
+      height: 30px;
+
+      &:hover #slide {
+        transition: 1s;
+        right: 0;
+      }
+    }
+
+    #slide {
+      position: absolute;
+      right: -180px;
+      width: 250px;
+      transition: 1s;
+    }
+
     a {
       color: lighten(@gray-base, 65%);
       font-weight: 400;
     }
 
+    form {
+      color: lighten(@gray-base, 65%);
+      font-weight: 400;
+      height: 30px;
+    }
+
+    input[type="text"]::-webkit-input-placeholder {
+       color: lighten(@gray-base, 65%);
+       font-weight: 400;
+    }
+
+    input[type="text"]:-moz-placeholder {
+       color: lighten(@gray-base, 65%);
+       font-weight: 400;
+    }
+
+    input[type="text"]::-moz-placeholder {
+       color: lighten(@gray-base, 65%);
+       font-weight: 400;
+    }
+
+    input[type="text"]:-ms-input-placeholder {
+       color: lighten(@gray-base, 65%);
+       font-weight: 400;
+    }
+
+
     i {
       margin-right: 2px;
     }
 }
+
 
 // Logo & Branding
 .logo {
@@ -619,3 +671,4 @@ padding-top: 5px;
       vertical-align: middle;
     }
   }
+

@@ -10810,7 +10810,48 @@ you can use the generic selector below, but it's slower:
 .ct-topBar.navbar-scroll-top {
   position: relative;
 }
+.ct-topBar .ct-input--search {
+  line-height: 30px;
+  width: 225px;
+}
+.ct-topBar .search-wrapper {
+  position: relative;
+  overflow: hidden;
+  width: 250px;
+  height: 30px;
+}
+.ct-topBar .search-wrapper:hover #slide {
+  transition: 1s;
+  right: 0;
+}
+.ct-topBar #slide {
+  position: absolute;
+  right: -180px;
+  width: 250px;
+  transition: 1s;
+}
 .ct-topBar a {
+  color: #a6a6a6;
+  font-weight: 400;
+}
+.ct-topBar form {
+  color: #a6a6a6;
+  font-weight: 400;
+  height: 30px;
+}
+.ct-topBar input[type="text"]::-webkit-input-placeholder {
+  color: #a6a6a6;
+  font-weight: 400;
+}
+.ct-topBar input[type="text"]:-moz-placeholder {
+  color: #a6a6a6;
+  font-weight: 400;
+}
+.ct-topBar input[type="text"]::-moz-placeholder {
+  color: #a6a6a6;
+  font-weight: 400;
+}
+.ct-topBar input[type="text"]:-ms-input-placeholder {
   color: #a6a6a6;
   font-weight: 400;
 }
