@@ -552,7 +552,6 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
 
     def generate_thumbnail(self, marker=True):
         geom = None
-        marker = ''
 
         if self.geom:
             geom = self.geom.centroid
@@ -561,8 +560,8 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
         else:
             return '/static/firestation/theme/assets/images/content/property-1.jpg'
 
-        if marker:
-            marker = 'pin-l-embassy+0074D9({geom.x},{geom.y})/'
+        if marker and geom:
+            marker = 'pin-l-embassy+0074D9({geom.x},{geom.y})/'.format(geom=geom)
 
         return 'http://api.tiles.mapbox.com/v4/garnertb.mmlochkh/{marker}' \
                '{geom.x},{geom.y},8/500x300.png?access_token={access_token}'.format(marker=marker,

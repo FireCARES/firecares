@@ -6,9 +6,11 @@ from .models import FireDepartment, FireStation, Staffing, PopulationClass1Quart
 from django.db import connections
 from django.test import TestCase
 from django.test.client import Client
+from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.contrib.gis.geos import Point
+from django.contrib.gis.geos import Point, Polygon, MultiPolygon
 from django.contrib.auth import get_user_model
+from firecares.firecares_core.models import Address, Country
 from firecares.firestation.templatetags.firecares import quartile_text, risk_level
 from firecares.firestation.managers import CalculationsQuerySet
 
@@ -511,5 +513,30 @@ class FireStationTests(TestCase):
         self.assertTrue(lafd in response.context['object_list'])
         self.assertFalse(rfd in response.context['object_list'])
 
+    def test_generate_thumbnail_url(self):
+        """
+        Tests the generate thumbnail url logic.
+        """
+
+        lafd = FireDepartment.objects.create(name='Los Angeles', population=0, population_class=9, state='CA')
+
+        # with no geometry make sure the thumbnail is the place holder
+        self.assertEqual(lafd.generate_thumbnail(), '/static/firestation/theme/assets/images/content/property-1.jpg')
+        lafd_poly = Polygon.from_bbox((-118.42170426600454, 34.09700463377199, -118.40170426600453,  34.117004633771984))
+
+        us = Country.objects.create(iso_code='US', name='United States')
+        address = Address.objects.create(address_line1='Test', country=us, geom=Point(-118.42170426600454, 34.09700463377199))
+        lafd.headquarters_address = address
+        lafd.save()
+
+        # ensure a fd with no geometry uses the headquarters address location
+        self.assertEqual(lafd.generate_thumbnail(), 'http://api.tiles.mapbox.com/v4/garnertb.mmlochkh/pin-l-embassy+0074D9(-118.421704266,34.0970046338)/-118.421704266,34.0970046338,8/500x300.png?access_token={0}'.format(settings.MAPBOX_ACCESS_TOKEN))
+
+        # ensure a fd with a geometry uses the centroid of the geometry
+        lafd.geom = MultiPolygon([lafd_poly])
+        self.assertEqual(lafd.generate_thumbnail(), 'http://api.tiles.mapbox.com/v4/garnertb.mmlochkh/pin-l-embassy+0074D9(-118.411704266,34.1070046338)/-118.411704266,34.1070046338,8/500x300.png?access_token={0}'.format(settings.MAPBOX_ACCESS_TOKEN))
+
+        # ensure the marker is not in the url when marker=False
+        self.assertEqual(lafd.generate_thumbnail(marker=False), 'http://api.tiles.mapbox.com/v4/garnertb.mmlochkh/False-118.411704266,34.1070046338,8/500x300.png?access_token={0}'.format(settings.MAPBOX_ACCESS_TOKEN))
 
 
