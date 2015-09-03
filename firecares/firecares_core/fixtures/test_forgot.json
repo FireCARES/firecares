@@ -10,7 +10,7 @@
         "last_login": null,
         "groups": [],
         "user_permissions": [],
-        "password": "pbkdf2_sha256$20000$iTDrt8PlRS4R$F2+dfymgPhUZN8COMRb51w35VvVPHS7iNNlf5yjIazY=",
+        "password": "pbkdf2_sha256$20000$a2nSe6phrknp$RKl64dgJ1juT414NYJ1T4txJx9f40rDlpjCn9GmAUmQ=",
         "email": "test@example.com",
         "date_joined": "2015-08-28T02:17:55Z"
     },

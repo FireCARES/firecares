@@ -1,9 +1,11 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
+from django.contrib.auth.decorators import login_required
+from django.views.generic import TemplateView
 from django.views.decorators.cache import cache_page
 from .firecares_core.forms import FirecaresPasswordResetForm
 from .firestation.views import Home
-from .firecares_core.views import ForgotUsername, UsernameSent
+from .firecares_core.views import ForgotUsername
 from .firestation.api import StaffingResource, FireStationResource, FireDepartmentResource
 from tastypie.api import Api
 from firestation.views import Home
@@ -34,8 +36,12 @@ urlpatterns = patterns('',
         kwargs={'template_name': 'registration/password/password_reset_confirm.html'}),
     url(r'^password-reset/complete/$', 'django.contrib.auth.views.password_reset_complete',
         name='password_reset_complete', kwargs={'template_name': 'registration/password/password_reset_complete.html'}),
+    url(r'^password-change/$', 'django.contrib.auth.views.password_change', name='password_change',
+        kwargs={'template_name': 'registration/password/password_change.html'}),
+    url(r'^password-change/done/$', 'django.contrib.auth.views.password_change_done', name='password_change_done',
+        kwargs={'template_name': 'registration/password/password_change_done.html'}),
     url(r'^forgot-username/$', ForgotUsername.as_view(), name='forgot_username'),
-    url(r'^forgot-username/done/$', UsernameSent.as_view(), name='username_sent'),
+    url(r'^forgot-username/done/$', TemplateView.as_view(template_name='registration/username_sent.html'), name='username_sent'),
     url(r'^logout/$', 'django.contrib.auth.views.logout_then_login', name='logout'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
