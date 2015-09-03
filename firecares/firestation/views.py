@@ -407,7 +407,7 @@ class Home(LoginRequiredMixin, TemplateView, FeaturedDepartmentsMixin):
                                                                  )))
 
             context['featured_departments'] = json.dumps(dict(type='FeatureCollection', features=priority_departments))
-            cache.set('priority_deparments_geojson', context['featured_departments'])
+            cache.set('priority_deparments_geojson', context['featured_departments'], 60 * 60 * 24)
         else:
             context['featured_departments'] = priority_department_geojson
 
