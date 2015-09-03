@@ -209,7 +209,7 @@
         </span>
         <span class="pull-right">
             <a href="{% url 'registration_register' %}" class="text-uppercase">sign up</a>
-            <a href="{% url 'login' %}" class="text-uppercase">login</a>
+            <a href="{% url 'login' %}?next={% url 'firedepartment_list' %}" class="text-uppercase">login</a>
         </span>
     </div>
     <!--<div class="ct-u-displayTableCell">

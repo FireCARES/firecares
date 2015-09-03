@@ -1,10 +1,8 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 from django.views.decorators.cache import cache_page
 from .firecares_core.forms import FirecaresPasswordResetForm
-from .firestation.views import Home
 from .firecares_core.views import ForgotUsername
 from .firestation.api import StaffingResource, FireStationResource, FireDepartmentResource
 from tastypie.api import Api
@@ -18,7 +16,6 @@ v1_api.register(FireDepartmentResource())
 
 
 urlpatterns = patterns('',
-    # Examples:
     url(r'^$', cache_page(60*15)(Home.as_view()), name='firestation_home'),
     (r'^api/', include(v1_api.urls)),
     url(r'^', include('firecares.firestation.urls')),
