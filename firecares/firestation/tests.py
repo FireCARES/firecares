@@ -513,6 +513,9 @@ class FireStationTests(TestCase):
         self.assertTrue(lafd in response.context['object_list'])
         self.assertFalse(rfd in response.context['object_list'])
 
+        response = c.get(reverse('firedepartment_list'), {'q': '', 'state':'CA'})
+        self.assertTrue(lafd in response.context['object_list'])
+
     def test_generate_thumbnail_url(self):
         """
         Tests the generate thumbnail url logic.
@@ -539,4 +542,27 @@ class FireStationTests(TestCase):
         # ensure the marker is not in the url when marker=False
         self.assertEqual(lafd.generate_thumbnail(marker=False), 'http://api.tiles.mapbox.com/v4/garnertb.mmlochkh/False-118.411704266,34.1070046338,8/500x300.png?access_token={0}'.format(settings.MAPBOX_ACCESS_TOKEN))
 
+    def test_department_list_view(self):
+        """
+        Tests the list view.
+        """
 
+        fd = FireDepartment.objects.create(name='Adak Volunteer Fire Department', population=None)
+        c = Client()
+        c.login(**{'username': 'admin', 'password': 'admin'})
+
+        # regression test default params do not filter out the object
+        response = c.get('/departments?name=adak&state=&region=&fdid=&sortBy=&limit=')
+        self.assertTrue(fd in response.context['object_list'])
+
+        # regression test default params do not filter out the object
+        response = c.get('/departments?fdid=&state=&name=adak&region=&population=0+%2C+9818605&q=&dist_model_score=0+%2C+458&sortBy=&limit=')
+        self.assertTrue(fd in response.context['object_list'])
+
+        # test limit=0 does not throw a 500
+        response = c.get('/departments?fdid=&state=&name=adak&region=&population=0+%2C+9818605&q=&dist_model_score=0+%2C+458&sortBy=&limit=0')
+        self.assertTrue(fd in response.context['object_list'])
+
+        # test strings in the numeric fields don't throw a 500
+        response = c.get('/departments?fdid=&state=&name=adak&region=&population=wer0+%2C+9818605&q=&dist_model_score=we0+%2C+458&sortBy=&limit=0')
+        self.assertTrue(fd in response.context['object_list'])

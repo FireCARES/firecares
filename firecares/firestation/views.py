@@ -27,8 +27,8 @@ class DISTScoreContextMixin(object):
         context['dist_min'] = score_metrics['dist_model_score__min']
 
         population_metrics = FireDepartment.objects.all().aggregate(Max('population'), Min('population'))
-        context['population_max'] = population_metrics['population__max']/1000
-        context['population_min'] = population_metrics['population__min']/1000
+        context['population_max'] = population_metrics['population__max'] or 0
+        context['population_min'] = population_metrics['population__min'] or 0
 
         return context
 
@@ -193,11 +193,13 @@ class SafeSortMixin(object):
             queryset = queryset.order_by(order_by)
 
             if order_by == '-population':
-                queryset = queryset.filter(population__gte=0, population__isnull=False)
+                queryset = queryset.extra(select={ 'population_is_null': 'population IS NULL'}) \
+                    .order_by('population_is_null', '-population')
 
-        # default sorting to -population
+        # default sorting to -population and put null values at the end.
         else:
-            queryset = queryset.filter(population__gte=0, population__isnull=False).order_by('-population')
+            queryset = queryset.extra(select={'population_is_null': 'population IS NULL'}) \
+                .order_by('population_is_null', '-population')
 
         return queryset
 
@@ -227,7 +229,10 @@ class LimitMixin(object):
 
         try:
             limit = int(limit)
-            self.paginate_by = limit
+
+            # make sure the limit is not 0
+            if limit:
+                self.paginate_by = limit
 
         except:
             return
@@ -291,21 +296,21 @@ class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitM
                 queryset = queryset.filter(**{field: value})
 
             #range is passed as pair of comma delimited min and max values for example 12,36
-            if  field in self.range_fields and value and "," in value:
-                min_max = value.split(",")
-                Min = int(min_max[0])
-                Max = int(min_max[1])
+            try:
+                if field in self.range_fields and value and "," in value:
+                    min, max = value.split(",")
+                    Min = int(min)
+                    Max = int(max)
 
-                # population values received in thousands need to convert
-                if field == 'population':
-                    Min *= 1000;
-                    Max *= 1000;
+                    if Min:
+                        queryset = queryset.filter(**{field+'__gte': Min})
 
-                if Min:
-                    queryset = queryset.filter(**{field+'__gte': Min})
-                
-                if Max:
-                    queryset = queryset.filter(**{field+'__lte': Max})
+                    if Max:
+                        from django.db.models import Q
+                        queryset = queryset.filter(Q(**{field+'__lte': Max})|Q(**{field+'__isnull': True}))
+
+            except:
+                pass
 
         return queryset
 
@@ -322,6 +327,9 @@ class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitM
         max_page = page_obj.number + 6
         max_page = min(paginator.num_pages, max_page)
         context['windowed_range'] = range(min_page, max_page)
+
+        context['dist_min'] = 0
+
         if min_page > 1:
                 context['first_page'] = 1
         if max_page < paginator.num_pages:
