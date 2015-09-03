@@ -295,7 +295,7 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
         ]
 
     @property
-    def headquarders_geom(self):
+    def headquarters_geom(self):
         return getattr(self.headquarters_address, 'geom', None)
 
     @property

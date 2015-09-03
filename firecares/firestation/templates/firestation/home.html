@@ -221,7 +221,7 @@
 </div>
 </section>
 <section id="about" class="text-center ct-u-paddingBoth100 col-lg-12 section">
-
+    <div class="row">
     <div class="col-lg-9">
             <div class="ct-heading text-uppercase ct-u-marginBottom40">
                 <h3>About FireCARES</h3>
@@ -273,9 +273,13 @@
     <div class="col-lg-3">
         <img class="pull-right" src="{{ STATIC_URL }}teaser.png"/>
     </div>
+        </div>
 </section>
 
 <section class="section">
+    <div class="ct-heading text-uppercase text-center ct-u-paddingBottom30">
+                <h3>Featured Departments</h3>
+            </div>
     <div id="map" class="col-lg-12" geojson="{{ featured_departments }}"></div>
 </section>
 <div class="section" id="partners"></div>
