@@ -29,10 +29,3 @@ class ForgotUsername(View):
                                user.email)
             return HttpResponseRedirect(reverse('username_sent'))
         return render(request, self.template_name, {'form': form})
-
-
-class UsernameSent(View):
-    template_name = 'registration/username_sent.html'
-
-    def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)

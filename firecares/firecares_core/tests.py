@@ -1,7 +1,7 @@
 from .models import RecentlyUpdatedMixin
 
 from datetime import timedelta
-from urlparse import urlsplit
+from urlparse import urlsplit, urlunsplit
 from django.contrib.auth import get_user_model, authenticate
 from django.core import mail
 from django.core.management import call_command
@@ -147,7 +147,7 @@ class CoreTests(TestCase):
         resp = c.post(reverse('password_reset'), data={'email': 'test@example.com'})
         self.assertEqual(resp.status_code, 302)
 
-        self.assertTrue(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox), 1)
         user = User.objects.get(username='tester_mcgee')
 
         token = resp.context[0]['token']
@@ -176,12 +176,52 @@ class CoreTests(TestCase):
 
         c = Client()
         resp = c.get(reverse('forgot_username'))
-        self.assertTrue(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
 
         resp = c.post(reverse('forgot_username'), {'email': 'test@example.com'})
-        self.assertTrue(resp.status_code, 302)
+        self.assertEqual(resp.status_code, 302)
         self.assertEqual(resolve(urlsplit(resp.url).path).url_name, 'username_sent')
 
-        self.assertTrue(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox), 1)
         # Make sure that the username is actually in the email (otherwise what's the point?)
         self.assertTrue('tester_mcgee' in mail.outbox[0].body)
+
+    def test_change_password(self):
+        """
+        Test the change password worflow.
+        """
+
+        c = Client()
+        resp = c.get(reverse('password_change'))
+        # Should redirect to login view since password_change requires a logged-in user
+        self.assertEqual(resp.status_code, 302)
+
+        # Weird behavior on this 302 to /login, it *should* have a trailing slash, but doesn't
+        split = urlsplit(resp.url)
+        shimmed = urlsplit(urlunsplit((split.scheme, split.netloc, split.path + '/', split.query, split.fragment)))
+        self.assertEquals(resolve(shimmed.path).url_name, 'login')
+
+        # Should redirect to the password_change page after login
+        resp = c.post(shimmed.path + '?' + shimmed.query, {'username': 'tester_mcgee', 'password': 'test'})
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resolve(urlsplit(resp.url).path).url_name, 'password_change')
+
+        # Fill out the change password form w/ invalid old password_change
+        resp = c.post(reverse('password_change'), {'old_password': 'badpassword'})
+        # No redirect means something bad happened
+        self.assertEqual(resp.status_code, 200)
+
+        # Fill out the change password form w/ new passwords that don't match
+        resp = c.post(reverse('password_change'),
+                      {'old_password': 'test',
+                       'new_password1': 'brandnewpassword',
+                       'new_password2': 'uhohthiswontmatch'})
+        self.assertEqual(resp.status_code, 200)
+
+        # Fill out using valid params that would change password
+        resp = c.post(reverse('password_change'),
+                      {'old_password': 'test',
+                       'new_password1': 'newerpassword',
+                       'new_password2': 'newerpassword'})
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resolve(urlsplit(resp.url).path).url_name, 'password_change_done')
