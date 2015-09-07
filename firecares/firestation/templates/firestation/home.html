@@ -15,9 +15,6 @@
     <title>FireCARES · The Community Assessment Response Evaluation System</title>
     {% include 'firestation/_favicon.html' %}
 
-    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/style.css">
-
     <script type="text/javascript">
         var featured_departments = {{ featured_departments|safe }};
     </script>
@@ -292,11 +289,9 @@
 {% include 'firestation/_footer.html' %}
 
 </div>
+
 {% include 'google_analytics.html' %}
-<!-- JavaScripts -->
-
 {%  include 'firestation/_firecares_static.html' %}
-
 
 </body>
 </html>
