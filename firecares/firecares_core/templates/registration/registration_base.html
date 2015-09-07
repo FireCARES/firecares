@@ -10,12 +10,12 @@
 <html class="no-js" lang="en"> <!--<![endif]-->
 <head lang="en">
     <meta charset="UTF-8">
-    <meta name="description" content="Welcome to FireCARES, created by the Fire Fighter Safety and Deployment Study.  Login to learn how fire department resources are deployed to match your community risks.">
+    <meta name="description" content="{% block meta_description %}Welcome to FireCARES, created by the Fire Fighter Safety and Deployment Study.  Login to learn how fire department resources are deployed to match your community risks."{% endblock %}>
     <meta name="author" content="Prominent Edge LLC">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-    <title>FireCARES - Login</title>
+    <title>{% block meta_title %}Login to your account · FireCARES{% endblock %}</title>
     {% include 'firestation/_favicon.html' %}
 
     {% include "firestation/_firecares_static.html" %}

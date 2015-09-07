@@ -1,5 +1,11 @@
 {% extends 'registration/registration_base.html' %}
 
+{% block meta_title %}Registration is currently closed · FireCARES{% endblock %}
+
+{% block meta_description %}
+Registration on FireCARES is currently closed.
+{% endblock %}
+
 {% block breadcrumbs %}
     {{ block.super }}
     <a href="{% url 'registration_complete' %}">Registration Closed</a>

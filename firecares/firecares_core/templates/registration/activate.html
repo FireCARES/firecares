@@ -1,5 +1,7 @@
 {% extends 'registration/registration_base.html' %}
 
+{% block meta_title %}Activate your account · FireCARES{% endblock %}
+
 {% block breadcrumbs %}
     {{ block.super }}
     <a href="{% url 'registration_activate' activation_key=activation_key %}">Activation Complete</a>

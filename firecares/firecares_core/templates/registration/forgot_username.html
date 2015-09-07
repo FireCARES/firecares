@@ -1,6 +1,8 @@
 {% extends 'registration/registration_base.html' %}
 {% load widget_tweaks %}
 
+{% block meta_title %}Forgot your username? · FireCARES{% endblock %}
+
 {% block breadcrumbs %}
     <a href="{% url 'firestation_home' %}">Home</a>
     <a href="{% url 'login' %}">Login</a>
