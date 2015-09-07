@@ -34,11 +34,9 @@
         </div>
         <div class="collapse navbar-collapse text-uppercase">
             <ul class="nav navbar-nav ct-navbar--fadeInUp">
-                <li class="onepage"><a href="#about">About</a></li>
-                <li class="onepage"><a href="#layers">Layers</a></li>
-                <li class="onepage"><a href="#portfolio">Map</a></li>
-                <li class="onepage"><a href="#whyus">People</a></li>
-                <li class="onepage active"><a href="{% url 'firedepartment_list' %}">Fire Departments</a></li>
+                <li class="onepage"><a href="{% url 'firestation_home' %}#about">About</a></li>
+                <li class="onepage"><a href="{% url 'firestation_home' %}#partners">Partners</a></li>
+                <li class="onepage active"><a href="{% url 'firedepartment_list' %}">Search</a></li>
             </ul>
         </div>
         <div class="clearfix"></div>
