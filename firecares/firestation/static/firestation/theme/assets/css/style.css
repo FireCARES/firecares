@@ -1,4 +1,7 @@
 @charset "UTF-8";
+@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
+@import url(https://fonts.googleapis.com/css?family=Libre+Baskerville:400italic);
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700,800);
 /*------------------------------------------------------------------
 Project:	Estato - Developers HTML Template
 Version:	1.0
@@ -52,9 +55,6 @@ Licensed under the MIT license - http://opensource.org/licenses/MIT
 
 Copyright (c) 2014 Daniel Eden
 */
-@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
-@import url(https://fonts.googleapis.com/css?family=Libre+Baskerville:400italic);
-@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700,800);
 .animated {
   -webkit-animation-duration: 1s;
   animation-duration: 1s;
@@ -11463,6 +11463,14 @@ table.residential-fires {
   /* w3c */
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#495E82', endColorstr='#2d3a51', GradientType=1);
   /* ie6-9 */
+}
+.marketing-icon i {
+  font-size: 60px !important;
+  color: #f29a00;
+}
+.ct-iconBox--2col .ct-iconBox--description,
+.ct-iconBox--2col .ct-icon {
+  display: inline-block;
 }
 .ct-pageWrapper {
   z-index: 3;
