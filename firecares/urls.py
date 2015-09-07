@@ -1,7 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from django.views.generic import TemplateView
-from django.views.decorators.cache import cache_page
 from .firecares_core.forms import FirecaresPasswordResetForm
 from .firecares_core.views import ForgotUsername
 from .firestation.api import StaffingResource, FireStationResource, FireDepartmentResource
@@ -16,7 +15,7 @@ v1_api.register(FireDepartmentResource())
 
 
 urlpatterns = patterns('',
-    url(r'^$', cache_page(60*15)(Home.as_view()), name='firestation_home'),
+    url(r'^$', Home.as_view(), name='firestation_home'),
     (r'^api/', include(v1_api.urls)),
     url(r'^', include('firecares.firestation.urls')),
     (r'^accounts/', include('registration.backends.default.urls')),
