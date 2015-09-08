@@ -5,6 +5,7 @@ from django.db.models import Func, Case, When, Q, Min, Max, Avg
 from django.db.models.expressions import RawSQL
 from django.db.models import Aggregate
 from django.db.models import FloatField
+from django.contrib.gis.db.models.query import GeoQuerySet
 
 class PriorityDepartmentsManager(models.Manager):
 
@@ -38,7 +39,7 @@ class FilteredAvg(Aggregate):
             return value
         return float(value)
 
-class CalculationsQuerySet(models.QuerySet):
+class CalculationsQuerySet(GeoQuerySet):
 
     def as_quartiles(self):
         qs = self
