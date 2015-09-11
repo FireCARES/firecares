@@ -197,6 +197,7 @@
         </div>
     </div>
 </header>
+
 <section class="sub-navbar ">
     <div class="container ct-u-paddingBoth20">
         <span>
@@ -209,14 +210,8 @@
             <a href="{% url 'login' %}?next={% url 'firedepartment_list' %}" class="text-uppercase">login</a>
         </span>
     </div>
-    <!--<div class="ct-u-displayTableCell">
-        <h4 class="text-uppercase">FIND YOUR SAFE GRADE NOW!</h4>
-    </div>-->
-
 </section>
 
-</div>
-</section>
 <section id="about" class="text-center ct-u-paddingBoth100 col-lg-12 section">
     <div class="row">
     <div class="col-lg-9">
@@ -273,22 +268,26 @@
         </div>
 </section>
 
-<section class="section">
+<section id="featured" class="section ct-u-paddingBottom20" style="min-height: 400px">
     <div class="ct-heading text-uppercase text-center ct-u-paddingBottom30">
-                <h3>Featured Departments</h3>
-            </div>
+        <h3>Featured Departments</h3>
+    </div>
     <div id="map" class="col-lg-12"></div>
 </section>
-<div class="section" id="partners"></div>
-<section class="ct-u-paddingBottom60 text-center">
-    <div class="container">
-        {% include 'firestation/_partners.html' %}
+
+</div>
+
+<section class="section" id="partners">
+    <div class="ct-u-paddingBottom60 text-center">
+        <div class="container">
+            {% include 'firestation/_partners.html' %}
+        </div>
     </div>
 </section>
 
-{% include 'firestation/_footer.html' %}
 
-</div>
+
+{% include 'firestation/_footer.html' %}
 
 {% include 'google_analytics.html' %}
 {%  include 'firestation/_firecares_static.html' %}
