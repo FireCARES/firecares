@@ -57,7 +57,7 @@ class CoreTests(TestCase):
         with self.assertRaises(User.DoesNotExist):
             User.objects.get(username='foo')
 
-        call_command('add_user', username='foo', password='bar', email='foo@bar.com')
+        call_command('add_user', 'foo', 'bar', 'foo@bar.com')
 
         user = authenticate(username='foo', password='bar')
         self.assertIsNotNone(user)
@@ -65,15 +65,14 @@ class CoreTests(TestCase):
         self.assertFalse(user.is_staff)
         self.assertTrue(user.is_active)
 
-        call_command('add_user', username='foo_admin', password='bar', email='foo@bar.com', is_superuser=True)
+        call_command('add_user', 'foo_admin', 'bar', 'foo@bar.com', is_superuser=True)
         user = authenticate(username='foo_admin', password='bar')
         self.assertIsNotNone(user)
         self.assertTrue(user.is_superuser)
         self.assertFalse(user.is_staff)
         self.assertTrue(user.is_active)
 
-        call_command('add_user', username='foo_admin1', password='bar', email='foo@bar.com', is_staff=True,
-                     is_active=False)
+        call_command('add_user', 'foo_admin1', 'bar', 'foo@bar.com', is_staff=True, is_active=False)
         user = authenticate(username='foo_admin1', password='bar')
         self.assertIsNotNone(user)
         self.assertFalse(user.is_superuser)
@@ -81,8 +80,7 @@ class CoreTests(TestCase):
         self.assertFalse(user.is_active)
 
         # Make sure no error is thrown when creating a user that already exists
-        call_command('add_user', username='foo_admin1', password='bar', email='foo@bar.com', is_staff=True,
-                     is_active=False)
+        call_command('add_user', 'foo_admin1', 'bar', 'foo@bar.com', is_staff=True, is_active=False)
 
     def test_registration_views(self):
         """
