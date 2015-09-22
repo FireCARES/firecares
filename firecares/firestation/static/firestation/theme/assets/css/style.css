@@ -11472,6 +11472,10 @@ table.residential-fires {
 .ct-iconBox--2col .ct-icon {
   display: inline-block;
 }
+.ct-copyright-link {
+  color: #757575;
+  font-weight: 600;
+}
 .ct-pageWrapper {
   z-index: 3;
   background-color: #ffffff;
