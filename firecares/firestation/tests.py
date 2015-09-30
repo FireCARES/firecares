@@ -1,15 +1,18 @@
 import json
 import requests
 import string
+from urlparse import urlsplit, urlunsplit
 from .forms import StaffingForm
 from .models import FireDepartment, FireStation, Staffing, PopulationClass1Quartile, PopulationClass9Quartile
 from django.db import connections
 from django.test import TestCase
 from django.test.client import Client
 from django.conf import settings
-from django.core.urlresolvers import reverse
-from django.contrib.gis.geos import Point, Polygon, MultiPolygon
+from django.core.management import call_command
+from django.core.urlresolvers import reverse, resolve
+from django.contrib.gis.geos import Point, Polygon, MultiPolygon, fromstr
 from django.contrib.auth import get_user_model
+from firecares.usgs.models import UnincorporatedPlace
 from firecares.firecares_core.models import Address, Country
 from firecares.firestation.templatetags.firecares import quartile_text, risk_level
 from firecares.firestation.managers import CalculationsQuerySet
@@ -18,6 +21,7 @@ User = get_user_model()
 
 
 class FireStationTests(TestCase):
+    # fixtures = ['test_government_unit_association.json']
 
     def setUp(self):
         self.response_capability_enabled = False
@@ -587,3 +591,38 @@ class FireStationTests(TestCase):
         response = c.get(reverse('similar_departments', args=[123]))
         self.assertEqual(response.status_code, 404)
 
+    def test_update_government_unit_associations(self):
+        """
+        Tests functionality associated with updating a FireDepartment's assoiciated government units
+        """
+
+        call_command('loaddata', 'firecares/firestation/fixtures/test_government_unit_association.json')
+
+        fd = FireDepartment.objects.get(pk=86610)
+        place = UnincorporatedPlace.objects.get(pk=9254)
+
+        c = Client()
+        response = c.get(reverse('firedepartment_update_government_units', args=[fd.pk]))
+        self.assertEqual(response.status_code, 302)
+
+        # Make sure that we're redirected to login since we're not yet authenticated
+        split = urlsplit(response.url)
+        shimmed = urlsplit(urlunsplit((split.scheme, split.netloc, split.path + '/', split.query, split.fragment)))
+        self.assertEquals(resolve(shimmed.path).url_name, 'login')
+
+        # Login and make sure that we get a 200 back from the govt unit association update page
+        c.login(**{'username': 'admin', 'password': 'admin'})
+        response = c.get(reverse('firedepartment_update_government_units', args=[fd.pk]))
+        self.assertEqual(response.status_code, 200)
+
+        old_point_count = fd.geom.num_points
+        response = c.post(reverse('firedepartment_update_government_units', args=[fd.pk]), {'unincorporated_places': [place.pk]})
+        self.assertEqual(response.status_code, 200)
+        # Make sure that the UnincorporatedPlace is associated
+        self.assertEqual(fd.government_unit.first().object, place)
+
+        # Update the geom for the FD
+        response = c.post(reverse('firedepartment_update_government_units', args=[fd.pk]), {'unincorporated_places': [place.pk], 'update_geom': [1]})
+        # Should have a different point count now that geometries are merged
+        fd.refresh_from_db()
+        self.assertNotEqual(fd.geom.num_points, old_point_count)

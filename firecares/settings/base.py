@@ -143,6 +143,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'genericm2m',
     'autocomplete_light',
     'django.contrib.admin',
     'django.contrib.gis',

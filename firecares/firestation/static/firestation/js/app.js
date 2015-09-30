@@ -10,7 +10,8 @@
       'fireStation.mapService',
       'fireStation.gauge',
       'fireStation.search',
-      'fireStation.graphs'
+      'fireStation.graphs',
+      'fireStation.map'
   ])
 
   .config(function($interpolateProvider, $httpProvider, $resourceProvider) {
@@ -22,4 +23,3 @@
   })
 
 })();
-

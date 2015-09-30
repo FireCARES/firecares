@@ -2,8 +2,10 @@ import json
 import pandas as pd
 import urllib
 from django.views.generic import DetailView, ListView, TemplateView
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render_to_response
+from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.gis import geos
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.http.response import HttpResponseRedirect
@@ -11,10 +13,14 @@ from django.db.models import Max, Min, Count
 from django.db.models.fields import FieldDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import IntegerField
+from django.template import RequestContext
+from firecares.tasks.update import update_population_class_quartile
 from firecares.firecares_core.mixins import LoginRequiredMixin, CacheMixin
 from firecares.firestation.managers import Ntile, Case, When, Avg
 from firecares.firestation.models import FireStation, FireDepartment
-from firecares.usgs.models import StateorTerritoryHigh, CountyorEquivalent, IncorporatedPlace
+from firecares.usgs.models import (StateorTerritoryHigh, CountyorEquivalent,
+    IncorporatedPlace, Reserve, NativeAmericanArea, IncorporatedPlace,
+    UnincorporatedPlace, MinorCivilDivision)
 
 
 class DISTScoreContextMixin(object):
@@ -180,6 +186,67 @@ class DepartmentDetailView(LoginRequiredMixin, CacheMixin, DISTScoreContextMixin
 
         context.update(self.add_dist_values_to_context())
         return context
+
+
+class DepartmentUpdateGovernmentUnits(LoginRequiredMixin, DetailView):
+    model = FireDepartment
+    template_name = 'firestation/department_update_government_units.html'
+
+    def _associated_government_unit_ids(self, model_type):
+        return [x.object_id for x in self.object.government_unit.filter(object_type=ContentType.objects.get_for_model(model_type))]
+
+    def get_context_data(self, **kwargs):
+        context = super(DepartmentUpdateGovernmentUnits, self).get_context_data(**kwargs)
+
+        context['current_incorporated_places'] = self._associated_government_unit_ids(IncorporatedPlace)
+        context['incorporated_places'] = IncorporatedPlace.objects.filter(id__in=[100, 101]) # (geom__contains=self.object.headquarters_geom)
+        context['current_minor_civil_divisions'] = self._associated_government_unit_ids(MinorCivilDivision)
+        context['minor_civil_divisions'] = MinorCivilDivision.objects.filter(geom__contains=self.object.headquarters_geom)
+        context['current_native_american_areas'] = self._associated_government_unit_ids(NativeAmericanArea)
+        context['native_american_areas'] = NativeAmericanArea.objects.filter(id__in=[100,101]) # (geom__contains=self.object.headquarters_geom)
+        context['current_reserves'] = self._associated_government_unit_ids(Reserve)
+        context['reserves'] = Reserve.objects.filter(id__in=[100,101,86621]) # (geom__contains=self.object.headquarters_geom)
+        context['current_unincorporated_places'] = self._associated_government_unit_ids(UnincorporatedPlace)
+        context['unincorporated_places'] = UnincorporatedPlace.objects.filter(geom__contains=self.object.headquarters_geom)
+        context['current_counties'] = self._associated_government_unit_ids(CountyorEquivalent)
+        context['counties'] = CountyorEquivalent.objects.filter(id__in=[100, 101, 102, 1872])# (geom__contains=self.object.headquarters_geom)
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        context = self.get_context_data()
+
+        incorporated_places_selections = [int(x) for x in request.POST.getlist('incorporated_places')]
+        minor_civil_divisions_selections = [int(x) for x in request.POST.getlist('minor_civil_divisions')]
+        native_american_areas_selections = [int(x) for x in request.POST.getlist('native_american_areas')]
+        reserves_selections = [int(x) for x in request.POST.getlist('reserves')]
+        unincorporated_places = context['unincorporated_places']
+        unincorporated_places_selections = [int(x) for x in request.POST.getlist('unincorporated_places')]
+
+        counties_selections = [int(x) for x in request.POST.getlist('counties')]
+
+        def _update_govt_units(selections, current, model_type):
+            for i in set(selections) | set(current):
+                if i in selections and i not in current:
+                    self.object.government_unit.connect(model_type.objects.get(pk=i))
+                elif i not in selections and i in current:
+                    self.object.government_unit.filter(object_id=i, object_type=ContentType.objects.get_for_model(model_type)).delete()
+
+        _update_govt_units(counties_selections, context['current_counties'], CountyorEquivalent)
+        _update_govt_units(unincorporated_places_selections, context['current_unincorporated_places'], UnincorporatedPlace)
+        _update_govt_units(reserves_selections, context['current_reserves'], Reserve)
+        _update_govt_units(native_american_areas_selections, context['current_native_american_areas'], NativeAmericanArea)
+        _update_govt_units(minor_civil_divisions_selections, context['current_minor_civil_divisions'], MinorCivilDivision)
+        _update_govt_units(incorporated_places_selections, context['current_incorporated_places'], IncorporatedPlace)
+
+        if request.POST.get('update_geom'):
+            self.object.set_geometry_from_government_unit()
+
+        context = self.get_context_data()
+        messages.add_message(request, messages.SUCCESS, 'Government unit associations updated')
+
+        return render_to_response(self.template_name or self.get_template_names(), RequestContext(request, context))
 
 
 class SafeSortMixin(object):
@@ -440,6 +507,7 @@ class Stats(LoginRequiredMixin, TemplateView):
         context['stations_with_fdid'] = FireStation.objects.filter(fdid__isnull=False)
         context['stations_with_departments'] = FireStation.objects.filter(department__isnull=False)
         context['departments_with_government_unit'] = FireDepartment.objects.filter(object_id__isnull=True)
+
         return context
 
 

@@ -1,6 +1,7 @@
 from firecares.celery import app
 from django.db import connections
 from django.db.utils import ConnectionDoesNotExist
+from firecares.firestation.models import create_quartile_views
 from firecares.firestation.models import FireDepartment
 from firecares.firestation.models import NFIRSStatistic as nfirs
 from fire_risk.models import DIST, NotEnoughRecords
@@ -14,6 +15,13 @@ from firecares.utils import dictfetchall
 def update_scores():
     for fd in FireDepartment.objects.all():
         update_performance_score.delay(fd.id)
+
+
+@app.task(queue='update')
+def update_population_class_quartile():
+    print('Updating quartile views')
+    create_quartile_views(None)
+
 
 @app.task(queue='update')
 def update_performance_score(id, dry_run=False):
