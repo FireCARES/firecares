@@ -1,7 +1,7 @@
 from firecares.settings.base import *
 
 
-INSTALLED_APPS += ('debug_toolbar',)
+INSTALLED_APPS += ('debug_toolbar', 'fixture_magic')
 
 MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware', )
 

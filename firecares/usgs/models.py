@@ -232,6 +232,9 @@ class IncorporatedPlace(USGSBase):
     def name(self):
         return self.place_name
 
+    def __unicode__(self):
+        return '{name}, {state}'.format(name=self.name, state=self.state_name)
+
     class Meta:
         ordering = ('state_name', 'place_name', )
 
@@ -255,6 +258,9 @@ class UnincorporatedPlace(USGSBase):
     def name(self):
         return self.place_name
 
+    def __unicode__(self):
+        return '{name}, {state}'.format(name=self.name, state=self.state_name)
+
 
 class MinorCivilDivision(USGSBase):
     service_id = 16
@@ -274,6 +280,9 @@ class MinorCivilDivision(USGSBase):
     @property
     def name(self):
         return self.minorcivildivision_name
+
+    def __unicode__(self):
+        return '{name}, {state}'.format(name=self.name, state=self.state_name)
 
 
 class StateorTerritoryHigh(USGSBase):

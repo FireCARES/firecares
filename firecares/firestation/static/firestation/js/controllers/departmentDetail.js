@@ -28,12 +28,12 @@
 
 				 if (numFireStations > 0) {
 					var stationLayer = L.featureGroup(stationMarkers);
-	
+
 					// Uncomment to show Fire Stations by default
 					// stationLayer.addTo(departmentMap);
-	
+
 					layersControl.addOverlay(stationLayer, 'Fire Stations');
-	
+
 					if (config.geom === null) {
 						departmentMap.fitBounds(stationLayer.getBounds(), fitBoundsOptions);
 					}
@@ -63,5 +63,5 @@
               departmentMap.toggleFullscreen();
           };
 
-      })
+      });
 })();

@@ -202,6 +202,9 @@
                             <i class="fa fa-clock-o"></i><h6>Last Updated: {{ object.modified }}</h6>
                         </div>
                         <div class="ct-u-displayTableCell text-right">
+                            {% if perms.firestation.change_firedeparment %}
+                            <a href="{% url 'firedepartment_update_government_units' object.id %}"><i class="fa fa-arrow-circle-o-up"></i>Update government units</a>
+                            {% endif %}
                             <a href="" ng-click="toggleFullScreenMap()"><i class="fa fa-arrows-alt"></i> View Fullscreen Map</a>
                         </div>
                     </div>
@@ -482,7 +485,7 @@
                                 {% endif %}
                                 </ul>
                             </div>
-                            {% endif %} <!-- if not firestations --> 
+                            {% endif %} <!-- if not firestations -->
                         </div>
                     </div>
                 </div>

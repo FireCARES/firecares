@@ -85,5 +85,3 @@ def cache_thumbnail(id, upload_to_s3=False, marker=True):
     except Exception as exc:
         if current.request.retries < 3:
             current.retry(exc=exc, countdown=min(2 ** current.request.retries, 128))
-
-
