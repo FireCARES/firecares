@@ -734,7 +734,8 @@
     <div class="container">
         <div class="ct-heading ct-u-marginBottom30">
             <h3>Similar Departments</h3>
-            <a href="search-list.html" class="pull-right"><i class="fa fa-angle-right"></i>View More</a>
+           {% url 'similardepartments_list_slug' object.id object.slug as similarURL %}
+            <a href="{{similarURL}}" class="pull-right"><i class="fa fa-angle-right"></i>View More</a>
         </div>
         <div class="ct-js-owl ct-owl-controls--type2" data-single="false" data-items="4" data-pagination="false">
             {% for department in object.similar_departments|slice:":15" %}
