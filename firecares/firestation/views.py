@@ -369,7 +369,7 @@ class SimilarDepartmentsListView(FireDepartmentListView):
     model = FireDepartment
 
     def get_queryset(self):
-        queryset = FireDepartment.objects.get(id=self.kwargs.get('pk')).similar_departments
+        queryset = FireDepartment.objects.get(id=self.kwargs['pk']).similar_departments
         # If there is a 'q' argument, this is a full text search.
         if self.request.GET.get('q'):
             queryset = queryset.full_text_search(self.request.GET.get('q'))

@@ -4,6 +4,7 @@ from django.conf.urls import patterns, url
 from django.views.decorators.cache import cache_page
 
 urlpatterns = patterns('',
+					   url(r'departments/(?P<pk>\d+)/(?P<slug>[-\w]+)/search-list?$', SimilarDepartmentsListView.as_view(template_name='firestation/firedepartment_list.html'), name='similardepartments_list_slug'),
                        url(r'departments/(?P<pk>\d+)/search-list?$', SimilarDepartmentsListView.as_view(template_name='firestation/firedepartment_list.html'), name='similardepartments_list'),
                        url(r'departments/(?P<pk>\d+)/?$', DepartmentDetailView.as_view(template_name='firestation/department_detail.html'), name='firedepartment_detail'),
                        url(r'departments/(?P<pk>\d+)/(?P<slug>[-\w]+)/?$', DepartmentDetailView.as_view(template_name='firestation/department_detail.html'), name='firedepartment_detail_slug'),
