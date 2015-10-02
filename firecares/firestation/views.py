@@ -306,9 +306,7 @@ class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitM
     search_fields = ['fdid', 'state', 'region', 'name']
     range_fields = ['population', 'dist_model_score']
 
-    def get_queryset(self):
-        queryset = super(FireDepartmentListView, self).get_queryset()
-
+    def handle_search(self, queryset):
         # If there is a 'q' argument, this is a full text search.
         if self.request.GET.get('q'):
             queryset = queryset.full_text_search(self.request.GET.get('q'))
@@ -338,6 +336,11 @@ class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitM
 
             except:
                 pass
+        return queryset
+    def get_queryset(self):
+        queryset = super(FireDepartmentListView, self).get_queryset()
+
+        queryset = self.handle_search(queryset)
 
         return queryset
 
@@ -370,35 +373,7 @@ class SimilarDepartmentsListView(FireDepartmentListView):
 
     def get_queryset(self):
         queryset = FireDepartment.objects.get(id=self.kwargs['pk']).similar_departments
-        # If there is a 'q' argument, this is a full text search.
-        if self.request.GET.get('q'):
-            queryset = queryset.full_text_search(self.request.GET.get('q'))
-
-        queryset = self.sort_queryset(queryset, self.request.GET.get('sortBy'))
-        self.limit_queryset(self.request.GET.get('limit'))
-
-        for field, value in self.request.GET.items():
-            if value and value.lower() != 'any' and field in self.search_fields:
-                if field.lower().endswith('name'):
-                    field += '__icontains'
-                queryset = queryset.filter(**{field: value})
-
-            # range is passed as pair of comma delimited min and max values for example 12,36
-            try:
-                if field in self.range_fields and value and "," in value:
-                    min, max = value.split(",")
-                    Min = int(min)
-                    Max = int(max)
-
-                    if Min:
-                        queryset = queryset.filter(**{field + '__gte': Min})
-
-                    if Max:
-                        from django.db.models import Q
-                        queryset = queryset.filter(Q(**{field + '__lte': Max}) | Q(**{field + '__isnull': True}))
-
-            except:
-                pass
+        queryset = self.handle_search(queryset)
         return queryset
 
 

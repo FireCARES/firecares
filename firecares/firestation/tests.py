@@ -568,10 +568,9 @@ class FireStationTests(TestCase):
         self.assertTrue(fd in response.context['object_list'])
 
     def test_similar_list_view(self):
-		fd = FireDepartment.objects.create(name='Adak Volunteer Fire Department', population=None)
-		blueFD = FireDepartment.objects.create(name='Blue Volunteer Fire Department', population=None)
-		
-		c = Client()
+        fd = FireDepartment.objects.create(name='Adak Volunteer Fire Department', population=None)
+        blueFD = FireDepartment.objects.create(name='Blue Volunteer Fire Department', population=None)
+        c = Client()
         c.login(**{'username': 'admin', 'password': 'admin'})
         
         #test and ensure fd is not in object list
