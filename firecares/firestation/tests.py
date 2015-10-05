@@ -568,15 +568,21 @@ class FireStationTests(TestCase):
         self.assertTrue(fd in response.context['object_list'])
 
     def test_similar_list_view(self):
-        fd = FireDepartment.objects.create(name='Adak Volunteer Fire Department', population=None)
-        blueFD = FireDepartment.objects.create(name='Blue Volunteer Fire Department', population=None)
+        """
+        Tests the similar departments list view.
+        """
+        fd = FireDepartment.objects.create(name='Adak Volunteer Fire Department', population=5000)
+        blueFD = FireDepartment.objects.create(name='Blue Volunteer Fire Department', population=5100)
+        unrelated = FireDepartment.objects.create(name='Unrelated Fire Department', population=15000000)
+
         c = Client()
         c.login(**{'username': 'admin', 'password': 'admin'})
-        
-        #test and ensure fd is not in object list
-        responseString = '/departments/{0}/{1}/similar'.format(fd.id,fd.slug)
-        response = c.get(responseString)
+
+        response = c.get(reverse('similar_departments_slug', args=[fd.id, fd.slug]))
+        self.assertTrue(blueFD in response.context['object_list'])
         self.assertTrue(fd not in response.context['object_list'])
-        
-        self.assertEqual(response.status_code,200)
-        
+        self.assertTrue(unrelated not in response.context['object_list'])
+        self.assertEqual(response.status_code, 200)
+
+        response = c.get(reverse('similar_departments', args=[123]))
+        self.assertEqual(response.status_code, 404)

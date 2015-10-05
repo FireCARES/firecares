@@ -520,8 +520,6 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
                     params['population__lte'] = upper_bound
                     params['population__gte'] = lower_bound
 
-                break
-
         similar = FireDepartment.objects.filter(**params)\
             .exclude(id=self.id)\
             .extra(select={'difference': "abs(population - %s)"}, select_params=[self.population])\
