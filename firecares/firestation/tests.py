@@ -574,7 +574,9 @@ class FireStationTests(TestCase):
         c.login(**{'username': 'admin', 'password': 'admin'})
         
         #test and ensure fd is not in object list
-        responseString = '/departments/{0}/search-list'.format(fd.id)
+        responseString = '/departments/{0}/{1}/similar'.format(fd.id,fd.slug)
         response = c.get(responseString)
         self.assertTrue(fd not in response.context['object_list'])
+        
+        self.assertEqual(response.status_code,200)
         

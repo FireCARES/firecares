@@ -339,6 +339,9 @@ class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitM
         return queryset
     def get_queryset(self):
         queryset = super(FireDepartmentListView, self).get_queryset()
+        
+        if self.kwargs.get('pk',None) is not None:
+			queryset = FireDepartment.objects.get(id=self.kwargs['pk']).similar_departments
 
         queryset = self.handle_search(queryset)
 
@@ -366,16 +369,6 @@ class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitM
             context['last_page'] = paginator.num_pages
 
         return context
-
-
-class SimilarDepartmentsListView(FireDepartmentListView):
-    model = FireDepartment
-
-    def get_queryset(self):
-        queryset = FireDepartment.objects.get(id=self.kwargs['pk']).similar_departments
-        queryset = self.handle_search(queryset)
-        return queryset
-
 
 class FireStationDetailView(DetailView):
     model = FireStation
