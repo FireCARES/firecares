@@ -566,3 +566,17 @@ class FireStationTests(TestCase):
         # test strings in the numeric fields don't throw a 500
         response = c.get('/departments?fdid=&state=&name=adak&region=&population=wer0+%2C+9818605&q=&dist_model_score=we0+%2C+458&sortBy=&limit=0')
         self.assertTrue(fd in response.context['object_list'])
+
+    def test_similar_list_view(self):
+        fd = FireDepartment.objects.create(name='Adak Volunteer Fire Department', population=None)
+        blueFD = FireDepartment.objects.create(name='Blue Volunteer Fire Department', population=None)
+        c = Client()
+        c.login(**{'username': 'admin', 'password': 'admin'})
+        
+        #test and ensure fd is not in object list
+        responseString = '/departments/{0}/{1}/similar'.format(fd.id,fd.slug)
+        response = c.get(responseString)
+        self.assertTrue(fd not in response.context['object_list'])
+        
+        self.assertEqual(response.status_code,200)
+        
