@@ -15,7 +15,7 @@ User = get_user_model()
 class CoreTests(TestCase):
     fixtures = ['test_forgot.json']
 
-    def test_home_requires_login(self):
+    def test_home_does_not_require_login(self):
         """
         Ensures the home page requires login.
         Note: This is just until we improve the home page.
@@ -23,8 +23,7 @@ class CoreTests(TestCase):
 
         c = Client()
         response = c.get('/')
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue('login' in response.url)
+        self.assertEqual(response.status_code, 200)
 
     def test_departments_requires_login(self):
         """

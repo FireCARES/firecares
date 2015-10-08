@@ -443,5 +443,5 @@ class Stats(LoginRequiredMixin, TemplateView):
         return context
 
 
-class Home(LoginRequiredMixin, TemplateView, FeaturedDepartmentsMixin):
+class Home(TemplateView):
     template_name = 'firestation/home.html'
