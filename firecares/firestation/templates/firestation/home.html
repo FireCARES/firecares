@@ -21,6 +21,7 @@
     <![endif]-->
 
     <script src="{{STATIC_URL}}firestation/theme/assets/js/modernizr.custom.js"></script>
+    {% include 'google_analytics.html' %}
 </head>
 <body class="ct-headroom--fixedMenu cssAnimate onepager" ng-app="fireStation" ng-controller="home">
 
@@ -284,8 +285,6 @@
 
 
 {% include 'firestation/_footer.html' %}
-
-{% include 'google_analytics.html' %}
 {%  include 'firestation/_firecares_static.html' %}
 
 </body>

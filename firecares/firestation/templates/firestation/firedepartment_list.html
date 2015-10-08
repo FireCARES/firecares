@@ -18,7 +18,7 @@
 
     {% include 'firestation/_favicon.html' %}
     {% include "firestation/_firecares_static.html" %}
-
+    {% include 'google_analytics.html' %}
 </head>
 
 <body class="ct-headroom--fixedTopBar cssAnimate search"
@@ -324,9 +324,6 @@
 
 </div>
 <!-- JavaScripts -->
-
-{% include 'google_analytics.html' %}
-
 <script type="text/javascript">
       $('#sort-select').on("select2-selecting", function(e) {
         window.location.href = e.choice.id;
