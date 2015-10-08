@@ -586,3 +586,4 @@ class FireStationTests(TestCase):
 
         response = c.get(reverse('similar_departments', args=[123]))
         self.assertEqual(response.status_code, 404)
+

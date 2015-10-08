@@ -13,8 +13,8 @@
                 return
             }
 
-            L.tileLayer('https://{s}.tiles.mapbox.com/v3/garnertb.m9pm846a/{z}/{x}/{y}.png',
-              {'attribution': '© Mapbox', 'opacity':.95}).addTo(map);
+            L.tileLayer('http://d26i9v8ekbnwvr.cloudfront.net/base/{z}/{x}/{y}{r}.png',
+              {'attribution': '© Mapbox', 'opacity':.95, detectRetina: true}).addTo(map);
         };
 
         this.initMap = function(div, options) {
