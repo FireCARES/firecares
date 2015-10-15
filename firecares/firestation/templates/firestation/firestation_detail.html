@@ -37,6 +37,10 @@
                     <span class="header-extra-attribute">
                         <b>Department:</b> <a href="{{ object.department.get_absolute_url }}">{{ object.department.name }}</a>
                     </span>
+                    {% else %}
+                    <span class="header-extra-attribute">
+                        <b>Department:</b> <a href="{% url suggested_departments {{object.id}} %}"> Suggested Departments</a>
+                    </span>
                     {% endif %}
                 </span>
                </div>

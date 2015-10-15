@@ -1,0 +1,44 @@
+{% load humanize %}
+{% load firecares %}
+{% load cache %}
+
+{% cache 600 fire-station-card station.id %}
+<div class="ct-itemProducts ct-u-marginBottom30 ct-hover fire-department-card">
+
+    {% if object.recently_updated %}
+        <label class="control-label sale">
+            Recently updated
+        </label>
+    {% endif %}
+
+    <a href="{{ station.get_suggested_url }}">
+        <div class="ct-main-content">
+            <div class="ct-imageBox">
+                <img src="{{ station.thumbnail }}" alt=""><i class="fa fa-eye"></i>
+            </div>
+            <div class="ct-main-text">
+                <div class="ct-product--tilte">
+                    {{ station.name }}
+                </div>
+                <div class="ct-product--description">
+                    {{ station.station_address.address_line1 }}
+                </div>
+            </div>
+        </div>
+        <!--<div class="ct-product--meta">
+            <div class="ct-icons">
+                <span>
+                    <i class="fa fa-building-o"></i> {{ department.firestation_set.count }}
+                </span>
+                <span>
+                    <i class="fa fa-clock-o"></i> {{ department.dist_model_score|floatformat:"0" }}s
+                </span>
+                <span>
+                    <i class="fa fa-users"></i> {{ department.population|abbreviatedintword }}
+                </span>
+            </div>
+            <div class="ct-text"></div>
+        </div> -->
+    </a>
+</div>
+{% endcache %}

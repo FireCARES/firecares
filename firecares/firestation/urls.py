@@ -1,4 +1,6 @@
-from .views import DepartmentDetailView, Stats, FireDepartmentListView, SimilarDepartmentsListView
+
+from .views import DepartmentDetailView, Stats, FireStationListView, SuggestedDepartmentsView, FireDepartmentListView, \
+    SimilarDepartmentsListView
 from django.views.generic import TemplateView
 from django.conf.urls import patterns, url
 from django.views.decorators.cache import cache_page
@@ -12,5 +14,7 @@ urlpatterns = patterns('',
                        url(r'community-risk$', cache_page(60 * 60 * 24)(TemplateView.as_view(template_name='firestation/community_risk_model.html')), name='models_community_risk'),
                        url(r'performance-score$', cache_page(60 * 60 * 24)(TemplateView.as_view(template_name='firestation/performance_score_model.html')), name='models_performance_score'),
                        url(r'stats/fire-stations/?$', Stats.as_view(), name='firestation_stats'),
+                       url(r'stations/?$', FireStationListView.as_view(template_name='firestation/firestation_list.html'), name='firestation_list'),
+                       url(r'stations/(?P<pk>\d+)/suggested$', SuggestedDepartmentsView.as_view(template_name='firestation/suggested_departments.html'), name='suggested_departments'),
                        )
 

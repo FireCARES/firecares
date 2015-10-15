@@ -745,7 +745,123 @@ class FireStation(USGSStructureData):
         """
         return 'http://services.nationalmap.gov/arcgis/rest/services/structures/MapServer/7/{0}?f=json' \
             .format(self.objectid)
+        
+    """
+    Returns sorted list of suggested departments for fire station
+    """
+    @property
+    def suggested_departments(self):
+        """
+        Helper functions
+        """
+        def FilterName(self,name,wordsToFilter):
+            removedDict = dict((re.escape(k), v) for k, v in wordsToFilter.iteritems())
+            removedPattern = re.compile("|".join(removedDict.keys()))
+            name = removedPattern.sub(lambda m: removedDict[re.escape(m.group(0))], name)
+            name = re.sub("^\d+\s|\s\d+\s|\s\d+$", " ", name)
+            name =  re.sub(' +',' ', name)
+            name = name.strip()
+            return name
 
+        def DetermineInsertIndex(suggestedDepartments,numSuggested,score):
+            index = 1
+            while index < numSuggested:
+                if score > suggestedDepartments[index]:
+                    break
+                index += 1
+            return index
+        
+        alwaysRemoved = { "Station": "", 
+            " Engine": "",
+            " Truck": "",
+            " Ladder": "",
+            " Quint": "",
+            " Squirt": "",
+            " Ambulance": "",
+            " Service": "",
+            " District": "",
+            " Headquarters" : "",
+            " City" : "",
+            } 
+        levRemoved = { 
+            " Rescue": "",
+            " Service": "",
+            " and": "",
+            " Emergency": "",
+            " Medical": "",
+            " Services": "",
+            } 
+        
+        filteredName = self.name
+        filteredName = FilterName(filteredName,alwaysRemoved)
+        levFilteredName = FilterName(filteredName,levRemoved)
+
+        nearby_departments = FireDepartment.objects.filter(headquarters_address__geom__distance_lte=(self.geom, D(mi=40)))\
+        .distance(self.geom)\
+        .extra(select={'dis_name': "select levenshtein(firestation_firedepartment.name, %s)", 'dis_sound': "select similarity(firestation_firedepartment.name, %s)"}, select_params=(levFilteredName,filteredName,))\
+        .order_by('distance','dis_name')
+        
+        
+        bestDepartmentScore = 0
+        bestDepartmentID = 0
+        bestDepartmentName = ''
+        suggestedDepMax = 10
+        suggestedDepartments = list()
+        
+        for n, fireDepartment in enumerate(nearby_departments):
+            
+            if n == 100:
+                break
+            
+            departmentDistance = 40
+            
+            if fireDepartment.distance is not None:
+                departmentDistance = fireDepartment.distance.mi
+            else:
+                meterStation = self.geom.transform(3857,True)
+                meterDepartment = self.geom.transform(3857,True)
+                departmentDistance = meterDepartment.distance(meterStation) * 0.000621371
+        """
+        The maximum return from levenshtein will be the length of the longer string
+         so to create a true 0-1 ratio find the longer string name
+        """
+        stationNameLen = len(levFilteredName)
+        departmentNameLen = len(fireDepartment.name)
+        minName = min(stationNameLen,departmentNameLen)
+        longestName = max(stationNameLen,departmentNameLen)
+        minDistance = longestName - minName
+        """
+        lower bound of levenshtein is at least difference of strings
+        to create zero to one ratio must subtract minimum distances
+        """
+        fireDepartment.dis_name = max(fireDepartment.dis_name - minDistance,0)
+        
+        departmentScore = ((1 - departmentDistance / 40) * 55) + (1 - fireDepartment.dis_name / longestName) * 80 + (fireDepartment.dis_sound * 30)
+    
+        fireDepartment.distance = departmentDistance
+        fireDepartment.departmentScore = departmentScore
+            
+        if departmentScore > bestDepartmentScore:
+            bestDepartmentScore = departmentScore
+            bestDepartmentID = fireDepartment.id
+            bestDepartmentName = fireDepartment.name
+            suggestedDepartments.insert(0,fireDepartment)
+        else:
+            numSuggested = len(suggestedDepartments)
+            if numSuggested < suggestedDepMax or (numSuggested >= suggestedDepMax and departmentScore > suggestedDepartments[suggestedDepMax-1].departmentScore):
+                depIndex = DetermineInsertIndex(suggestedDepartments,numSuggested,departmentScore)
+                suggestedDepartments.insert(depIndex,fireDepartment)
+        """
+        Trim list down to max count
+        """
+        numSuggested = len(suggestedDepartments)
+        while numSuggested > suggestedDepMax:
+            suggestedDepartments.pop()
+            numSuggested -= 1
+
+        return suggestedDepartments
+        
+        
     @classmethod
     def load_data(cls):
         objects = requests.get('http://services.nationalmap.gov/arcgis/rest/services/structures/MapServer/7/query?'
@@ -809,6 +925,9 @@ class FireStation(USGSStructureData):
                 return self.district.transform(102009, clone=True).area / 1000000
             except:
                 return
+
+    def get_suggested_url(self):
+        return reverse('suggested_departments', kwargs=dict(pk=self.id))
 
     def get_absolute_url(self):
         return reverse('firestation_detail', kwargs=dict(pk=self.id))
