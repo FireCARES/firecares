@@ -23,6 +23,7 @@ install:
   - conda install --yes -n condaenv pip scipy
   - source activate condaenv
   - travis_wait "pip install -r requirements.txt"
+  - easy_install --upgrade numpy
 
 before_script:
   - psql -c "CREATE EXTENSION postgis" -U postgres
