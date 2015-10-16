@@ -155,7 +155,8 @@ INSTALLED_APPS = (
     'storages',
     'widget_tweaks',
     'firecares.tasks',
-    'registration'
+    'registration',
+    'django_slack'
 )
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
@@ -178,11 +179,16 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'slack_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django_slack.log.SlackExceptionHandler'
         }
     },
     'loggers': {
         'django.request': {
-            'handlers': ['mail_admins'],
+            'handlers': ['mail_admins', 'slack_admins'],
             'level': 'ERROR',
             'propagate': True,
         },
@@ -230,3 +236,9 @@ EMAIL_PORT = os.getenv('EMAIL_PORT', 25)
 EMAIL_SUBJECT_PREFIX = '[FireCARES] '
 SERVER_EMAIL = os.getenv('SERVER_EMAIL', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', '')
+
+SLACK_BACKEND = 'django_slack.backends.RequestsBackend'
+SLACK_TOKEN = os.getenv('SLACK_TOKEN', None)
+SLACK_CHANNEL = os.getenv('SLACK_CHANNEL', '#firecares')
+SLACK_ICON_EMOJI = os.getenv('SLACK_ICON_EMOJI', ':goberserk:')
+SLACK_USERNAME = os.getenv('SLACK_USERNAME', 'edgebot')
