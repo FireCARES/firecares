@@ -248,7 +248,70 @@ class LimitMixin(object):
 
         return context
 
+class SuggestedDepartmentsView(LoginRequiredMixin, ListView, LimitMixin):
+    model = FireStation
+    paginate_by = 10
+    queryset = FireStation.objects.all()
+    
+    def get_queryset(self):
+        queryset = super(SuggestedDepartmentsView,self).get_queryset()
+        station = FireStation.objects.get(id=**kwargs['pk'])
+        queryset = station.suggested_departments
+        
+        return queryset
 
+    def get_context_data(self, **kwargs):
+        context = super(SuggestedDepartmentsView,self).get_context_data(**kwargs)
+        return context
+
+class FireStationListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitMixin):
+    model = FireStation
+    paginate_by = 30
+    queryset = FireStation.objects.all()
+    sort_by_fields = [
+        ('name', 'Name Ascending'),
+        ('-name', 'Name Descending'),
+        ('state', 'State Acscending'),
+        ('-state', 'State Descending'),
+        ('dist_model_score', 'Lowest DIST Score'),
+        ('-dist_model_score', 'Highest DIST Score'),
+        ('population', 'Smallest Population'),
+        ('-population', 'Largest Population')
+        ]
+
+    search_fields = ['fdid', 'state', 'region', 'name']
+    
+    def get_queryset(self):
+        queryset = super(FireStationListView, self).get_queryset()
+        rqueryset = self.sort_queryset(queryset, self.request.GET.get('sortBy'))
+        self.limit_queryset(self.request.GET.get('limit'))
+
+        for field, value in self.request.GET.items():
+            if value and value.lower() != 'any' and field in self.search_fields:
+                if field.lower().endswith('name'):
+                    field += '__icontains'
+                queryset = queryset.filter(**{field: value})
+
+        return queryset
+        
+    def get_context_data(self, **kwargs):
+        context = super(FireStationListView, self).get_context_data(**kwargs)
+        context = self.get_sort_context(context)
+         
+        page_obj = context['page_obj']
+        paginator = page_obj.paginator
+        min_page = page_obj.number - 5
+        min_page = max(1, min_page)
+        max_page = page_obj.number + 6
+        max_page = min(paginator.num_pages, max_page)
+        context['windowed_range'] = range(min_page, max_page)
+        if min_page > 1:
+                context['first_page'] = 1
+        if max_page < paginator.num_pages:
+                context['last_page'] = paginator.num_pages
+
+        return context
+    
 class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitMixin, DISTScoreContextMixin, FeaturedDepartmentsMixin):
     model = FireDepartment
     paginate_by = 30

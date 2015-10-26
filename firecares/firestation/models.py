@@ -733,6 +733,9 @@ class FireStation(USGSStructureData):
         return 'http://services.nationalmap.gov/arcgis/rest/services/structures/MapServer/7/{0}?f=json' \
             .format(self.objectid)
         
+    """
+    Returns sorted list of suggested departments for fire station
+    """
     @property
     def suggested_departments(self):
         """
@@ -752,7 +755,7 @@ class FireStation(USGSStructureData):
             while index < numSuggested:
                 if score > suggestedDepartments[index]:
                     break
-                index++
+                index += 1
             return index
         
         alwaysRemoved = { "Station": "", 
@@ -780,7 +783,7 @@ class FireStation(USGSStructureData):
         filteredName = FilterName(filteredName,alwaysRemoved)
         levFilteredName = FilterName(filteredName,levRemoved)
 
-         nearby_departments = FireDepartment.objects.filter(headquarters_address__geom__distance_lte=(self.geom, D(mi=40)))\
+        nearby_departments = FireDepartment.objects.filter(headquarters_address__geom__distance_lte=(self.geom, D(mi=40)))\
         .distance(self.geom)\
         .extra(select={'dis_name': "select levenshtein(firestation_firedepartment.name, %s)", 'dis_sound': "select similarity(firestation_firedepartment.name, %s)"}, select_params=(levFilteredName,filteredName,))\
         .order_by('distance','dis_name')
@@ -825,7 +828,7 @@ class FireStation(USGSStructureData):
         fireDepartment.distance = departmentDistance
         fireDepartment.departmentScore = departmentScore
             
-         if departmentScore > bestDepartmentScore:
+        if departmentScore > bestDepartmentScore:
             bestDepartmentScore = departmentScore
             bestDepartmentID = fireDepartment.id
             bestDepartmentName = fireDepartment.name
@@ -838,8 +841,10 @@ class FireStation(USGSStructureData):
         """
         Trim list down to max count
         """
-        while(len(suggestedDepartments) > suggestedDepMax):
+        numSuggested = len(suggestedDepartments)
+        while numSuggested > suggestedDepMax:
             suggestedDepartments.pop()
+            numSuggested -= 1
 
         return suggestedDepartments
         
@@ -907,6 +912,9 @@ class FireStation(USGSStructureData):
                 return self.district.transform(102009, clone=True).area / 1000000
             except:
                 return
+
+    def get_suggested_url(self):
+        return reverse('suggested_departments', kwargs=dict(pk=self.id))
 
     def get_absolute_url(self):
         return reverse('firestation_detail', kwargs=dict(pk=self.id))
