@@ -761,14 +761,14 @@ class FireStation(USGSStructureData):
             removed_pattern = re.compile("|".join(removed_dict.keys()))
             name = removed_pattern.sub(lambda m: removed_dict[re.escape(m.group(0))], name)
             name = re.sub("^\d+\s|\s\d+\s|\s\d+$", " ", name)
-            name =  re.sub(' +',' ', name)
+            name = re.sub(' +',' ', name)
             name = name.strip()
             return name
 
         def determine_insertion_index(suggested_departments,department_count,score):
             index = 1
             while index < department_count:
-                if score > suggested_departments[index]:
+                if score > suggested_departments[index].department_score:
                     break
                 index += 1
             return index
@@ -825,35 +825,35 @@ class FireStation(USGSStructureData):
                 meterDepartment = self.geom.transform(3857,True)
                 department_distance = meterDepartment.distance(meterStation) * 0.000621371
         
-        #  The maximum return from levenshtein will be the length of the longer string
-        #  so to create a true 0-1 ratio find the longer string name
+            #  The maximum return from levenshtein will be the length of the longer string
+            #  so to create a true 0-1 ratio find the longer string name
 
-        station_name_length = len(lev_filtered_name)
-        department_name_length = len(fireDepartment.name)
-        minimum_name_length = min(station_name_length,department_name_length)
-        longest_name_length = max(station_name_length,department_name_length)
-        minimum_lev_distance = longest_name_length - minimum_name_length
+            station_name_length = len(lev_filtered_name)
+            department_name_length = len(fireDepartment.name)
+            minimum_name_length = min(station_name_length,department_name_length)
+            longest_name_length = max(station_name_length,department_name_length)
+            minimum_lev_distance = longest_name_length - minimum_name_length
         
-        #  lower bound of levenshtein is at least difference of strings
-        #  to create zero to one ratio must subtract minimum distances
-        
-        fireDepartment.dis_name = max(fireDepartment.dis_name - minimum_lev_distance,0)
-        
-        department_score = ((1 - department_distance / 40) * 55) + (1 - fireDepartment.dis_name / longest_name_length) * 80 + (fireDepartment.dis_sound * 30)
-    
-        fireDepartment.distance = department_distance
-        fireDepartment.departmentScore = department_score
+            #  lower bound of levenshtein is at least difference of strings
+            #  to create zero to one ratio must subtract minimum distances
             
-        if department_score > best_department_score:
-            best_department_score = department_score
-            best_department_id = fireDepartment.id
-            best_department_name = fireDepartment.name
-            suggested_departments.insert(0,fireDepartment)
-        else:
-            num_departments = len(suggested_departments)
-            if num_departments < max_suggested_departments or (num_departments >= max_suggested_departments and department_score > suggested_departments[max_suggested_departments-1].department_score):
-                department_index = DetermineInsertIndex(suggested_departments,num_departments,department_score)
-                suggested_departments.insert(department_index,fireDepartment)
+            fireDepartment.dis_name = max(fireDepartment.dis_name - minimum_lev_distance,0)
+            
+            department_score = ((1 - department_distance / 40) * 55) + (1 - fireDepartment.dis_name / longest_name_length) * 80 + (fireDepartment.dis_sound * 30)
+        
+            fireDepartment.distance = department_distance
+            fireDepartment.department_score = department_score
+                
+            if department_score > best_department_score:
+                best_department_score = department_score
+                best_department_id = fireDepartment.id
+                best_department_name = fireDepartment.name
+                suggested_departments.insert(0,fireDepartment)
+            else:
+                num_departments = len(suggested_departments)
+                if num_departments < max_suggested_departments or (num_departments >= max_suggested_departments and department_score > suggested_departments[max_suggested_departments-1].department_score):
+                    department_index = determine_insertion_index(suggested_departments,num_departments,department_score)
+                    suggested_departments.insert(department_index,fireDepartment)
         
         #  Trim list down to max count
 
