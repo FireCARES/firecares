@@ -4,10 +4,6 @@ from django import forms
 from django.contrib.auth.forms import PasswordResetForm
 from django.core.mail import EmailMultiAlternatives
 from django.template import loader
-from django.forms.widgets import CheckboxChoiceInput
-from django.utils.encoding import python_2_unicode_compatible
-from django.utils.html import html_safe, conditional_escape
-from django.utils.safestring import mark_safe
 from firecares.tasks.email import send_mail
 
 

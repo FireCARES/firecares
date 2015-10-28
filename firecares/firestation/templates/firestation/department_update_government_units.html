@@ -10,12 +10,12 @@
 <html class="no-js" lang="en"> <!--<![endif]-->
 <head lang="en">
     <meta charset="UTF-8">
-    <meta name="description" content="{{ object.description }} Learn more about this community's risks.">
+    <meta name="description" content="{{ object.description }} Update government unit assocations for {{ object.name }}.">
     <meta name="author" content="Prominent Edge LLC">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-    <title>Community Assessment: {{ object.name }}</title>
+    <title>Update government unit associations for fire department: {{ object.name }}</title>
     {% include 'firestation/_favicon.html' %}
 
 
@@ -27,7 +27,7 @@
       id: {{object.id}}
     }
     </script>
-
+    {% include 'google_analytics.html' %}
 </head>
 
 <body class="ct-headroom--fixedTopBar cssAnimate" ng-controller="jurisdictionController" ng-app="fireStation">
@@ -196,22 +196,6 @@
 </header>
 <section class="ct-u-paddingBottom60">
     <div class="container">
-        <div class="ct-productMeta--single ">
-            {% if messages %}
-            <div class="row usgs-messages">
-                <div class="col-md-12 col-lg-12">
-                    <ul>
-                        {% for message in messages %}
-                        <div class="alert {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}alert-success{% else %}alert-danger{% endif %}" role="alert">
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            {{ message }}
-                        </div>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-            {% endif %}
-        </div>
         <div class="ct-section--products">
             <div class="row">
                 <div class="col-md-12 col-lg-12">
@@ -302,94 +286,12 @@
                             </div>
                         </div>
                         <div class="col-md-8">
-                            <p class="ct-u-marginBottom20">
-                                {{ object.description }}
-                            </p>
-                            <div class="row">
-                                <div class="col-md-1 ct-u-marginTop20">
-                                    <div class="diamond-control-label diamond-{{object.population_metrics_row.risk_model_fires_quartile | risk_level | default_if_none:'unavailable'}}">
-                                        <div>{{ object.population_metrics_row.risk_model_fires_quartile | risk_level | default_if_none:'n/a'}}</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-11">
-                                    <div class="risk-card">
-                                        <div class="main-content">
-                                            <div class="main-text">
-                                                <div class="ct-product--tilte">
-                                                    Fire Risk
-                                                </div>
-                                                <div class="description">
-                                                    This department falls into the {{ object.population_metrics_row.risk_model_fires_quartile|risk_level|default:'unknown' }} risk category for structure fires when compared to other fire departments with communities of the same size classification.
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-1 ct-u-marginTop20">
-                                    <div class="diamond-control-label diamond-{{object.population_metrics_row.risk_model_size1_percent_size2_percent_sum_quartile | risk_level | default_if_none:'unavailable'}}">
-                                        <div>{{ object.population_metrics_row.risk_model_size1_percent_size2_percent_sum_quartile | risk_level | default_if_none:'n/a'}}</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-11">
-                                    <div class="risk-card">
-                                        <div class="main-content">
-                                            <div class="main-text">
-                                                <div class="ct-product--tilte">
-                                                    Fire Spread Risk
-                                                </div>
-                                                <div class="description">
-                                                    This department falls into the {{ object.population_metrics_row.risk_model_size1_percent_size2_percent_sum_quartile|risk_level|default:'unknown' }} risk category for the number of fires spread beyond room of origin when compared to other fire departments with communities of the same size classification.
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-1 ct-u-marginTop20">
-                                    <div class="diamond-control-label diamond-{{object.population_metrics_row.risk_model_deaths_injuries_sum_quartile | risk_level | default_if_none:'unavailable'}}">
-                                        <div>{{ object.population_metrics_row.risk_model_deaths_injuries_sum_quartile | risk_level | default_if_none:'n/a'}}</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-11">
-                                    <div class="risk-card">
-                                        <div class="main-content">
-                                            <div class="main-text">
-                                                <div class="ct-product--tilte">
-                                                    Death and Injury Risk
-                                                </div>
-                                                <div class="description">
-                                                    This department falls into the {{ object.population_metrics_row.risk_model_deaths_injuries_sum_quartile|risk_level|default:'unknown' }} risk category for the number of fire-related deaths and injuries when compared to other fire departments with communities of the same size classification.
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row community-risk-legend ct-u-marginBottom30">
-                                <div>
-                                 <div class="diamond-control-label diamond-low diamond-legend"></div>
-                                 <span class="help-text"><span class="help-text-category">Low</span><span>: less than 25% of departments have an equal or smaller risk value.</span></span>
-                                </div>
-                                <div>
-                                 <div class="diamond-control-label diamond-medium diamond-legend" style="opacity: .5; display: inline-block"></div>
-                                 <span class="help-text"><span class="help-text-category">Medium</span><span>: 25-75% of departments have a smaller risk value.</span></span>
-                                 </div>
-                                <div>
-                                 <div class="diamond-control-label diamond-high diamond-legend" style="opacity: .5; display: inline-block"></div>
-                                 <span class="help-text"><span class="help-text-category">High</span><span>: over 75% of departments have an equal or smaller risk value.</span></span>
-                                </div>
-                             </div>
+                            <div id="map"></div>
                         </div>
                     </div>
 
-                    <div class="ct-gallery ct-u-marginBottom20">
-                        <div id="map"></div>
-                    </div>
                     <div class="row">
-                        <div class="col-md-12 col-lg-12">
+                        <div class="col-md-12 col-lg-12 ct-u-marginTop10">
                             <div class="ct-u-displayTableVertical">
                                 <div class="ct-u-displayTableCell text-left">
                                     <i class="fa fa-clock-o pull-left"></i><h6>Last Updated: {{ object.modified }}</h6>
@@ -407,7 +309,7 @@
                     <div class="col-sm-6 col-md-12 ct-u-marginBottom30">
                         <h3>Associated Government Units</h3>
                     </div>
-                    <form role="form" method="post" class="usgs" action=".">
+                    <form role="form" method="post" class="usgs" action="{% url 'firedepartment_update_government_units'  object.id %}">
                         {% csrf_token %}
                         <div class="col-sm-12 col-md-12 ct-u-marginBottom10">
                             <div class="metric-card">
@@ -658,7 +560,7 @@
 
                             <div class="submission">
                                 <label class="pull-left">
-                                    <input type="checkbox" name="update_geom" class="pull-left" value="1"/>
+                                    <input type="checkbox" name="update_geom" class="pull-left" value="1" checked="checked"/>
                                     Update department geometry to include geometries of government units?
                                 </label>
                                 <button class="btn btn-primary btn-xlarge pull-left ct-u-marginTop20" type="submit">Save</button>
@@ -703,7 +605,6 @@
 </div>
 
 {% include "firestation/_firecares_static.html" %}
-{% include 'google_analytics.html' %}
 
 </body>
 </html>

@@ -18,12 +18,6 @@ def update_scores():
 
 
 @app.task(queue='update')
-def update_population_class_quartile():
-    print('Updating quartile views')
-    create_quartile_views(None)
-
-
-@app.task(queue='update')
 def update_performance_score(id, dry_run=False):
     """
     Updates department performance scores.
