@@ -1,7 +1,7 @@
 'use strict';
 
 (function() {
-    angular.module('fireStation.departmentDetailController', [])
+    angular.module('fireStation.matchDetailController', [])
 
     .controller('matchController', function($scope, $http, FireStation, map) {
     

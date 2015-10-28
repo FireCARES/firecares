@@ -293,7 +293,7 @@ class SuggestedDepartmentsView(LoginRequiredMixin, ListView, LimitMixin):
     
     def get_queryset(self):
         queryset = super(SuggestedDepartmentsView,self).get_queryset()
-        station = FireStation.objects.get(id=**kwargs['pk'])
+        station = get_object_or_404(FireStation,pk=self.kwargs.get('pk'))
         queryset = station.suggested_departments
         
         return queryset
