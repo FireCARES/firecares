@@ -684,7 +684,7 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
                     counter += 1
 
                 assert counter == cls.objects.all().count()
-    
+
     @cached_property
     def slug(self):
         return slugify(self.name)
@@ -1070,4 +1070,3 @@ def create_quartile_views(sender, **kwargs):
         cursor.execute("CREATE MATERIALIZED VIEW population_class_%s_quartiles AS ({0});".format(query), [population_class])
 
 post_migrate.connect(create_quartile_views)
-

@@ -10851,6 +10851,7 @@ img.mfp-img {
   height: 100%;
   display: block;
   pointer-events: none;
+  z-index: 1000;
 }
 .fire-department-card .ct-main-text {
   min-height: 75px;
@@ -11484,9 +11485,15 @@ table.residential-fires {
 .usgs-messages .alert {
   margin-bottom: 0;
 }
+.usgs-update-link {
+  margin-right: 2em;
+}
 .usgs .metric-card {
   background-color: #F7F7F7;
   margin-bottom: 1em;
+}
+.usgs .metric-card:first-child {
+  border-top: 1px solid #ddd;
 }
 .usgs .main-text ul {
   padding-left: 10px;
@@ -11508,6 +11515,7 @@ table.residential-fires {
   height: 100%;
   display: block;
   pointer-events: none;
+  z-index: 1000;
 }
 .usgs ul {
   padding-left: 30px;

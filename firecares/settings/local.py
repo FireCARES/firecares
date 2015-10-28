@@ -18,8 +18,17 @@ DEBUG_TOOLBAR_CONFIG = {
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'magic'
     }
+}
+
+LOGGING['loggers'] = {
+    'django.request': {
+        'handlers': ['mail_admins'],
+        'level': 'ERROR',
+        'propagate': True,
+    },
 }
 
 

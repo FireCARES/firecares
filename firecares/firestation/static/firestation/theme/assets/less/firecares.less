@@ -16,6 +16,7 @@
   height: 100%;
   display: block;
   pointer-events: none;
+  z-index: 1000;
 }
 
 .fire-department-card .ct-main-text {
@@ -725,10 +726,18 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#495E82', end
   }
 }
 
+.usgs-update-link {
+  margin-right: 2em;
+}
+
 .usgs {
   .metric-card {
     background-color: #F7F7F7;
     margin-bottom: 1em;
+
+    &:first-child {
+      border-top: 1px solid #ddd;
+    }
   }
 
   .main-text ul {
@@ -754,6 +763,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#495E82', end
     height: 100%;
     display: block;
     pointer-events: none;
+    z-index: 1000;
   }
 
   ul {

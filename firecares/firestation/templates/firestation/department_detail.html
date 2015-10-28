@@ -195,6 +195,22 @@
 <section class="ct-u-paddingBottom60">
     <div class="container">
         <div class="ct-productMeta--single ">
+            {% if messages %}
+            <div class="row usgs-messages">
+                <div class="col-md-12 col-lg-12">
+                    <ul>
+                        {% for message in messages %}
+                        <div class="alert {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}alert-success{% else %}alert-danger{% endif %}" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="ct-productMeta--single ">
             <div class="row">
                 <div class="col-md-8 col-lg-9">
                     <div class="ct-u-displayTableVertical">
@@ -203,7 +219,7 @@
                         </div>
                         <div class="ct-u-displayTableCell text-right">
                             {% if perms.firestation.change_firedeparment %}
-                            <a href="{% url 'firedepartment_update_government_units' object.id %}"><i class="fa fa-arrow-circle-o-up"></i>Update government units</a>
+                            <a href="{% url 'firedepartment_update_government_units' object.id %}" class="usgs-update-link"><i class="fa fa-arrow-circle-o-up"></i>Update government units</a>
                             {% endif %}
                             <a href="" ng-click="toggleFullScreenMap()"><i class="fa fa-arrows-alt"></i> View Fullscreen Map</a>
                         </div>
