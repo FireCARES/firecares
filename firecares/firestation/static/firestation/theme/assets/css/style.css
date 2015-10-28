@@ -1,7 +1,4 @@
 @charset "UTF-8";
-@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
-@import url(https://fonts.googleapis.com/css?family=Libre+Baskerville:400italic);
-@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700,800);
 /*------------------------------------------------------------------
 Project:	Estato - Developers HTML Template
 Version:	1.0
@@ -55,6 +52,9 @@ Licensed under the MIT license - http://opensource.org/licenses/MIT
 
 Copyright (c) 2014 Daniel Eden
 */
+@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
+@import url(https://fonts.googleapis.com/css?family=Libre+Baskerville:400italic);
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700,800);
 .animated {
   -webkit-animation-duration: 1s;
   animation-duration: 1s;
@@ -10851,6 +10851,7 @@ img.mfp-img {
   height: 100%;
   display: block;
   pointer-events: none;
+  z-index: 1000;
 }
 .fire-department-card .ct-main-text {
   min-height: 75px;
@@ -11475,6 +11476,68 @@ table.residential-fires {
 .ct-copyright-link {
   color: #757575;
   font-weight: 600;
+}
+.usgs-messages ul {
+  margin-top: 1em;
+  margin-bottom: 0;
+  padding-left: 0;
+}
+.usgs-messages .alert {
+  margin-bottom: 0;
+}
+.usgs-update-link {
+  margin-right: 2em;
+}
+.usgs .metric-card {
+  background-color: #F7F7F7;
+  margin-bottom: 1em;
+}
+.usgs .metric-card:first-child {
+  border-top: 1px solid #ddd;
+}
+.usgs .main-text ul {
+  padding-left: 10px;
+}
+.usgs hr {
+  clear: both;
+}
+.usgs .map {
+  min-height: 300px;
+  padding-left: 0;
+}
+.usgs .map > .leaflet-control-container:after {
+  content: '';
+  position: absolute;
+  -webkit-box-shadow: inset -1px 1px 5px 3px rgba(0, 0, 0, 0.19);
+  -moz-box-shadow: inset -1px 1px 5px 3px rgba(0, 0, 0, 0.19);
+  box-shadow: inset -1px 1px 5px 3px rgba(0, 0, 0, 0.19);
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  z-index: 1000;
+}
+.usgs ul {
+  padding-left: 30px;
+}
+.usgs input[type='checkbox'].hang-left {
+  margin-left: -20px;
+}
+.usgs input[type='checkbox'] {
+  width: 1em;
+  float: left;
+}
+.usgs .leaflet-control-layers-list span {
+  margin-left: 1em;
+}
+.usgs li {
+  list-style-type: none;
+}
+.usgs button {
+  clear: left;
+}
+.usgs .submission input[type='checkbox'] {
+  margin-right: 0.5em;
 }
 .ct-pageWrapper {
   z-index: 3;
