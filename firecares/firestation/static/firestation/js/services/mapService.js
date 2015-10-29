@@ -13,7 +13,7 @@
                 return
             }
 
-            L.tileLayer('https://d26i9v8ekbnwvr.cloudfront.net/base/{z}/{x}/{y}{r}.png',
+            L.tileLayer('https://{s}.firecares.org/base/{z}/{x}/{y}{r}.png',
               {'attribution': '© Mapbox', 'opacity':.95, detectRetina: true}).addTo(map);
         };
 
