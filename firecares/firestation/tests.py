@@ -2,7 +2,7 @@ import json
 import requests
 import string
 from .forms import StaffingForm
-from .models import FireDepartment, FireStation, Staffing, PopulationClass1Quartile, PopulationClass9Quartile
+from .models import FireDepartment, FireStation, Staffing, PopulationClass9Quartile
 from django.db import connections
 from django.test import TestCase
 from django.test.client import Client
@@ -10,7 +10,7 @@ from django.conf import settings
 from django.core.cache import caches
 from django.core.management import call_command
 from django.core.urlresolvers import reverse, resolve
-from django.contrib.gis.geos import Point, Polygon, MultiPolygon, fromstr
+from django.contrib.gis.geos import Point, Polygon, MultiPolygon
 from django.contrib.auth import get_user_model
 from firecares.usgs.models import UnincorporatedPlace
 from firecares.firecares_core.models import Address, Country
@@ -594,7 +594,7 @@ class FireStationTests(TestCase):
 
     def test_update_government_unit_associations(self):
         """
-        Tests functionality associated with updating a FireDepartment's assoiciated government units
+        Tests functionality associated with updating a FireDepartment's associated government units
         """
 
         call_command('loaddata', 'firecares/firestation/fixtures/test_government_unit_association.json')

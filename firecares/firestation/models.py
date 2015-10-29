@@ -15,7 +15,6 @@ from django.db import connections
 from django.db.models import Avg, Max, Min, Q
 from django.db.models.loading import get_model
 from django.db.models.signals import post_migrate
-from django.db.utils import ConnectionDoesNotExist
 from django.utils.text import slugify
 from firecares.firecares_core.models import RecentlyUpdatedMixin
 from django.core.urlresolvers import reverse
@@ -23,7 +22,6 @@ from django.db.transaction import rollback
 from django.db.utils import IntegrityError, ProgrammingError
 from django.utils.functional import cached_property
 from firecares.firecares_core.models import Address
-from firecares.utils import dictfetchall
 from numpy import histogram
 from phonenumber_field.modelfields import PhoneNumberField
 from firecares.firecares_core.models import Country

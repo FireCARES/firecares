@@ -5,20 +5,17 @@ from django.views.generic import DetailView, ListView, TemplateView
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.gis import geos
-from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.http.response import HttpResponseRedirect
-from django.db.models import Max, Min, Count
+from django.db.models import Max, Min
 from django.db.models.fields import FieldDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import IntegerField
-from django.template import RequestContext
 from firecares.firecares_core.mixins import LoginRequiredMixin, CacheMixin
-from firecares.firestation.managers import Ntile, Case, When, Avg
+from firecares.firestation.managers import Ntile, Case, When
 from firecares.firestation.models import FireStation, FireDepartment
 from firecares.usgs.models import (StateorTerritoryHigh, CountyorEquivalent,
-    IncorporatedPlace, Reserve, NativeAmericanArea, IncorporatedPlace,
+    Reserve, NativeAmericanArea, IncorporatedPlace,
     UnincorporatedPlace, MinorCivilDivision)
 
 
@@ -189,6 +186,9 @@ class DepartmentDetailView(LoginRequiredMixin, CacheMixin, DISTScoreContextMixin
 
 
 class DepartmentUpdateGovernmentUnits(LoginRequiredMixin, DetailView):
+    """
+    View to update a Department's government unit.
+    """
     model = FireDepartment
     template_name = 'firestation/department_update_government_units.html'
 
@@ -197,9 +197,9 @@ class DepartmentUpdateGovernmentUnits(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(DepartmentUpdateGovernmentUnits, self).get_context_data(**kwargs)
-        
+
         geom = self.object.headquarters_geom.buffer(0.001)
-        
+
         context['current_incorporated_places'] = self._associated_government_unit_ids(IncorporatedPlace)
         context['incorporated_places'] = IncorporatedPlace.objects.filter(geom__intersects=geom)
         context['current_minor_civil_divisions'] = self._associated_government_unit_ids(MinorCivilDivision)
@@ -219,12 +219,12 @@ class DepartmentUpdateGovernmentUnits(LoginRequiredMixin, DetailView):
         self.object = self.get_object()
         context = self.get_context_data()
 
-        incorporated_places_selections = [int(x) for x in request.POST.getlist('incorporated_places')]
-        minor_civil_divisions_selections = [int(x) for x in request.POST.getlist('minor_civil_divisions')]
-        native_american_areas_selections = [int(x) for x in request.POST.getlist('native_american_areas')]
-        reserves_selections = [int(x) for x in request.POST.getlist('reserves')]
-        unincorporated_places_selections = [int(x) for x in request.POST.getlist('unincorporated_places')]
-        counties_selections = [int(x) for x in request.POST.getlist('counties')]
+        incorporated_places_selections = map(int, request.POST.getlist('incorporated_places'))
+        minor_civil_divisions_selections = map(int, request.POST.getlist('minor_civil_divisions'))
+        native_american_areas_selections = map(int, request.POST.getlist('native_american_areas'))
+        reserves_selections = map(int, request.POST.getlist('reserves'))
+        unincorporated_places_selections = map(int, request.POST.getlist('unincorporated_places'))
+        counties_selections = map(int, request.POST.getlist('counties'))
 
         def _update_govt_units(selections, current, model_type):
             for i in set(selections) | set(current):
@@ -243,7 +243,6 @@ class DepartmentUpdateGovernmentUnits(LoginRequiredMixin, DetailView):
         if request.POST.get('update_geom'):
             self.object.set_geometry_from_government_unit()
 
-        context = self.get_context_data()
         messages.add_message(request, messages.SUCCESS, 'Government unit associations updated')
 
         return redirect(self.object)
@@ -404,6 +403,7 @@ class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitM
             except:
                 pass
         return queryset
+
     def get_queryset(self):
         queryset = super(FireDepartmentListView, self).get_queryset()
 
