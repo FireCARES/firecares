@@ -198,7 +198,7 @@ class DepartmentUpdateGovernmentUnits(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(DepartmentUpdateGovernmentUnits, self).get_context_data(**kwargs)
 
-        geom = self.object.headquarters_geom.buffer(0.001)
+        geom = self.object.headquarters_geom.buffer(0.01)
 
         context['current_incorporated_places'] = self._associated_government_unit_ids(IncorporatedPlace)
         context['incorporated_places'] = IncorporatedPlace.objects.filter(geom__intersects=geom)
