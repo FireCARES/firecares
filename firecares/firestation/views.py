@@ -197,19 +197,21 @@ class DepartmentUpdateGovernmentUnits(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(DepartmentUpdateGovernmentUnits, self).get_context_data(**kwargs)
-
+        
+        geom = self.object.headquarters_geom.buffer(0.001)
+        
         context['current_incorporated_places'] = self._associated_government_unit_ids(IncorporatedPlace)
-        context['incorporated_places'] = IncorporatedPlace.objects.filter(geom__contains=self.object.headquarters_geom)
+        context['incorporated_places'] = IncorporatedPlace.objects.filter(geom__intersects=geom)
         context['current_minor_civil_divisions'] = self._associated_government_unit_ids(MinorCivilDivision)
-        context['minor_civil_divisions'] = MinorCivilDivision.objects.filter(geom__contains=self.object.headquarters_geom)
+        context['minor_civil_divisions'] = MinorCivilDivision.objects.filter(geom__intersects=geom)
         context['current_native_american_areas'] = self._associated_government_unit_ids(NativeAmericanArea)
-        context['native_american_areas'] = NativeAmericanArea.objects.filter(geom__contains=self.object.headquarters_geom)
+        context['native_american_areas'] = NativeAmericanArea.objects.filter(geom__intersects=geom)
         context['current_reserves'] = self._associated_government_unit_ids(Reserve)
-        context['reserves'] = Reserve.objects.filter(geom__contains=self.object.headquarters_geom)
+        context['reserves'] = Reserve.objects.filter(geom__intersects=geom)
         context['current_unincorporated_places'] = self._associated_government_unit_ids(UnincorporatedPlace)
-        context['unincorporated_places'] = UnincorporatedPlace.objects.filter(geom__contains=self.object.headquarters_geom)
+        context['unincorporated_places'] = UnincorporatedPlace.objects.filter(geom__intersects=geom)
         context['current_counties'] = self._associated_government_unit_ids(CountyorEquivalent)
-        context['counties'] = CountyorEquivalent.objects.filter(geom__contains=self.object.headquarters_geom)
+        context['counties'] = CountyorEquivalent.objects.filter(geom__intersects=geom)
 
         return context
 
