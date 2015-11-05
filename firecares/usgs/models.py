@@ -161,7 +161,7 @@ class Reserve(USGSBase):
     fcode = models.IntegerField(choices=wilderness_fcode_1, null=True, blank=True)
     admintype = models.IntegerField(choices=ownerclass_domain, null=True, blank=True)
     ownerormanagingagency = models.IntegerField(choices=ownerormanagingagency_domain, null=True, blank=True)
-    geom = models.PolygonField()
+    geom = models.MultiPolygonField()
 
 
 class NativeAmericanArea(USGSBase):
@@ -174,7 +174,7 @@ class NativeAmericanArea(USGSBase):
     nativeamericanarea_fipscode = models.CharField(max_length=5, null=True, blank=True)
     admintype = models.IntegerField(choices=ownerclass_domain, null=True, blank=True)
     population = models.IntegerField(null=True, blank=True)
-    geom = models.PolygonField()
+    geom = models.MultiPolygonField()
 
     @property
     def fips(self):
@@ -192,7 +192,7 @@ class CountyorEquivalent(USGSBase):
     county_name = models.CharField(max_length=120, null=True, blank=True)
     stco_fipscode = models.CharField(max_length=5, null=True, blank=True)
     population = models.IntegerField(null=True, blank=True)
-    geom = models.PolygonField()
+    geom = models.MultiPolygonField()
 
     @property
     def fips(self):
@@ -222,7 +222,7 @@ class IncorporatedPlace(USGSBase):
     population = models.IntegerField(null=True, blank=True)
     iscapitalcity = models.IntegerField(choices=yesno_domain, null=True, blank=True)
     iscountyseat = models.IntegerField(choices=yesno_domain, null=True, blank=True)
-    geom = models.PolygonField()
+    geom = models.MultiPolygonField()
 
     @property
     def fips(self):
@@ -248,7 +248,7 @@ class UnincorporatedPlace(USGSBase):
     place_fipscode = models.CharField(max_length=5, null=True, blank=True)
     place_name = models.CharField(max_length=120, null=True, blank=True)
     population = models.IntegerField(null=True, blank=True)
-    geom = models.PolygonField()
+    geom = models.MultiPolygonField()
 
     @property
     def fips(self):
@@ -271,7 +271,7 @@ class MinorCivilDivision(USGSBase):
     minorcivildivision_fipscode = models.CharField(max_length=10, null=True, blank=True)
     minorcivildivision_name = models.CharField(max_length=120, null=True, blank=True)
     population = models.IntegerField(null=True, blank=True)
-    geom = models.PolygonField()
+    geom = models.MultiPolygonField()
 
     @property
     def fips(self):

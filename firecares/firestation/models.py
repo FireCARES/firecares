@@ -568,7 +568,8 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
         objs = self.government_unit_objects
 
         if objs:
-            self.geom = MultiPolygon([obj.geom for obj in objs if getattr(obj, 'geom', None)])
+            for g in [x for x in objs if getattr(x, 'geom', None)]:
+                self.geom = MultiPolygon(self.geom.union(g.geom))
             self.save()
 
     def set_population_from_government_unit(self):
