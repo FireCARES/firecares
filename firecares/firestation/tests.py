@@ -14,6 +14,7 @@ from django.contrib.gis.geos import Point, Polygon, MultiPolygon
 from django.contrib.auth import get_user_model
 from firecares.usgs.models import UnincorporatedPlace
 from firecares.firecares_core.models import Address, Country
+from firecares.firecares_core.mixins import hash_for_cache
 from firecares.firestation.models import create_quartile_views
 from firecares.firestation.templatetags.firecares import quartile_text, risk_level
 from firecares.firestation.managers import CalculationsQuerySet
@@ -645,11 +646,20 @@ class FireStationTests(TestCase):
         # remove cached items from other test runs
         cache.clear()
         response = c.get(reverse('firedepartment_detail', args=[fd.pk]))
+        prefix = hash_for_cache('firestation.change_firedepartment', '/departments/86610')
         keys = cache._cache.keys()
-        self.assertTrue(any(['_PERMS_firestation.change_firedepartment_PAGE_/departments/86610' in x for x in keys]))
+        self.assertTrue(any([prefix in x for x in keys]))
+
+        # prime the cache with a slugged page path that is very long
+        response = c.get(reverse('firedepartment_detail_slug', args=[fd.pk, fd.slug]))
         c.logout()
+
         # tester_mcgee doesn't have firestation.change_firedepartment permissions, so *should* have an empty PERMS qualifier
         c.login(**{'username': 'tester_mcgee', 'password': 'test'})
         response = c.get(reverse('firedepartment_detail', args=[fd.pk]))
         keys = cache._cache.keys()
-        self.assertTrue(any(['_PERMS__PAGE_/departments/86610' in x for x in keys]))
+        prefix = hash_for_cache(None, '/departments/86610')
+        self.assertTrue(any([prefix in x for x in keys]))
+
+        # ensure that NONE of the keys blow out the max memcached key length
+        self.assertFalse(any([len(k) > 250 for k in keys]))
