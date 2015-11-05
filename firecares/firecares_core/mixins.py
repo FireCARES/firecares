@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 def hash_for_cache(perms, page):
-    return '_' + hashlib.md5(perms or '' + page).hexdigest() + '_'
+    return '_' + hashlib.md5((perms or '') + page).hexdigest() + '_'
 
 
 class CacheMixin(object):

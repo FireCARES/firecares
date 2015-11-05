@@ -12,7 +12,7 @@ from django.core.management import call_command
 from django.core.urlresolvers import reverse, resolve
 from django.contrib.gis.geos import Point, Polygon, MultiPolygon
 from django.contrib.auth import get_user_model
-from firecares.usgs.models import UnincorporatedPlace
+from firecares.usgs.models import UnincorporatedPlace, MinorCivilDivision
 from firecares.firecares_core.models import Address, Country
 from firecares.firecares_core.mixins import hash_for_cache
 from firecares.firestation.models import create_quartile_views
@@ -602,6 +602,7 @@ class FireStationTests(TestCase):
 
         fd = FireDepartment.objects.get(pk=86610)
         place = UnincorporatedPlace.objects.get(pk=9254)
+        div = MinorCivilDivision.objects.get(pk=31575)
 
         c = Client()
         response = c.get(reverse('firedepartment_update_government_units', args=[fd.pk]))
@@ -623,7 +624,8 @@ class FireStationTests(TestCase):
         self.assertEqual(fd.government_unit.first().object, place)
 
         # Update the geom for the FD
-        response = c.post(reverse('firedepartment_update_government_units', args=[fd.pk]), {'unincorporated_places': [place.pk], 'update_geom': [1]})
+        response = c.post(reverse('firedepartment_update_government_units', args=[fd.pk]), {'minor_civil_divisions': [div.pk], 'update_geom': [1]})
+
         # Should have a different point count now that geometries are merged
         fd.refresh_from_db()
         self.assertNotEqual(fd.geom.num_points, old_point_count)
