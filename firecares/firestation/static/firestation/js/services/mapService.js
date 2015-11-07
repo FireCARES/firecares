@@ -13,8 +13,10 @@
                 return
             }
 
-            L.tileLayer('https://{s}.firecares.org/base/{z}/{x}/{y}{r}.png',
-              {'attribution': '© Mapbox', 'opacity':.95, detectRetina: true}).addTo(map);
+            var retina = L.Browser.retina ? '@2x': '';
+
+            L.tileLayer('https://{s}.firecares.org/base/{z}/{x}/{y}' + retina + '.png',
+              {'attribution': '© Mapbox', 'opacity':.95}).addTo(map);
         };
 
         this.initMap = function(div, options) {
