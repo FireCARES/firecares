@@ -663,3 +663,11 @@ class FireStationTests(TestCase):
 
         # ensure that NONE of the keys blow out the max memcached key length
         self.assertFalse(any([len(k) > 250 for k in keys]))
+
+    def test_robots(self):
+        """
+        Ensure robots.txt resolves.
+        """
+        c = Client()
+        response = c.get(reverse('robots.txt'))
+        self.assertEqual(response.status_code, 200)
