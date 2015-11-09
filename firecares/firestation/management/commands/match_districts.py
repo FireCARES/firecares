@@ -52,7 +52,8 @@ for layer in ds:
                 matched_station.district = MultiPolygon(geom)
             matched_station.save()
         elif matched_station is not None and matched_station.district is not None:
-            print matched_station.district.centroid
+            #print 'Station: {0}, Geom: {1}'.format(matched_station.name,matched_station.district)
+            print matched_station.district == geom
 
 
 
