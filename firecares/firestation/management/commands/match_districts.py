@@ -1,59 +1,72 @@
 import sys
-import os
-import django
 from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.geos import MultiPolygon, Polygon
 from firecares.firestation.models import FireStation
+from optparse import make_option
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "firecares.settings.local")
-django.setup()
+from django.core.management.base import BaseCommand
 
-num_command_args = len(sys.argv)
-if num_command_args < 3:
-    assert ('Expected command line args: <path to geojson file> <state to filter stations>')
-geojson_file = sys.argv[1]
-state_filter = sys.argv[2]
-ds = DataSource(geojson_file)
-filter_stations = FireStation.objects.filter(state=state_filter)
 
-if filter_stations is None:
-    assert( 'Could not filter stations')
+class Command(BaseCommand):
+    help = 'Matches district geometry within GeoJSON files with appropriate fire station.'
+    def add_arguments(self, parser):
+        parser.add_argument('geojson_file')
+        parser.add_argument('verbose',default=False,nargs='?')
 
-for layer in ds:
-    geom_list = layer.get_geoms(geos=True)
-    num_geoms = len(geom_list)
-    print 'Num Districts: {0}'.format(num_geoms)
-    for geom in geom_list:
-        match_stations = list()
+    def handle(self, *args, **options):
+        geojson_file = options.get('geojson_file')
+        verbose = options.get('verbose')
+        state_filter = geojson_file.split('/')[-1].split('-')[1]
+        ds = DataSource(geojson_file)
+        print 'Extracted State code: {0}'.format(state_filter.upper())
+        filter_stations = FireStation.objects.filter(state=state_filter.upper())
 
-        for station in filter_stations:
-            if geom.intersects(station.geom) == True:
-                match_stations.append(station)
+        if filter_stations is None:
+            assert( 'Could not filter stations')
 
-        matched_station = None
-        num_match_stations = len(match_stations)
-        if num_match_stations == 1:
-            matched_station = match_stations[0]
-        elif num_match_stations > 1:
-            geom.set_srid(4326)
-            meter_geom = geom.centroid.transform(3857,clone=True)
-            shortest_dist = meter_geom.distance(match_stations[0].geom.centroid.transform(3857,clone=True))
-            for station in match_stations:
-               station_dist = meter_geom.distance(station.geom.centroid.transform(3857,clone=True))
-               if station_dist < shortest_dist:
-                   shortest_dist = station_dist
-                   matched_station = station
+        for layer in ds:
+            geom_list = layer.get_geoms(geos=True)
+            num_geoms = len(geom_list)
+            num_updated = 0
+            print 'Number of Districts: {0}'.format(num_geoms)
+            for geom in geom_list:
+                match_stations = list()
 
-        if matched_station is not None and matched_station.district is None:
-            print 'matched district for {0}'.format(matched_station.name)
-            if isinstance(geom,MultiPolygon):
-                matched_station.district = geom
-            elif isinstance(geom,Polygon):
-                matched_station.district = MultiPolygon(geom)
-            matched_station.save()
-        elif matched_station is not None and matched_station.district is not None:
-            #print 'Station: {0}, Geom: {1}'.format(matched_station.name,matched_station.district)
-            print matched_station.district == geom
+                for station in filter_stations:
+                    if geom.intersects(station.geom) == True:
+                        match_stations.append(station)
+
+                matched_station = None
+                num_match_stations = len(match_stations)
+                if num_match_stations == 1:
+                    matched_station = match_stations[0]
+                elif num_match_stations > 1:
+                    geom.set_srid(4326)
+                    meter_geom = geom.centroid.transform(3857,clone=True)
+                    shortest_dist = meter_geom.distance(match_stations[0].geom.centroid.transform(3857,clone=True))
+                    for station in match_stations:
+                       station_dist = meter_geom.distance(station.geom.centroid.transform(3857,clone=True))
+                       if station_dist < shortest_dist:
+                           shortest_dist = station_dist
+                           matched_station = station
+
+                if matched_station is not None and matched_station.district is None:
+                    if verbose:
+                        print 'Updated district for {0}'.format(matched_station.name)
+                    if isinstance(geom,MultiPolygon):
+                        matched_station.district = geom
+                    elif isinstance(geom,Polygon):
+                        matched_station.district = MultiPolygon(geom)
+                    matched_station.save()
+                    num_updated += 1
+                elif matched_station is not None and matched_station.district is not None:
+                    if verbose:
+                        print 'District already set: No Update'
+
+        print 'Successfully Updated {0}/{1} Stations'.format(num_updated,num_geoms)
+
+
+
 
 
 
