@@ -26,25 +26,25 @@
                       stationMarkers.push(marker);
                   }
 
-				 if (numFireStations > 0) {
-					var stationLayer = L.featureGroup(stationMarkers);
+                  if (numFireStations > 0) {
+                      var stationLayer = L.featureGroup(stationMarkers);
 
-					// Uncomment to show Fire Stations by default
-					// stationLayer.addTo(departmentMap);
+                      // Uncomment to show Fire Stations by default
+                      // stationLayer.addTo(departmentMap);
 
-					layersControl.addOverlay(stationLayer, 'Fire Stations');
+                      layersControl.addOverlay(stationLayer, 'Fire Stations');
 
-					if (config.geom === null) {
-						departmentMap.fitBounds(stationLayer.getBounds(), fitBoundsOptions);
-					}
-			     }
+                      if (config.geom === null) {
+                      	departmentMap.fitBounds(stationLayer.getBounds(), fitBoundsOptions);
+                      }
+                  }
               });
           }
 
           if (config.centroid != null) {
-           var headquarters = L.marker(config.centroid, {icon: headquartersIcon,zIndexOffset:1000});
-           headquarters.addTo(departmentMap);
-           layersControl.addOverlay(headquarters, 'Headquarters Location');
+            var headquarters = L.marker(config.centroid, {icon: headquartersIcon,zIndexOffset:1000});
+            headquarters.addTo(departmentMap);
+            layersControl.addOverlay(headquarters, 'Headquarters Location');
           };
 
           if (config.geom != null) {

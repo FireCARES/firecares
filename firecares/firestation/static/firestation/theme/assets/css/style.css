@@ -11539,6 +11539,9 @@ table.residential-fires {
 .usgs .submission input[type='checkbox'] {
   margin-right: 0.5em;
 }
+.apparatus input[disabled] {
+  color: #fff;
+}
 .ct-pageWrapper {
   z-index: 3;
   background-color: #ffffff;

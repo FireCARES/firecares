@@ -54,9 +54,14 @@ class Address(models.Model):
     geocode_results = JSONField(null=True, blank=True)
 
     def get_row_display(self):
-        return '{city}, {state_provice}, {postal_code}' \
+        return '{city}, {state_province}, {postal_code}' \
             .format(address_line1=self.address_line1, address_line2=self.address_line2, city=self.city,
-                    state_provice=self.state_province, postal_code=self.postal_code, country=self.country.iso_code)
+                    state_province=self.state_province, postal_code=self.postal_code, country=self.country.iso_code)
+
+    def get_full_display(self):
+        return '{line1}{line2}, {city}, {state_province}, {postal_code}' \
+            .format(line1=self.address_line1, line2=' ' + self.address_line2 if self.address_line2 else '', city=self.city,
+                    state_province=self.state_province, postal_code=self.postal_code, country=self.country.iso_code)
 
     @classmethod
     def create_from_string(cls, query_string, dry_run=False):

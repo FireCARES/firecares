@@ -474,7 +474,7 @@
                                     <tbody>
                                     {%  for station in firestations %}
                                     <tr>
-                                        <td>{{ station.name }}</td>
+                                        <td><a href="{% url 'firestation_detail_slug' station.id station.slug %}">{{ station.name }}</a></td>
                                         <td>{{ station.address }}</td>
                                     </tr>
                                     {% endfor %}

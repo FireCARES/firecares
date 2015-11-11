@@ -809,8 +809,12 @@ class FireStation(USGSStructureData):
             except:
                 return
 
+    @cached_property
+    def slug(self):
+        return slugify(self.name)
+
     def get_absolute_url(self):
-        return reverse('firestation_detail', kwargs=dict(pk=self.id))
+        return reverse('firestation_detail_slug', kwargs=dict(pk=self.id, slug=self.slug))
 
     class Meta:
         verbose_name = 'Fire Station'
