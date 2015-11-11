@@ -9,6 +9,11 @@ from django.core.management.base import BaseCommand
 
 class Command(BaseCommand):
     help = 'Matches district geometry within GeoJSON files with appropriate fire station.'
+    queryset = None
+    def set_queryset(self, station_queryset):
+        if station_queryset is not None:
+            self.queryset = station_queryset
+
     def add_arguments(self, parser):
         parser.add_argument('geojson_file')
         parser.add_argument('verbose',default=False,nargs='?')
@@ -19,7 +24,9 @@ class Command(BaseCommand):
         state_filter = geojson_file.split('/')[-1].split('-')[1]
         ds = DataSource(geojson_file)
         print 'Extracted State code: {0}'.format(state_filter.upper())
-        filter_stations = FireStation.objects.filter(state=state_filter.upper())
+        filter_stations = self.queryset
+        if filter_stations is None:
+            filter_stations = FireStation.objects.filter(state=state_filter.upper())
 
         if filter_stations is None:
             assert( 'Could not filter stations')
