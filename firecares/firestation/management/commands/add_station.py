@@ -73,7 +73,9 @@ class Command(BaseCommand):
 
                 if not dryrun:
                     station = FireStation.objects.create(name=name, fdid=fdid, station_number=number,
-                                               geom=geom, station_address=address, department=fd,
+                                               geom=geom, station_address=address, address=address.address_line1,
+                                               city=address.city, state=address.state_province,
+                                               zipcode=address.postal_code, department=fd,
                                                source_datadesc='FireCARES add station command.',
                                                loaddate=datetime.now(),
                                                ftype='Emergency Response and Law Enforcement')
