@@ -58,6 +58,51 @@ class Address(models.Model):
             .format(address_line1=self.address_line1, address_line2=self.address_line2, city=self.city,
                     state_provice=self.state_province, postal_code=self.postal_code, country=self.country.iso_code)
 
+    @classmethod
+    def create_from_string(cls, query_string, dry_run=False):
+        g = GoogleV3()
+        try:
+            results = g.geocode(query=query_string)
+        except GeocoderQuotaExceeded:
+            sleep(0.5)
+            results = g.geocode(query=query_string)
+
+        if results and results.latitude and results.longitude:
+            params = dict(geom=Point(results.longitude, results.latitude))
+            filter_components = lambda n: [c for c in results.raw['address_components'] if n in c['types']]
+            postal_codes = filter_components('postal_code')
+            countries = filter_components('country')
+            states = filter_components('administrative_area_level_1')
+            cities = filter_components('locality')
+            street_numbers = filter_components('street_number')
+            street_names = filter_components('route')
+
+            if postal_codes:
+                params['postal_code'] = postal_codes[0]['short_name']
+
+            if countries:
+                params['country'] = Country.objects.get(iso_code=countries[0]['short_name'])
+
+            if states:
+                params['state_province'] = states[0]['short_name']
+
+            if cities:
+                params['city'] = cities[0]['long_name']
+
+            if street_numbers and street_names:
+                params['address_line1'] = '{0} {1}'.format(street_numbers[0]['short_name'], street_names[0]['short_name'])
+
+            if not dry_run:
+                try:
+                    objs = cls.objects.get(**params)
+                except cls.DoesNotExist:
+                    objs = cls.objects.create(**params)
+                return objs
+            else:
+                print 'Create new address with these parameters: {0}'.format(params)
+                return cls(**params)
+
+
     def geocode(self):
         g = GoogleV3()
         query_string = self.get_row_display()
