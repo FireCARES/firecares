@@ -38,9 +38,42 @@ class FireStationTests(TestCase):
             self.user.set_password(self.password)
             self.user.save()
 
+    def assert_redirect_to_login(self, response):
+        self.assertEqual(response.status_code, 302)
+        split = urlsplit(response.url)
+        shimmed = urlsplit(urlunsplit((split.scheme, split.netloc, split.path + '/', split.query, split.fragment)))
+        self.assertEqual(resolve(shimmed.path).url_name, 'login')
+
     def create_firestation(self, **kwargs):
         return FireStation.objects.create(station_number=25, name='Test Station', geom=Point(35, -77),
                                           **kwargs)
+
+    def test_firestation_detail_page_requires_login(self):
+        """
+        Ensures that the firestation detail page redirects to login for unauthoized users
+        """
+
+        call_command('loaddata', 'firecares/firestation/fixtures/test_firestation_detail.json')
+
+        c = Client()
+
+        fs = FireStation.objects.filter(id=24957).first()
+
+        # Make sure that we're redirected to login since we're not yet authenticated
+        response = c.get(reverse('firestation_detail', args=[fs.pk]))
+        self.assert_redirect_to_login(response)
+        response = c.get(reverse('firestation_detail_slug', args=[fs.pk, fs.slug]))
+        self.assert_redirect_to_login(response)
+
+        c.login(**{'username': 'admin', 'password': 'admin'})
+
+        # Make sure that we get back a valid page for both the regular route + slug route
+        response = c.get(reverse('firestation_detail', args=[fs.pk]))
+        self.assertEqual(response.status_code, 200)
+        # Ensure that the slug works as well
+        response = c.get(reverse('firestation_detail_slug', args=[fs.pk, fs.slug]))
+        self.assertEqual(response.status_code, 200)
+
 
     def test_authentication(self):
         """
@@ -54,11 +87,11 @@ class FireStationTests(TestCase):
         for resource in ['capabilities', 'firestations']:
             url = '{0}?format=json'.format(reverse('api_dispatch_list', args=[self.current_api_version, resource]),)
             response = c.get(url)
-            self.assertTrue(response.status_code, 401)
+            self.assertEqual(response.status_code, 401)
 
             c.login(**{'username': 'admin', 'password': 'admin'})
             response = c.get(url)
-            self.assertTrue(response.status_code, 200)
+            self.assertEqual(response.status_code, 200)
 
     def test_add_capability_to_station(self):
         """
@@ -316,8 +349,7 @@ class FireStationTests(TestCase):
         fd = FireDepartment.objects.create(name='Test db', population=0)
         c = Client()
         response = c.get(fd.get_absolute_url())
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue('login' in response.url)
+        self.assert_redirect_to_login(response)
 
     def test_department_list_view_requires_login(self):
         """
@@ -328,8 +360,7 @@ class FireStationTests(TestCase):
         fd = FireDepartment.objects.create(name='Test db', population=0)
         c = Client()
         response = c.get('/departments')
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue('login' in response.url)
+        self.assert_redirect_to_login(response)
 
     def test_convenience_methods(self):
         """
@@ -608,9 +639,7 @@ class FireStationTests(TestCase):
         response = c.get(reverse('firedepartment_update_government_units', args=[fd.pk]))
 
         # Make sure that we're redirected to login since we're not yet authenticated
-        split = urlsplit(response.url)
-        shimmed = urlsplit(urlunsplit((split.scheme, split.netloc, split.path + '/', split.query, split.fragment)))
-        self.assertEqual(resolve(shimmed.path).url_name, 'login')
+        self.assert_redirect_to_login(response)
 
         # Login and make sure that we get a 200 back from the govt unit association update page
         c.login(**{'username': 'admin', 'password': 'admin'})

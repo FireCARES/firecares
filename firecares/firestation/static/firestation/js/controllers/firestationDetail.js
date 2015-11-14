@@ -2,7 +2,7 @@
 
 (function() {
   angular.module('fireStation.firestationDetailController', [])
-  .controller('fireStationController', function($scope, $window, $http, Staffing, $timeout, map) {
+  .controller('fireStationController', function($scope, $window, $http, Staffing, $timeout, map, FireStation, $filter) {
 
     var thisFirestation = '/api/v1/firestations/' + config.id + '/';
 
@@ -20,6 +20,7 @@
       'Boat', 'Hazmat', 'Chief', 'Other'];
 
     $scope.forms = [];
+    $scope.stations = [];
     $scope.message = {};
     var fitBoundsOptions = {padding: [6, 6]};
 
@@ -30,6 +31,31 @@
       }
 
       $scope.forms = data;
+    });
+
+    FireStation.query({department: config.departmentId}).$promise.then(function(data) {
+      $scope.stations = $filter('filter')(data.objects, function(val, idx, array) {
+        return val.id !== config.id;
+      });
+
+      var stationMarkers = [];
+      var numFireStations = $scope.stations.length;
+      for (var i = 0; i < numFireStations; i++) {
+        var station = $scope.stations[i];
+        var marker = L.marker(station.geom.coordinates.reverse(), {icon: stationIcon, opacity: 0.6});
+        marker.bindPopup('<b>' + station.name + '</b><br/>' + station.address + ', ' + station.city + ' ' +
+            station.state);
+        stationMarkers.push(marker);
+      }
+
+      if (numFireStations > 0) {
+        var stationLayer = L.featureGroup(stationMarkers);
+
+        // Uncomment to show Fire Stations by default
+        // stationLayer.addTo(departmentMap);
+
+        layersControl.addOverlay(stationLayer, 'Other Fire Stations');
+      }
     });
 
     var map = map.initMap('map', {scrollWheelZoom: false});
@@ -44,16 +70,15 @@
     station.addTo(map);
     layersControl.addOverlay(station, 'This Station');
 
+
+
     if ( config.headquarters) {
       var headquarters = L.marker(headquartersGeom, {icon: headquartersIcon, zIndexOffset: 1000});
       headquarters.bindPopup('<b>' + config.headquartersName + '</b>');
-      headquarters.addTo(map);
       layersControl.addOverlay(headquarters, 'Headquarters Location');
-      map.fitBounds(L.latLngBounds([headquartersGeom, stationGeom]).pad(1.2));
     }
-    else {
-      map.setView(stationGeom, 13);
-    }
+
+    map.setView(stationGeom, 15);
 
 
     $scope.ClearForm = function(form) {

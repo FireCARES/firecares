@@ -449,8 +449,10 @@ class SimilarDepartmentsListView(FireDepartmentListView, CacheMixin):
         return queryset
 
 
-class FireStationDetailView(DetailView):
+class FireStationDetailView(LoginRequiredMixin, CacheMixin, DetailView):
     model = FireStation
+
+    cache_timeout = 60 * 60 * 24
 
 
 class SpatialIntersectView(ListView):

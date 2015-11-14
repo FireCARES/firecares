@@ -23,7 +23,8 @@
         stationName: "{{ object.name|default:'Station' }}",
         headquarters: {{ object.department.headquarters_geom.json|safe|default:"null" }},
         headquartersName: "{{ object.department.name }} Headquarters",
-        id: {{object.id}}
+        id: {{object.id}},
+        departmentId: {{ object.department_id|default:"null" }}
     }
     </script>
     {% include 'google_analytics.html' %}

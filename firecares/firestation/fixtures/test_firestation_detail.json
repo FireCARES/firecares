@@ -1,0 +1,1146 @@
+[
+{
+    "fields": {
+        "name": "United States of America"
+    },
+    "model": "firecares_core.country",
+    "pk": "US"
+},
+{
+    "fields": {
+        "address_line2": "",
+        "city": "Anchorage",
+        "address_line1": "100 E 4TH AVE",
+        "state_province": "AK",
+        "postal_code": "99501-2506",
+        "country": "US",
+        "geom": "SRID=4326;POINT (-149.8826136000000133 61.2182863999999967)",
+        "geocode_results": "{\"geometry\":{\"location\":{\"lat\":61.2182864,\"lng\":-149.8826136},\"viewport\":{\"northeast\":{\"lat\":61.21963538029151,\"lng\":-149.8812646197085},\"southwest\":{\"lat\":61.2169374197085,\"lng\":-149.8839625802915}},\"location_type\":\"ROOFTOP\"},\"address_components\":[{\"long_name\":\"100\",\"short_name\":\"100\",\"types\":[\"street_number\"]},{\"long_name\":\"East 4th Avenue\",\"short_name\":\"E 4th Ave\",\"types\":[\"route\"]},{\"long_name\":\"Downtown\",\"short_name\":\"Downtown\",\"types\":[\"neighborhood\",\"political\"]},{\"long_name\":\"Anchorage\",\"short_name\":\"Anchorage\",\"types\":[\"locality\",\"political\"]},{\"long_name\":\"Anchorage\",\"short_name\":\"Anchorage\",\"types\":[\"administrative_area_level_2\",\"political\"]},{\"long_name\":\"Alaska\",\"short_name\":\"AK\",\"types\":[\"administrative_area_level_1\",\"political\"]},{\"long_name\":\"United States\",\"short_name\":\"US\",\"types\":[\"country\",\"political\"]},{\"long_name\":\"99501\",\"short_name\":\"99501\",\"types\":[\"postal_code\"]},{\"long_name\":\"2506\",\"short_name\":\"2506\",\"types\":[\"postal_code_suffix\"]}],\"place_id\":\"ChIJL2ad7iiWyFYRq61NT6vK8Hg\",\"formatted_address\":\"100 East 4th Avenue, Anchorage, AK 99501, USA\",\"types\":[\"street_address\"]}"
+    },
+    "model": "firecares_core.address",
+    "pk": 806
+},
+{
+    "fields": {
+        "address_line2": "",
+        "city": "Anchorage",
+        "address_line1": "100 E 4TH AVE",
+        "state_province": "AK",
+        "postal_code": "99501",
+        "country": "US",
+        "geom": "SRID=4326;POINT (-149.8826136000000133 61.2182863999999967)",
+        "geocode_results": "{\"geometry\":{\"location\":{\"lat\":61.2182864,\"lng\":-149.8826136},\"viewport\":{\"northeast\":{\"lat\":61.21963538029151,\"lng\":-149.8812646197085},\"southwest\":{\"lat\":61.2169374197085,\"lng\":-149.8839625802915}},\"location_type\":\"ROOFTOP\"},\"address_components\":[{\"long_name\":\"100\",\"short_name\":\"100\",\"types\":[\"street_number\"]},{\"long_name\":\"East 4th Avenue\",\"short_name\":\"E 4th Ave\",\"types\":[\"route\"]},{\"long_name\":\"Downtown\",\"short_name\":\"Downtown\",\"types\":[\"neighborhood\",\"political\"]},{\"long_name\":\"Anchorage\",\"short_name\":\"Anchorage\",\"types\":[\"locality\",\"political\"]},{\"long_name\":\"Anchorage\",\"short_name\":\"Anchorage\",\"types\":[\"administrative_area_level_2\",\"political\"]},{\"long_name\":\"Alaska\",\"short_name\":\"AK\",\"types\":[\"administrative_area_level_1\",\"political\"]},{\"long_name\":\"United States\",\"short_name\":\"US\",\"types\":[\"country\",\"political\"]},{\"long_name\":\"99501\",\"short_name\":\"99501\",\"types\":[\"postal_code\"]},{\"long_name\":\"2506\",\"short_name\":\"2506\",\"types\":[\"postal_code_suffix\"]}],\"place_id\":\"ChIJL2ad7iiWyFYRq61NT6vK8Hg\",\"formatted_address\":\"100 East 4th Avenue, Anchorage, AK 99501, USA\",\"types\":[\"street_address\"]}"
+    },
+    "model": "firecares_core.address",
+    "pk": 805
+},
+{
+    "fields": {
+        "address_line2": "",
+        "city": "Eagle River",
+        "address_line1": "16630 Eagle River Road",
+        "state_province": "AK",
+        "postal_code": "99577-8054",
+        "country": "US",
+        "geom": "SRID=4326;POINT (-149.5718608609999194 61.3167063110000754)",
+        "geocode_results": null
+    },
+    "model": "firecares_core.address",
+    "pk": 43459
+},
+{
+    "fields": {
+        "source_originator": "TechniGraphics, Inc.",
+        "objectid": 698581,
+        "source_featureid": "10494164",
+        "loaddate": "2010-12-15T11:45:51Z",
+        "admintype": 0,
+        "city": "Eagle River",
+        "gnis_id": "2642915",
+        "zipcode": "99577-8054",
+        "fcode": 74026,
+        "state": "AK",
+        "ftype": "Emergency Response and Law Enforcement",
+        "geom": "SRID=4326;POINT (-149.5718608609999194 61.3167063110000754)",
+        "pointlocationtype": 1,
+        "foot_id": null,
+        "data_security": 5,
+        "globalid": "{EA95B7F3-908F-4775-B96C-C8142184E518}",
+        "addressbuildingname": null,
+        "complex_id": null,
+        "address": "16630 Eagle River Road",
+        "source_datasetid": "{FFB73981-A011-4E37-AC53-5FD0E4157100}",
+        "distribution_policy": "E4",
+        "name": "Anchorage Fire Department Battalion 3 East Side Station 11",
+        "created": "2015-02-27T06:00:00Z",
+        "source_datadesc": "Alaska fire station update statewide processed by NGTOC December 2010",
+        "permanent_identifier": "2f04f066-f976-467f-b623-4c92c0734fbe",
+        "modified": "2015-03-10T01:20:07.823Z",
+        "islandmark": 0
+    },
+    "model": "firestation.usgsstructuredata",
+    "pk": 24697
+},
+{
+    "fields": {
+        "address_line2": "",
+        "city": "Anchorage",
+        "address_line1": "6040 de Havilland Avenue",
+        "state_province": "AK",
+        "postal_code": "99502-1081",
+        "country": "US",
+        "geom": "SRID=4326;POINT (-149.9965276289999281 61.1812348240000574)",
+        "geocode_results": null
+    },
+    "model": "firecares_core.address",
+    "pk": 43400
+},
+{
+    "fields": {
+        "source_originator": "TechniGraphics",
+        "objectid": 411681,
+        "source_featureid": "10488184",
+        "loaddate": "2012-12-20T08:44:19Z",
+        "admintype": null,
+        "city": "Anchorage",
+        "gnis_id": "2643090",
+        "zipcode": "99502-1081",
+        "fcode": 74026,
+        "state": "AK",
+        "ftype": "Emergency Response and Law Enforcement",
+        "geom": "SRID=4326;POINT (-149.9965276289999281 61.1812348240000574)",
+        "pointlocationtype": 4,
+        "foot_id": null,
+        "data_security": 5,
+        "globalid": "{F6ED7164-39F4-467E-AE2F-783A3EC49705}",
+        "addressbuildingname": null,
+        "complex_id": null,
+        "address": "6040 de Havilland Avenue",
+        "source_datasetid": "{B99081CA-B2A4-4C05-B969-3D0F65F9C89C}",
+        "distribution_policy": "E4",
+        "name": "Ted Stevens Anchorage International Airport Fire Station",
+        "created": "2015-02-27T06:00:00Z",
+        "source_datadesc": "AK Law Enforcement update of the entire state processed December 2012",
+        "permanent_identifier": "{55BE2EB4-9B41-4CAE-9798-81B880D87CFA}",
+        "modified": "2015-03-10T01:18:21.521Z",
+        "islandmark": 2
+    },
+    "model": "firestation.usgsstructuredata",
+    "pk": 51600
+},
+{
+    "fields": {
+        "address_line2": "",
+        "city": "Anchorage",
+        "address_line1": "1301 Patterson Street",
+        "state_province": "AK",
+        "postal_code": "99504-2742",
+        "country": "US",
+        "geom": "SRID=4326;POINT (-149.7478111849999038 61.2094043320000765)",
+        "geocode_results": null
+    },
+    "model": "firecares_core.address",
+    "pk": 43398
+},
+{
+    "fields": {
+        "source_originator": "TechniGraphics, Inc.",
+        "objectid": 400431,
+        "source_featureid": "10494163",
+        "loaddate": "2010-12-15T11:45:51Z",
+        "admintype": null,
+        "city": "Anchorage",
+        "gnis_id": "2643225",
+        "zipcode": "99504-2742",
+        "fcode": 74026,
+        "state": "AK",
+        "ftype": "Emergency Response and Law Enforcement",
+        "geom": "SRID=4326;POINT (-149.7478111849999038 61.2094043320000765)",
+        "pointlocationtype": 4,
+        "foot_id": null,
+        "data_security": 5,
+        "globalid": "{5D64DA75-D038-4C1C-90CB-137B3FCFC502}",
+        "addressbuildingname": null,
+        "complex_id": null,
+        "address": "1301 Patterson Street",
+        "source_datasetid": "{FFB73981-A011-4E37-AC53-5FD0E4157100}",
+        "distribution_policy": "E4",
+        "name": "Anchorage Fire Department Battalion 3 East Side Station 6",
+        "created": "2015-02-27T06:00:00Z",
+        "source_datadesc": "Alaska fire station update statewide processed by NGTOC December 2010",
+        "permanent_identifier": "{DB2DFAB8-001C-464B-AE71-61C18D7B160B}",
+        "modified": "2015-03-10T01:18:21.495Z",
+        "islandmark": 2
+    },
+    "model": "firestation.usgsstructuredata",
+    "pk": 15047
+},
+{
+    "fields": {
+        "address_line2": "",
+        "city": "Anchorage",
+        "address_line1": "4350 MacInnes Street",
+        "state_province": "AK",
+        "postal_code": "99508-5136",
+        "country": "US",
+        "geom": "SRID=4326;POINT (-149.8500082819999193 61.1812794090000693)",
+        "geocode_results": null
+    },
+    "model": "firecares_core.address",
+    "pk": 43397
+},
+{
+    "fields": {
+        "source_originator": "TechniGraphics, Inc.",
+        "objectid": 179039,
+        "source_featureid": "10494162",
+        "loaddate": "2010-12-15T11:45:51Z",
+        "admintype": null,
+        "city": "Anchorage",
+        "gnis_id": "2643224",
+        "zipcode": "99508-5136",
+        "fcode": 74026,
+        "state": "AK",
+        "ftype": "Emergency Response and Law Enforcement",
+        "geom": "SRID=4326;POINT (-149.8500082819999193 61.1812794090000693)",
+        "pointlocationtype": 4,
+        "foot_id": null,
+        "data_security": 5,
+        "globalid": "{0AB7F5C2-A8AA-40D4-978F-C97E4B822430}",
+        "addressbuildingname": null,
+        "complex_id": null,
+        "address": "4350 MacInnes Street",
+        "source_datasetid": "{FFB73981-A011-4E37-AC53-5FD0E4157100}",
+        "distribution_policy": "E4",
+        "name": "Anchorage Fire Department Battalion 3 East Side Station 4",
+        "created": "2015-02-27T06:00:00Z",
+        "source_datadesc": "Alaska fire station update statewide processed by NGTOC December 2010",
+        "permanent_identifier": "{82EF6B05-ED8E-427A-B7B6-3372061BC742}",
+        "modified": "2015-03-10T01:18:21.484Z",
+        "islandmark": 2
+    },
+    "model": "firestation.usgsstructuredata",
+    "pk": 6375
+},
+{
+    "fields": {
+        "address_line2": "",
+        "city": "Anchorage",
+        "address_line1": "4501 Campbell Airstrip Road",
+        "state_province": "AK",
+        "postal_code": "99507-1267",
+        "country": "US",
+        "geom": "SRID=4326;POINT (-149.7622833459999185 61.1796426950000409)",
+        "geocode_results": null
+    },
+    "model": "firecares_core.address",
+    "pk": 43396
+},
+{
+    "fields": {
+        "source_originator": "TechniGraphics, Inc.",
+        "objectid": 639057,
+        "source_featureid": "10494165",
+        "loaddate": "2010-12-15T11:45:51Z",
+        "admintype": null,
+        "city": "Anchorage",
+        "gnis_id": "2643226",
+        "zipcode": "99507-1267",
+        "fcode": 74026,
+        "state": "AK",
+        "ftype": "Emergency Response and Law Enforcement",
+        "geom": "SRID=4326;POINT (-149.7622833459999185 61.1796426950000409)",
+        "pointlocationtype": 1,
+        "foot_id": null,
+        "data_security": 5,
+        "globalid": "{F66A55DA-9CAA-4271-8FD1-CA5DBFD53AEE}",
+        "addressbuildingname": null,
+        "complex_id": null,
+        "address": "4501 Campbell Airstrip Road",
+        "source_datasetid": "{FFB73981-A011-4E37-AC53-5FD0E4157100}",
+        "distribution_policy": "E4",
+        "name": "Anchorage Fire Department Battalion 3 East Side Station 14",
+        "created": "2015-02-27T06:00:00Z",
+        "source_datadesc": "Alaska fire station update statewide processed by NGTOC December 2010",
+        "permanent_identifier": "{A1B489C0-990F-4849-B40D-17B75B8F34FF}",
+        "modified": "2015-03-10T01:18:21.467Z",
+        "islandmark": 2
+    },
+    "model": "firestation.usgsstructuredata",
+    "pk": 48963
+},
+{
+    "fields": {
+        "address_line2": "",
+        "city": "Anchorage",
+        "address_line1": "1148 Huffman Road",
+        "state_province": "AK",
+        "postal_code": "99515-3520",
+        "country": "US",
+        "geom": "SRID=4326;POINT (-149.8591506599999263 61.1083318080000595)",
+        "geocode_results": null
+    },
+    "model": "firecares_core.address",
+    "pk": 43395
+},
+{
+    "fields": {
+        "source_originator": "TechniGraphics, Inc.",
+        "objectid": 579396,
+        "source_featureid": "10494158",
+        "loaddate": "2010-12-15T11:45:51Z",
+        "admintype": 0,
+        "city": "Anchorage",
+        "gnis_id": "2642957",
+        "zipcode": "99515-3520",
+        "fcode": 74026,
+        "state": "AK",
+        "ftype": "Emergency Response and Law Enforcement",
+        "geom": "SRID=4326;POINT (-149.8591506599999263 61.1083318080000595)",
+        "pointlocationtype": 1,
+        "foot_id": " ",
+        "data_security": 5,
+        "globalid": "{C348AB5F-4D56-4EC0-A44E-E0B881027C0C}",
+        "addressbuildingname": null,
+        "complex_id": " ",
+        "address": "1148 Huffman Road",
+        "source_datasetid": "{FFB73981-A011-4E37-AC53-5FD0E4157100}",
+        "distribution_policy": "E4",
+        "name": "Anchorage Fire Department Battalion 2 South Side Station 9",
+        "created": "2015-02-27T06:00:00Z",
+        "source_datadesc": "Alaska fire station update statewide processed by NGTOC December 2010",
+        "permanent_identifier": "3c477ff3-da55-4fbc-a7d7-5d4906b15d29",
+        "modified": "2015-03-10T01:18:21.445Z",
+        "islandmark": 0
+    },
+    "model": "firestation.usgsstructuredata",
+    "pk": 27684
+},
+{
+    "fields": {
+        "address_line2": "",
+        "city": "Anchorage",
+        "address_line1": "6151 O'Malley Road",
+        "state_province": "AK",
+        "postal_code": "99507-6957",
+        "country": "US",
+        "geom": "SRID=4326;POINT (-149.7677042369999185 61.1235136030000490)",
+        "geocode_results": null
+    },
+    "model": "firecares_core.address",
+    "pk": 43394
+},
+{
+    "fields": {
+        "source_originator": "TechniGraphics, Inc.",
+        "objectid": 639056,
+        "source_featureid": "10494156",
+        "loaddate": "2010-12-15T11:45:51Z",
+        "admintype": null,
+        "city": "Anchorage",
+        "gnis_id": "2643221",
+        "zipcode": "99507-6957",
+        "fcode": 74026,
+        "state": "AK",
+        "ftype": "Emergency Response and Law Enforcement",
+        "geom": "SRID=4326;POINT (-149.7677042369999185 61.1235136030000490)",
+        "pointlocationtype": 1,
+        "foot_id": null,
+        "data_security": 5,
+        "globalid": "{5BAB7C4C-8E14-4306-92DC-9DFA5A008719}",
+        "addressbuildingname": null,
+        "complex_id": null,
+        "address": "6151 O'Malley Road",
+        "source_datasetid": "{FFB73981-A011-4E37-AC53-5FD0E4157100}",
+        "distribution_policy": "E4",
+        "name": "Anchorage Fire Department Battalion 2 South Side Station 8",
+        "created": "2015-02-27T06:00:00Z",
+        "source_datadesc": "Alaska fire station update statewide processed by NGTOC December 2010",
+        "permanent_identifier": "{4A1B6CBB-C4BE-497B-A8EB-DB10376A2572}",
+        "modified": "2015-03-10T01:18:21.425Z",
+        "islandmark": 2
+    },
+    "model": "firestation.usgsstructuredata",
+    "pk": 42352
+},
+{
+    "fields": {
+        "address_line2": "",
+        "city": "Anchorage",
+        "address_line1": "8735 Jewel Lake Road",
+        "state_province": "AK",
+        "postal_code": "99502-5255",
+        "country": "US",
+        "geom": "SRID=4326;POINT (-149.9510236739999129 61.1413702680000597)",
+        "geocode_results": null
+    },
+    "model": "firecares_core.address",
+    "pk": 43393
+},
+{
+    "fields": {
+        "source_originator": "TechniGraphics, Inc.",
+        "objectid": 179038,
+        "source_featureid": "10494155",
+        "loaddate": "2010-12-15T11:45:51Z",
+        "admintype": null,
+        "city": "Anchorage",
+        "gnis_id": "2643220",
+        "zipcode": "99502-5255",
+        "fcode": 74026,
+        "state": "AK",
+        "ftype": "Emergency Response and Law Enforcement",
+        "geom": "SRID=4326;POINT (-149.9510236739999129 61.1413702680000597)",
+        "pointlocationtype": 1,
+        "foot_id": null,
+        "data_security": 5,
+        "globalid": "{F3B7C2B5-6257-4ABF-80D3-F5469A4761B0}",
+        "addressbuildingname": null,
+        "complex_id": null,
+        "address": "8735 Jewel Lake Road",
+        "source_datasetid": "{FFB73981-A011-4E37-AC53-5FD0E4157100}",
+        "distribution_policy": "E4",
+        "name": "Anchorage Fire Department Battalion 2 South Side Station 7",
+        "created": "2015-02-27T06:00:00Z",
+        "source_datadesc": "Alaska fire station update statewide processed by NGTOC December 2010",
+        "permanent_identifier": "{CFEFA316-DDBF-4541-814D-32598EA11D43}",
+        "modified": "2015-03-10T01:18:21.407Z",
+        "islandmark": 2
+    },
+    "model": "firestation.usgsstructuredata",
+    "pk": 6374
+},
+{
+    "fields": {
+        "address_line2": "",
+        "city": "Anchorage",
+        "address_line1": "11301 Southport Drive",
+        "state_province": "AK",
+        "postal_code": "99515",
+        "country": "US",
+        "geom": "SRID=4326;POINT (-149.9346116099999051 61.1185215370000492)",
+        "geocode_results": null
+    },
+    "model": "firecares_core.address",
+    "pk": 43392
+},
+{
+    "fields": {
+        "source_originator": "TechniGraphics, Inc.",
+        "objectid": 400430,
+        "source_featureid": "10494161",
+        "loaddate": "2010-12-15T11:45:51Z",
+        "admintype": null,
+        "city": "Anchorage",
+        "gnis_id": "2643223",
+        "zipcode": "99515",
+        "fcode": 74026,
+        "state": "AK",
+        "ftype": "Emergency Response and Law Enforcement",
+        "geom": "SRID=4326;POINT (-149.9346116099999051 61.1185215370000492)",
+        "pointlocationtype": 4,
+        "foot_id": null,
+        "data_security": 5,
+        "globalid": "{2A8A1554-94E1-4A5F-91BC-23B3BA0E9FFB}",
+        "addressbuildingname": null,
+        "complex_id": null,
+        "address": "11301 Southport Drive",
+        "source_datasetid": "{FFB73981-A011-4E37-AC53-5FD0E4157100}",
+        "distribution_policy": "E4",
+        "name": "Anchorage Fire Department Battalion 2 South Side Station 15",
+        "created": "2015-02-27T06:00:00Z",
+        "source_datadesc": "Alaska fire station update statewide processed by NGTOC December 2010",
+        "permanent_identifier": "{E1F5B6C4-7501-43E5-A207-C04AB381B5BE}",
+        "modified": "2015-03-10T01:18:21.386Z",
+        "islandmark": 2
+    },
+    "model": "firestation.usgsstructuredata",
+    "pk": 15046
+},
+{
+    "fields": {
+        "address_line2": "",
+        "city": "Anchorage",
+        "address_line1": "7920 Homer Drive",
+        "state_province": "AK",
+        "postal_code": "99518-3253",
+        "country": "US",
+        "geom": "SRID=4326;POINT (-149.8578885769999260 61.1488500250000584)",
+        "geocode_results": null
+    },
+    "model": "firecares_core.address",
+    "pk": 43391
+},
+{
+    "fields": {
+        "source_originator": "TechniGraphics, Inc.",
+        "objectid": 281781,
+        "source_featureid": "10494160",
+        "loaddate": "2010-12-15T11:45:51Z",
+        "admintype": 0,
+        "city": "Anchorage",
+        "gnis_id": "2642905",
+        "zipcode": "99518-3253",
+        "fcode": 74026,
+        "state": "AK",
+        "ftype": "Emergency Response and Law Enforcement",
+        "geom": "SRID=4326;POINT (-149.8578885769999260 61.1488500250000584)",
+        "pointlocationtype": 1,
+        "foot_id": null,
+        "data_security": 5,
+        "globalid": "{03D45F1C-477A-4195-9C9D-5B338E72DB02}",
+        "addressbuildingname": null,
+        "complex_id": null,
+        "address": "7920 Homer Drive",
+        "source_datasetid": "{FFB73981-A011-4E37-AC53-5FD0E4157100}",
+        "distribution_policy": "E4",
+        "name": "Anchorage Fire Department Battalion 2 South Side Station 12",
+        "created": "2015-02-27T06:00:00Z",
+        "source_datadesc": "Alaska fire station update statewide processed by NGTOC December 2010",
+        "permanent_identifier": "8e9c2ad3-5def-47ab-809f-a168d66a04eb",
+        "modified": "2015-03-10T01:18:21.374Z",
+        "islandmark": 0
+    },
+    "model": "firestation.usgsstructuredata",
+    "pk": 18486
+},
+{
+    "fields": {
+        "address_line2": "",
+        "city": "Anchorage",
+        "address_line1": "14861 Mountain Air Drive",
+        "state_province": "AK",
+        "postal_code": "99516-4473",
+        "country": "US",
+        "geom": "SRID=4326;POINT (-149.7521890309999151 61.0861780790000353)",
+        "geocode_results": null
+    },
+    "model": "firecares_core.address",
+    "pk": 43390
+},
+{
+    "fields": {
+        "source_originator": "TechniGraphics, Inc.",
+        "objectid": 579414,
+        "source_featureid": "10494159",
+        "loaddate": "2010-12-15T11:45:51Z",
+        "admintype": null,
+        "city": "Anchorage",
+        "gnis_id": "2643222",
+        "zipcode": "99516-4473",
+        "fcode": 74026,
+        "state": "AK",
+        "ftype": "Emergency Response and Law Enforcement",
+        "geom": "SRID=4326;POINT (-149.7521890309999151 61.0861780790000353)",
+        "pointlocationtype": 1,
+        "foot_id": null,
+        "data_security": 5,
+        "globalid": "{F7745E2A-816D-4C9D-AF39-E1846C3C56B5}",
+        "addressbuildingname": null,
+        "complex_id": null,
+        "address": "14861 Mountain Air Drive",
+        "source_datasetid": "{FFB73981-A011-4E37-AC53-5FD0E4157100}",
+        "distribution_policy": "E4",
+        "name": "Anchorage Fire Department Battalion 2 South Side Station 10",
+        "created": "2015-02-27T06:00:00Z",
+        "source_datadesc": "Alaska fire station update statewide processed by NGTOC December 2010",
+        "permanent_identifier": "{C1537D2D-3C65-4A1E-9E7E-251005004C30}",
+        "modified": "2015-03-10T01:18:21.363Z",
+        "islandmark": 2
+    },
+    "model": "firestation.usgsstructuredata",
+    "pk": 27696
+},
+{
+    "fields": {
+        "address_line2": "",
+        "city": "Anchorage",
+        "address_line1": "2207 McRae Road",
+        "state_province": "AK",
+        "postal_code": "99517-2568",
+        "country": "US",
+        "geom": "SRID=4326;POINT (-149.9239332709999246 61.1858996660000685)",
+        "geocode_results": null
+    },
+    "model": "firecares_core.address",
+    "pk": 43389
+},
+{
+    "fields": {
+        "source_originator": "TechniGraphics, Inc.",
+        "objectid": 281501,
+        "source_featureid": "10494154",
+        "loaddate": "2010-12-15T11:45:51Z",
+        "admintype": null,
+        "city": "Anchorage",
+        "gnis_id": "2643219",
+        "zipcode": "99517-2568",
+        "fcode": 74026,
+        "state": "AK",
+        "ftype": "Emergency Response and Law Enforcement",
+        "geom": "SRID=4326;POINT (-149.9239332709999246 61.1858996660000685)",
+        "pointlocationtype": 1,
+        "foot_id": null,
+        "data_security": 5,
+        "globalid": "{7F8F254F-76A2-4BF0-AD04-002C65DBC065}",
+        "addressbuildingname": null,
+        "complex_id": null,
+        "address": "2207 McRae Road",
+        "source_datasetid": "{FFB73981-A011-4E37-AC53-5FD0E4157100}",
+        "distribution_policy": "E4",
+        "name": "Anchorage Fire Department Battalion 1 North Side Station 5",
+        "created": "2015-02-27T06:00:00Z",
+        "source_datadesc": "Alaska fire station update statewide processed by NGTOC December 2010",
+        "permanent_identifier": "{44C77CB6-2C1E-4B1F-A9B7-86C635D78BBB}",
+        "modified": "2015-03-10T01:18:21.350Z",
+        "islandmark": 2
+    },
+    "model": "firestation.usgsstructuredata",
+    "pk": 18256
+},
+{
+    "fields": {
+        "address_line2": "",
+        "city": "Anchorage",
+        "address_line1": "1100 Airport Heights Drive",
+        "state_province": "AK",
+        "postal_code": "99508-2942",
+        "country": "US",
+        "geom": "SRID=4326;POINT (-149.8239518819999034 61.2125799720000714)",
+        "geocode_results": null
+    },
+    "model": "firecares_core.address",
+    "pk": 43388
+},
+{
+    "fields": {
+        "source_originator": "TechniGraphics, Inc.",
+        "objectid": 877715,
+        "source_featureid": "10494153",
+        "loaddate": "2010-12-15T11:45:51Z",
+        "admintype": 0,
+        "city": "Anchorage",
+        "gnis_id": "2642951",
+        "zipcode": "99508-2942",
+        "fcode": 74026,
+        "state": "AK",
+        "ftype": "Emergency Response and Law Enforcement",
+        "geom": "SRID=4326;POINT (-149.8239518819999034 61.2125799720000714)",
+        "pointlocationtype": 1,
+        "foot_id": null,
+        "data_security": 5,
+        "globalid": "{60B9C52E-B69A-4AB7-8ED6-53D655C8639F}",
+        "addressbuildingname": null,
+        "complex_id": null,
+        "address": "1100 Airport Heights Drive",
+        "source_datasetid": "{FFB73981-A011-4E37-AC53-5FD0E4157100}",
+        "distribution_policy": "E4",
+        "name": "Anchorage Fire Department Battalion 1 North Side Station 3",
+        "created": "2015-02-27T06:00:00Z",
+        "source_datadesc": "Alaska fire station update statewide processed by NGTOC December 2010",
+        "permanent_identifier": "44de067f-7326-405a-b911-e3693eb50c45",
+        "modified": "2015-03-10T01:18:21.339Z",
+        "islandmark": 0
+    },
+    "model": "firestation.usgsstructuredata",
+    "pk": 36506
+},
+{
+    "fields": {
+        "address_line2": "",
+        "city": "Anchorage",
+        "address_line1": "122 East 4th Avenue",
+        "state_province": "AK",
+        "postal_code": "99501-2506",
+        "country": "US",
+        "geom": "SRID=4326;POINT (-149.8822885069999131 61.2182611590000647)",
+        "geocode_results": null
+    },
+    "model": "firecares_core.address",
+    "pk": 43387
+},
+{
+    "fields": {
+        "source_originator": "Oak Ridge National Laboratory, Geographic Information Sciences and Technology Group",
+        "objectid": 830048,
+        "source_featureid": "10487969",
+        "loaddate": "2014-03-17T15:48:53Z",
+        "admintype": null,
+        "city": "Anchorage",
+        "gnis_id": "2643218",
+        "zipcode": "99501-2506",
+        "fcode": 74026,
+        "state": "AK",
+        "ftype": "Emergency Response and Law Enforcement",
+        "geom": "SRID=4326;POINT (-149.8822885069999131 61.2182611590000647)",
+        "pointlocationtype": 4,
+        "foot_id": null,
+        "data_security": 5,
+        "globalid": "{285BE8E6-2543-47BA-BAFD-D42DB42CA824}",
+        "addressbuildingname": null,
+        "complex_id": null,
+        "address": "122 East 4th Avenue",
+        "source_datasetid": "{879EC9CF-DFCE-4A14-82FC-60F2B66884AB}",
+        "distribution_policy": "E4",
+        "name": "Anchorage Fire Department Battalion 1 North Side Station 1",
+        "created": "2015-02-27T06:00:00Z",
+        "source_datadesc": "AK miscellaneous and Schools ORNL dataset update through TNM Corps project processed March 2014",
+        "permanent_identifier": "{411B733A-76A3-43CC-A158-969610DDFAFA}",
+        "modified": "2015-03-10T01:18:21.328Z",
+        "islandmark": 2
+    },
+    "model": "firestation.usgsstructuredata",
+    "pk": 24957
+},
+{
+    "fields": {
+        "risk_model_injuries": 23.3641904298606,
+        "risk_model_deaths": 4.90709592326018,
+        "risk_model_fires": 196.250806118862,
+        "headquarters_fax": "907-267-4977",
+        "featured": false,
+        "risk_model_fires_size0_percentage": 0.52417964595012,
+        "headquarters_address": 805,
+        "risk_model_fires_size1_percentage": 0.397652230469644,
+        "population_class": 7,
+        "state": "AK",
+        "geom": "SRID=4326;MULTIPOLYGON (((-150.2532679999999061 61.0806630000000723, -150.2776759999999285 61.0940660000000548, -150.2894239999999115 61.1000770000000557, -150.2907919999999251 61.1007770000000505, -150.2964259999999115 61.1036600000000476, -150.3034279999999114 61.1072420000000420, -150.3035629999999117 61.1073110000000383, -150.3039679999999123 61.1075180000000842, -150.3041039999999100 61.1075880000000780, -150.3274059999999110 61.1195090000000505, -150.3353299999999138 61.1235640000000444, -150.3665559999999175 61.1395390000000702, -150.3935859999999138 61.1533680000000572, -150.3973119999999142 61.1552740000000767, -150.4206149999999127 61.1671970000000442, -150.3914039999999090 61.1716240000000653, -150.3037729999999215 61.1849070000000665, -150.2745629999999153 61.1893360000000825, -150.2700939999999150 61.1900130000000786, -150.2566889999999091 61.1920450000000642, -150.2522209999999063 61.1927230000000577, -150.2488429999999084 61.1932350000000724, -150.2387109999999097 61.1947700000000623, -150.2353339999999093 61.1952830000000745, -150.2352769999999111 61.1952910000000543, -150.2351059999999165 61.1953170000000455, -150.2350499999999158 61.1953260000000796, -150.1947809999999208 61.2014310000000705, -150.1886319999999273 61.2021460000000843, -150.0950709999999049 61.2130420000000868, -150.0488219999999160 61.2184560000000602, -150.0022219989999144 61.2239130000000387, -150.0016279989999077 61.2240800000000718, -149.9999989989999278 61.2245380000000523, -149.9841249999999206 61.2290140000000633, -149.9823839999999109 61.2295040000000768, -149.9771619999999075 61.2309760000000551, -149.9754219999999236 61.2314670000000660, -149.9709319999999195 61.2327330000000529, -149.9665649999999175 61.2339640000000713, -149.9639199999999164 61.2352250000000708, -149.9635749999999064 61.2353890000000547, -149.9562509999999236 61.2388930000000755, -149.9546099999999171 61.2396760000000313, -149.9516219999999294 61.2411050000000614, -149.9514529999999297 61.2411850000000868, -149.9509479999999257 61.2414270000000442, -149.9507799999999236 61.2415080000000671, -149.9506439999999259 61.2415730000000735, -149.9502359999999044 61.2417670000000385, -149.9501009999999042 61.2418330000000424, -149.9500689999999281 61.2418480000000613, -149.9499729999999147 61.2418930000000614, -149.9499419999999077 61.2419090000000779, -149.9466149999999232 61.2435000000000400, -149.9411529999999289 61.2461110000000417, -149.9385029999999119 61.2473950000000400, -149.9370529999999064 61.2480960000000323, -149.9327059999999108 61.2502010000000610, -149.9312569999999027 61.2509040000000482, -149.9210399999999197 61.2558520000000613, -149.9139479999999196 61.2592870000000858, -149.9089809999999261 61.2616930000000366, -149.8978879999999094 61.2670430000000579, -149.8900689999999258 61.2763270000000375, -149.8776939999999058 61.2907790000000432, -149.8770459999999218 61.2914220000000682, -149.8733109999999158 61.2961870000000317, -149.8721789999999032 61.2974950000000831, -149.8688519999999187 61.3013450000000830, -149.8594929999999295 61.3119490000000837, -149.8594679999999073 61.3119760000000724, -149.8593969999999160 61.3120590000000334, -149.8593729999999198 61.3120870000000764, -149.8540119999999263 61.3182360000000699, -149.8379319999999097 61.3366830000000505, -149.8325719999999137 61.3428330000000415, -149.8278579999999067 61.3482400000000325, -149.8137159999999142 61.3644630000000575, -149.8090029999999047 61.3698710000000460, -149.8052659999999037 61.3744120000000635, -149.7955359999999132 61.3853850010000315, -149.7924229999999284 61.3888960010000346, -149.7449569999999142 61.3992530010000337, -149.7367849999999123 61.4010350010000820, -149.7308339999999021 61.4023340010000425, -149.7167109999999184 61.4054160010000487, -149.7022209999999234 61.4085760010000854, -149.6954239999999174 61.4100590010000360, -149.6587689999999213 61.4181290010000680, -149.6442859999999087 61.4213190000000395, -149.6385849999999209 61.4225520000000529, -149.6271749999999088 61.4250230000000670, -149.6214909999999065 61.4262810000000741, -149.6157969999999295 61.4275430000000711, -149.6126429999999061 61.4282410000000709, -149.6031799999999237 61.4303380000000629, -149.6000269999999261 61.4310370000000603, -149.5851329999999280 61.4343360000000871, -149.5734309999999141 61.4369280000000799, -149.5688759999999036 61.4379250000000638, -149.5678739999999038 61.4381460000000743, -149.5648689999999021 61.4388110000000438, -149.5638679999999283 61.4390330000000517, -149.5599999999999170 61.4398880000000531, -149.5483969999999090 61.4424540000000547, -149.5445299999999236 61.4433100000000536, -149.5357279999999207 61.4452560000000858, -149.5093219999999121 61.4510950000000662, -149.5063419999999041 61.4517550000000483, -149.5005139999999244 61.4530120000000579, -149.4991299999999228 61.4533100000000445, -149.4977469999999187 61.4536090000000854, -149.4945989999999085 61.4542880000000764, -149.4911929999999245 61.4550230000000397, -149.4846389999999303 61.4564370000000508, -149.4777899999999136 61.4579150000000709, -149.4768559999999127 61.4581160000000750, -149.4709419999999227 61.4593930000000341, -149.4704109999999275 61.4595070000000305, -149.4688199999999085 61.4598500000000740, -149.4682899999999108 61.4599650000000679, -149.4647449999999083 61.4607290000000717, -149.4541109999999264 61.4630230000000779, -149.4505669999999213 61.4637890000000766, -149.4461629999999275 61.4647390000000655, -149.4396399999999119 61.4661470000000350, -149.4329669999999055 61.4676590000000829, -149.4285739999999123 61.4686560000000668, -149.4261059999999190 61.4692150000000765, -149.4187039999999058 61.4708940000000439, -149.4162369999999100 61.4714550000000486, -149.4122709999999188 61.4723310000000538, -149.4003749999999116 61.4749610000000644, -149.3964099999999178 61.4758380000000670, -149.3963389999999265 61.4758530000000860, -149.3961259999999243 61.4759000000000810, -149.3960559999999020 61.4759160000000406, -149.3945789999999079 61.4762520000000450, -149.3901489999999228 61.4772620000000529, -149.3886729999999261 61.4775990000000547, -149.3880659999999239 61.4777170000000410, -149.3862439999999197 61.4780720000000542, -149.3856379999999149 61.4781910000000380, -149.3812949999999091 61.4791380000000345, -149.3682679999999152 61.4819790000000808, -149.3639259999999069 61.4829270000000747, -149.3634349999999245 61.4830340000000319, -149.3619629999999177 61.4833540000000767, -149.3617979999999079 61.4833900000000426, -149.3614729999999042 61.4834620000000314, -149.3598879999999269 61.4838330000000610, -149.3594419999999161 61.4839380000000801, -149.3550179999999159 61.4839080000000422, -149.3533909999999025 61.4838980000000674, -149.3511329999999191 61.4838970000000700, -149.3443589989999225 61.4838950000000750, -149.3421009989999106 61.4838950000000750, -149.3361859989999232 61.4838940000000775, -149.3184409999999218 61.4838910000000851, -149.3125259999999059 61.4838910000000851, -149.3045979999999133 61.4838870000000384, -149.2808209999999178 61.4838780000000611, -149.2728969999999151 61.4838760000000661, -149.2705769999999177 61.4838680000000863, -149.2687119999999084 61.4838650000000371, -149.2645279999999275 61.4838540000000648, -149.2636199999999178 61.4838500000000749, -149.2629149999999072 61.4838500000000749, -149.2613019999999153 61.4838450000000307, -149.2596609999999089 61.4838390000000459, -149.2555939999999168 61.4838260000000787, -149.2551999999999168 61.4837320000000318, -149.2547509999999136 61.4837350000000811, -149.2531129999999280 61.4837510000000407, -149.2528759999999295 61.4837120000000823, -149.2522089999999082 61.4836050000000682, -149.2521459999999252 61.4835960000000341, -149.2519029999999134 61.4835620000000631, -149.2516569999999092 61.4835520000000315, -149.2509189999999251 61.4835240000000454, -149.2506739999999184 61.4835150000000681, -149.2493519999999023 61.4834640000000832, -149.2453869999999085 61.4833120000000690, -149.2442509999999061 61.4832690000000639, -149.2440679999999134 61.4832430000000727, -149.2440129999999101 61.4832350000000361, -149.2438499999999237 61.4832110000000398, -149.2437959999999180 61.4832040000000575, -149.2437579999999286 61.4832070000000499, -149.2436449999999297 61.4832170000000815, -149.2436079999999095 61.4832210000000714, -149.2435739999999100 61.4832230000000663, -149.2434739999999067 61.4832320000000436, -149.2434409999999048 61.4832360000000335, -149.2431279999999276 61.4832310000000462, -149.2429409999999166 61.4832280000000537, -149.2429039999999247 61.4832280000000537, -149.2414419999999211 61.4832040000000575, -149.2409429999999304 61.4831980000000726, -149.2400199999999302 61.4831830000000537, -149.2375559999999268 61.4831440000000384, -149.2375719999999149 61.4828410000000645, -149.2376049999999168 61.4822720000000800, -149.2376009999999269 61.4819190000000617, -149.2375929999999187 61.4815570000000662, -149.2375889999999288 61.4812580000000821, -149.2375759999999048 61.4805960000000482, -149.2375729999999123 61.4804700000000821, -149.2375709999999174 61.4803520000000390, -149.2375659999999300 61.4801080000000866, -149.2375619999999117 61.4799120000000698, -149.2375499999999136 61.4793300000000613, -149.2375489999999161 61.4791390000000320, -149.2375859999999079 61.4773310000000492, -149.2377029999999252 61.4719080000000417, -149.2377429999999094 61.4700980000000641, -149.2377439999999069 61.4700360000000501, -149.2377469999999278 61.4699070000000347, -149.2377609999999208 61.4693260000000805, -149.2377679999999032 61.4691340000000537, -149.2377689999999291 61.4690830000000688, -149.2377719999999215 61.4689300000000571, -149.2377729999999190 61.4688790000000722, -149.2377999999999076 61.4662290000000553, -149.2378829999999255 61.4582790000000614, -149.2379119999999091 61.4556300000000419, -149.2379879999999162 61.4548650000000407, -149.2333219999999301 61.4548140000000558, -149.2170179999999107 61.4546370000000479, -149.2115839999999025 61.4545780000000832, -149.2041679999999246 61.4545020000000477, -149.1876819999999100 61.4543360000000689, -149.1875849999999275 61.4543350000000714, -149.1875859999999250 61.4542050000000586, -149.1876109999999187 61.4486730000000421, -149.1876449999999181 61.4412580000000617, -149.1876079999999263 61.4382660000000556, -149.1874969999999223 61.4292910000000347, -149.1874599999999020 61.4263000000000829, -149.1874589999999046 61.4262210000000550, -149.1874559999999121 61.4259840000000850, -149.1874549999999147 61.4259060000000545, -149.1874539999999172 61.4258390000000531, -149.1874509999999248 61.4256380000000490, -149.1874509999999248 61.4255720000000451, -149.1874469999999064 61.4252850000000308, -149.1816229999999166 61.4252420000000825, -149.1803979999999115 61.4252330000000484, -149.1628359999999134 61.4251050000000305, -149.1583929999999043 61.4250720000000570, -149.1510579999999209 61.4250190000000771, -149.1487179999999171 61.4250050000000556, -149.1417019999999241 61.4249650000000429, -149.1401159999999209 61.4249570000000631, -149.1393639999999152 61.4249650000000429, -149.1379939999999067 61.4249750000000745, -149.1338849999999070 61.4250100000000430, -149.1325169999999218 61.4250220000000695, -149.1307389999999202 61.4250060000000531, -149.1299839999999222 61.4249980000000733, -149.1223869999999181 61.4249280000000795, -149.1198549999999159 61.4249050000000807, -149.1171929999999293 61.4248930000000541, -149.1092099999999050 61.4248580000000857, -149.1065489999999158 61.4248480000000541, -149.1031599999999173 61.4248220000000629, -149.0985259999999073 61.4247880000000350, -149.0929959999999141 61.4247450000000867, -149.0896089999999106 61.4247220000000311, -149.0720669999999188 61.4246000000000549, -149.0644339999999204 61.4245490000000700, -149.0534749999999065 61.4249250000000870, -149.0194709999999247 61.4260770000000775, -149.0019419999999286 61.4266710000000558, -148.9823619999999096 61.4266450000000646, -148.9236229999999068 61.4265670000000341, -148.9040439999999137 61.4265420000000404, -148.9018169999999088 61.4265630000000442, -148.8878159999999298 61.4266900000000646, -148.8391319999999212 61.4271370000000729, -148.8229049999999063 61.4272860000000378, -148.8218219999999121 61.4272960000000694, -148.8185759999999220 61.4273330000000328, -148.8181459999999277 61.4273380000000770, -148.8174959999999203 61.4273380000000770, -148.7936549999999158 61.4273010000000568, -148.7922689999999193 61.4272990000000618, -148.7762749999999130 61.4272740000000681, -148.7636499999999273 61.4272540000000618, -148.7437229999999033 61.4272230000000832, -148.7221369999999183 61.4271850000000654, -148.7142589999999132 61.4271720000000414, -148.6982989999999063 61.4271490000000426, -148.6981979999999055 61.4271480000000452, -148.6978979999999240 61.4271470000000477, -148.6977979999999206 61.4271470000000477, -148.6961429999999211 61.4271440000000553, -148.6911809999999150 61.4271360000000755, -148.6898089999999115 61.4271350000000780, -148.6895279999999104 61.4271240000000489, -148.6844219999999268 61.4269160000000625, -148.6787499999999227 61.4269410000000562, -148.6746289989999070 61.4269570000000726, -148.6706739989999164 61.4269740000000866, -148.6625849989999040 61.4270140000000424, -148.6615979989999232 61.4270100000000525, -148.6606099989999166 61.4270050000000651, -148.6486429989999181 61.4270460000000753, -148.6361249999999075 61.4269370000000663, -148.6299199999999132 61.4268930000000637, -148.6255719999999201 61.4268640000000801, -148.6206209999999146 61.4267930000000320, -148.6150199999999302 61.4268210000000749, -148.6149379999999098 61.4267730000000824, -148.6141499999999098 61.4267830000000572, -148.6117859999999098 61.4268150000000333, -148.6109989999999073 61.4268270000000598, -148.6027649999999198 61.4269190000000549, -148.5780629999999292 61.4272000000000844, -148.5698299999999108 61.4272940000000744, -148.5658229999999094 61.4272800000000530, -148.5638559999999302 61.4272730000000706, -148.5618159999999079 61.4272660000000315, -148.5495509999999229 61.4272230000000832, -148.5459339999999031 61.4272270000000731, -148.5399599999999225 61.4272370000000478, -148.5285349999999198 61.4272500000000719, -148.4942639999999301 61.4272910000000820, -148.4828419999999198 61.4273070000000416, -148.4782749999999112 61.4272390000000428, -148.4645739999999137 61.4270380000000387, -148.4600069999999050 61.4269720000000348, -148.4600889999999254 61.4259170000000836, -148.4603449999999043 61.4227580000000444, -148.4603749999999138 61.4223880000000690, -148.4603929999999252 61.4217040000000338, -148.4604229999999063 61.4048470010000642, -148.4604309999999145 61.4001450010000553, -148.4604689999999039 61.3802160010000648, -148.4605159999999273 61.3555840000000785, -148.4605289999999229 61.3485800000000836, -148.4605319999999153 61.3469610000000785, -148.4605349999999078 61.3453410000000758, -148.4605449999999109 61.3397280000000364, -148.4605469999999059 61.3387990000000514, -148.4605489999999293 61.3378680000000713, -148.4605539999999166 61.3354770000000826, -148.4605819999999028 61.3247490000000539, -148.4606129999999098 61.3139340000000743, -148.4605929999999034 61.3089830000000688, -148.4606809999999086 61.2983370000000605, -148.4607309999999245 61.2922540000000708, -148.4607499999999050 61.2900880000000825, -148.4608709999999121 61.2762930000000665, -148.4610089999999047 61.2605810000000588, -148.4613019999999040 61.2272480000000314, -148.4613229999999078 61.2250530000000595, -148.4614079999999205 61.2153160000000867, -148.4614949999999283 61.2055810000000520, -148.4614999999999156 61.2049160000000825, -148.4615059999999289 61.2042500000000587, -148.4615219999999169 61.2023840000000519, -148.4615629999999271 61.1975110000000768, -148.4616439999999216 61.1881200000000831, -148.4617419999999299 61.1766770000000406, -148.4617699999999161 61.1733030000000326, -148.4618399999999099 61.1652340000000549, -148.4795869999999240 61.1650590000000420, -148.4795249999999101 61.1620540000000688, -148.4783939999999234 61.1065700000000334, -148.4782559999999023 61.0998070000000553, -148.4781139999999198 61.0928140000000326, -148.4778329999999187 61.0790580000000318, -148.4777979999999218 61.0773720000000822, -148.4776949999999260 61.0723140000000626, -148.4776609999999266 61.0706280000000561, -148.4773379999999179 61.0548020000000520, -148.4770789999999181 61.0420270000000755, -148.4764969999999096 61.0134260000000381, -148.4764649999999051 61.0118770000000836, -148.4764329999999291 61.0103080000000659, -148.4764009999999246 61.0087390000000482, -148.4763719999999125 61.0073260000000346, -148.4762149999999110 60.9995800000000372, -148.4755389999999124 60.9965000000000828, -148.4750099999999122 60.9940940000000751, -148.4744799999999145 60.9916880000000674, -148.4744559999999183 60.9884510000000546, -148.4744469999999126 60.9871400000000676, -148.4744139999999106 60.9825930000000653, -148.4743869999999220 60.9787450000000604, -148.4743649999999207 60.9755110000000400, -148.4743609999999023 60.9751650000000609, -148.4743539999999200 60.9741310000000567, -148.4743529999999225 60.9737870000000726, -148.4743069999999250 60.9674440000000573, -148.4741719999999248 60.9484180000000606, -148.4741269999999247 60.9420760000000428, -148.4741069999999183 60.9393710000000510, -148.4740979999999126 60.9380420000000527, -148.4740689999999290 60.9340090000000600, -148.4740689999999290 60.9339970000000335, -148.4740489999999227 60.9312590000000682, -148.4740489999999227 60.9311330000000453, -148.4740399999999170 60.9298440000000596, -148.4740309999999113 60.9285550000000740, -148.4740009999999302 60.9244830000000661, -148.4739899999999295 60.9230640000000676, -148.4739799999999263 60.9216440000000716, -148.4739689999999257 60.9201420000000553, -148.4739659999999049 60.9196600000000785, -148.4739619999999150 60.9191790000000424, -148.4738579999999217 60.9049200000000610, -148.4738229999999248 60.9001350000000343, -148.4737879999999279 60.8953500000000645, -148.4737429999999279 60.8893840000000637, -148.4736999999999227 60.8834140000000730, -148.4736449999999195 60.8758150000000455, -148.4736159999999074 60.8718270000000530, -148.4735399999999288 60.8614360000000829, -148.4734959999999262 60.8554590000000530, -148.4734609999999293 60.8506300000000806, -148.4999979999999198 60.8498310000000515, -148.5001449999999181 60.8498270000000616, -148.5170589999999038 60.8493180000000393, -148.5219629999999142 60.8491700000000719, -148.5230529999999192 60.8491370000000416, -148.5232789999999170 60.8491310000000567, -148.5235059999999123 60.8491230000000769, -148.5236509999999157 60.8491190000000870, -148.5237949999999216 60.8491140000000428, -148.5263179999999181 60.8490380000000641, -148.5521789999999100 60.8482510000000616, -148.5552979999999081 60.8481570000000715, -148.5566249999999116 60.8481170000000589, -148.5579529999999124 60.8480760000000487, -148.5913319999999089 60.8470610000000534, -148.5915609999999276 60.8470530000000736, -148.5917639999999267 60.8470460000000344, -148.5917889999999204 60.8470460000000344, -148.5925419999999235 60.8470230000000356, -148.5926419999999268 60.8470190000000457, -148.5930609999999206 60.8470050000000811, -148.5934939999999074 60.8469910000000596, -148.5938089999999079 60.8469810000000848, -148.5942749999999251 60.8469690000000583, -148.5946739999999124 60.8469570000000317, -148.5947559999999044 60.8469540000000393, -148.5950719999999023 60.8469460000000595, -148.5951789999999164 60.8469410000000721, -148.5954999999999302 60.8469270000000506, -148.5956069999999158 60.8469230000000607, -148.5956079999999133 60.8469250000000557, -148.6006019999999239 60.8467760000000339, -148.6065439999999285 60.8465980000000854, -148.6207279999999287 60.8461660000000393, -148.6271979999999076 60.8459700000000794, -148.6633039989999077 60.8459710000000769, -148.6774989999999264 60.8459740000000693, -148.6847769999999116 60.8459910000000832, -148.6879299999999091 60.8459990000000630, -148.6910819999999092 60.8460070000000428, -148.6993089999999142 60.8460260000000517, -148.7011399999999242 60.8460310000000391, -148.7290239999999244 60.8461000000000354, -148.7292179999999178 60.8461000000000354, -148.7411029999999244 60.8461280000000784, -148.7460229999999228 60.8461400000000481, -148.7460359999999184 60.8439700000000698, -148.7460519999999065 60.8415470000000482, -148.7460819999999160 60.8371670000000790, -148.7461079999999072 60.8327870000000530, -148.7462849999999150 60.8056130000000508, -148.7463179999999170 60.8004560000000538, -148.7463329999999075 60.7981100000000652, -148.7463489999999240 60.7959590000000389, -148.7463629999999171 60.7938080000000696, -148.7464219999999102 60.7849850000000629, -148.7464569999999071 60.7798290000000634, -148.7464499999999248 60.7792750000000410, -148.7464299999999184 60.7780110000000491, -148.7463449999999057 60.7725620000000504, -148.7463169999999195 60.7707470000000853, -148.7463109999999062 60.7695060000000353, -148.7462929999999233 60.7657830000000558, -148.7462879999999075 60.7645420000000627, -148.7462749999999119 60.7642020000000684, -148.7462729999999169 60.7641660000000456, -148.7462169999999162 60.7630450000000337, -148.7461999999999023 60.7626710000000685, -148.7460869999999034 60.7597520000000486, -148.7460699999999179 60.7593360000000757, -148.7460239999999203 60.7581570000000397, -148.7459789999999202 60.7569780000000605, -148.7459759999999278 60.7569150000000491, -148.7457499999999300 60.7510840000000485, -148.7456869999999185 60.7494600000000560, -148.7456649999999172 60.7463020010000605, -148.7456199999999171 60.7398770010000817, -148.7456179999999222 60.7396400010000548, -148.7455989999999133 60.7368790010000339, -148.7455779999999095 60.7338810010000429, -148.7476289999999040 60.7338800010000455, -148.7496799999999268 60.7338780010000505, -148.7602819999999042 60.7338710010000682, -148.7843519999999273 60.7338560010000492, -148.7887719999999092 60.7338540010000543, -148.7931919999999195 60.7338510010000618, -148.8041009999999176 60.7338440010000795, -148.8043969999999092 60.7338430010000820, -148.8116019999999082 60.7338390010000353, -148.8191019999999298 60.7338340010000479, -148.8222189999999046 60.7338310010000555, -148.8236689999999101 60.7338310010000555, -148.8282359999999187 60.7338280010000631, -148.8315729999999064 60.7338250010000706, -148.8346919999999045 60.7338240010000732, -148.8349699999999132 60.7338240010000732, -148.8358039999999107 60.7338240010000732, -148.8360819999999194 60.7338240010000732, -148.8362939999999242 60.7338230010000757, -148.8495069999999032 60.7338290010000605, -148.8627179999999157 60.7338180010000315, -148.8717399999999031 60.7338160010000365, -148.8744159999999113 60.7338150010000390, -148.8754759999999067 60.7338150010000390, -148.8792119999999102 60.7338150010000390, -148.8910319999999103 60.7338130010000441, -148.9047679999999048 60.7338110010000491, -148.9185029999999301 60.7338100010000517, -148.9894219999999052 60.7337940010000352, -149.0197279999999296 60.7337890010000478, -149.0277539999999021 60.7337880010000504, -149.0280049999999221 60.7337880010000504, -149.0290319999999156 60.7337920010000403, -149.0298069999999200 60.7338480010000694, -149.0298339999999087 60.7338500010000644, -149.0357559999999069 60.7342770010000663, -149.0360249999999098 60.7342960010000752, -149.0360519999999269 60.7342970010000727, -149.0370749999999020 60.7343720010000538, -149.0381279999999151 60.7344490010000868, -149.0393729999999266 60.7345400010000844, -149.0406169999999122 60.7346300010000846, -149.0428809999999089 60.7347970010000608, -149.0428769999999190 60.7349050010000724, -149.0428359999999088 60.7359560010000337, -149.0424979999999096 60.7446460010000351, -149.0423919999999214 60.7473370000000727, -149.0422349999999199 60.7512820000000602, -149.0406149999999172 60.7921050000000491, -149.0394469999999103 60.8150130000000786, -149.0392219999999099 60.8194370000000504, -149.0383419999999148 60.8362480000000687, -149.0383349999999041 60.8363900000000513, -149.0382969999999148 60.8371310000000562, -149.0383679999999060 60.8373190000000363, -149.0395299999999281 60.8403620000000842, -149.0399189999999123 60.8413780000000770, -149.0399829999999213 60.8415290000000368, -149.0389959999999121 60.8469790000000330, -149.0385679999999127 60.8493420000000356, -149.0488939999999047 60.8598210000000677, -149.0528989999999112 60.8638860000000363, -149.0552119999999263 60.8662330000000793, -149.0575259999999105 60.8685800000000654, -149.0605269999999223 60.8716250000000514, -149.0671889999999280 60.8783830000000421, -149.0775539999999069 60.8797440000000734, -149.0851089999999033 60.8807360000000699, -149.0900099999999213 60.8819070000000693, -149.1005799999999226 60.8844350000000532, -149.1012949999999080 60.8846060000000762, -149.1034399999999209 60.8851190000000315, -149.1041549999999063 60.8852900000000545, -149.1196059999999193 60.8889860000000454, -149.1659609999999248 60.9000760000000696, -149.1814129999999068 60.9037730000000579, -149.1849849999999265 60.9046280000000593, -149.1885709999999108 60.9054860000000531, -149.1959049999999252 60.9054650000000493, -149.1995789999999147 60.9054550000000745, -149.2103769999999088 60.9054240000000391, -149.2313039999999091 60.9057060000000661, -149.3264779989999056 60.9069920000000593, -149.3582029999999179 60.9074210000000562, -149.3688399999999206 60.9075640000000362, -149.3732989999999177 60.9076240000000553, -149.4001699999999175 60.9132640000000833, -149.4105819999999198 60.9154500000000780, -149.4123809999999253 60.9158270000000357, -149.4177779999999132 60.9169600000000742, -149.4195779999999161 60.9173380000000861, -149.4285709999999199 60.9192250000000399, -149.4555499999999029 60.9248880000000668, -149.4645439999999041 60.9267760000000749, -149.4657349999999099 60.9270260000000690, -149.4693099999999220 60.9277760000000512, -149.4705019999999251 60.9280270000000428, -149.4773489999999185 60.9294640000000527, -149.4978899999999271 60.9337750000000824, -149.5047379999999180 60.9352130000000329, -149.5489169999999035 60.9444830000000479, -149.6269429999999261 60.9608560000000352, -149.6537519999999120 60.9693150000000514, -149.6709819999999240 60.9747560000000703, -149.6800579999999172 60.9776220000000535, -149.6927369999999087 60.9816260000000625, -149.7147149999999272 60.9882570000000328, -149.7232349999999030 60.9907910000000584, -149.7252209999999195 60.9913810000000467, -149.7311799999999096 60.9931540000000609, -149.7325349999999275 60.9935570000000666, -149.7331679999999210 60.9937430000000518, -149.7369669999999076 60.9948600000000738, -149.7478539999999043 60.9980620000000613, -149.7483589999999083 60.9982250000000477, -149.7520889999999270 60.9994430000000420, -149.7525819999999044 60.9995670000000700, -149.7540609999999219 60.9999420000000327, -149.7542859999999223 60.9999990000000594, -149.7545559999999227 61.0000680000000557, -149.7556659999999056 61.0003500000000827, -149.7639879999999266 61.0024600000000419, -149.7889569999999253 61.0087900000000332, -149.7972809999999129 61.0109010000000467, -149.7994069999999169 61.0114400000000501, -149.8057869999999241 61.0130570000000603, -149.8079139999999256 61.0135970000000611, -149.8132849999999223 61.0149580000000356, -149.8293979999999124 61.0190440000000649, -149.8347699999999065 61.0204060000000368, -149.8492249999999046 61.0240710000000490, -149.8925909999999249 61.0350660000000858, -149.9070469999999204 61.0387310000000411, -149.9096319999999025 61.0393860000000359, -149.9173899999999264 61.0413530000000719, -149.9199759999999060 61.0420090000000641, -149.9294709999999213 61.0444160000000693, -149.9579589999999030 61.0516390000000797, -149.9674549999999158 61.0540470000000823, -149.9720849999999075 61.0552200000000767, -149.9859779999999034 61.0587420000000520, -149.9906089989999032 61.0599170000000413, -149.9923659989999294 61.0603620000000546, -149.9976379989999202 61.0616990000000328, -149.9993959989999155 61.0621450000000436, -149.9996979989999204 61.0622220000000766, -149.9999559989999227 61.0622860000000856, -149.9999999989999253 61.0622980000000553, -150.0010979989999100 61.0625760000000355, -150.0016359989999160 61.0627120000000332, -150.0021959989999232 61.0628550000000700, -150.0047269989999279 61.0634510000000432, -150.0123199989999137 61.0652400000000739, -150.0148519989999158 61.0658370000000446, -150.0258369999999104 61.0684260000000450, -150.0536669999999049 61.0749850000000833, -150.0589339999999083 61.0749860000000808, -150.0702209999999184 61.0749890000000732, -150.1042799999999033 61.0749980000000505, -150.1411759999999163 61.0750080000000821, -150.2064589999999100 61.0750240000000417, -150.2121299999999167 61.0750260000000367, -150.2263239999999200 61.0750300000000834, -150.2405189999999209 61.0750340000000733, -150.2430179999999211 61.0750350000000708, -150.2532679999999061 61.0806630000000723)))",
+        "dist_model_score": 22.0,
+        "website": "http://www.muni.org/departments/fire/pages/default.aspx",
+        "headquarters_phone": "907-267-4936",
+        "risk_model_fires_size2": 15.3405572654201,
+        "risk_model_fires_size1": 78.0395707846311,
+        "risk_model_fires_size0": 102.870678068811,
+        "risk_model_fires_size2_percentage": 0.0781681235802358,
+        "population": 291826,
+        "fdid": "23100",
+        "mail_address": 806,
+        "name": "Anchorage Fire Department",
+        "created": "2015-08-13T12:09:24.924Z",
+        "organization_type": "Municipal Government",
+        "region": "West",
+        "modified": "2015-08-13T12:09:24.924Z",
+        "department_type": "Mostly Career"
+    },
+    "model": "firestation.firedepartment",
+    "pk": 73624
+},
+{
+    "fields": {
+        "count": 25,
+        "created": "2015-07-24T13:23:40.151Z",
+        "metric": "civilian_casualties",
+        "modified": "2015-07-24T13:23:40.151Z",
+        "fire_department": 73624,
+        "year": 2002
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752175
+},
+{
+    "fields": {
+        "count": 274,
+        "created": "2015-07-24T13:23:41.550Z",
+        "metric": "residential_structure_fires",
+        "modified": "2015-07-24T13:23:41.550Z",
+        "fire_department": 73624,
+        "year": 2002
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752264
+},
+{
+    "fields": {
+        "count": 9,
+        "created": "2015-07-24T13:23:40.191Z",
+        "metric": "civilian_casualties",
+        "modified": "2015-07-24T13:23:40.192Z",
+        "fire_department": 73624,
+        "year": 2003
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752183
+},
+{
+    "fields": {
+        "count": 265,
+        "created": "2015-07-24T13:23:41.557Z",
+        "metric": "residential_structure_fires",
+        "modified": "2015-07-24T13:23:41.558Z",
+        "fire_department": 73624,
+        "year": 2003
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752273
+},
+{
+    "fields": {
+        "count": 10,
+        "created": "2015-07-24T13:23:40.199Z",
+        "metric": "civilian_casualties",
+        "modified": "2015-07-24T13:23:40.199Z",
+        "fire_department": 73624,
+        "year": 2004
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752191
+},
+{
+    "fields": {
+        "count": 242,
+        "created": "2015-07-24T13:23:41.567Z",
+        "metric": "residential_structure_fires",
+        "modified": "2015-07-24T13:23:41.567Z",
+        "fire_department": 73624,
+        "year": 2004
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752280
+},
+{
+    "fields": {
+        "count": 244,
+        "created": "2015-07-24T13:23:41.571Z",
+        "metric": "residential_structure_fires",
+        "modified": "2015-07-24T13:23:41.571Z",
+        "fire_department": 73624,
+        "year": 2005
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752285
+},
+{
+    "fields": {
+        "count": 6,
+        "created": "2015-07-24T13:23:40.205Z",
+        "metric": "civilian_casualties",
+        "modified": "2015-07-24T13:23:40.205Z",
+        "fire_department": 73624,
+        "year": 2005
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752198
+},
+{
+    "fields": {
+        "count": 8,
+        "created": "2015-07-24T13:23:40.209Z",
+        "metric": "civilian_casualties",
+        "modified": "2015-07-24T13:23:40.209Z",
+        "fire_department": 73624,
+        "year": 2006
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752203
+},
+{
+    "fields": {
+        "count": 263,
+        "created": "2015-07-24T13:23:41.576Z",
+        "metric": "residential_structure_fires",
+        "modified": "2015-07-24T13:23:41.576Z",
+        "fire_department": 73624,
+        "year": 2006
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752293
+},
+{
+    "fields": {
+        "count": 9,
+        "created": "2015-07-24T13:23:40.214Z",
+        "metric": "civilian_casualties",
+        "modified": "2015-07-24T13:23:40.214Z",
+        "fire_department": 73624,
+        "year": 2007
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752209
+},
+{
+    "fields": {
+        "count": 207,
+        "created": "2015-07-24T13:23:41.582Z",
+        "metric": "residential_structure_fires",
+        "modified": "2015-07-24T13:23:41.582Z",
+        "fire_department": 73624,
+        "year": 2007
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752300
+},
+{
+    "fields": {
+        "count": 24,
+        "created": "2015-07-24T13:23:40.219Z",
+        "metric": "civilian_casualties",
+        "modified": "2015-07-24T13:23:40.220Z",
+        "fire_department": 73624,
+        "year": 2008
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752217
+},
+{
+    "fields": {
+        "count": 227,
+        "created": "2015-07-24T13:23:41.587Z",
+        "metric": "residential_structure_fires",
+        "modified": "2015-07-24T13:23:41.588Z",
+        "fire_department": 73624,
+        "year": 2008
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752308
+},
+{
+    "fields": {
+        "count": 9,
+        "created": "2015-07-24T13:23:40.225Z",
+        "metric": "civilian_casualties",
+        "modified": "2015-07-24T13:23:40.225Z",
+        "fire_department": 73624,
+        "year": 2009
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752225
+},
+{
+    "fields": {
+        "count": 290,
+        "created": "2015-07-24T13:23:41.593Z",
+        "metric": "residential_structure_fires",
+        "modified": "2015-07-24T13:23:41.593Z",
+        "fire_department": 73624,
+        "year": 2009
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752315
+},
+{
+    "fields": {
+        "count": 257,
+        "created": "2015-07-24T13:23:41.600Z",
+        "metric": "residential_structure_fires",
+        "modified": "2015-07-24T13:23:41.600Z",
+        "fire_department": 73624,
+        "year": 2010
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752323
+},
+{
+    "fields": {
+        "count": 11,
+        "created": "2015-07-24T13:23:40.232Z",
+        "metric": "civilian_casualties",
+        "modified": "2015-07-24T13:23:40.232Z",
+        "fire_department": 73624,
+        "year": 2010
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752233
+},
+{
+    "fields": {
+        "count": 34,
+        "created": "2015-07-24T13:23:40.238Z",
+        "metric": "civilian_casualties",
+        "modified": "2015-07-24T13:23:40.238Z",
+        "fire_department": 73624,
+        "year": 2011
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752241
+},
+{
+    "fields": {
+        "count": 236,
+        "created": "2015-07-24T13:23:41.606Z",
+        "metric": "residential_structure_fires",
+        "modified": "2015-07-24T13:23:41.606Z",
+        "fire_department": 73624,
+        "year": 2011
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752331
+},
+{
+    "fields": {
+        "count": 262,
+        "created": "2015-07-24T13:23:41.614Z",
+        "metric": "residential_structure_fires",
+        "modified": "2015-07-24T13:23:41.614Z",
+        "fire_department": 73624,
+        "year": 2012
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752339
+},
+{
+    "fields": {
+        "count": 28,
+        "created": "2015-07-24T13:23:40.247Z",
+        "metric": "civilian_casualties",
+        "modified": "2015-07-24T13:23:40.247Z",
+        "fire_department": 73624,
+        "year": 2012
+    },
+    "model": "firestation.nfirsstatistic",
+    "pk": 752250
+},
+{
+    "fields": {
+        "department": 73624,
+        "fdid": null,
+        "station_number": null,
+        "station_address": 43459,
+        "district": null
+    },
+    "model": "firestation.firestation",
+    "pk": 24697
+},
+{
+    "fields": {
+        "department": 73624,
+        "fdid": null,
+        "station_number": null,
+        "station_address": 43400,
+        "district": null
+    },
+    "model": "firestation.firestation",
+    "pk": 51600
+},
+{
+    "fields": {
+        "department": 73624,
+        "fdid": null,
+        "station_number": null,
+        "station_address": 43398,
+        "district": null
+    },
+    "model": "firestation.firestation",
+    "pk": 15047
+},
+{
+    "fields": {
+        "department": 73624,
+        "fdid": null,
+        "station_number": null,
+        "station_address": 43397,
+        "district": null
+    },
+    "model": "firestation.firestation",
+    "pk": 6375
+},
+{
+    "fields": {
+        "department": 73624,
+        "fdid": null,
+        "station_number": null,
+        "station_address": 43396,
+        "district": null
+    },
+    "model": "firestation.firestation",
+    "pk": 48963
+},
+{
+    "fields": {
+        "department": 73624,
+        "fdid": null,
+        "station_number": null,
+        "station_address": 43395,
+        "district": null
+    },
+    "model": "firestation.firestation",
+    "pk": 27684
+},
+{
+    "fields": {
+        "department": 73624,
+        "fdid": null,
+        "station_number": null,
+        "station_address": 43394,
+        "district": null
+    },
+    "model": "firestation.firestation",
+    "pk": 42352
+},
+{
+    "fields": {
+        "department": 73624,
+        "fdid": null,
+        "station_number": null,
+        "station_address": 43393,
+        "district": null
+    },
+    "model": "firestation.firestation",
+    "pk": 6374
+},
+{
+    "fields": {
+        "department": 73624,
+        "fdid": null,
+        "station_number": null,
+        "station_address": 43392,
+        "district": null
+    },
+    "model": "firestation.firestation",
+    "pk": 15046
+},
+{
+    "fields": {
+        "department": 73624,
+        "fdid": null,
+        "station_number": null,
+        "station_address": 43391,
+        "district": null
+    },
+    "model": "firestation.firestation",
+    "pk": 18486
+},
+{
+    "fields": {
+        "department": 73624,
+        "fdid": null,
+        "station_number": null,
+        "station_address": 43390,
+        "district": null
+    },
+    "model": "firestation.firestation",
+    "pk": 27696
+},
+{
+    "fields": {
+        "department": 73624,
+        "fdid": null,
+        "station_number": null,
+        "station_address": 43389,
+        "district": null
+    },
+    "model": "firestation.firestation",
+    "pk": 18256
+},
+{
+    "fields": {
+        "department": 73624,
+        "fdid": null,
+        "station_number": null,
+        "station_address": 43388,
+        "district": null
+    },
+    "model": "firestation.firestation",
+    "pk": 36506
+},
+{
+    "fields": {
+        "department": 73624,
+        "fdid": null,
+        "station_number": null,
+        "station_address": 43387,
+        "district": null
+    },
+    "model": "firestation.firestation",
+    "pk": 24957
+}
+]
