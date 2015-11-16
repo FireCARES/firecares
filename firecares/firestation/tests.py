@@ -26,7 +26,7 @@ User = get_user_model()
 class FireStationTests(TestCase):
 
     def setUp(self):
-        self.response_capability_enabled = False
+        self.response_capability_enabled = True
         self.current_api_version = 'v1'
         self.fire_station = self.create_firestation()
 
@@ -57,7 +57,7 @@ class FireStationTests(TestCase):
 
         c = Client()
 
-        fs = FireStation.objects.filter(id=24957).first()
+        fs = FireStation.objects.filter(id=46971).first()
 
         # Make sure that we're redirected to login since we're not yet authenticated
         response = c.get(reverse('firestation_detail', args=[fs.pk]))
@@ -79,12 +79,10 @@ class FireStationTests(TestCase):
         """
         Tests users have to be authenticated to GET resources.
         """
-        if not self.response_capability_enabled:
-            return
 
         c = Client()
 
-        for resource in ['capabilities', 'firestations']:
+        for resource in ['staffing', 'firestations']:
             url = '{0}?format=json'.format(reverse('api_dispatch_list', args=[self.current_api_version, resource]),)
             response = c.get(url)
             self.assertEqual(response.status_code, 401)
@@ -92,16 +90,14 @@ class FireStationTests(TestCase):
             c.login(**{'username': 'admin', 'password': 'admin'})
             response = c.get(url)
             self.assertEqual(response.status_code, 200)
+            c.logout()
 
     def test_add_capability_to_station(self):
         """
         Tests adding a capability via the API.
         """
 
-        if not self.response_capability_enabled:
-            return
-
-        url = '{0}?format=json'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'capabilities']),)
+        url = '{0}?format=json'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'staffing']),)
         station_uri = '{0}{1}/'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'firestations']),
                                        self.fire_station.id)
         c = Client()
@@ -140,15 +136,12 @@ class FireStationTests(TestCase):
         Tests updating the capability through the API.
         """
 
-        if not self.response_capability_enabled:
-            return
-
         capability = Staffing.objects.create(firestation=self.fire_station, firefighter=1, firefighter_emt=1,
                           firefighter_paramedic=1, ems_emt=1, ems_paramedic=1, officer=1, officer_paramedic=1,
                           ems_supervisor=1, chief_officer=1)
 
         url = '{0}{1}/?format=json'.format(reverse('api_dispatch_list',
-                                                   args=[self.current_api_version, 'capabilities']), capability.id)
+                                                   args=[self.current_api_version, 'staffing']), capability.id)
 
         c = Client()
         c.login(**{'username': 'admin', 'password': 'admin'})
@@ -157,7 +150,8 @@ class FireStationTests(TestCase):
                       officer_paramedic=2, ems_supervisor=2, chief_officer=2)
 
         response = c.put(url, data=json.dumps(params), content_type='application/json')
-        self.assertEqual(response.status_code, 204)
+        # Since the API is returning data, it'll pass a 200 vs 204
+        self.assertEqual(response.status_code, 200)
 
         updated_capability = Staffing.objects.get(id=capability.id)
         self.assertEqual(updated_capability.firefighter, 2)
@@ -175,15 +169,12 @@ class FireStationTests(TestCase):
         Tests deleting the capability through the API.
         """
 
-        if not self.response_capability_enabled:
-            return
-
         capability = Staffing.objects.create(firestation=self.fire_station, firefighter=1, firefighter_emt=1,
                           firefighter_paramedic=1, ems_emt=1, ems_paramedic=1, officer=1, officer_paramedic=1,
                           ems_supervisor=1, chief_officer=1)
 
         url = '{0}{1}/?format=json'.format(reverse('api_dispatch_list',
-                                                   args=[self.current_api_version, 'capabilities']), capability.id)
+                                                   args=[self.current_api_version, 'staffing']), capability.id)
 
         c = Client()
         c.login(**{'username': 'admin', 'password': 'admin'})
@@ -199,9 +190,6 @@ class FireStationTests(TestCase):
         """
         Tests capability validation via a Form object.
         """
-
-        if not self.response_capability_enabled:
-            return
 
         capability = dict(firestation=self.fire_station.id,
                           firefighter='test',
@@ -227,10 +215,7 @@ class FireStationTests(TestCase):
         Tests capability validation via the API.
         """
 
-        if not self.response_capability_enabled:
-            return
-
-        url = '{0}?format=json'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'capabilities']),)
+        url = '{0}?format=json'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'staffing']),)
         station_uri = '{0}{1}/'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'firestations']),
                                        self.fire_station.id)
         c = Client()
@@ -263,11 +248,8 @@ class FireStationTests(TestCase):
         Tests filtering response capabilities by the fire station.
         """
 
-        if not self.response_capability_enabled:
-            return
-
         url = '{0}?format=json&firestation={1}'.format(reverse('api_dispatch_list',
-                                                               args=[self.current_api_version, 'capabilities']),
+                                                               args=[self.current_api_version, 'staffing']),
                                                        self.fire_station.id
                                                        )
         c = Client()

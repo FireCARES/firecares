@@ -76,6 +76,8 @@ class FireStationResource(ModelResource):
     class Meta:
         resource_name = 'firestations'
         queryset = FireStation.objects.all()
+        authorization = DjangoAuthorization()
+        authentication = MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
         cache = SimpleCache()
         list_allowed_methods = ['get']
         detail_allowed_methods = ['get']

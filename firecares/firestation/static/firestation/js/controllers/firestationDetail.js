@@ -70,16 +70,25 @@
     station.addTo(map);
     layersControl.addOverlay(station, 'This Station');
 
-
-
     if ( config.headquarters) {
       var headquarters = L.marker(headquartersGeom, {icon: headquartersIcon, zIndexOffset: 1000});
       headquarters.bindPopup('<b>' + config.headquartersName + '</b>');
       layersControl.addOverlay(headquarters, 'Headquarters Location');
     }
 
-    map.setView(stationGeom, 15);
-
+    if ( config.district) {
+      var district = L.geoJson(config.district, {
+        style: function (feature) {
+          return {color: '#0074D9', fillOpacity: .05, opacity:.8, weight:2};
+        }
+      }).addTo(map);
+      layersControl.addOverlay(district, 'District');
+      map.fitBounds(district.getBounds());
+      map.setView(stationGeom);
+    }
+    else {
+      map.setView(stationGeom, 15);
+    }
 
     $scope.ClearForm = function(form) {
       form.apparatus = 'Engine';

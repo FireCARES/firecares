@@ -21,6 +21,7 @@
     var config = {
         geom: {{ object.geom.json|safe|default:"null" }},
         stationName: "{{ object.name|default:'Station' }}",
+        district: {{ object.district.json|safe|default:"null" }},
         headquarters: {{ object.department.headquarters_geom.json|safe|default:"null" }},
         headquartersName: "{{ object.department.name }} Headquarters",
         id: {{object.id}},
