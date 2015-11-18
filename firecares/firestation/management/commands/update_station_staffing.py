@@ -47,6 +47,7 @@ class Command(BaseCommand):
                             )
         parser.add_argument('--schema',default=None,dest='use_schema',nargs='?',help='Use schema file rather than command line',required=False)
         parser.add_argument('--verbose',action='store_true',default=False,dest='verbose',help='Turn on for more debug output')
+        parser.add_argument('--dry_run',action='store_true',default=False,dest='dry_run',help='Do not save values into database')
         parser.add_argument('--no_geom', action='store_false', default=True, help='Use Geometry in Data Source as filter for matching',
                             dest='use_geometry_filter')
         parser.add_argument('--apparatus_counts', action='store_true', default=False, help='Use Apparatus field in Data Source as staff count for apparatus',
@@ -107,7 +108,7 @@ class Command(BaseCommand):
             apparatus_info = apparatus_info_dict[apparatus_map]
             apparatus_info.Add(staff_count)
 
-    def create_staffing_from_dict(self,matched_station,apparatus_info_dict):
+    def create_staffing_from_dict(self,matched_station,apparatus_info_dict,dry_run):
         for apparatus_choice,apparatus_info in apparatus_info_dict.iteritems():
             if len(apparatus_info.apparatus_staff_counts) > 0:
                 for apparatus_count in apparatus_info.apparatus_staff_counts:
@@ -116,6 +117,8 @@ class Command(BaseCommand):
                     staff_object.apparatus = apparatus_choice
                     staff_object.firefighter = apparatus_count
                     staff_object.firestation = matched_station
+                    if dry_run is True:
+                        continue
                     matched_station.staffing_set.add(staff_object)
                     staff_object.save()
 
@@ -139,6 +142,7 @@ class Command(BaseCommand):
 
         use_geometry_filter = options.get('use_geometry_filter')
         use_apparatus_counts = options.get('use_apparatus_counts')
+        dry_run = options.get('dry_run')
 
         apparatus_info_dict = self.create_apparatus_info()
 
@@ -186,4 +190,4 @@ class Command(BaseCommand):
 
                 self.extract_apparatus_information(total_staff,apparatus_mapping_dict,feature,apparatus_info_dict,use_apparatus_counts)
 
-                self.create_staffing_from_dict(matched_station,apparatus_info_dict)
+                self.create_staffing_from_dict(matched_station,apparatus_info_dict,dry_run)
