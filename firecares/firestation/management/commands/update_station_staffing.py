@@ -41,6 +41,7 @@ class Command(BaseCommand):
         parser.add_argument('--station_number_schema',dest='station_number_schema',nargs='?',default='ST_NO')
         parser.add_argument('--station_name_schema',dest='station_name_schema',nargs='?',default='Name')
         parser.add_argument('--total_staff_schema',dest='total_staff_schema',nargs='?',default='ST_FF')
+        parser.add_argument('--station_address_schema',dest='station_address_schema',nargs='?',default='ADDRESS')
         parser.add_argument('--apparatus_schema',dest='apparatus_schema',nargs='?',\
                             default='Engine:Engine-Truck:Ladder/Truck/Aerial-Ladder:Ladder/Truck/Aerial-Rescue:Heavy Rescue-Quint:Quint-Ambulance:Ambulance/ALS-Chief:Chief',\
                             )
@@ -52,7 +53,7 @@ class Command(BaseCommand):
                             dest='use_apparatus_counts')
 
 
-    def match_station(self,station_number,station_name,filter_stations):
+    def match_station(self,station_number,station_name,station_address,filter_stations):
         matched_station = None
         for station in filter_stations:
             extracted_station_number = re.search('Station (?P<station_num>\d+)',station.name)
@@ -60,9 +61,15 @@ class Command(BaseCommand):
                 extracted_station_number = extracted_station_number.group('station_num')
                 if station_number == station.station_number and extracted_station_number == station_number:
                     matched_station = station
-                    break
                 elif extracted_station_number == station_number:
                     matched_station = station
+                else:
+                    if station_address is None:
+                        continue
+                    address = station.station_address
+                    if station_address == address:
+                        print 'Address Match: {0}'.format(station.name)
+                        matched_station = station
 
         if matched_station is not None:
             print 'Matched Name: {0}'.format(matched_station.name)
@@ -77,7 +84,8 @@ class Command(BaseCommand):
         for apparatus_field,apparatus_map in apparatus_mapping_dict.iteritems():
             apparatus_count = feature.get(apparatus_field)
             if apparatus_count > 0:
-                print '{0} count: {1}'.format(apparatus_field,apparatus_count)
+                if verbose is True:
+                    print '{0} count: {1}'.format(apparatus_field,apparatus_count)
                 total_apparatus_count += 1
                 apparatus_count_dict[apparatus_field] = apparatus_count
 
@@ -94,7 +102,8 @@ class Command(BaseCommand):
             apparatus_map = apparatus_mapping_dict.get(apparatus_field,'Other')
             if apparatus_map == 'Chief':
                 staff_count = 1
-            print 'Adding new {0} staff count of {1}'.format(apparatus_map,staff_count)
+            if verbose is True:
+                print 'Adding new {0} staff count of {1}'.format(apparatus_map,staff_count)
             apparatus_info = apparatus_info_dict[apparatus_map]
             apparatus_info.Add(staff_count)
 
@@ -124,6 +133,7 @@ class Command(BaseCommand):
 
         station_number_field = options.get('station_number_schema')
         station_name_field = options.get('station_name_schema')
+        station_address_field = options.get('station_address_schema')
         total_staff_field = options.get('total_staff_schema')
         apparatus_list = options.get('apparatus_schema')
 
@@ -136,13 +146,15 @@ class Command(BaseCommand):
         apparatus_list = apparatus_list.split('-')
         for apparatus_pair in apparatus_list:
             apparatus_mapping = apparatus_pair.split(':')
-            print 'Apparatus pair: {0} : {1}'.format(apparatus_mapping[0],apparatus_mapping[1])
+            if verbose is True:
+                print 'Apparatus pair: {0} : {1}'.format(apparatus_mapping[0],apparatus_mapping[1])
             apparatus_mapping_dict[apparatus_mapping[0]] = apparatus_mapping[1]
 
         filter_stations = FireStation.objects.filter(state=state_filter.upper())
 
         for layer in ds:
-            print 'Number of Features: {0}'.format(layer.num_feat)
+            if verbose is True:
+                print 'Number of Features: {0}'.format(layer.num_feat)
             for feature in layer:
                 for apparatus_info in apparatus_info_dict.itervalues():
                     apparatus_info.Clear()
@@ -150,21 +162,24 @@ class Command(BaseCommand):
                 matched_station = None
                 station_number = feature.get(station_number_field)
                 station_name = feature.get(station_name_field)
+                station_address = feature.get(station_address_field)
                 total_staff = feature.get(total_staff_field)
 
                 if total_staff < 1 and use_apparatus_counts is False:
                     continue
 
+                print 'Total Staff: {0}'.format(total_staff)
+
                 if use_geometry_filter is True:
-                    filter_stations = FireStation.objects.filter(geom__distance_lte=(feature.geom.geos,D(mi=5)))
+                    filter_stations = FireStation.objects.filter(geom__distance_lte=(feature.geom.geos,D(mi=10)))
 
                 if(isinstance(station_number,basestring)):
                     station_number = re.sub('[^0-9]','',station_number)
                 else:
                     station_number = str(station_number)
-                print station_number
+                print 'Extracted station number: {0}'.format(station_number)
 
-                matched_station = self.match_station(station_number,station_name,filter_stations)
+                matched_station = self.match_station(station_number,station_name,station_address,filter_stations)
 
                 if matched_station is None:
                     continue
