@@ -24,3 +24,5 @@ django-registration-redux==1.2
 django-autocomplete-light==2.2.5
 django-fixture-magic==0.0.7
 django-slack==4.1.0
+defusedxml==0.4.1
+lxml==3.5.0

@@ -48,7 +48,12 @@ class PrettyJSONSerializer(Serializer):
                 sort_keys=True, ensure_ascii=False, indent=self.json_indent)
 
 
-class FireDepartmentResource(ModelResource):
+class JSONDefaultModelResource(ModelResource):
+    def determine_format(self, request):
+        return 'application/json' if not request.GET.get('format') else super(JSONDefaultModelResource, self).determine_format(request)
+
+
+class FireDepartmentResource(JSONDefaultModelResource):
     """
     The Fire Department API.
     """
@@ -66,7 +71,7 @@ class FireDepartmentResource(ModelResource):
         limit = 120
 
 
-class FireStationResource(ModelResource):
+class FireStationResource(JSONDefaultModelResource):
     """
     The Fire Station API.
     """
@@ -91,7 +96,7 @@ class FireStationResource(ModelResource):
         limit = 120
 
 
-class StaffingResource(ModelResource):
+class StaffingResource(JSONDefaultModelResource):
     """
     The ResponseCapability API.
     """

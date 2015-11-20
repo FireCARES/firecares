@@ -684,3 +684,24 @@ class FireStationTests(TestCase):
         c = Client()
         response = c.get(reverse('robots.txt'))
         self.assertEqual(response.status_code, 200)
+
+    def test_api_formats(self):
+        """
+        Test that an API endpoint defaults to JSON vs XML and supports JSON and XML serialization formats
+        """
+
+        c = Client()
+        c.login(**{'username': 'admin', 'password': 'admin'})
+
+        for route in ['fire-departments', 'staffing', 'firestations']:
+            # Test to ensure that the default route returns JSON vs XML
+            resp = c.get(reverse('api_dispatch_list', args=[self.current_api_version, route]))
+            self.assertEqual(resp.get('Content-type'), 'application/json')
+
+            # Ensure that the existing ?format=json still returns JSON
+            resp = c.get('{0}?format=json'.format(reverse('api_dispatch_list', args=[self.current_api_version, route]),))
+            self.assertEqual(resp.get('Content-type'), 'application/json')
+
+            # Make sure that returning XML is supported
+            resp = c.get('{0}?format=xml'.format(reverse('api_dispatch_list', args=[self.current_api_version, route]),))
+            self.assertTrue(resp.get('Content-type').startswith('application/xml'))
