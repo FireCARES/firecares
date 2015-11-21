@@ -18,7 +18,8 @@
     <title>{% block meta_title %}Login to your account · FireCARES{% endblock %}</title>
     {% include 'firestation/_favicon.html' %}
 
-    {% include "firestation/_firecares_static.html" %}
+    {% include "firestation/_firecares_style.html" %}
+
     {% include 'google_analytics.html' %}
 </head>
 
@@ -358,5 +359,8 @@
 {% include 'firestation/_footer.html' %}
 
 </div>
+
+{% include "firestation/_firecares_scripts.html" %}
+
 </body>
 </html>
