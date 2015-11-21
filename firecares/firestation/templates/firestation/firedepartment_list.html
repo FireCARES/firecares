@@ -17,7 +17,7 @@
     <title>Search for a Community · FireCARES</title>
 
     {% include 'firestation/_favicon.html' %}
-    {% include "firestation/_firecares_static.html" %}
+    {% include "firestation/_firecares_style.html" %}
     {% include 'google_analytics.html' %}
 </head>
 
@@ -218,7 +218,7 @@
                                     </ui-select>
                                 </div>
                                 <div class="ct-form--item ct-u-marginBoth40">
-                                    <input name="dist_model_score" type="text" ng-model="params.dist_model_score" class="slider ct-js-sliderTicks" data-slider-handle="square" data-slider-min="{{ dist_min|floatformat|default:0 }}" data-slider-max="{{ dist_max|floatformat|default:1000 }}" data-slider-step="1" 
+                                    <input name="dist_model_score" type="text" ng-model="params.dist_model_score" class="slider ct-js-sliderTicks" data-slider-handle="square" data-slider-min="{{ dist_min|floatformat|default:0 }}" data-slider-max="{{ dist_max|floatformat|default:1000 }}" data-slider-step="1"
                                     data-slider-value="[{{ request.GET.dist_model_score |default:dist_min}} , {{dist_max}}]"/>
                                     <label class="text-center center-block">DIST Score (s)</label>
                                 </div>
@@ -226,8 +226,8 @@
 
                                 <div class="ct-u-displayTableCell">
                                     <input name="population" type="text" ng-model="params.population" class="slider ct-js-sliderTicks"  data-slider-handle="square" data-slider-min="{{ population_min|floatformat|default:0 }}" data-slider-max="{{ population_max|floatformat|default:1000 }}"  data-slider-step="10" data-slider-value="[{{request.GET.population|default:population_min}} , {{population_max}} ]"/>
-                                    <label class="text-center center-block">Protected Population 
-                                   </label> 
+                                    <label class="text-center center-block">Protected Population
+                                   </label>
                                 </div>
                                 <button type="submit" class="btn btn-warning ct-u-marginTop10" ng-click="search()">Search or Filter Now</button>
 
@@ -323,7 +323,9 @@
 {% include "firestation/_footer.html" %}
 
 </div>
-<!-- JavaScripts -->
+
+{% include "firestation/_firecares_scripts.html" %}
+
 <script type="text/javascript">
       $('#sort-select').on("select2-selecting", function(e) {
         window.location.href = e.choice.id;

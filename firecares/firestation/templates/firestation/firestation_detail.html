@@ -16,6 +16,7 @@
 
     <title>Firestation detail: {{ object.name }}</title>
     {% include 'firestation/_favicon.html' %}
+    {% include "firestation/_firecares_style.html" %}
 
     <script type="text/javascript">
     var config = {
@@ -281,6 +282,7 @@
 {% include 'firestation/_footer.html' %}
 </div>
 
-{% include "firestation/_firecares_static.html" %}
+{% include "firestation/_firecares_scripts.html" %}
+
 </body>
 </html>

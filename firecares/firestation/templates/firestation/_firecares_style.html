@@ -1,0 +1,12 @@
+{% load compress %}
+
+{% compress css %}
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/imports.css"/>
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}nvd3/nv.d3.min.css"/>
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}leaflet-fullscreen/leaflet.fullscreen.css"/>
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/bootstrap.css"/>
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/style.css"/>
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/js/ui-select2/ui-select2.css"/>
+<link rel="stylesheet" href="{{ STATIC_URL }}leaflet/leaflet.css" />
+<link rel="stylesheet" href="{{ STATIC_URL }}firestation/firestation.css" />
+{% endcompress %}
