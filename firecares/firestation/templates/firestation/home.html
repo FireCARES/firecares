@@ -285,7 +285,29 @@
 
 
 {% include 'firestation/_footer.html' %}
-{%  include 'firestation/_firecares_static.html' %}
+{% include 'firestation/_firecares_static.html' %}
+
+<script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "url": "https://firecares.org/",
+    "potentialAction": {
+    "@type": "SearchAction",
+        "target": "https://firecares.org/department/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+    }
+}
+</script>
+
+<script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "Organization",
+    "url": "http://firecares.org",
+    "logo": "https://s3.amazonaws.com/firecares-static/firecares-header-logo.png"
+}
+</script>
 
 </body>
 </html>
