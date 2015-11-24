@@ -34,6 +34,15 @@ function parseBoolean(str, $defaultValue) {
     return $defaultValue;
 }
 
+function humanizeInteger(val) {
+  // Ripped from https://github.com/taijinlee/humanize/blob/master/humanize.js
+  var thousandsSep = ',';
+  var intPart = parseInt(val.toFixed(0), 10) + '';
+  var j = intPart.length > 3 ? intPart.length % 3 : 0;
+
+  return (j ? intPart.substr(0, j) + thousandsSep : '') + intPart.substr(j).replace(/(\d{3})(?=\d)/g, '$1' + thousandsSep);
+};
+
 // Kenburns //-----------------------------
 
 function makekenburns($element) {
@@ -344,7 +353,21 @@ function makekenburns($element) {
 
         //Bootstrap slider init
         if($('.slider').length > 0){
-            $('.slider').slider();
+          // You'd think that a `.slider:not([humanize])` would work as a complement to `.slider[humanize]`, but it doesn't appear so
+          // Using the long-hand approach to doing the same thing
+          $('.slider').each(function() {
+            var $t = $(this);
+            if ( $t.attr('humanize')) {
+              $t.slider({
+                formater: function(inp) {
+                  return humanizeInteger(inp);
+                }
+              })
+            }
+            else {
+              $t.slider();
+            }
+          });
         }
 
 
