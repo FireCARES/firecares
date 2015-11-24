@@ -24,6 +24,8 @@
     var config = {
       geom: {{ object.geom.json|safe|default:"null" }},
       centroid: [{{ object.headquarters_address.geom.centroid.y }}, {{ object.headquarters_address.geom.centroid.x }}],
+      headquarters: {{ object.headquarters_address.geom.json|safe|default:"null" }},
+      headquartersName: "{{ object.name }} Headquarters",
       id: {{object.id}}
     }
     </script>

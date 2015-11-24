@@ -18,10 +18,19 @@
 
         var l = L.geoJson(config.geom, {
           style: function (feature) {
-            return {color: '#6c6c6c', fillOpacity: .05, opacity:.8, weight:2};
+            return {color: '#6c6c6c', fillOpacity: .05, opacity: .8, weight: 2};
           }
         }).addTo(curMap);
         layersControl.addOverlay(l, 'Department Boundary');
+
+        var headquartersGeom = config.headquarters ? L.latLng(config.headquarters.coordinates[1], config.headquarters.coordinates[0]) : null;
+        var headquartersIcon = L.FireCARESMarkers.headquartersmarker();
+
+        if ( headquartersGeom) {
+          var headquarters = L.marker(headquartersGeom, {icon: headquartersIcon, zIndexOffset: 1000});
+          headquarters.bindPopup('<b>' + config.headquartersName + '</b>').addTo(curMap);
+          layersControl.addOverlay(headquarters, 'Headquarters Location');
+        }
 
         var overlay = L.geoJson(overlay, {
           style: function (feature) {
