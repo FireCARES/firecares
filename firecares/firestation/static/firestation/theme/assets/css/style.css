@@ -10841,6 +10841,9 @@ img.mfp-img {
 #map {
   min-height: 400px;
 }
+#featured #map {
+  padding-left: 0;
+}
 #map:last-child:after {
   content: '';
   position: absolute;
