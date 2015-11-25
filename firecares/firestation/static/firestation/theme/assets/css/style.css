@@ -10942,7 +10942,8 @@ img.mfp-img {
   min-height: 60px;
 }
 .logo h1 {
-  text-indent: -999px;
+  text-indent: -9999px;
+  font-size: 20px;
 }
 .ct-mediaSection-inner {
   padding: 1.5em;
