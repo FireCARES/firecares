@@ -359,7 +359,7 @@ function makekenburns($element) {
             var $t = $(this);
             if ( $t.attr('humanize')) {
               $t.slider({
-                formater: function(inp) {
+                visualFormatter: function(inp) {
                   return humanizeInteger(inp);
                 }
               })

@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * ========================================================= */
- 
+
 !function( $ ) {
 
 	var Slider = function(element, options) {
@@ -122,6 +122,7 @@
 		this.size = this.picker[0][this.sizePos];
 
 		this.formater = options.formater;
+    this.visualFormatter = options.visualFormatter;
 
 		this.layout();
 
@@ -151,14 +152,14 @@
 
 		over: false,
 		inDrag: false,
-		
+
 		showTooltip: function(){
 			this.tooltip.addClass('in');
 			//var left = Math.round(this.percent*this.width);
 			//this.tooltip.css('left', left - this.tooltip.outerWidth()/2);
 			this.over = true;
 		},
-		
+
 		hideTooltip: function(){
 			if (this.inDrag === false) {
 				this.tooltip.removeClass('in');
@@ -178,20 +179,20 @@
 			}
 			if (this.range) {
 				this.tooltipInner.text(
-					this.formater(this.value[0]) + 
-					' : ' + 
-					this.formater(this.value[1])
+					this.visualFormatter(this.value[0]) +
+					' : ' +
+					this.visualFormatter(this.value[1])
 				);
 
-				this.element.val(this.formater(this.value[0]) + 
-					' , ' + 
+				this.element.val(this.formater(this.value[0]) +
+					' , ' +
 					this.formater(this.value[1])).trigger('input');
 
 				this.tooltip[0].style[this.stylePos] = this.size * (this.percentage[0] + (this.percentage[1] - this.percentage[0])/2)/100 - (this.orientation === 'vertical' ? this.tooltip.outerHeight()/2 : this.tooltip.outerWidth()/2) +'px';
 
 			} else {
 				this.tooltipInner.text(
-					this.formater(this.value[0])
+					this.visualFormatter(this.value[0])
 				);
 				this.element.val(this.formater(this.value[0])).trigger('input');
 				this.tooltip[0].style[this.stylePos] = this.size * this.percentage[0]/100 - (this.orientation === 'vertical' ? this.tooltip.outerHeight()/2 : this.tooltip.outerWidth()/2) +'px';
@@ -247,7 +248,7 @@
 		},
 
 		mousemove: function(ev) {
-			
+
 			// Touch: Get the original event:
 			if (this.touchCapable && ev.type === 'touchmove') {
 				ev = ev.originalEvent;
@@ -387,7 +388,10 @@
 		handle: 'round',
 		formater: function(value) {
 			return value;
-		}
+		},
+    visualFormatter: function(value) {
+      return value;
+    }
 	};
 
 	$.fn.slider.Constructor = Slider;
