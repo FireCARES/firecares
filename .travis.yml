@@ -10,7 +10,7 @@ before_install:
   - sudo rm /etc/apt/sources.list.d/ubuntugis-stable-source.list
   - sudo apt-get -qq -y update
   - sudo apt-get install -y libxml2-dev libxslt1-dev git libpq-dev python-dev python-pip python-pycurl python-psycopg2
-  - sudo apt-get install -y binutils gdal-bin python-gdal libpng-dev libfreetype6-dev pkg-config
+  - sudo apt-get install -y binutils gdal-bin python-gdal libpng-dev libfreetype6-dev pkg-config libffi-dev
   - sudo apt-get install -y libblas-dev liblapack-dev libatlas-base-dev gfortran python-numpy python-scipy python-matplotlib
 
 install:
