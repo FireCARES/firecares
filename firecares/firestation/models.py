@@ -425,12 +425,12 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
     @property
     def geom_area(self):
         """
-        Project the department's geometry into north america lambert conformal conic
-        Returns km2
+        Project the department's geometry into US National Atlas Equal Area
+        Returns mi2
         """
         if self.geom:
             try:
-                return self.geom.transform(102009, clone=True).area / 1000000
+                return (self.geom.transform(2163, clone=True).area / 1000000) * 0.386102
             except:
                 return
 
@@ -800,12 +800,12 @@ class FireStation(USGSStructureData):
     @property
     def district_area(self):
         """
-        Project the district's geometry into north america lambert conformal conic
-        Returns km2
+        Project the district's geometry into US National Atlas Equal Area
+        Returns mi2
         """
         if self.district:
             try:
-                return self.district.transform(102009, clone=True).area / 1000000
+                return (self.district.transform(102009, clone=True).area / 1000000) * 0.38610
             except:
                 return
 
