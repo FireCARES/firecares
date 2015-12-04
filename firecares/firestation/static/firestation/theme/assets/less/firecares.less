@@ -218,6 +218,7 @@ font-size: 14px;
 background: @start-color;
 background: -webkit-linear-gradient(left, @start-color, @mid-color @color-stop, @end-color);
 background: -moz-linear-gradient(left, @start-color, @mid-color @color-stop, @end-color); /* FF3.6+ */
+background: -ms-linear-gradient(left, @start-color, @mid-color @color-stop, @end-color);
 background: -o-linear-gradient(left, @start-color, @mid-color @color-stop, @end-color);
 filter: e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d', GradientType=1)",argb(@start-color),argb(@end-color))); // IE9 and down, gets no color-stop at all for proper fallback
 }
