@@ -17,6 +17,7 @@ class CacheMixin(object):
     """
     cache_timeout = 60
     cache_permission_differentiators = []
+    cache_auth_differentiator = True
 
     def get_cache_timeout(self):
         return self.cache_timeout
@@ -24,9 +25,14 @@ class CacheMixin(object):
     def get_permission_differentiators(self):
         return self.cache_permission_differentiators
 
+    def get_auth_differentiator(self):
+        return self.cache_auth_differentiator
+
     def dispatch(self, *args, **kwargs):
         request = args[0]
         perms = ','.join(request.user.get_all_permissions() & set(self.get_permission_differentiators()))
+        if self.get_auth_differentiator():
+            perms += ':{}'.format(request.user.is_authenticated())
         return cache_page(self.get_cache_timeout(), key_prefix=hash_for_cache(perms, request.path))(super(CacheMixin, self).dispatch)(*args, **kwargs)
 
 

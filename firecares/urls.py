@@ -16,7 +16,7 @@ v1_api.register(FireDepartmentResource())
 
 
 urlpatterns = patterns('',
-    url(r'^$', cache_page(60 * 60 * 24)(Home.as_view()), name='firestation_home'),
+    url(r'^$', Home.as_view(), name='firestation_home'),
     (r'^api/', include(v1_api.urls)),
     url(r'^', include('firecares.firestation.urls')),
     (r'^accounts/', include('registration.backends.default.urls')),
