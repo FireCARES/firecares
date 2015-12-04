@@ -659,7 +659,7 @@ class FireStationTests(TestCase):
         # remove cached items from other test runs
         cache.clear()
         response = c.get(reverse('firedepartment_detail', args=[fd.pk]))
-        prefix = hash_for_cache('firestation.change_firedepartment', '/departments/86610')
+        prefix = hash_for_cache('firestation.change_firedepartment:True', '/departments/86610')
         keys = cache._cache.keys()
         self.assertTrue(any([prefix in x for x in keys]))
 
@@ -671,11 +671,33 @@ class FireStationTests(TestCase):
         c.login(**{'username': 'tester_mcgee', 'password': 'test'})
         response = c.get(reverse('firedepartment_detail', args=[fd.pk]))
         keys = cache._cache.keys()
-        prefix = hash_for_cache(None, '/departments/86610')
+        prefix = hash_for_cache(':True', '/departments/86610')
         self.assertTrue(any([prefix in x for x in keys]))
 
         # ensure that NONE of the keys blow out the max memcached key length
         self.assertFalse(any([len(k) > 250 for k in keys]))
+
+    def test_homepage_auth_caching(self):
+        cache = caches['default']
+        cache.clear()
+
+        c = Client()
+
+        # Hit w/o being logged in
+        resp = c.get(reverse('firestation_home'))
+        prefix = hash_for_cache(':False', '/')
+        keys = cache._cache.keys()
+        self.assertTrue(any([prefix in x for x in keys]))
+
+        # After logging in, we should have a different cache key for this page since we've authed
+        c.login(**{'username': 'admin', 'password': 'admin'})
+        resp2 = c.get(reverse('firestation_home'))
+        prefix = hash_for_cache(':True', '/')
+        keys = cache._cache.keys()
+        self.assertTrue(any([prefix in x for x in keys]))
+
+        # If the body of the response is the same, then we have issues
+        self.assertNotEqual(resp.content, resp2.content)
 
     def test_robots(self):
         """

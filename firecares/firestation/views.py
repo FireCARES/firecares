@@ -513,5 +513,7 @@ class Stats(LoginRequiredMixin, TemplateView):
         return context
 
 
-class Home(TemplateView):
+class Home(CacheMixin, TemplateView):
+    cache_timeout = 60 * 60 * 24
+
     template_name = 'firestation/home.html'
