@@ -57,7 +57,7 @@ class DepartmentDetailView(LoginRequiredMixin, CacheMixin, DISTScoreContextMixin
 
         page = self.request.GET.get('page')
 
-        paginator = Paginator(context['firedepartment'].firestation_set.all(), self.objects_per_page)
+        paginator = Paginator(context['firedepartment'].firestation_set.order_by('station_number'), self.objects_per_page)
 
         try:
             stations = paginator.page(page)
