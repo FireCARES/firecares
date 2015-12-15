@@ -3,6 +3,7 @@ from .models import RecentlyUpdatedMixin
 from datetime import timedelta
 from urlparse import urlsplit, urlunsplit
 from django.contrib.auth import get_user_model, authenticate
+from django.conf import settings
 from django.core import mail
 from django.core.management import call_command
 from django.core.urlresolvers import reverse, resolve
@@ -145,7 +146,6 @@ class CoreTests(TestCase):
         self.assertEqual(resp.status_code, 302)
 
         self.assertEqual(len(mail.outbox), 1)
-        user = User.objects.get(username='tester_mcgee')
 
         token = resp.context[0]['token']
         uid = resp.context[0]['uid']
@@ -222,3 +222,20 @@ class CoreTests(TestCase):
                        'new_password2': 'newerpassword'})
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(resolve(urlsplit(resp.url).path).url_name, 'password_change_done')
+
+    def test_contact_us(self):
+        """
+        Test the contact us form submission
+        """
+
+        c = Client()
+        with self.settings(ADMINS=(('Test Admin', 'admin@example.com'),)):
+            # Disable captcha checking
+            settings.RECAPTCHA_SECRET = ''
+            resp = c.post(reverse('contact_us'), {
+                          'name': 'Tester McGee',
+                          'email': 'test@example.com',
+                          'message': 'This is a test'})
+
+            self.assertRedirects(resp, reverse('contact_thank_you'))
+            self.assertEqual(len(mail.outbox), 1)

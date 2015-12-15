@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.views.decorators.cache import cache_page
 from django.views.generic import TemplateView
 from .firecares_core.forms import FirecaresPasswordResetForm
-from .firecares_core.views import ForgotUsername
+from .firecares_core.views import ForgotUsername, ContactUs
 from .firestation.api import StaffingResource, FireStationResource, FireDepartmentResource
 from tastypie.api import Api
 from firestation.views import Home
@@ -19,6 +19,8 @@ urlpatterns = patterns('',
     url(r'^$', Home.as_view(), name='firestation_home'),
     (r'^api/', include(v1_api.urls)),
     url(r'^', include('firecares.firestation.urls')),
+    url(r'^contact-us/$', ContactUs.as_view(), name='contact_us'),
+    url(r'^contact-us/thank-you/$', TemplateView.as_view(template_name='contact/thank_you.html'), name='contact_thank_you'),
     (r'^accounts/', include('registration.backends.default.urls')),
     url(r'^login/$', 'django.contrib.auth.views.login', name='login', kwargs={'template_name': 'accounts/login.html'}),
     url(r'^password-reset/$', 'django.contrib.auth.views.password_reset',

@@ -30,16 +30,16 @@ def download_file(url, download_to=None):
     r = requests.get(url, stream=True)
     with open(os.path.join(download_to, download_to), 'wb') as f:
         for chunk in r.iter_content(chunk_size=1024):
-            if chunk: # filter out keep-alive new chunks
+            if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
                 f.flush()
     return download_to
 
 
-
 @app.task(bind=True)
 def debug_task(self):
     print('Request: {0!r}'.format(self.request))
+
 
 @app.task(rate_limit=10)
 def cache_thumbnail(id, upload_to_s3=False, marker=True):

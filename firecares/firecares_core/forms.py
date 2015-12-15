@@ -4,6 +4,7 @@ from django import forms
 from django.contrib.auth.forms import PasswordResetForm
 from django.core.mail import EmailMultiAlternatives
 from django.template import loader
+from firecares.firecares_core.models import ContactRequest
 from firecares.tasks.email import send_mail
 
 
@@ -45,3 +46,9 @@ class FirecaresPasswordResetForm(PasswordResetForm):
             email_message.attach_alternative(html_email, 'text/html')
 
         send_mail.delay(email_message)
+
+
+class ContactForm(forms.ModelForm):
+    class Meta:
+        model = ContactRequest
+        fields = '__all__'
