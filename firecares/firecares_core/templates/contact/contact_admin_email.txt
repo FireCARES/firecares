@@ -1,0 +1,6 @@
+A contact request has been submitted:
+
+Name: {{ contact.name }}
+Email: {{ contact.email }}
+Message: {{ contact.message }}
+Created: {{ contact.created_at }}

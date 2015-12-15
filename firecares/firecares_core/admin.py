@@ -1,4 +1,4 @@
-from .models import Address
+from .models import Address, ContactRequest
 from django.contrib.gis import admin
 
 
@@ -8,4 +8,9 @@ class AddressAdmin(admin.OSMGeoAdmin):
     search_fields = ['address_line1', 'state_province', 'city']
 
 
+class ContactRequestAdmin(admin.OSMGeoAdmin):
+    list_display = ['name', 'email', 'created_at']
+    search_fields = ['name', 'email']
+
 admin.site.register(Address, AddressAdmin)
+admin.site.register(ContactRequest, ContactRequestAdmin)

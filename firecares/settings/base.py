@@ -95,6 +95,9 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '$keb7sv^%c+_7+94u6_!lc3%a-3ima9eh!xyj%$xa8yibv&ogr'
 
+# Leave as empty to prevent captcha verification
+RECAPTCHA_SECRET = ''
+
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',

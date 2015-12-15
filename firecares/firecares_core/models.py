@@ -107,7 +107,6 @@ class Address(models.Model):
                 print 'Create new address with these parameters: {0}'.format(params)
                 return cls(**params)
 
-
     def geocode(self):
         g = GoogleV3()
         query_string = self.get_row_display()
@@ -136,3 +135,16 @@ class Address(models.Model):
         verbose_name_plural = "Addresses"
         unique_together = ("address_line1", "address_line2", "postal_code",
                            "city", "state_province", "country")
+
+
+class ContactRequest(models.Model):
+    """
+    Model to store contact request information
+    """
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __unicode__(self):
+        return "%s (%s)" % (self.name, self.email)
