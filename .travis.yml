@@ -21,7 +21,7 @@ install:
   - conda info -a
   - conda update --yes conda
   - conda create --yes -n condaenv python=2.7
-  - conda install --yes -n condaenv pip scipy
+  - conda install --yes -n condaenv pip scipy==0.16.0
   - source activate condaenv
   - travis_wait "pip install -r requirements.txt"
   - easy_install --upgrade numpy
