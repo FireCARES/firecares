@@ -1,5 +1,7 @@
+from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
+from django.views.defaults import page_not_found
 from django.views.decorators.cache import cache_page
 from django.views.generic import TemplateView
 from .firecares_core.forms import FirecaresPasswordResetForm
@@ -46,3 +48,7 @@ urlpatterns = patterns('',
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain'), name='robots.txt'),
 )
+
+if settings.DEBUG:
+    urlpatterns += patterns('',
+        url(r'^.*/$', page_not_found),)

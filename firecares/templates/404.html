@@ -1,0 +1,47 @@
+{% extends "firestation/_conservative_base.html" %}
+
+{% load compress %}
+
+{% block page_title %}
+Page not found · FireCARES
+{% endblock %}
+
+{% block meta_description %}
+
+{% endblock %}
+
+{% block title %}
+    Page not found - 404
+{% endblock %}
+
+{% block scrollspy %}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'firestation_home' %}">Home</a>
+{% endblock %}
+
+{% block extrascripts %}
+{% compress js %}
+<script src="{{STATIC_URL}}firestation/theme/assets/js/sticky_footer.js"></script>
+{% endcompress js %}
+{% endblock %}
+
+{% block section %}
+    <section class="ct-u-paddingBoth60">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 col-md-12">
+                <div class="ct-u-marginBottom50">
+                    <p class="text-center">
+                        We're sorry, but the page you were looking for wasn't found.
+                        Feel free to go to start at the <a class="ct-u-text--motive" href="{% url 'firestation_home' %}">homepage</a>
+                        or <a class="ct-u-text--motive" href="{% url 'contact_us' %}">contact us</a> if you have
+                        any questions!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    </section>
+{% endblock %}

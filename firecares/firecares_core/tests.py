@@ -239,3 +239,8 @@ class CoreTests(TestCase):
 
             self.assertRedirects(resp, reverse('contact_thank_you'))
             self.assertEqual(len(mail.outbox), 1)
+
+    def test_display_404_page(self):
+        c = Client()
+        resp = c.get('/notarealpage/')
+        self.assertContains(resp, 'Page not found', status_code=404)
