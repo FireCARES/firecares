@@ -2,7 +2,6 @@ from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from django.views.defaults import page_not_found
-from django.views.decorators.cache import cache_page
 from django.views.generic import TemplateView
 from .firecares_core.forms import FirecaresPasswordResetForm
 from .firecares_core.views import ForgotUsername, ContactUs

@@ -11558,6 +11558,11 @@ table.residential-fires {
   left: 25%;
   margin-bottom: 22px;
 }
+/* Normalizing bootstrap versions between Estato theme and included bootstrap */
+.navbar-toggle {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
 .ct-pageWrapper {
   z-index: 3;
   background-color: #ffffff;

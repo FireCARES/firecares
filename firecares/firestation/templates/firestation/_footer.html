@@ -1,6 +1,6 @@
 {% load cache %}
 
-{% cache 600 footer %}
+{% cache 600 footer user.is_authenticated %}
 <footer>
     <div class="ct-footer--extended ct-u-paddingBoth60">
         <div class="container">
@@ -35,8 +35,12 @@
                                 <a class="text-capitalize" href="{% url 'models_performance_score' %}">Performance Score</a>
                             </div>
                             <div class="col-md-6">
-                                <a class="text-capitalize" href="{% url 'login' %}">Login</a>
-                                <a class="text-capitalize" href="{% url 'registration_register' %}">Register</a>
+                                {% if not user.is_authenticated %}
+                                <a href="{% url 'registration_register' %}" class="text-capitalize">sign up</a>
+                                <a href="{% url 'login' %}?next={% url 'firedepartment_list' %}" class="text-capitalize">login</a>
+                                {% else %}
+                                <a href="{% url 'logout' %}" class="text-capitalize">logout</a>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
