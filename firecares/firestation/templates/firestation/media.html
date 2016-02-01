@@ -1,0 +1,48 @@
+{% extends "firestation/_conservative_base.html" %}
+
+{% block page_title %}
+Media
+{% endblock %}
+
+{% block meta_description %}
+Community risks for fire departments were determined via statistical regression models that predict various types of risk as a function of community attributes.  Click here to learn more.
+{% endblock %}
+
+{% block title %}
+    FireCARES in the Media
+{% endblock %}
+
+{% block scrollspy %}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'firestation_home' %}">Home</a>
+    <a href="#">Media</a>
+{% endblock %}
+
+
+{% block section %}
+    <section class="ct-u-paddingBoth60">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 col-md-12">
+                <div class="ct-u-marginBottom50">
+                      <hr>
+                      <div class="row">
+                        <div class="col-md-6">
+                          <h3>Risk vs. Response: The FireCARES Project</h3>
+                          <p class = "ct-u-paddingBoth10">Published: September 2nd 2015</p>
+                          <p class="lead">Dr. Lori Moore-Merrell (IAFF), Dr. Craig Weinschenk (NIST) and Ray Ranellone (Worcester Polytechnic Institute) presentation at IAFF Health, Safety and EMS Conference.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <iframe width="560" height="315" src="https://www.youtube.com/embed/dJK_jIUz9Ok" frameborder="0" allowfullscreen></iframe>
+                        </div>
+                      </div>
+                      <hr>
+                </div>
+            </div>
+        </div>
+    </div>
+    </section>
+
+{% endblock %}

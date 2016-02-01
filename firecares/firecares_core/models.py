@@ -5,6 +5,7 @@ from geopy.exc import GeocoderQuotaExceeded
 from jsonfield import JSONField
 from time import sleep
 from django.utils import timezone
+from ckeditor_uploader.fields import RichTextUploadingField
 
 
 class RecentlyUpdatedMixin(models.Model):
@@ -148,3 +149,17 @@ class ContactRequest(models.Model):
 
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.email)
+
+
+class MediaItem(models.Model):
+    """
+    A generic media type that can store embedded HTML snippets (eg. for videos, posts),
+    as well as images, documents and other file types uploaded via CKEditorUploadingWidget
+    """
+    title = models.CharField(max_length=200)
+    body = RichTextUploadingField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_shown = models.BooleanField(default=True)
+
+    def __unicode__(self):
+        return self.title

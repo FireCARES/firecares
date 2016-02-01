@@ -17,4 +17,5 @@ urlpatterns = patterns('',
                        url(r'^community-risk$', cache_page(60 * 60 * 24)(TemplateView.as_view(template_name='firestation/community_risk_model.html')), name='models_community_risk'),
                        url(r'^performance-score$', cache_page(60 * 60 * 24)(TemplateView.as_view(template_name='firestation/performance_score_model.html')), name='models_performance_score'),
                        url(r'^stats/fire-stations/?$', Stats.as_view(), name='firestation_stats'),
+                       url(r'^media$', cache_page(60 * 60 * 24)(TemplateView.as_view(template_name='firestation/media.html')), name='media'),
                        )

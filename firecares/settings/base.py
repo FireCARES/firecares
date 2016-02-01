@@ -160,7 +160,9 @@ INSTALLED_APPS = (
     'widget_tweaks',
     'firecares.tasks',
     'registration',
-    'django_slack'
+    'django_slack',
+    'ckeditor',
+    'ckeditor_uploader'
 )
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
@@ -248,3 +250,11 @@ SLACK_TOKEN = os.getenv('SLACK_TOKEN', None)
 SLACK_CHANNEL = os.getenv('SLACK_CHANNEL', '#firecares')
 SLACK_ICON_EMOJI = os.getenv('SLACK_ICON_EMOJI', ':goberserk:')
 SLACK_USERNAME = os.getenv('SLACK_USERNAME', 'edgebot')
+
+CKEDITOR_UPLOAD_PATH = 'uploads/'
+CKEDITOR_IMAGE_BACKEND = 'pillow'
+CKEDITOR_CONFIGS = {
+    'default': {
+        'removePlugins': 'stylesheetparser'
+    }
+}
