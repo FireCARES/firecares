@@ -60,5 +60,6 @@ firecares/settings/local_settings.py
 # PyCharm Settings
 .idea
 
+
 **/.DS_Store
 celerybeat-schedule
