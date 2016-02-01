@@ -32,7 +32,18 @@ can run collect static from the `firecares-ansible` directory on the host machin
 
 `ansible-playbook vagrant.yml -i vagrant_server --tags django.collectstatic`
 
+### Unit Testing
 
+You'll need the following commands to run all of the unit tests.  Tests are run on each commit automatically, so please run them yourself before you commit.
+
+```
+vagrant ssh
+sudo -u postgres psql -c "alter user firecares superuser"`
+sudo su firecares
+cd /webapps/firecares/firecares
+workon firecares
+python manage.py test
+```
 
 #### Generating CSS
 
