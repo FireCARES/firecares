@@ -641,6 +641,15 @@ class FireStationTests(TestCase):
         fd.refresh_from_db()
         self.assertNotEqual(fd.geom.num_points, old_point_count)
 
+        # Test for ability to create new geoms for FireDepartments that didn't previously have a geometry
+        fd_null_geom = FireDepartment.objects.get(pk=96582)
+        div2 = MinorCivilDivision.objects.get(pk=19336)
+
+        response = c.get(reverse('firedepartment_update_government_units', args=[fd_null_geom.pk]))
+        self.assertEqual(response.status_code, 200)
+        response = c.post(reverse('firedepartment_update_government_units', args=[fd_null_geom.pk]), {'minor_civil_divisions': [div2.pk], 'update_geom': [1]})
+        self.assertRedirects(response, reverse('firedepartment_detail_slug', args=[fd_null_geom.pk, fd_null_geom.slug]), fetch_redirect_response=False)
+
     def test_firedepartment_detail_page_caching(self):
         # Requires having something *other* than the DummyCache in order test caching
         call_command('loaddata', 'firecares/firestation/fixtures/test_government_unit_association.json')

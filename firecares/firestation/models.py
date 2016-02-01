@@ -565,11 +565,20 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
                                                                                     access_token=getattr(settings, 'MAPBOX_ACCESS_TOKEN', ''))
 
     def set_geometry_from_government_unit(self):
-        objs = self.government_unit_objects
+        def _first(arr):
+            if arr and len(arr):
+                return arr[0]
+            else:
+                return None
+
+        geom_containers = self.government_unit_objects + [self]
+        objs = [x.geom for x in geom_containers if getattr(x, 'geom', None)]
 
         if objs:
-            for g in [x for x in objs if getattr(x, 'geom', None)]:
-                self.geom = MultiPolygon(self.geom.union(g.geom))
+            geom = objs.pop()
+            for g in objs:
+                geom = geom.union(g)
+            self.geom = MultiPolygon(geom) if geom.geom_type == 'Polygon' else geom
             self.save()
 
     def set_population_from_government_unit(self):
