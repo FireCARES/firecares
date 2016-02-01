@@ -46,6 +46,7 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain'), name='robots.txt'),
+    url(r'^ckeditor/', include('ckeditor_uploader.urls')),
 )
 
 if settings.DEBUG:

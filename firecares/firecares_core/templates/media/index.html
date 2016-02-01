@@ -1,0 +1,95 @@
+{% extends "firestation/_conservative_base.html" %}
+
+{% block page_title %}
+Models - Performance Score · FireCARES
+{% endblock %}
+
+{% block meta_description %}
+The goal of the fire department performance score is to assess how well a fire department performs compared to the "standardized" version of itself.  Click here to learn more about how performance scores are calculated.
+{% endblock %}
+
+{% block title %}
+    Performance Score
+{% endblock %}
+
+{% block extra_head %}
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/javascript">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        processEscapes: true
+      }
+    });
+    </script>
+{% endblock %}
+
+{% block scrollspy %}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'firestation_home' %}">Home</a>
+    <a href="#">Performance Score</a>
+{% endblock %}
+
+
+{% block section %}
+    <section class="ct-u-paddingBoth60">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 col-md-12">
+
+                <div class="ct-u-marginBottom20" ng-app="fireStation" ng-controller="performanceScore">
+                    <gauge class="pull-right" description="This department is {[value]} seconds over the industry standard."
+                                       metric-title="Performance Score" min="0"
+                                       max="200" value="{[ value ]}" inverse style="width: 300px;"></gauge>
+                    <p>The goal of the fire department performance score is to assess how well a fire department performs compared to the "standardized" version of itself. One component of this metric is the structure fire spread category from the National Fire Incident Reporting System (NFIRS). This category provides information which quantifies the fire spread in a structure from confined to object of origin through spread beyond structure of origin. There are five categories defined in NFIRS, but for this analysis the data are collapsed into three categories: room of origin (lumping object and room together), floor of origin (lumping floor and structure together), and beyond structure of origin. The data are combined into these three bins which sets the baseline for the actual outcomes of the fire calls a particular department responds to. The resulting distribution of fire spread is the basis for comparison for developing the performance score.</p>
+                    <p>The second component of this score is the model that defines how the fire department would perform if it were a standard, idealized version of itself. The concept is that there exists a fire department where all responses meet or exceed the national standards governing department performance. A fire department responding to a fire must complete a series of tasks before they can put water on the fire. For purposes of this model these tasks are broken up as follows:</p>
+
+                    <ul>
+                        <li><b>Time to alarm</b> - Time required before the fire is noticed, and some form of action is taken [<a href="http://www.nist.gov/el/fire_research/upload/Report-on-Residential-Fireground-Field-Experiments.pdf" target="_blank">NIST TN 1661</a>, <a href="http://nvlpubs.nist.gov/nistpubs/TechnicalNotes/NIST.TN.1797.pdf" target="_blank">NIST TN 1797</a>].</li>
+                        <li><b>Time to dispatch</b> - Time required for dispatch operator to obtain enough information regarding the fire and location to issue a dispatch [<a href="http://www.nfpa.org/codes-and-standards/document-information-pages?mode=code&code=1710" target="blank">NFPA 1710</a>].</li>
+                        <li><b>Time to turnout</b> - Time required for firefighter turnout [<a href="http://www.nfpa.org/codes-and-standards/document-information-pages?mode=code&code=1710" target="blank">NFPA 1710</a>].</li>
+                        <li><b>Time to arrival</b> - Transit time required for engine between station and fire location [<a href="http://www.nfpa.org/codes-and-standards/document-information-pages?mode=code&code=1710" target="blank">NFPA 1710</a>, GIS].</li>
+                        <li><b>Time to suppress</b> - Time required for firefighters on-scene to put water onto fire (includes size-up, hose connection, etc.) [<a href="http://www.nist.gov/el/fire_research/upload/Report-on-Residential-Fireground-Field-Experiments.pdf" target="_blank">NIST TN 1661</a>, <a href="http://nvlpubs.nist.gov/nistpubs/TechnicalNotes/NIST.TN.1797.pdf" target="_blank">NIST TN 1797</a>]</li>
+                    </ul>
+
+                    <p>When water is put onto a fire, the idealized fire is assumed to have reached the peak size. In other words, growth time for the fire is equivalent to the sum of the tasks the fire department must perform to suppress the fire.</p>
+                    <p>
+                    \begin{equation*}
+                    t = t_{growth} = t_{alarm}+t_{dispatch}+t_{turnout}+t_{arrival}+t_{suppress}
+                    \end{equation*}
+                    </p>
+
+                    <p>This growth time is then coupled to a fire spread model:</p>
+
+                    \begin{equation*}
+                    Area = \alpha e^{\beta t_{growth}}
+                    \end{equation*}
+
+                    <p>
+                        such that the approximate fire size in terms of "area involved" can be determined using $t_{growth}$. This fire size is then binned into the same three fire spread bins/categories that the actual outcomes were. There then exists a mapping in time that can be used to assess the differences in the actual distribution and the standardized distribution of fire spread. To obtain this mapping, one additional assumption is necessary. The observed fire spread outcome is related to the room size and the size of the building within which the fire took place. For example, if the area damaged by a fire is greater than the size of the room it originated within, but less than the size of the building, the model assumes that the firefighters would classify this fire as "contained to building of origin." As aforementioned, the NFIRS database contains the actual fire spread categories reported by fire departments. Knowledge of this extent of fire spread places a constraint on the possible values of area damaged by the fire, and thus possible values of time for tasks that the fire department could have taken. Because the model already assumes "ideal" values for fire department tasks, it is reasonable to place an additional time parameter in $t_{growth}$, which will be referred to as $t_{correction}$:
+                    </p>
+
+                    \begin{equation*}
+                    t_{growth} = t_{alarm}+t_{dispatch}+t_{turnout}+t_{arrival}+t_{suppress}+\boldsymbol{t_{correction}}
+                    \end{equation*}
+
+                    <p>This correction time represents the adjustment necessary to the "standardized" fire department response time in order to have received the observed fire spread outcome. It can be either positive, meaning the actual fire department needed to take longer compared against its "standardized" self, or negative, meaning the actual fire department performed better than its "standardized" self. </p>
+                    <p>If one inverts the model to solve for $t_{correction}$, using RA to represent room area, and BA to represent building area, then for a given fire that spreads beyond the room of origin, but is contained to the building, the following constraint holds:</p>
+
+                    \begin{equation*}
+                    \frac{\ln\left(\frac{RA}{\alpha}\right)}{\beta}-t_{growth} < t_{correction} < \frac{\ln\left(\frac{BA}{\alpha}\right)}{\beta}-t_{growth}
+                    \end{equation*}
+
+
+                    <p>Where $t_{growth}$ is the sum of the alarm, dispatch, turnout, arrival, and suppression times of the "standardized" fire department as defined above. In the absence of any additional relevant information about the incident, it is reasonable to consider all values within the above constraint equally likely, and thus for a given incident there are a range of possible $t_{correction}$ values that are viable. One final constraint on $t_{correction}$ that is considered useful is to force it to be zero or greater. This effectively assumes that all incidents for which $t_{correction}$ specified above would return a negative value, it instead evaluated to zero. A zero value indicates the actual fire department's performance was in line with its "standardized" ideal for those incidents. </p>
+                    <p>The average over the distribution of all possible $t_{correction}$ values is then considered to the fire department's performance score. This score represents the average time (in seconds) that the actual department performance exceeds its "standardized" self.</p>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    </section>
+
+{% endblock %}

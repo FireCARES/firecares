@@ -1,4 +1,4 @@
-from .models import Address, ContactRequest
+from .models import Address, ContactRequest, MediaItem
 from django.contrib.gis import admin
 
 
@@ -14,3 +14,4 @@ class ContactRequestAdmin(admin.OSMGeoAdmin):
 
 admin.site.register(Address, AddressAdmin)
 admin.site.register(ContactRequest, ContactRequestAdmin)
+admin.site.register(MediaItem)
