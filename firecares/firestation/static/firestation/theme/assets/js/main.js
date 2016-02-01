@@ -1544,4 +1544,6 @@ function makekenburns($element) {
         }
     })
 
+    $(".pagination").rPage();
+
 })(jQuery);
