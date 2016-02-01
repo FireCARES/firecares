@@ -707,6 +707,14 @@ class FireStationTests(TestCase):
         response = c.get(reverse('robots.txt'))
         self.assertEqual(response.status_code, 200)
 
+    def test_media(self):
+        """
+        Ensure media page resolves.
+        """
+        c = Client()
+        response = c.get(reverse('media.html'))
+        self.assertEqual(response.status_code, 200)
+
     def test_api_formats(self):
         """
         Test that an API endpoint defaults to JSON vs XML and supports JSON and XML serialization formats
