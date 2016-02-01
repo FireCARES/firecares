@@ -712,7 +712,7 @@ class FireStationTests(TestCase):
         Ensure media page resolves.
         """
         c = Client()
-        response = c.get(reverse('media.html'))
+        response = c.get(reverse('media'))
         self.assertEqual(response.status_code, 200)
 
     def test_api_formats(self):
