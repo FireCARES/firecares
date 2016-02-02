@@ -453,7 +453,7 @@
                                     </tbody>
                                 </table>
                             </div>
-
+                            <a name = "stations"></a>
                             {% if not firestations %}
                             <div class="ct-heading ct-u-marginBottom20">
                             <h3>No stations linked to this department </h3>
@@ -485,19 +485,19 @@
                         <div class="ct-pagination text-center ct-u-marginBottom30">
                             <ul class="pagination">
                                 {% if firestations.has_previous %}
-                                        <li><a href="?page={{firestations.previous_page_number }}" aria-label="Previous"><span aria-hidden="true"><i class="fa fa-angle-left"></i></span></a></li>
+                                        <li><a href="?page={{firestations.previous_page_number }}#stations" aria-label="Previous"><span aria-hidden="true"><i class="fa fa-angle-left"></i></span></a></li>
                                 {% endif %}
 
                                     {% for p in firestations.paginator.page_range %}
                                         {% if p != firestations.number %}
-                                             <li><a href="?page={{ p }}">{{ p }}</a></li>
+                                             <li><a href="?page={{ p }}#stations">{{ p }}</a></li>
                                         {% else %}
-                                             <li class="active"><a href="?page={{ p }}">{{ p }}</a></li>
+                                             <li class="active"><a href="?page={{ p }}#stations">{{ p }}</a></li>
                                         {% endif %}
                                     {% endfor %}
 
                                 {% if firestations.has_next %}
-                                        <li><a href="?page={{firestations.next_page_number}}" aria-label="Next"><span aria-hidden="true"><i class="fa fa-angle-right"></i></span></a></li>
+                                        <li><a href="?page={{firestations.next_page_number}}#stations" aria-label="Next"><span aria-hidden="true"><i class="fa fa-angle-right"></i></span></a></li>
                                 {% endif %}
                                 </ul>
                             </div>
