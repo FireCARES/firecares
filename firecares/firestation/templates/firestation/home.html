@@ -26,16 +26,7 @@
 </head>
 <body class="ct-headroom--fixedMenu cssAnimate onepager" ng-app="fireStation" ng-controller="home">
 
-<nav class="ct-menuMobile text-uppercase">
-    <ul class="ct-menuMobile-navbar">
-        <li class="onepage"><a href="{% url 'firestation_home' %}">Home</a></li>
-        <li class="onepage"><a href="#about">About Us</a></li>
-        <li class="onepage"><a href="#portfolio">Our work</a></li>
-        <li class="onepage"><a href="#whyus">Why us?</a></li>
-        <li class="onepage"><a href="#testimonials">testimonials</a></li>
-        <li class="onepage"><a href="#contact">Contact Us</a></li>
-    </ul>
-</nav>
+    {% include 'firestation/_mobile_navbar.html' %}
 
 <form class="ct-searchFormMobile ct-u-marginBottom50" role="form">
     <div class="form-group ">

@@ -1,0 +1,15 @@
+<nav class="ct-menuMobile text-uppercase">
+    <ul class="ct-menuMobile-navbar">
+        <li class="onepage"><a href="{% url 'firestation_home' %}#about">about firecares</a></li>
+        <li class="onepage"><a href="{% url 'firedepartment_list' %}">browse</a></li>
+        <li class="onepage"><a href="{% url 'media' %}">media</a></li>
+        <li class="onepage"><a href="{% url 'firestation_home' %}#partners">partners</a></li>
+        <li class="onepage"><a href="{% url 'contact_us' %}">contact us</a></li>
+        {% if not user.is_authenticated %}
+            <li class="onepage"><a href="{% url 'registration_register' %}">sign up</a></li>
+            <li class="onepage"><a href="{% url 'login' %}?next={% url 'firedepartment_list' %}">login</a></li>
+        {% else %}
+            <li class="onepage"><a href="{% url 'logout' %}">logout</a></li>
+        {% endif %}
+    </ul>
+</nav>
