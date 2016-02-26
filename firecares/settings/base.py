@@ -223,6 +223,7 @@ CELERY_IMPORTS = (
     'firecares.tasks.cache',
     'firecares.tasks.update',
     'firecares.tasks.email',
+    'firecares.tasks.cleanup',
 )
 
 CELERY_QUEUES = [
@@ -230,6 +231,7 @@ CELERY_QUEUES = [
     Queue('cache', routing_key='cache'),
     Queue('update', routing_key='update'),
     Queue('email', routing_key='email'),
+    Queue('cleanup', routing_key='cleanup'),
 ]
 
 ACCOUNT_ACTIVATION_DAYS = 7

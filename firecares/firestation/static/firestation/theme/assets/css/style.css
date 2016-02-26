@@ -1,4 +1,7 @@
 @charset "UTF-8";
+@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
+@import url(https://fonts.googleapis.com/css?family=Libre+Baskerville:400italic);
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700,800);
 /*------------------------------------------------------------------
 Project:	Estato - Developers HTML Template
 Version:	1.0
@@ -52,9 +55,6 @@ Licensed under the MIT license - http://opensource.org/licenses/MIT
 
 Copyright (c) 2014 Daniel Eden
 */
-@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
-@import url(https://fonts.googleapis.com/css?family=Libre+Baskerville:400italic);
-@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700,800);
 .animated {
   -webkit-animation-duration: 1s;
   animation-duration: 1s;
@@ -3559,11 +3559,12 @@ html[dir="rtl"] .select2-container-multi .select2-search-choice-close {
 }
 .tooltip {
   opacity: 1!important;
+  font-size: 12px;
 }
-.tooltip.top .tooltip-arrow {
+.slider .tooltip.top .tooltip-arrow {
   border-top-color: #60a7d4;
 }
-.tooltip-inner {
+.slider .tooltip-inner {
   background-color: #60a7d4;
 }
 /*!
@@ -11563,6 +11564,9 @@ table.residential-fires {
   margin-top: 8px;
   margin-bottom: 8px;
 }
+.dropdown-menu {
+  font-size: 14px;
+}
 .ct-pageWrapper {
   z-index: 3;
   background-color: #ffffff;
@@ -15346,4 +15350,9 @@ header {
   .ct-js-dropdown-mobile ul {
     max-height: none !important;
   }
+}
+.download-menu .format {
+  font-size: 12px;
+  color: gray;
+  font-variant: small-caps;
 }

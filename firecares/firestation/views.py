@@ -1,23 +1,30 @@
 import json
+import os
 import pandas as pd
+import shutil
 import urllib
-from django.views.generic import DetailView, ListView, TemplateView
+import uuid
+from django.views.generic import DetailView, ListView, TemplateView, View
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
-from django.http.response import HttpResponseRedirect
+from django.http.response import HttpResponseRedirect, HttpResponse
+from django.db import connections
 from django.db.models import Max, Min
 from django.db.models.fields import FieldDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import IntegerField
+from django.db.models import F
+from django.utils.encoding import smart_str
 from firecares.firecares_core.mixins import LoginRequiredMixin, CacheMixin
 from firecares.firestation.managers import Ntile, Case, When
 from firecares.firestation.models import FireStation, FireDepartment
 from firecares.usgs.models import (StateorTerritoryHigh, CountyorEquivalent,
     Reserve, NativeAmericanArea, IncorporatedPlace,
     UnincorporatedPlace, MinorCivilDivision)
-
+from tempfile import mkdtemp
+from firecares.tasks.cleanup import remove_file
 
 class DISTScoreContextMixin(object):
     @staticmethod
@@ -517,3 +524,44 @@ class Home(CacheMixin, TemplateView):
     cache_timeout = 60 * 60 * 24
 
     template_name = 'firestation/home.html'
+
+
+class DownloadShapefile(LoginRequiredMixin, View):
+    content_type = 'application/zip'
+    output_dir = '/tmp'
+    fields = ['firecares_id', 'name', 'department', 'station_number', 'station_address__address_line1',
+              'station_address__address_line2', 'station_address__city', 'station_address__state_province',
+              'station_address__postal_code', 'station_address__country']
+
+    def get_command(self, queryset, path):
+        return "pgsql2shp -f {path} -h {HOST} -u {USER} -P  {PASSWORD} {NAME} \'{query}\'".format(query=queryset.query,
+                                                                                                  path=path,
+                                                                                                  **connections['default'].settings_dict)
+
+    def get(self, request, *args, **kwargs):
+        response = HttpResponse(content_type=self.content_type)
+        geom = self.kwargs.get('geometry_field', 'geom')
+        self.fields.append(geom)
+
+        geom_type = 'stations'
+        if geom == 'district':
+            geom_type = 'districts'
+
+        department = get_object_or_404(FireDepartment, id=kwargs['pk'])
+        queryset = department.firestation_set.all().select_related('station_address').annotate(firecares_id=F('id')).values(*self.fields)
+
+        path = mkdtemp()
+        filename = '{0}-{1}-{2}'.format(department.id, department.slug, geom_type)
+        file_path = os.path.join(path, filename)
+        os.system(self.get_command(queryset, file_path))
+
+        if os.path.exists(os.path.join(self.output_dir, filename + '.zip')):
+            filename += '-' + str(uuid.uuid4())[:5]
+
+        zip_file = shutil.make_archive(self.output_dir + '/' + filename, 'zip', path)
+        remove_file.delay(path)
+        response['Content-Disposition'] = 'attachment; filename="{0}.zip"'.format(smart_str(filename))
+        response['X-Accel-Redirect'] = smart_str(zip_file)
+        response.content = file_path
+        remove_file.delay(zip_file, countdown=600)
+        return response

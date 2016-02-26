@@ -12,7 +12,8 @@
       'fireStation.gauge',
       'fireStation.search',
       'fireStation.graphs',
-      'fireStation.map'
+      'fireStation.map',
+      'ui.bootstrap'
   ])
 
   .config(function($interpolateProvider, $httpProvider, $resourceProvider) {

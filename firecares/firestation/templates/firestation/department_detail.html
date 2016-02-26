@@ -462,6 +462,15 @@
 
                             <div class="ct-heading ct-u-marginBottom20">
                                 <h3 class="text-uppercase"> {{ firestations.paginator.count }} Stations</h3>
+                                <div class="dropdown pull-right">
+                                  <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                    <i class="fa fa-download"></i>
+                                  </button>
+                                  <ul class="dropdown-menu download-menu" aria-labelledby="dropdownMenu1">
+                                    <li><a href="{% url 'department_stations_shapefile' object.id object.slug %}">Download Locations <span class="format">(shp)</span></a></li>
+                                    <li><a href="{% url 'department_districts_shapefile' object.id object.slug %}">Download Districts <span class="format">(shp)</span></a></li>
+                                  </ul>
+                                </div>
                             </div>
                             <div class="ct-section--products ct-section--products2col ct-u-marginBottom30">
                                 <table class="table table-striped" style="font-size:14px;">
