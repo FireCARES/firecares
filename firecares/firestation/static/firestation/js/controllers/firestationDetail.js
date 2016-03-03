@@ -215,6 +215,10 @@
       form.chief = 0;
     };
 
+    $scope.toggleFullScreenMap = function() {
+        map.toggleFullscreen();
+    };
+
     $scope.showMessage = function(message, message_type) {
       /*
        message_type should be one of the bootstrap alert classes (error, success, info, warning, etc.)
