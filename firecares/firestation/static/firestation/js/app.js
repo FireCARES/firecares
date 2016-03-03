@@ -13,12 +13,11 @@
       'fireStation.search',
       'fireStation.graphs',
       'fireStation.map',
-      'ui.bootstrap'
+      'ui.bootstrap',
+      'mapstory.uploader'
   ])
 
   .config(function($interpolateProvider, $httpProvider, $resourceProvider) {
-    $interpolateProvider.startSymbol('{[');
-    $interpolateProvider.endSymbol(']}');
     $httpProvider.defaults.xsrfCookieName = 'csrftoken';
     $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
     $resourceProvider.defaults.stripTrailingSlashes = false;

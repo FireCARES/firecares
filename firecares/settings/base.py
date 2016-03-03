@@ -123,6 +123,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'reversion.middleware.RevisionMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -160,8 +161,14 @@ INSTALLED_APPS = (
     'widget_tweaks',
     'firecares.tasks',
     'registration',
-    'django_slack'
+    'django_slack',
+    'osgeo_importer',
+    'djcelery',
+    'reversion'
 )
+
+OSGEO_IMPORTER = 'firecares.importers.GeoDjangoImport'
+OSGEO_INSPECTOR = 'firecares.importers.GeoDjangoInspector'
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 

@@ -11576,6 +11576,9 @@ table.residential-fires {
 .dropdown-menu {
   font-size: 14px;
 }
+.wizard-modal-window {
+  z-index: 9000 !important;
+}
 .ct-pageWrapper {
   z-index: 3;
   background-color: #ffffff;

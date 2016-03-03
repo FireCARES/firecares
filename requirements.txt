@@ -28,3 +28,5 @@ defusedxml==0.4.1
 lxml==3.5.0
 pyOpenSSL==0.15.1
 ndg-httpsclient==0.4.0
+django-reversion==1.10.1
+diff-match-patch==20121119

@@ -8,6 +8,7 @@ from .firecares_core.views import ForgotUsername, ContactUs
 from .firestation.api import StaffingResource, FireStationResource, FireDepartmentResource
 from tastypie.api import Api
 from firestation.views import Home
+from osgeo_importer.urls import urlpatterns as importer_urlpatterns
 
 admin.autodiscover()
 v1_api = Api(api_name='v1')
@@ -47,6 +48,9 @@ urlpatterns = patterns('',
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain'), name='robots.txt'),
 )
+
+
+urlpatterns += importer_urlpatterns
 
 if settings.DEBUG:
     urlpatterns += patterns('',

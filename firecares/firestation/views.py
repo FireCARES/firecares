@@ -19,7 +19,7 @@ from django.db.models import F
 from django.utils.encoding import smart_str
 from firecares.firecares_core.mixins import LoginRequiredMixin, CacheMixin
 from firecares.firestation.managers import Ntile, Case, When
-from firecares.firestation.models import FireStation, FireDepartment
+from firecares.firestation.models import FireStation, FireDepartment, Staffing
 from firecares.usgs.models import (StateorTerritoryHigh, CountyorEquivalent,
     Reserve, NativeAmericanArea, IncorporatedPlace,
     UnincorporatedPlace, MinorCivilDivision)
@@ -538,6 +538,29 @@ class DownloadShapefile(LoginRequiredMixin, View):
                                                                                                   path=path,
                                                                                                   **connections['default'].settings_dict)
 
+    def get_queryset(self, *args, **kwargs):
+        return kwargs.get('department').firestation_set.all().select_related('station_address') \
+            .annotate(firecares_id=F('id')).values(*self.fields)
+
+    def create_shapefile(self, queryset, filename):
+        path = mkdtemp()
+        file_path = os.path.join(path, filename)
+        os.system(self.get_command(queryset, file_path))
+
+        if os.path.exists(os.path.join(self.output_dir, filename + '.zip')):
+            filename += '-' + str(uuid.uuid4())[:5]
+
+        zip_file = shutil.make_archive(self.output_dir + '/' + filename, 'zip', path)
+        remove_file.delay(path)
+        remove_file.delay(zip_file, countdown=600)
+        return file_path, zip_file
+
+    def filename(self, *args, **kwargs):
+        return '{0}-{1}-{2}'.format(kwargs.get('department').id,
+                                    kwargs.get('department').slug,
+                                    kwargs.get('geom_type'))
+
+
     def get(self, request, *args, **kwargs):
         response = HttpResponse(content_type=self.content_type)
         geom = self.kwargs.get('geometry_field', 'geom')
@@ -548,20 +571,42 @@ class DownloadShapefile(LoginRequiredMixin, View):
             geom_type = 'districts'
 
         department = get_object_or_404(FireDepartment, id=kwargs['pk'])
-        queryset = department.firestation_set.all().select_related('station_address').annotate(firecares_id=F('id')).values(*self.fields)
-
-        path = mkdtemp()
-        filename = '{0}-{1}-{2}'.format(department.id, department.slug, geom_type)
-        file_path = os.path.join(path, filename)
-        os.system(self.get_command(queryset, file_path))
-
-        if os.path.exists(os.path.join(self.output_dir, filename + '.zip')):
-            filename += '-' + str(uuid.uuid4())[:5]
-
-        zip_file = shutil.make_archive(self.output_dir + '/' + filename, 'zip', path)
-        remove_file.delay(path)
+        queryset = self.get_queryset(department=department)
+        filename = self.filename(department=department, geom_type=geom_type)
+        file_path, zip_file = self.create_shapefile(queryset, filename)
         response['Content-Disposition'] = 'attachment; filename="{0}.zip"'.format(smart_str(filename))
         response['X-Accel-Redirect'] = smart_str(zip_file)
         response.content = file_path
-        remove_file.delay(zip_file, countdown=600)
         return response
+
+
+class DownloadStaffing(DownloadShapefile):
+    fields = ['id', 'apparatus', 'ems_emt',  'officer', 'ems_supervisor',
+              'chief_officer']
+
+    def get_queryset(self, *args, **kwargs):
+
+        query = Staffing.objects.select_related('firestation').filter(firestation__department=kwargs.get('department'))
+
+        for long, short in [('firestation_id', 'station'),
+                            ('firefighter', 'ff'),
+                            ('firefighter_emt', 'ff_emt'),
+                            ('firefighter_paramedic', 'ff_paramedic'),
+                            ('ems_paramedic', 'ems_paramedic'),
+                            ('officer_paramedic', 'officer_pa'),
+                            ('ems_supervisor', 'ems_supervisor'),
+                            ]:
+
+            query = query.extra(select={short: long})
+            self.fields.append(short)
+
+        return query.values(*self.fields)
+
+    def filename(self, *args, **kwargs):
+        return '{0}-{1}-{2}'.format(kwargs.get('department').id, kwargs.get('department').slug,
+                                    'staffing')
+
+    def get_command(self, queryset, path):
+        resp = super(DownloadStaffing, self).get_command(queryset, path)
+        print resp
+        return resp

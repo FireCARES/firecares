@@ -1,6 +1,6 @@
 from .views import (DepartmentDetailView, Stats, FireDepartmentListView,
                     SimilarDepartmentsListView, DepartmentUpdateGovernmentUnits, FireStationDetailView,
-                    DownloadShapefile)
+                    DownloadShapefile, DownloadStaffing)
 from django.contrib.auth.decorators import permission_required
 from django.views.generic import TemplateView
 from django.conf.urls import patterns, url
@@ -10,6 +10,7 @@ urlpatterns = patterns('',
                        url(r'^departments/(?P<pk>\d+)/(?P<slug>[\w-]+)/similar-departments/?$', SimilarDepartmentsListView.as_view(template_name='firestation/firedepartment_list.html'), name='similar_departments_slug'),
                        url(r'^departments/(?P<pk>\d+)/(?P<slug>[\w-]+)/fire-stations.shp$', cache_page(60 * 9)(DownloadShapefile.as_view()), name='department_stations_shapefile'),
                        url(r'^departments/(?P<pk>\d+)/(?P<slug>[\w-]+)/fire-districts.shp$', cache_page(60 * 9)(DownloadShapefile.as_view()), kwargs=dict(geometry_field='district'), name='department_districts_shapefile'),
+                       url(r'^departments/(?P<pk>\d+)/(?P<slug>[\w-]+)/fire-station-staffing.shp$', cache_page(60 * 9)(DownloadStaffing.as_view()), kwargs=(dict(geometry_field='firestation__geom')), name='department_staffing_shapefile'),
                        url(r'^departments/(?P<pk>\d+)/similar-departments/?$', SimilarDepartmentsListView.as_view(template_name='firestation/firedepartment_list.html'), name='similar_departments'),
                        url(r'^departments/(?P<pk>\d+)/settings/government-units/?$', permission_required('firestation.change_firedepartment')(DepartmentUpdateGovernmentUnits.as_view()), name='firedepartment_update_government_units'),
                        url(r'^stations/(?P<pk>\d+)/?$', FireStationDetailView.as_view(template_name='firestation/firestation_detail.html'), name='firestation_detail'),

@@ -1,0 +1,58 @@
+<div class="modal-header">
+        <h3 class="modal-title">Update data<button type="button" class="close" ng-click="ok()" aria-label="Close"><span aria-hidden="true">&times;</span></button></h3>
+</div>
+<div class="modal-body row">
+    <div class="col-sm-12 col-md-12 col-lg-12 import-wizard-modal">
+        <wizard on-finish="importLayer()" hide-indicators="true">
+
+        <wz-step title="Upload" wz-disabled="{{layerSet}}" canexit="layer != null" class="row">
+            <div class="col-sm-8 col-md-8 col-lg-8 col-md-offset-2" style="padding-top: 5px; padding-left: 2px;" ng-controller="UploaderController">
+
+                <p>FireCARES accepts data in .csv, .geojson, and zipped shapefile formats.</p>
+
+                <div style="margin: 23px 0 10px 0;">
+                    <input type="file" nv-file-select uploader="uploader"/>
+                    </div>
+
+                <div style="margin: 20px 0 10px 0;">
+
+                    <uib-progressbar type="success" ng-show="uploader.progress > 0 && uploader.progress < 100" value="uploader.progress">{{uploader.progress}}%</uib-progressbar>
+
+                    <div ng-repeat="fields in errors" class="clrs-red">
+                        <div ng-repeat="error in fields" class="clrs-red">
+                            <i class="fa fa-warning" ng-show="error"></i> {{ error }}
+                    </div>
+                </div>
+                </div>
+
+                <div class="import-wizard-button">
+                    <button class="btn" type="submit" wz-next value="Continue">Continue <i class="fa fa-arrow-circle-right"></i></button>
+                </div>
+
+            </div>
+        </wz-step>
+
+        <wz-step>
+            <p>Ok, the data looks good.  Click below to update FireCARES.</p>
+            <div>
+                <div class="clrs-green fnt-weight-400" ng-show="success">The update has finished successfully.</div>
+                <div class="clrs-red fnt-weight-400" ng-show="errors">Update has failed.  Please correct your data and try again.</div>
+            </div>
+            <div class="import-wizard-button">
+                <i class="fa fa-spinner fa-spin fa-3x" ng-show="processing"></i>
+                <button class="btn" ng-show="!processing && !success" type="submit" wz-next value="Continue">Update <i class="fa fa-arrow-circle-right"></i></button>
+            </div>
+            <div>
+                <ul class="import-wizard-error-list" ng-show="errorMessages">
+                    <li class="clrs-red" style="" ng-repeat="error in errorMessages">{{error}}</li>
+                </ul>
+            </div>
+
+        </wz-step>
+
+    </wizard>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" type="button" ng-click="ok()">Close</button>
+</div>

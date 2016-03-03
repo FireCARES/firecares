@@ -8,6 +8,7 @@ from django.test import TestCase
 from django.test.client import Client
 from django.conf import settings
 from django.core.cache import caches
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.core.urlresolvers import reverse, resolve
 from django.contrib.gis.geos import Point, Polygon, MultiPolygon
@@ -19,6 +20,9 @@ from firecares.firestation.models import create_quartile_views
 from firecares.firestation.templatetags.firecares import quartile_text, risk_level
 from firecares.firestation.managers import CalculationsQuerySet
 from urlparse import urlsplit, urlunsplit
+from reversion.models import Revision
+from reversion import revisions as reversion
+from firecares.importers import GeoDjangoImport
 
 User = get_user_model()
 
@@ -799,3 +803,212 @@ class FireStationTests(TestCase):
             # Make sure that returning XML is supported
             resp = c.get('{0}?format=xml'.format(reverse('api_dispatch_list', args=[self.current_api_version, route]),))
             self.assertTrue(resp.get('Content-type').startswith('application/xml'))
+
+    def create_la_data(self):
+        field_mappings = {
+            'NAME': 'name',
+            'DEPARTMENT': 'department',
+            'STATION_NU': 'station_number',
+            'ADDRESS_LI': 'station_address__address_line1',
+            'ADDRESS_01': 'station_address__address_line2',
+            'COUNTRY_ID': 'station_address__country',
+            'STATE_PROV': 'station_address__state_province',
+            'CITY': 'station_address__city',
+            'POSTAL_COD': 'station_address__postal_code',
+            'FIRECARES_': 'id',
+        }
+
+        FireDepartment.objects.create(id=87255, name='Los Angeles County Fire Department')
+
+        feats = {
+        "type": "FeatureCollection",
+        "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+
+        "features": [
+        { "type": "Feature", "properties": { "NAME": "Los Angeles County Fire Department Station 80", "DEPARTMENT": 87255.0, "STATION_NU": 80.0, "ADDRESS_LI": "1533 West Sierra Highway", "ADDRESS_01": None, "CITY": "Acton", "STATE_PROV": "CA", "POSTAL_COD": "93510-1894", "COUNTRY_ID": "US", "FIRECARES_": 49620.0 }, "geometry": { "type": "Point", "coordinates": [ -118.142042439999898, 34.487823576000039 ] } },
+        { "type": "Feature", "properties": { "NAME": "Los Angeles County Fire Department Station 65", "DEPARTMENT": 87255.0, "STATION_NU": 65.0, "ADDRESS_LI": "4206 North Cornell Road", "ADDRESS_01": None, "CITY": "Agoura", "STATE_PROV": "CA", "POSTAL_COD": "91301-2528", "COUNTRY_ID": "US", "FIRECARES_": 16616.0 }, "geometry": { "type": "Point", "coordinates": [ -118.753559992999897, 34.134420014000057 ] } },
+        { "type": "Feature", "properties": { "NAME": "Los Angeles County Fire Department Station 89", "DEPARTMENT": 87255.0, "STATION_NU": 89.0, "ADDRESS_LI": "29575 Canwood Street", "ADDRESS_01": None, "CITY": "Agoura Hills", "STATE_PROV": "CA", "POSTAL_COD": "91301-1558", "COUNTRY_ID": "US", "FIRECARES_": 795.0 }, "geometry": { "type": "Point", "coordinates": [ -118.769329790999905, 34.147909454000057 ] } },
+        { "type": "Feature", "properties": { "NAME": "Los Angeles County Fire Department Station 11", "DEPARTMENT": 87255.0, "STATION_NU": 11.0, "ADDRESS_LI": "2521 North El Molino Avenue", "ADDRESS_01": None, "CITY": "Altadena", "STATE_PROV": "CA", "POSTAL_COD": "91001-2317", "COUNTRY_ID": "US", "FIRECARES_": 1334.0 }, "geometry": { "type": "Point", "coordinates": [ -118.132906841999898, 34.188535251000076 ] } },
+        { "type": "Feature", "properties": { "NAME": "Los Angeles County Fire Department Station 12", "DEPARTMENT": 87255.0, "STATION_NU": 12.0, "ADDRESS_LI": "2760 North Lincoln Avenue", "ADDRESS_01": None, "CITY": "Altadena", "STATE_PROV": "CA", "POSTAL_COD": "91001-4961", "COUNTRY_ID": "US", "FIRECARES_": 26322.0 }, "geometry": { "type": "Point", "coordinates": [ -118.158457743999918, 34.192918916000053 ] } },
+        { "type": "Feature", "properties": { "NAME": "Los Angeles County Fire Department Station 55", "DEPARTMENT": 87255.0, "STATION_NU": 55.0, "ADDRESS_LI": "945 Avalon Canyon Road", "ADDRESS_01": None, "CITY": "Avalon", "STATE_PROV": "CA", "POSTAL_COD": "90704", "COUNTRY_ID": "US", "FIRECARES_": 35013.0 }, "geometry": { "type": "Point", "coordinates": [ -118.33542908499993, 33.333073288000037 ] } },
+        { "type": "Feature", "properties": { "NAME": "Los Angeles County Fire Department Station 32", "DEPARTMENT": 87255.0, "STATION_NU": 32.0, "ADDRESS_LI": "605 North Angeleno Avenue", "ADDRESS_01": None, "CITY": "Azusa", "STATE_PROV": "CA", "POSTAL_COD": "91702-2904", "COUNTRY_ID": "US", "FIRECARES_": 29712.0 }, "geometry": { "type": "Point", "coordinates": [ -117.910420849999923, 34.131861813000057 ] } },]
+        }
+
+        for feature in feats['features']:
+            mapping = {}
+            address_fields = {}
+
+            mapping['geom'] = Point(*feature['geometry']['coordinates'])
+            address_geom = {'geom':Point(*feature['geometry']['coordinates'])}
+
+            for field, value in feature['properties'].items():
+                firecares_field = field_mappings[field]
+
+                if firecares_field == 'department':
+                    value = FireDepartment.objects.get(id=value)
+
+                if '__' in firecares_field:
+                    address_fields[firecares_field.replace('station_address__', '')] = value
+                else:
+                    mapping[firecares_field] = value
+
+            if address_fields:
+                if address_fields['country']:
+                    country, created = Country.objects.get_or_create(name=address_fields['country'])
+                    address_fields['country'] = country
+
+                    address, created = Address.objects.update_or_create(defaults=address_geom, **address_fields)
+                    mapping['station_address'] = address
+                    mapping['city'] = address.city
+                    mapping['address'] = address.address_line1
+                    mapping['state'] = address.state_province
+                    mapping['zipcode'] = address.postal_code
+
+            FireStation.objects.create(**mapping)
+
+        call_command('createinitialrevisions', 'firestation')
+
+    def test_data_import(self):
+
+        c = Client()
+        c.login(**{'username': 'admin', 'password': 'admin'})
+        self.create_la_data()
+
+        feats = {
+        "type": "FeatureCollection",
+        "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+
+        "features": [
+        { "type": "Feature", "properties": { "NAME": "Los Angeles County Fire Department Station 3", "DEPARTMENT": 87255.0, "STATION_NU": 3.0, "ADDRESS_LI": "1534 West Sierra Highway", "ADDRESS_01": None, "CITY": "Acton", "STATE_PROV": "CA", "POSTAL_COD": "93510-1894", "COUNTRY_ID": "US", "FIRECARES_": 49620.0 }, "geometry": { "type": "Point", "coordinates": [ -118.145, 34.489 ] } },
+        { "type": "Feature", "properties": { "NAME": "Los Angeles County Fire Department Station 65", "DEPARTMENT": 87255.0, "STATION_NU": 65.0, "ADDRESS_LI": "4206 North Cornell Road", "ADDRESS_01": None, "CITY": "Agoura", "STATE_PROV": "CA", "POSTAL_COD": "91301-2528", "COUNTRY_ID": "US", "FIRECARES_": 16616.0 }, "geometry": { "type": "Point", "coordinates": [ -118.753559992999897, 34.134420014000057 ] } },
+        { "type": "Feature", "properties": { "NAME": "Los Angeles County Fire Department Station 89", "DEPARTMENT": 87255.0, "STATION_NU": 89.0, "ADDRESS_LI": "29575 Canwood Street", "ADDRESS_01": None, "CITY": "Agoura Hills", "STATE_PROV": "CA", "POSTAL_COD": "91301-1558", "COUNTRY_ID": "US", "FIRECARES_": 795.0 }, "geometry": { "type": "Point", "coordinates": [ -118.769329790999905, 34.147909454000057 ] } },
+        { "type": "Feature", "properties": { "NAME": "Los Angeles County Fire Department Station 11", "DEPARTMENT": 87255.0, "STATION_NU": 11.0, "ADDRESS_LI": "2521 North El Molino Avenue", "ADDRESS_01": None, "CITY": "Altadena", "STATE_PROV": "CA", "POSTAL_COD": "91001-2317", "COUNTRY_ID": "US", "FIRECARES_": 1334.0 }, "geometry": { "type": "Point", "coordinates": [ -118.132906841999898, 34.188535251000076 ] } },
+        { "type": "Feature", "properties": { "NAME": "Los Angeles County Fire Department Station 12", "DEPARTMENT": 87255.0, "STATION_NU": 12.0, "ADDRESS_LI": "2760 North Lincoln Avenue", "ADDRESS_01": None, "CITY": "Altadena", "STATE_PROV": "CA", "POSTAL_COD": "91001-4961", "COUNTRY_ID": "US", "FIRECARES_": 26322.0 }, "geometry": { "type": "Point", "coordinates": [ -118.158457743999918, 34.192918916000053 ] } },
+        { "type": "Feature", "properties": { "NAME": "Los Angeles County Fire Department Station 55", "DEPARTMENT": 87255.0, "STATION_NU": 55.0, "ADDRESS_LI": "945 Avalon Canyon Road", "ADDRESS_01": None, "CITY": "Avalon", "STATE_PROV": "CA", "POSTAL_COD": "90704", "COUNTRY_ID": "US", "FIRECARES_": 35013.0 }, "geometry": { "type": "Point", "coordinates": [ -118.33542908499993, 33.333073288000037 ] } },
+        { "type": "Feature", "properties": { "NAME": "Los Angeles County Fire Department Station 32", "DEPARTMENT": 87255.0, "STATION_NU": 32.0, "ADDRESS_LI": "605 North Angeleno Avenue", "ADDRESS_01": None, "CITY": "Ausa", "STATE_PROV": "CA", "POSTAL_COD": "91702-2903", "COUNTRY_ID": "US", "FIRECARES_": 29712.0 }, "geometry": { "type": "Point", "coordinates": [ -117.910420849999923, 34.131861813000057 ] } },
+        #  Add a new station.
+        { "type": "Feature", "properties": { "NAME": "Los Angeles County Fire Department Station 56", "DEPARTMENT": 87255.0, "STATION_NU": 56.0, "ADDRESS_LI": "123 New Rd Canyon Road", "ADDRESS_01": None, "CITY": "Los Angeles", "STATE_PROV": "CA", "POSTAL_COD": "90210", "COUNTRY_ID": "US"}, "geometry": { "type": "Point", "coordinates": [ -118.45, 33.32 ] } },
+        ]
+        }
+
+        sfu = SimpleUploadedFile("file.json", json.dumps(feats), content_type="application/json")
+        response = c.post(reverse('uploads-new-json'), data={'file': sfu})
+        self.assertEqual(response.status_code, 200)
+        js = json.loads(response.content)
+        self.assertEqual(js['state'], 'UPLOADED')
+
+        payload = [{'index': 0}]
+
+        response = c.post('/importer-api/data-layers/{0}/configure/'.format(js['id']), data=json.dumps(payload),
+                          content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        case = FireStation.objects.get(id=49620)
+
+        self.assertEqual(case.station_number, 3)
+        self.assertEqual(case.name, 'Los Angeles County Fire Department Station 3')
+        self.assertEqual(case.department.id, 87255)
+        self.assertEqual(case.station_address.address_line1, '1534 West Sierra Highway')
+        self.assertEqual(case.geom.x, -118.145)
+        self.assertEqual(case.geom.y, 34.489)
+        self.assertEqual(Address.objects.all().count(), len(feats['features'])+2)
+
+        new_station = FireStation.objects.get(station_address__city='Los Angeles')
+        self.assertTrue(new_station.station_number, 56)
+        self.assertTrue(new_station.department.id, 87255)
+        self.assertEqual(reversion.get_for_object(new_station).count(), 1)
+
+        self.assertEqual(Revision.objects.count(), len(feats['features']) + 2)
+        self.assertEqual(reversion.get_for_object(case).count(), 2)
+
+    def test_ensure_no_handlers(self):
+        self.assertEqual(GeoDjangoImport.enabled_handlers, [])
+
+    def test_geodjango_importer(self):
+        """
+        Test the geodjango import router.
+        """
+
+        gdi = GeoDjangoImport('87255-los-angeles-county-fire-department-stations.zip')
+        self.assertEqual(gdi.import_router, gdi.import_stations)
+
+        gdi = GeoDjangoImport('87255-los-angeles-county-fire-department-staffing.zip')
+        self.assertEqual(gdi.import_router, gdi.import_staffing)
+
+        gdi = GeoDjangoImport('87255-los-angeles-county-fire-department-nothing.zip')
+        self.assertEqual(gdi.import_router, gdi.import_stations)
+
+    def test_update_staffing(self):
+        c = Client()
+        c.login(**{'username': 'admin', 'password': 'admin'})
+        self.create_la_data()
+
+        staffing = {"type": "FeatureCollection",
+         "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+            "features": [
+            { "type": "Feature", "properties": { "STATION": 49620, "FF": 5, "FF_EMT": 0, "FF_PARAMED": 0, "EMS_PARAME": 0, "OFFICER_PA": 0, "EMS_SUPERV": 0, "CHIEF_OFFI": 0, "ID": 0, "APPARATUS": "Ambulance\/BLS", "EMS_EMT": 0, "OFFICER": 0, "CHIEF_O_01": 0 }, "geometry": { "type": "Point", "coordinates": [ -118.170790239999917, 34.04978036600005 ] } },
+            { "type": "Feature", "properties": { "STATION": 16616, "FF": 5, "FF_EMT": 0, "FF_PARAMED": 0, "EMS_PARAME": 0, "OFFICER_PA": 0, "EMS_SUPERV": 0, "CHIEF_OFFI": 0, "ID": 1, "APPARATUS": "Ambulance\/ALS", "EMS_EMT": 0, "OFFICER": 0, "CHIEF_O_01": 0 }, "geometry": { "type": "Point", "coordinates": [ -118.170790239999917, 34.04978036600005 ] } },
+            { "type": "Feature", "properties": { "STATION": 795, "FF": 3, "FF_EMT": 0, "FF_PARAMED": 0, "EMS_PARAME": 0, "OFFICER_PA": 0, "EMS_SUPERV": 0, "CHIEF_OFFI": 0, "ID": 2, "APPARATUS": "Engine", "EMS_EMT": 0, "OFFICER": 0, "CHIEF_O_01": 0 }, "geometry": { "type": "Point", "coordinates": [ -118.797332042999926, 34.759414746000061 ] } },
+            { "type": "Feature", "properties": { "STATION": 1334, "FF": 4, "FF_EMT": 0, "FF_PARAMED": 0, "EMS_PARAME": 0, "OFFICER_PA": 0, "EMS_SUPERV": 0, "CHIEF_OFFI": 0, "ID": 3, "APPARATUS": "Engine", "EMS_EMT": 0, "OFFICER": 0, "CHIEF_O_01": 0 }, "geometry": { "type": "Point", "coordinates": [ -118.077502903999914, 34.698650531000055 ] } },
+            { "type": "Feature", "properties": { "STATION": 26322, "FF": 7, "FF_EMT": 0, "FF_PARAMED": 0, "EMS_PARAME": 0, "OFFICER_PA": 0, "EMS_SUPERV": 0, "CHIEF_OFFI": 0, "ID": 4, "APPARATUS": "Engine", "EMS_EMT": 0, "OFFICER": 0, "CHIEF_O_01": 0 }, "geometry": { "type": "Point", "coordinates": [ -118.141363644999899, 34.699320828000054 ] } },
+            { "type": "Feature", "properties": { "STATION": 35013, "FF": 4, "FF_EMT": 0, "FF_PARAMED": 0, "EMS_PARAME": 0, "OFFICER_PA": 0, "EMS_SUPERV": 0, "CHIEF_OFFI": 0, "ID": 5, "APPARATUS": "Heavy Rescue", "EMS_EMT": 0, "OFFICER": 0, "CHIEF_O_01": 0 }, "geometry": { "type": "Point", "coordinates": [ -118.141363644999899, 34.699320828000054 ] } },
+            { "type": "Feature", "properties": { "STATION": 29712, "FF": 1, "FF_EMT": 0, "FF_PARAMED": 0, "EMS_PARAME": 0, "OFFICER_PA": 0, "EMS_SUPERV": 0, "CHIEF_OFFI": 0, "ID": 6, "APPARATUS": "Chief", "EMS_EMT": 0, "OFFICER": 0, "CHIEF_O_01": 0 }, "geometry": { "type": "Point", "coordinates": [ -118.141363644999899, 34.699320828000054 ] } },
+        ]}
+
+        call_command('createinitialrevisions', 'firestation')
+
+        sfu = SimpleUploadedFile("test-staffing.json", json.dumps(staffing), content_type="application/json")
+        response = c.post(reverse('uploads-new-json'), data={'file': sfu})
+        self.assertEqual(response.status_code, 200)
+        js = json.loads(response.content)
+        self.assertEqual(js['state'], 'UPLOADED')
+
+        payload = [{'index': 0}]
+
+        response = c.post('/importer-api/data-layers/{0}/configure/'.format(js['id']), data=json.dumps(payload),
+                          content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Staffing.objects.all().count(), 7)
+
+        case = Staffing.objects.get(id=5)
+        self.assertEqual(case.firestation.id, 35013)
+        self.assertEqual(case.firefighter, 4)
+        self.assertEqual(case.firefighter_emt, 0)
+        self.assertEqual(case.firefighter_paramedic, 0)
+        self.assertEqual(case.ems_paramedic, 0)
+        self.assertEqual(case.officer_paramedic, 0)
+        self.assertEqual(case.ems_supervisor, 0)
+        self.assertEqual(case.chief_officer, 0)
+        self.assertEqual(case.apparatus, 'Heavy Rescue')
+        self.assertEqual(case.ems_emt, 0)
+        self.assertEqual(case.officer, 0)
+        self.assertEqual(reversion.get_for_object(case).count(), 1)
+
+        staffing2 = staffing.copy()
+        staffing2['features'] = [
+            { "type": "Feature", "properties": { "STATION": 29712, "FF": 3, "FF_EMT": 1, "FF_PARAMED": 2, "EMS_PARAME": 3, "OFFICER_PA": 4, "EMS_SUPERV": 5, "CHIEF_OFFI": 6, "ID": 5, "APPARATUS": "Engine", "EMS_EMT": 7, "OFFICER": 8}, "geometry": { "type": "Point", "coordinates": [ -118.141363644999899, 34.699320828000054 ] } },
+        ]
+
+        sfu = SimpleUploadedFile("test-staffing.json", json.dumps(staffing2), content_type="application/json")
+        response = c.post(reverse('uploads-new-json'), data={'file': sfu})
+        self.assertEqual(response.status_code, 200)
+        js = json.loads(response.content)
+        self.assertEqual(js['state'], 'UPLOADED')
+
+        payload = [{'index': 0}]
+        c.post('/importer-api/data-layers/{0}/configure/'.format(js['id']), data=json.dumps(payload), content_type='application/json')
+
+        case = Staffing.objects.get(id=5)
+        self.assertEqual(case.firestation.id, 29712)
+        self.assertEqual(case.firefighter, 3)
+        self.assertEqual(case.firefighter_emt, 1)
+        self.assertEqual(case.firefighter_paramedic, 2)
+        self.assertEqual(case.ems_paramedic, 3)
+        self.assertEqual(case.officer_paramedic, 4)
+        self.assertEqual(case.ems_supervisor, 5)
+        self.assertEqual(case.chief_officer, 6)
+        self.assertEqual(case.apparatus, 'Engine')
+        self.assertEqual(case.ems_emt, 7)
+        self.assertEqual(case.officer, 8)
+
+        self.assertEqual(reversion.get_for_object(case).count(), 2)
+        self.assertEqual(Staffing.objects.all().count(), 7)

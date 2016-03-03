@@ -5,6 +5,7 @@ from geopy.exc import GeocoderQuotaExceeded
 from jsonfield import JSONField
 from time import sleep
 from django.utils import timezone
+from reversion import revisions as reversion
 
 
 class RecentlyUpdatedMixin(models.Model):
@@ -44,7 +45,7 @@ class Address(models.Model):
     Model to store addresses
     """
     address_line1 = models.CharField("Address line 1", max_length=100)
-    address_line2 = models.CharField("Address line 2", max_length=100, blank=True)
+    address_line2 = models.CharField("Address line 2", max_length=100, blank=True, null=True)
     city = models.CharField(max_length=50, blank=False)
     state_province = models.CharField("State/Province", max_length=40, blank=True)
     postal_code = models.CharField("Postal Code", max_length=10)
@@ -148,3 +149,6 @@ class ContactRequest(models.Model):
 
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.email)
+
+
+reversion.register(Address)

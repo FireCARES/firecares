@@ -30,7 +30,7 @@ from numpy import histogram
 from phonenumber_field.modelfields import PhoneNumberField
 from firecares.firecares_core.models import Country
 from genericm2m.models import RelatedObjectsDescriptor
-
+from reversion import revisions as reversion
 
 class USGSStructureData(models.Model):
     """
@@ -1045,7 +1045,6 @@ class PopulationClassQuartile(models.Model):
 
     id = models.ForeignKey(FireDepartment, db_column='id', primary_key=True)
     created = models.DateTimeField(editable=False)
-    created = models.DateTimeField(editable=False)
     modified = models.DateTimeField(editable=False)
     fdid = models.CharField(max_length=10, editable=False)
     name = models.CharField(max_length=100, editable=False)
@@ -1237,3 +1236,6 @@ def create_quartile_views(sender, **kwargs):
         cursor.execute("CREATE MATERIALIZED VIEW population_class_%s_quartiles AS ({0});".format(query), [population_class])
 
 post_migrate.connect(create_quartile_views)
+reversion.register(FireStation)
+reversion.register(FireDepartment)
+reversion.register(Staffing)
