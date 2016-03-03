@@ -22,11 +22,11 @@ from django.db.transaction import rollback
 from django.db.utils import IntegrityError, ProgrammingError
 from django.utils.functional import cached_property
 from firecares.firecares_core.models import Address
+from firecares.firecares_core.validators import validate_choice
 from numpy import histogram
 from phonenumber_field.modelfields import PhoneNumberField
 from firecares.firecares_core.models import Country
 from genericm2m.models import RelatedObjectsDescriptor
-
 
 
 class USGSStructureData(models.Model):
@@ -135,7 +135,6 @@ class USGSStructureData(models.Model):
                          (6, 'Municipal'),
                          (7, 'Private')]
 
-
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     objectid = models.IntegerField(unique=True, null=True, blank=True)
@@ -175,7 +174,6 @@ class USGSStructureData(models.Model):
 
     class Meta:
         ordering = ('state', 'city', 'name')
-
 
     @classmethod
     def count_differential(cls):
@@ -275,7 +273,7 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
                                                           verbose_name='Percentage of size 1 fires.')
 
     risk_model_fires_size2 = models.FloatField(null=True, blank=True, db_index=True,
-                                                   verbose_name='Predicted number of size 2 firese.')
+                                               verbose_name='Predicted number of size 2 firese.')
 
     risk_model_fires_size2_percentage = models.FloatField(null=True, blank=True,
                                                           verbose_name='Percentage of size 2 fires.')
@@ -379,7 +377,6 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
         qs = qs.filter(id=self.id)
         return qs
 
-
     @property
     def population_metrics_table(self):
         """
@@ -475,14 +472,14 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
             return 9
 
         community_sizes = [
-                (500000, 999999),
-                (250000, 499999),
-                (100000, 249999),
-                (50000, 99999),
-                (25000, 49999),
-                (10000, 24999),
-                (5000, 9999),
-                (2500, 4999)]
+            (500000, 999999),
+            (250000, 499999),
+            (100000, 249999),
+            (50000, 99999),
+            (25000, 49999),
+            (10000, 24999),
+            (5000, 9999),
+            (2500, 4999)]
 
         for clazz, min_max in zip(reversed(range(1, 9)), community_sizes):
             if min_max[0] <= self.population <= min_max[1]:
@@ -635,10 +632,10 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
     def residential_structure_fire_counts(self):
         return self.nfirsstatistic_set.filter(metric='residential_structure_fires')\
             .extra(select={
-                    'year_max': 'SELECT MAX(COUNT) FROM firestation_nfirsstatistic b WHERE b.year = firestation_nfirsstatistic.year and b.metric=firestation_nfirsstatistic.metric'
+                   'year_max': 'SELECT MAX(COUNT) FROM firestation_nfirsstatistic b WHERE b.year = firestation_nfirsstatistic.year and b.metric=firestation_nfirsstatistic.metric'
                    })\
             .extra(select={
-                    'year_min': 'SELECT MIN(COUNT) FROM firestation_nfirsstatistic b WHERE b.year = firestation_nfirsstatistic.year and b.metric=firestation_nfirsstatistic.metric'
+                   'year_min': 'SELECT MIN(COUNT) FROM firestation_nfirsstatistic b WHERE b.year = firestation_nfirsstatistic.year and b.metric=firestation_nfirsstatistic.metric'
                    })
 
     @classmethod
@@ -733,7 +730,6 @@ class FireStation(USGSStructureData):
 
     @classmethod
     def populate_address(cls):
-
         us, _ = Country.objects.get_or_create(iso_code='US')
         for obj in cls.objects.filter(station_address__isnull=True, address__isnull=False, zipcode__isnull=False):
             try:
@@ -742,10 +738,10 @@ class FireStation(USGSStructureData):
                                                         country=us, defaults=dict(geom=obj.geom))
             except Address.MultipleObjectsReturned:
                 objs = Address.objects.filter(address_line1=obj.address, city=obj.city, state_province=obj.state, postal_code=obj.zipcode,
-                                                        country=us)
-                import ipdb; ipdb.set_trace()
+                                              country=us)
             obj.station_address = addr
             obj.save()
+
     @property
     def origin_uri(self):
         """
@@ -781,7 +777,7 @@ class FireStation(USGSStructureData):
                 if obj['feature'].get('geometry'):
                     data['geom'] = Point(obj['feature']['geometry']['x'], obj['feature']['geometry']['y'])
 
-                data['loaddate'] = datetime.datetime.fromtimestamp(data['loaddate']/1000.0)
+                data['loaddate'] = datetime.datetime.fromtimestamp(data['loaddate'] / 1000.0)
                 feat = cls.objects.create(**data)
                 feat.save()
                 print 'Saved object: {0}'.format(data.get('name'))
@@ -880,7 +876,7 @@ class NFIRSStatistic(models.Model):
 
     class Meta:
         unique_together = ['fire_department', 'year', 'metric']
-        ordering = ['-year',]
+        ordering = ['-year', ]
 
 
 class PopulationClassQuartile(models.Model):
@@ -927,7 +923,7 @@ class PopulationClassQuartile(models.Model):
     risk_model_fires_size1_percentage = models.FloatField(null=True, blank=True, editable=False,
                                                           verbose_name='Percentage of size 1 fires.')
     risk_model_fires_size2 = models.FloatField(null=True, blank=True, editable=False,
-                                                   verbose_name='Predicted number of size 2 firese.')
+                                               verbose_name='Predicted number of size 2 firese.')
     risk_model_fires_size2_percentage = models.FloatField(null=True, blank=True, editable=False,
                                                           verbose_name='Percentage of size 2 fires.')
     population = models.IntegerField(null=True, blank=True, editable=False)
@@ -1017,7 +1013,7 @@ def create_quartile_views(sender, **kwargs):
     Creates DB views based on quartile queries.
     """
     for population_class in [choice[0] for choice in FireDepartment.POPULATION_CLASSES]:
-        query ="""
+        query = """
             SELECT
                 (SELECT COALESCE(risk_model_fires_size1_percentage,0)+COALESCE(risk_model_fires_size2_percentage,0)) AS "risk_model_size1_percent_size2_percent_sum",
                 (SELECT COALESCE(risk_model_deaths,0)+COALESCE(risk_model_injuries,0)) AS "risk_model_deaths_injuries_sum",

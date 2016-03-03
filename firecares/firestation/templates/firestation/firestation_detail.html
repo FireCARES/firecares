@@ -1,5 +1,6 @@
 {% load humanize %}
 {% load firecares %}
+{% load compress %}
 <!DOCTYPE html>
 <!--[if IE 8 ]>
 <html class="no-js ie8" lang="en"> <![endif]-->
@@ -27,7 +28,7 @@
         headquartersName: "{{ object.department.name }} Headquarters",
         id: {{object.id}},
         departmentId: {{ object.department_id|default:"null" }}
-    }
+    };
     </script>
     {% include 'google_analytics.html' %}
 </head>
@@ -283,6 +284,10 @@
 </div>
 
 {% include "firestation/_firecares_scripts.html" %}
-
+{% compress js %}
+<script src="{{ STATIC_URL }}firestation/esri2geo.js"></script>
+<script src="{{ STATIC_URL }}firestation/spin.js"></script>
+<script src="{{ STATIC_URL }}firestation/leaflet.spin.js"></script>
+{% endcompress js %}
 </body>
 </html>
