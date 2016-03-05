@@ -767,7 +767,7 @@
                 <h4>View More</h4>
             </a>
         </div>
-        <div class="ct-js-owl ct-owl-controls--type2" data-single="false" data-items="4" data-pagination="false">
+        <div class="ct-js-owl ct-owl-controls--type2" data-single="false" data-items="4">
             {% for department in object.similar_departments|slice:":15" %}
             <div class="item">
                 {% include 'firestation/_fire_department_card.html' %}
