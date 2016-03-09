@@ -4,11 +4,14 @@ import requests
 import sys
 import csv
 import os
+import re
+
 
 from .managers import PriorityDepartmentsManager, CalculationManager
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point, MultiPolygon
+from django.contrib.gis.measure import Distance, D
 from django.core.validators import MaxValueValidator
 from django.core.cache import cache
 from django.db import connections
@@ -813,6 +816,118 @@ class FireStation(USGSStructureData):
                 return (self.district.transform(102009, clone=True).area / 1000000) * 0.38610
             except:
                 return
+
+    def suggested_departments(self):
+        """
+        Helper functions
+        """
+        def filter_words_from_name(name,words_to_filter):
+            removed_dict = dict((re.escape(k), v) for k, v in words_to_filter.iteritems())
+            removed_pattern = re.compile("|".join(removed_dict.keys()))
+            name = removed_pattern.sub(lambda m: removed_dict[re.escape(m.group(0))], name)
+            name = re.sub("^\d+\s|\s\d+\s|\s\d+$", " ", name)
+            name = re.sub(' +', ' ', name)
+            name = name.strip()
+            return name
+
+        def determine_insertion_index(suggested_departments, department_count, score):
+            index = 1
+            while index < department_count:
+                if score > suggested_departments[index].department_score:
+                    break
+                index += 1
+            return index
+
+        always_removed_words = {"Station": "",
+            " Engine": "",
+            " Truck": "",
+            " Ladder": "",
+            " Quint": "",
+            " Squirt": "",
+            " Ambulance": "",
+            " Service": "",
+            " District": "",
+            " Headquarters": "",
+            " City": ""}
+        lev_removed_words = {
+            " Rescue": "",
+            " Service": "",
+            " and": "",
+            " Emergency": "",
+            " Medical": "",
+            " Services": ""}
+
+        filtered_name = self.name
+        filtered_name = filter_words_from_name(filtered_name, always_removed_words)
+        lev_filtered_name = filter_words_from_name(filtered_name, lev_removed_words)
+
+        nearby_departments = FireDepartment.objects.filter(headquarters_address__geom__distance_lte=(self.geom, D(mi=40)))\
+        .distance(self.geom)\
+        .extra(select={'dis_name': "select levenshtein(firestation_firedepartment.name, %s)", 'dis_sound': "select similarity(firestation_firedepartment.name, %s)"},\
+        select_params=(lev_filtered_name, filtered_name,))\
+        .order_by('distance', 'dis_name')
+
+
+        best_department_score = 0
+        best_department_id = 0
+        best_department_name = ''
+        max_suggested_departments = 10
+        suggested_departments = list()
+
+        for n, fireDepartment in enumerate(nearby_departments):
+
+            if n == 100:
+                break
+
+            department_distance = 40
+
+            if fireDepartment.distance is not None:
+                department_distance = fireDepartment.distance.mi
+            else:
+                meterStation = self.geom.transform(3857, True)
+                meterDepartment = self.geom.transform(3857, True)
+                department_distance = meterDepartment.distance(meterStation) * 0.000621371
+
+            #  The maximum return from levenshtein will be the length of the longer string
+            #  so to create a true 0-1 ratio find the longer string name
+
+            station_name_length = len(lev_filtered_name)
+            department_name_length = len(fireDepartment.name)
+            minimum_name_length = min(station_name_length, department_name_length)
+            longest_name_length = max(station_name_length, department_name_length)
+            minimum_lev_distance = longest_name_length - minimum_name_length
+
+            #  lower bound of levenshtein is at least difference of strings
+            #  to create zero to one ratio must subtract minimum distances
+
+            fireDepartment.dis_name = max(fireDepartment.dis_name - minimum_lev_distance,0)
+
+            department_score = ((1 - department_distance / 40) * 55) + (1 - fireDepartment.dis_name / longest_name_length) * 80 + (fireDepartment.dis_sound * 30)
+
+            fireDepartment.distance = department_distance
+            fireDepartment.department_score = department_score
+
+            if department_score > best_department_score:
+                best_department_score = department_score
+                best_department_id = fireDepartment.id
+                best_department_name = fireDepartment.name
+                suggested_departments.insert(0, fireDepartment)
+            else:
+                num_departments = len(suggested_departments)
+                if num_departments < max_suggested_departments or (num_departments >= max_suggested_departments and department_score > suggested_departments[max_suggested_departments-1].department_score):
+                    department_index = determine_insertion_index(suggested_departments, num_departments, department_score)
+                    suggested_departments.insert(department_index, fireDepartment)
+
+        #  Trim list down to max count
+
+        num_departments = len(suggested_departments)
+        while num_departments > max_suggested_departments:
+            suggested_departments.pop()
+            num_departments -= 1
+
+        return suggested_departments
+
+
 
     @cached_property
     def slug(self):
