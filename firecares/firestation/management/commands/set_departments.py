@@ -1,7 +1,4 @@
-
-from django.contrib.gis.gdal import DataSource
-from django.contrib.gis.geos import MultiPolygon, Polygon
-from firecares.firestation.models import FireStation, FireDepartment
+from firecares.firestation.models import FireStation
 from django.db import transaction
 from django.core.management.base import BaseCommand
 
@@ -67,19 +64,14 @@ class Command(BaseCommand):
 
                     FireStation.objects.filter(id=station.id).update(department=station.suggested_departments()[0])
 
-            resp = raw_input('Look Ok? (y/n/q) ')
+                resp = raw_input('Look Ok? (y/n/q) ')
 
-            if resp == 'y':
-                print 'Committed', transaction.commit()
-                print
+                if resp == 'y':
+                    print 'Committed', transaction.commit()
+                    print
 
-            if resp == 'n':
-                print 'Roll back.', transaction.rollback()
+                if resp == 'n':
+                    print 'Roll back.', transaction.rollback()
 
-            if resp == 'q':
-                break
-
-
-
-
-
+                if resp == 'q':
+                    break
