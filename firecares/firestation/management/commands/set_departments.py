@@ -52,6 +52,8 @@ class Command(BaseCommand):
 
         for start, end, total, qs in batches:
             with transaction.atomic():
+                to_commit = []
+
                 for station in qs:
 
                     if not station.suggested_departments():
@@ -62,16 +64,19 @@ class Command(BaseCommand):
                     print "Dept Id   : {0}".format(station.suggested_departments()[0].id)
                     print
 
-                    FireStation.objects.filter(id=station.id).update(department=station.suggested_departments()[0])
+                    to_commit.append((station.id, station.suggested_departments()[0]))
 
                 resp = raw_input('Look Ok? (y/n/q) ')
 
                 if resp == 'y':
-                    print 'Committed', transaction.commit()
+                    for id, dept in to_commit:
+                        FireStation.objects.filter(id=id).update(department=dept)
+
+                    print 'Committed'
                     print
 
                 if resp == 'n':
-                    print 'Roll back.', transaction.rollback()
+                    continue
 
                 if resp == 'q':
                     break
