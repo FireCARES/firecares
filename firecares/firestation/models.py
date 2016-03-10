@@ -539,11 +539,11 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
 
     @property
     def thumbnail(self):
-        return 'https://s3.amazonaws.com/firecares-static/department-thumbnails/{0}'.format(self.thumbnail_name)
+        return 'https://static.firecares.org/department-thumbnails/{0}'.format(self.thumbnail_name)
 
     @property
     def thumbnail_no_marker(self):
-        return 'https://s3.amazonaws.com/firecares-static/department-thumbnails/{0}' \
+        return 'https://static.firecares.org/department-thumbnails/{0}' \
             .format(self.thumbnail_name_no_marker)
 
     def generate_thumbnail(self, marker=True):
