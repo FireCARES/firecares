@@ -10,7 +10,7 @@
       y: config.geom.coordinates[1]
     };
 
-    var serviceAreaURL = $interpolate('http://gis.iaff.org/arcgis/rest/services/Production/101ServerServiceAreaOct2012/GPServer/101ServerServiceAreaOct2012/execute?f=json&Facilities={"features":[{"geometry":{"x":{[x]},"spatialReference":{"wkid":4326},"y":{[y]}}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4,4,4&Break_Values=4 6 8&returnZ=false&returnM=false')(stationGeom);
+    var serviceAreaURL = $interpolate('https://geo.firecares.org/?f=json&Facilities={"features":[{"geometry":{"x":{[x]},"spatialReference":{"wkid":4326},"y":{[y]}}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4,4,4&Break_Values=4 6 8&returnZ=false&returnM=false')(stationGeom);
 
     var options = {
       boxZoom: true,
