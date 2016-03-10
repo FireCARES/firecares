@@ -35,7 +35,7 @@ CACHES = {
 
 AWS_STORAGE_BUCKET_NAME = 'firecares-static'
 COMPRESS_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-COMPRESS_URL = "https://s3.amazonaws.com/firecares-static/"
+COMPRESS_URL = "https://static.firecares.org/"
 COMPRESS_STORAGE = "firecares.utils.CachedS3BotoStorage"
 STATICFILES_STORAGE = "firecares.utils.CachedS3BotoStorage"
 STATIC_URL = COMPRESS_URL
