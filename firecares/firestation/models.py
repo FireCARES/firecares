@@ -285,6 +285,8 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
     population = models.IntegerField(null=True, blank=True)
     population_class = models.IntegerField(null=True, blank=True, choices=POPULATION_CLASSES)
     featured = models.BooleanField(default=False, db_index=True)
+    iaff = models.CharField(max_length=25, blank=True, null=True)
+
 
     class Meta:
         ordering = ('name',)

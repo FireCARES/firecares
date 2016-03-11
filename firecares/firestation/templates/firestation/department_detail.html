@@ -381,6 +381,16 @@
                                         <span>{{ object.headquarters_fax|default:"Unknown" }}</span>
                                     </div>
                                 </div>
+                                {% if object.iaff %}
+                                <div class="ct-u-displayTableRow">
+                                    <div class="ct-u-displayTableCell">
+                                        <span class="ct-fw-600">IAFF</span>
+                                    </div>
+                                    <div class="ct-u-displayTableCell text-right">
+                                        <span>{{ object.iaff }}</span>
+                                    </div>
+                                </div>
+                                {% endif %}
                                 {% if object.website %}
                                 <div class="ct-u-displayTableRow">
                                     <div class="ct-u-displayTableCell">
