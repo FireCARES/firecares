@@ -5,6 +5,7 @@
   .controller('fireStationController', function($scope, $window, $http, Staffing, $timeout, map, FireStation, $filter, $interpolate) {
 
     var thisFirestation = '/api/v1/firestations/' + config.id + '/';
+    var serviceAreaData = null;
     var stationGeom = {
       x: config.geom.coordinates[0],
       y: config.geom.coordinates[1]
@@ -82,6 +83,14 @@
       layersControl.addOverlay(headquarters, 'Headquarters Location');
     }
 
+    var serviceArea = L.geoJson(null, {
+      onEachFeature: function(feature, layer) {
+        layer.bindPopup(feature.properties.Name + ' minutes');
+      }
+    });
+    layersControl.addOverlay(serviceArea, 'Service area');
+
+
     if ( config.district) {
       var district = L.geoJson(config.district, {
         style: function (feature) {
@@ -96,33 +105,33 @@
       map.setView(stationGeom, 15);
     }
 
-    map.spin(true);
-    $http({
-      method: 'GET',
-      url: serviceAreaURL
-    }).then(function success(resp) {
-      esri2geo.toGeoJSON(resp.data.results[0].value, function(_, geojson) {
-        var values = geojson.features.map(function(val, idx) {
-          return val.properties.ToBreak;
+    map.on('overlayadd', function(layer) {
+      if ( layer._leaflet_id === serviceArea._leaflet_id && !serviceAreaData) {
+        map.spin(true);
+        $http({
+          method: 'GET',
+          url: serviceAreaURL
+        }).then(function success(resp) {
+          esri2geo.toGeoJSON(resp.data.results[0].value, function(_, geojson) {
+            var values = geojson.features.map(function(val, idx) {
+              return val.properties.ToBreak;
+            });
+            var max = Math.max.apply(null, values);
+            serviceAreaData = geojson;
+            serviceArea.addData(geojson);
+            layer.setStyle(function(feature) {
+              return {
+                fillColor: '#33cc33',
+                fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5),
+                weight: 0.3
+              };
+            });
+            map.spin(false);
+          });
+        }, function error(error) {
+          map.spin(false);
         });
-        var max = Math.max.apply(null, values);
-        var serviceArea = L.geoJson(geojson, {
-          style: function(feature) {
-            return {
-              fillColor: "#33cc33",
-              fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5),
-              weight: 0.3
-            };
-          },
-          onEachFeature: function(feature, layer) {
-            layer.bindPopup(feature.properties.Name);
-          }
-        }).addTo(map);
-        layersControl.addOverlay(serviceArea, 'Service area');
-        map.spin(false);
-      });
-    }, function(error) {
-      map.spin(false);
+      }
     });
 
     $scope.ClearForm = function(form) {
