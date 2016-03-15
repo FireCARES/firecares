@@ -1,5 +1,6 @@
 from .models import FireStation, FireDepartment, Staffing
 from firecares.firecares_core.models import Address
+from firecares.firecares_core.admin import LocalOpenLayersAdmin
 from django.forms import ModelForm
 from django.contrib.gis import admin
 from autocomplete_light import ModelForm as AutocompleteModelForm
@@ -11,7 +12,7 @@ class FireStationAdminForm(AutocompleteModelForm):
         self.fields['station_address'].queryset = Address.objects.select_related().all()
 
 
-class FireStationAdmin(admin.OSMGeoAdmin):
+class FireStationAdmin(LocalOpenLayersAdmin):
     form = FireStationAdminForm
     list_display = ['state', 'name']
     list_filter = ['state', 'ftype']
@@ -40,14 +41,14 @@ class FireDepartmentAdminForm(AutocompleteModelForm):
         autocomplete_exclude = ('government_unit',)
 
 
-class FireDepartmentAdmin(admin.OSMGeoAdmin):
+class FireDepartmentAdmin(LocalOpenLayersAdmin):
     form = FireDepartmentAdminForm
     search_fields = ['name']
     list_display = ['name', 'state']
     list_filter = ['state']
 
 
-class ResponseCapabilityAdmin(admin.OSMGeoAdmin):
+class ResponseCapabilityAdmin(LocalOpenLayersAdmin):
     pass
 
 
