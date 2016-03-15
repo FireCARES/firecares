@@ -55,37 +55,7 @@ The goal of the fire department performance score is to assess how well a fire d
                     </ul>
 
                     <p>When water is put onto a fire, the idealized fire is assumed to have reached the peak size. In other words, growth time for the fire is equivalent to the sum of the tasks the fire department must perform to suppress the fire.</p>
-                    <p>
-                    \begin{equation*}
-                    t = t_{growth} = t_{alarm}+t_{dispatch}+t_{turnout}+t_{arrival}+t_{suppress}
-                    \end{equation*}
-                    </p>
-
-                    <p>This growth time is then coupled to a fire spread model:</p>
-
-                    \begin{equation*}
-                    Area = \alpha e^{\beta t_{growth}}
-                    \end{equation*}
-
-                    <p>
-                        such that the approximate fire size in terms of "area involved" can be determined using $t_{growth}$. This fire size is then binned into the same three fire spread bins/categories that the actual outcomes were. There then exists a mapping in time that can be used to assess the differences in the actual distribution and the standardized distribution of fire spread. To obtain this mapping, one additional assumption is necessary. The observed fire spread outcome is related to the room size and the size of the building within which the fire took place. For example, if the area damaged by a fire is greater than the size of the room it originated within, but less than the size of the building, the model assumes that the firefighters would classify this fire as "contained to building of origin." As aforementioned, the NFIRS database contains the actual fire spread categories reported by fire departments. Knowledge of this extent of fire spread places a constraint on the possible values of area damaged by the fire, and thus possible values of time for tasks that the fire department could have taken. Because the model already assumes "ideal" values for fire department tasks, it is reasonable to place an additional time parameter in $t_{growth}$, which will be referred to as $t_{correction}$:
-                    </p>
-
-                    \begin{equation*}
-                    t_{growth} = t_{alarm}+t_{dispatch}+t_{turnout}+t_{arrival}+t_{suppress}+\boldsymbol{t_{correction}}
-                    \end{equation*}
-
-                    <p>This correction time represents the adjustment necessary to the "standardized" fire department response time in order to have received the observed fire spread outcome. It can be either positive, meaning the actual fire department needed to take longer compared against its "standardized" self, or negative, meaning the actual fire department performed better than its "standardized" self. </p>
-                    <p>If one inverts the model to solve for $t_{correction}$, using RA to represent room area, and BA to represent building area, then for a given fire that spreads beyond the room of origin, but is contained to the building, the following constraint holds:</p>
-
-                    \begin{equation*}
-                    \frac{\ln\left(\frac{RA}{\alpha}\right)}{\beta}-t_{growth} < t_{correction} < \frac{\ln\left(\frac{BA}{\alpha}\right)}{\beta}-t_{growth}
-                    \end{equation*}
-
-
-                    <p>Where $t_{growth}$ is the sum of the alarm, dispatch, turnout, arrival, and suppression times of the "standardized" fire department as defined above. In the absence of any additional relevant information about the incident, it is reasonable to consider all values within the above constraint equally likely, and thus for a given incident there are a range of possible $t_{correction}$ values that are viable. One final constraint on $t_{correction}$ that is considered useful is to force it to be zero or greater. This effectively assumes that all incidents for which $t_{correction}$ specified above would return a negative value, it instead evaluated to zero. A zero value indicates the actual fire department's performance was in line with its "standardized" ideal for those incidents. </p>
-                    <p>The average over the distribution of all possible $t_{correction}$ values is then considered to the fire department's performance score. This score represents the average time (in seconds) that the actual department performance exceeds its "standardized" self.</p>
-
+                    
                 </div>
             </div>
         </div>
