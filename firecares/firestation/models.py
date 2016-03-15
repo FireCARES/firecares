@@ -286,6 +286,7 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
     population_class = models.IntegerField(null=True, blank=True, choices=POPULATION_CLASSES)
     featured = models.BooleanField(default=False, db_index=True)
     iaff = models.CharField(max_length=25, blank=True, null=True)
+    twitter_handle = models.CharField(max_length=255, blank=True, null=True)
 
 
     class Meta:
