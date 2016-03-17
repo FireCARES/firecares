@@ -1,7 +1,4 @@
 @charset "UTF-8";
-@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
-@import url(https://fonts.googleapis.com/css?family=Libre+Baskerville:400italic);
-@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700,800);
 /*------------------------------------------------------------------
 Project:	Estato - Developers HTML Template
 Version:	1.0
@@ -55,6 +52,9 @@ Licensed under the MIT license - http://opensource.org/licenses/MIT
 
 Copyright (c) 2014 Daniel Eden
 */
+@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
+@import url(https://fonts.googleapis.com/css?family=Libre+Baskerville:400italic);
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700,800);
 .animated {
   -webkit-animation-duration: 1s;
   animation-duration: 1s;
@@ -11486,6 +11486,12 @@ table.residential-fires {
   color: #757575;
   font-weight: 600;
 }
+.leaflet-control-layers-list span {
+  margin-left: .35em;
+}
+.leaflet-control-layers-list input[type='checkbox'] {
+  width: auto;
+}
 .usgs-messages ul {
   margin-top: 1em;
   margin-bottom: 0;
@@ -11535,9 +11541,6 @@ table.residential-fires {
 .usgs input[type='checkbox'] {
   width: 1em;
   float: left;
-}
-.usgs .leaflet-control-layers-list span {
-  margin-left: 1em;
 }
 .usgs li {
   list-style-type: none;
