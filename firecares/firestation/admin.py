@@ -1,7 +1,6 @@
 from .models import FireStation, FireDepartment, Staffing
 from firecares.firecares_core.models import Address
 from firecares.firecares_core.admin import LocalOpenLayersAdmin
-from django.forms import ModelForm
 from django.contrib.gis import admin
 from autocomplete_light import ModelForm as AutocompleteModelForm
 
@@ -14,7 +13,7 @@ class FireStationAdminForm(AutocompleteModelForm):
 
 class FireStationAdmin(LocalOpenLayersAdmin):
     form = FireStationAdminForm
-    list_display = ['state', 'name']
+    list_display = ['state', 'name', 'created', 'modified']
     list_filter = ['state', 'ftype']
     search_fields = ['name', 'state', 'city']
     readonly_fields = ['permanent_identifier', 'source_featureid', 'source_datasetid', 'objectid', 'globalid',
@@ -44,12 +43,13 @@ class FireDepartmentAdminForm(AutocompleteModelForm):
 class FireDepartmentAdmin(LocalOpenLayersAdmin):
     form = FireDepartmentAdminForm
     search_fields = ['name']
-    list_display = ['name', 'state']
+    list_display = ['name', 'state', 'created', 'modified']
     list_filter = ['state']
 
 
 class ResponseCapabilityAdmin(LocalOpenLayersAdmin):
-    pass
+    list_display = ['__unicode__', 'created', 'modified']
+    exclude = ['firestation']
 
 
 admin.site.register(FireStation, FireStationAdmin)
