@@ -11492,6 +11492,12 @@ table.residential-fires {
   color: #757575;
   font-weight: 600;
 }
+.leaflet-control-layers-list span {
+  margin-left: .35em;
+}
+.leaflet-control-layers-list input[type='checkbox'] {
+  width: auto;
+}
 .usgs-messages ul {
   margin-top: 1em;
   margin-bottom: 0;
@@ -11541,9 +11547,6 @@ table.residential-fires {
 .usgs input[type='checkbox'] {
   width: 1em;
   float: left;
-}
-.usgs .leaflet-control-layers-list span {
-  margin-left: 1em;
 }
 .usgs li {
   list-style-type: none;
