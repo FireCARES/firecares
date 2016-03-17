@@ -123,7 +123,7 @@
               return {
                 fillColor: '#33cc33',
                 fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5),
-                weight: 0.3
+                weight: 0.8
               };
             });
             map.spin(false);
