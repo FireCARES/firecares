@@ -1,7 +1,4 @@
 @charset "UTF-8";
-@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
-@import url(https://fonts.googleapis.com/css?family=Libre+Baskerville:400italic);
-@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700,800);
 /*------------------------------------------------------------------
 Project:	Estato - Developers HTML Template
 Version:	1.0
@@ -55,6 +52,9 @@ Licensed under the MIT license - http://opensource.org/licenses/MIT
 
 Copyright (c) 2014 Daniel Eden
 */
+@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
+@import url(https://fonts.googleapis.com/css?family=Libre+Baskerville:400italic);
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700,800);
 .animated {
   -webkit-animation-duration: 1s;
   animation-duration: 1s;
@@ -11327,6 +11327,7 @@ table.residential-fires {
   border: 2px solid pink;
   color: pink;
   z-index: 1000;
+  margin: 0 auto;
 }
 .diamond-control-label div {
   -webkit-transform: rotateZ(45deg);
@@ -11372,6 +11373,11 @@ table.residential-fires {
   width: 100%;
   position: relative;
   border-top: 1px solid #ddd;
+}
+@media (max-width: 991px) {
+  .risk-card {
+    margin-bottom: 50px;
+  }
 }
 .risk-card:first-child {
   border-top: 0px;

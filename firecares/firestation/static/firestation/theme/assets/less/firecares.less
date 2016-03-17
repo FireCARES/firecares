@@ -546,6 +546,7 @@ padding-top: 5px;
   border: 2px solid pink;
   color: pink;
   z-index: 1000;
+  margin: 0 auto;
 }
 .diamond-control-label div {
   -webkit-transform: rotateZ(45deg);
@@ -594,6 +595,13 @@ padding-top: 5px;
   position: relative;
   border-top: 1px solid #ddd;
 }
+
+@media (max-width: 991px) {
+  .risk-card {
+    margin-bottom: 50px;
+  }
+}
+
 .risk-card:first-child {
   border-top: 0px;
 }
