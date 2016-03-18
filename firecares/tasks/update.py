@@ -107,8 +107,8 @@ def update_nfirs_counts(id, year=None):
         ('residential_structure_fires', "select extract(year from inc_date) as year, count(*) from buildingfires"
                                         " where fdid=%s and state=%s and extract(year from inc_date) in %s group by year order by year desc;",
          (fd.fdid, fd.state, tuple(years.keys()))),
-        ('firefighter_casualties', "select right(inc_date, 4) as year, count(*) from ffcasualty where"
-                               " fdid=%s and state=%s and right(inc_date, 4)::integer in %s group by year order by year desc;", (fd.fdid, fd.state, tuple(years.keys()))),
+        ('firefighter_casualties', "select extract(year from inc_date) as year, count(*) from ffcasualty where"
+                               " fdid=%s and state=%s and extract(year from inc_date) in %s group by year order by year desc;", (fd.fdid, fd.state, tuple(years.keys()))),
     )
 
     for statistic, query, params in queries:
