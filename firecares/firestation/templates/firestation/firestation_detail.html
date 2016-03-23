@@ -262,16 +262,18 @@
                     <div class="apparatus">
                         <h4>Apparatus and Staffing</h4>
                         <hr/>
+                        {% verbatim %}
                         <div class="alert" ng-cloak id="response-capability-message" ng-class="'alert alert-' + message.message_class" ng-if="message.message">
                             <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            {[ message.message ]}
+                            {{  message.message }}
                         </div>
                         <ul class="nav nav-tabs apparatus-tabs">
-                            <li id="tab-{[ form.id ]}" ng-repeat="form in forms" ng-class="{'active': $last}">
-                                <a href="#{[ form.id ]}" data-toggle="tab">{[form.apparatus]} </a>
+                            <li id="tab-{{ form.id }}" ng-repeat="form in forms" ng-class="{'active': $last}">
+                                <a href="#{{ form.id }}" data-toggle="tab">{{  form.apparatus }} </a>
                             </li>
                             <li ng-click="AddForm()" id="" class="nav-action" data-toggle="tab">Add Apparatus</li>
                         </ul>
+                        {% endverbatim %}
                         {% include "firestation/response_capability_inline.html" %}
                     </div>
                 </div>

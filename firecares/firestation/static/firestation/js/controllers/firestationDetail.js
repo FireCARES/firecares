@@ -136,29 +136,13 @@
 
     $scope.ClearForm = function(form) {
       form.apparatus = 'Engine';
-      form.firefighter = 0;
-      form.firefighter_emt = 0;
-      form.firefighter_paramedic = 0;
-      form.ems_emt = 0;
-      form.ems_paramedic = 0;
-      form.officer = 0;
-      form.officer_paramedic = 0;
-      form.ems_supervisor = 0;
-      form.chief = 0;
+      form.personnel = 0;
     };
 
     $scope.AddForm = function() {
       var newForm = new Staffing({'apparatus': 'Engine',
-        'chief_officer': 0,
-        'ems_emt': 0,
-        'ems_paramedic': 0,
-        'ems_supervisor': 0,
-        'firefighter': 0,
-        'firefighter_emt': 0,
-        'firefighter_paramedic': 0,
+        'personnel': 0,
         'firestation': thisFirestation,
-        'officer': 0,
-        'officer_paramedic': 0,
         'id': new Date().getUTCMilliseconds(),
         'new_form': true
       });
@@ -209,19 +193,6 @@
       }, function(){
         $scope.showMessage('There was an error deleting the staffing for ' + form.apparatus + '.', 'error');
       });
-    };
-
-    $scope.ClearForm = function(form) {
-      form.apparatus = 'Engine';
-      form.firefighter = 0;
-      form.firefighter_emt = 0;
-      form.firefighter_paramedic = 0;
-      form.ems_emt = 0;
-      form.ems_paramedic = 0;
-      form.officer = 0;
-      form.officer_paramedic = 0;
-      form.ems_supervisor = 0;
-      form.chief = 0;
     };
 
     $scope.toggleFullScreenMap = function() {

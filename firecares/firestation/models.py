@@ -999,21 +999,24 @@ class Staffing(models.Model):
                          ('Chief', 'Chief'),
                          ('Other', 'Other')]
 
-    int_field_defaults = dict(null=True, blank=True, default=0, validators=[MaxValueValidator(99)])
+    # human friendly apparatus choices with <= 10 characters
+    APPARATUS_SHAPEFILE_CHOICES = [('Engine', 'engine'),
+                                   ('Ladder/Truck/Aerial', 'truck'),
+                                   ('Quint', 'quint'),
+                                   ('Ambulance/ALS', 'als_am'),
+                                   ('Ambulance/BLS', 'bls_am'),
+                                   ('Heavy Rescue', 'rescue'),
+                                   ('Boat', 'boat'),
+                                   ('Hazmat', 'hazmat'),
+                                   ('Chief', 'chief'),
+                                   ('Other', 'other')]
 
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     firestation = models.ForeignKey(FireStation)
     apparatus = models.CharField(choices=APPARATUS_CHOICES, max_length=20, default='Engine')
-    firefighter = models.PositiveIntegerField(**int_field_defaults)
-    firefighter_emt = models.PositiveIntegerField(verbose_name='Firefighter EMT', **int_field_defaults)
-    firefighter_paramedic = models.PositiveIntegerField(verbose_name='Firefighter Paramedic', **int_field_defaults)
-    ems_emt = models.PositiveIntegerField(verbose_name='EMS-Only EMT', **int_field_defaults)
-    ems_paramedic = models.PositiveIntegerField(verbose_name='EMS-Only Paramedic', **int_field_defaults)
-    officer = models.PositiveIntegerField(verbose_name='Company/Unit Officer', **int_field_defaults)
-    officer_paramedic = models.PositiveIntegerField(verbose_name='Company/Unit Officer Paramedic', **int_field_defaults)
-    ems_supervisor = models.PositiveIntegerField(verbose_name='EMS Supervisor', **int_field_defaults)
-    chief_officer = models.PositiveIntegerField(verbose_name='Chief Officer', **int_field_defaults)
+    personnel = models.PositiveIntegerField(null=True, blank=True, default=0, validators=[MaxValueValidator(99)])
+    als = models.BooleanField(default=False)
 
     def __unicode__(self):
         return '{0} response capability for {1}'.format(self.apparatus, self.firestation)

@@ -1,5 +1,7 @@
 import json
+import ogr
 import os
+import osr
 import pandas as pd
 import shutil
 import urllib
@@ -10,7 +12,7 @@ from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.http.response import HttpResponseRedirect, HttpResponse
-from django.db import connections
+from django.db import connection
 from django.db.models import Max, Min
 from django.db.models.fields import FieldDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -529,30 +531,138 @@ class Home(CacheMixin, TemplateView):
 class DownloadShapefile(LoginRequiredMixin, View):
     content_type = 'application/zip'
     output_dir = '/tmp'
-    fields = ['firecares_id', 'name', 'department', 'station_number', 'station_address__address_line1',
-              'station_address__address_line2', 'station_address__city', 'station_address__state_province',
-              'station_address__postal_code', 'station_address__country']
-
-    def get_command(self, queryset, path):
-        return "pgsql2shp -f {path} -h {HOST} -u {USER} -P  {PASSWORD} {NAME} \'{query}\'".format(query=queryset.query,
-                                                                                                  path=path,
-                                                                                                  **connections['default'].settings_dict)
 
     def get_queryset(self, *args, **kwargs):
-        return kwargs.get('department').firestation_set.all().select_related('station_address') \
-            .annotate(firecares_id=F('id')).values(*self.fields)
+        return kwargs.get('department').firestation_set.all()
 
-    def create_shapefile(self, queryset, filename):
+    def create_shapefile(self, queryset, filename, geom):
         path = mkdtemp()
         file_path = os.path.join(path, filename)
-        os.system(self.get_command(queryset, file_path))
+        geom_type = ogr.wkbPoint
+
+        if queryset.model._meta.get_field_by_name(geom)[0].geom_type == 'MULTIPOLYGON':
+            geom_type = ogr.wkbMultiPolygon
+
+        driver = ogr.GetDriverByName("ESRI Shapefile")
+
+        # create the data source
+        data_source = driver.CreateDataSource(file_path)
+
+        # create the spatial reference, WGS84
+        srs = osr.SpatialReference()
+        srs.ImportFromEPSG(4326)
+
+        # create the layer
+        layer = data_source.CreateLayer(filename, srs, geom_type)
+
+        # Name, Type, Width
+        fields = [
+            ('id', ogr.OFTInteger, None),
+            ('name', ogr.OFTString, 254),
+            ('department', ogr.OFTInteger, None),
+            ('station_nu', ogr.OFTInteger, None),
+            ('address_l1', ogr.OFTString, 100),
+            ('address_l2', ogr.OFTString, 100),
+            ('city', ogr.OFTString, 50),
+            ('state', ogr.OFTString, 40),
+            ('zipcode', ogr.OFTString, 10),
+            ('country', ogr.OFTString, 2),
+        ]
+
+        ids = queryset.values_list('id', flat=True)
+
+        # Pivot staffing rows per apparatus without aggregating
+        # resulting in multiple columns if a station has more than one of any apparatus type
+        for apparatus, apparatus_alias in Staffing.APPARATUS_SHAPEFILE_CHOICES:
+
+            cursor = connection.cursor()
+            sql = "select count(*) from firestation_staffing  where firestation_id in %s and apparatus=%s " \
+                  "group by firestation_id order by count(*) desc limit 1;"
+            cursor.execute(sql, [tuple(ids), apparatus])
+            row = cursor.fetchone()
+            count = 0
+
+            if row:
+                count = row[0]
+
+            for n in range(0, count) or [0]:
+                field_name = apparatus_alias
+
+                if n > 0:
+                    field_name = apparatus_alias + '_{0}'.format(n)
+
+                fields.append((field_name, ogr.OFTInteger, None))
+
+        for alias, field_type, width in fields:
+            field = ogr.FieldDefn(alias, field_type)
+
+            if width:
+                field.SetWidth(width)
+
+            layer.CreateField(field)
+            field = None
+
+        # Process the text file and add the attributes and features to the shapefile
+        for row in queryset:
+
+            raw_geom = getattr(row, geom)
+            wkt = None
+
+            if raw_geom:
+              wkt = raw_geom.wkt
+
+            else:
+                continue
+
+            feature = ogr.Feature(layer.GetLayerDefn())
+
+            # Set the attributes using the values from the delimited text file
+            feature.SetField('id', row.id)
+            feature.SetField('name', str(row.name))
+            feature.SetField('department', row.department.id)
+            feature.SetField('station_nu', row.station_number)
+
+            feature.SetField('address_l1', str(getattr(row.station_address, 'address_line1', str)) or None)
+            feature.SetField('address_l2', str(getattr(row.station_address, 'address_line2', str)) or None)
+            feature.SetField('city', str(getattr(row.station_address, 'city', str)) or None)
+            feature.SetField('state', str(getattr(row.station_address, 'state_province', str)) or None)
+            feature.SetField('zipcode', str(getattr(row.station_address, 'postal_code', str)) or None)
+            feature.SetField('country', str(getattr(row.station_address, 'country_id', str)) or None)
+
+            # Populate staffing for each unit
+            for apparatus, apparatus_alias in Staffing.APPARATUS_SHAPEFILE_CHOICES:
+
+                for n, record in enumerate(row.staffing_set.filter(apparatus=apparatus)):
+                    apparatus_alias_index = apparatus_alias
+
+                    if n > 0:
+                        apparatus_alias_index += '_{0}'.format(n)
+
+                    feature.SetField(apparatus_alias_index, record.personnel)
+
+
+            # Create the point from the Well Known Txt
+            point = ogr.CreateGeometryFromWkt(wkt)
+
+            # Set the feature geometry using the point
+            feature.SetGeometry(point)
+            # Create the feature in the layer (shapefile)
+            layer.CreateFeature(feature)
+            # Destroy the feature to free resources
+            feature.Destroy()
+
+        # Destroy the data source to free resources
+        data_source.Destroy()
 
         if os.path.exists(os.path.join(self.output_dir, filename + '.zip')):
             filename += '-' + str(uuid.uuid4())[:5]
 
         zip_file = shutil.make_archive(self.output_dir + '/' + filename, 'zip', path)
-        remove_file.delay(path)
-        remove_file.delay(zip_file, countdown=600)
+
+        if self.request.META.get('SERVER_NAME') != 'testserver':
+            remove_file.delay(path)
+            remove_file.delay(zip_file, countdown=600)
+
         return file_path, zip_file
 
     def filename(self, *args, **kwargs):
@@ -560,53 +670,20 @@ class DownloadShapefile(LoginRequiredMixin, View):
                                     kwargs.get('department').slug,
                                     kwargs.get('geom_type'))
 
-
     def get(self, request, *args, **kwargs):
         response = HttpResponse(content_type=self.content_type)
         geom = self.kwargs.get('geometry_field', 'geom')
-        self.fields.append(geom)
 
         geom_type = 'stations'
+
         if geom == 'district':
             geom_type = 'districts'
 
         department = get_object_or_404(FireDepartment, id=kwargs['pk'])
         queryset = self.get_queryset(department=department)
         filename = self.filename(department=department, geom_type=geom_type)
-        file_path, zip_file = self.create_shapefile(queryset, filename)
+        file_path, zip_file = self.create_shapefile(queryset, filename, geom)
         response['Content-Disposition'] = 'attachment; filename="{0}.zip"'.format(smart_str(filename))
         response['X-Accel-Redirect'] = smart_str(zip_file)
         response.content = file_path
         return response
-
-
-class DownloadStaffing(DownloadShapefile):
-    fields = ['id', 'apparatus', 'ems_emt',  'officer', 'ems_supervisor',
-              'chief_officer']
-
-    def get_queryset(self, *args, **kwargs):
-
-        query = Staffing.objects.select_related('firestation').filter(firestation__department=kwargs.get('department'))
-
-        for long, short in [('firestation_id', 'station'),
-                            ('firefighter', 'ff'),
-                            ('firefighter_emt', 'ff_emt'),
-                            ('firefighter_paramedic', 'ff_paramedic'),
-                            ('ems_paramedic', 'ems_paramedic'),
-                            ('officer_paramedic', 'officer_pa'),
-                            ('ems_supervisor', 'ems_supervisor'),
-                            ]:
-
-            query = query.extra(select={short: long})
-            self.fields.append(short)
-
-        return query.values(*self.fields)
-
-    def filename(self, *args, **kwargs):
-        return '{0}-{1}-{2}'.format(kwargs.get('department').id, kwargs.get('department').slug,
-                                    'staffing')
-
-    def get_command(self, queryset, path):
-        resp = super(DownloadStaffing, self).get_command(queryset, path)
-        print resp
-        return resp

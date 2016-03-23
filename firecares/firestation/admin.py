@@ -50,7 +50,7 @@ class FireDepartmentAdmin(VersionAdmin, LocalOpenLayersAdmin):
 
 
 class ResponseCapabilityAdmin(LocalOpenLayersAdmin):
-    list_display = ['__unicode__', 'created', 'modified']
+    list_display = ['__unicode__', 'created', 'modified', 'personnel', 'als']
     exclude = ['firestation']
 
 

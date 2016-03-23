@@ -8,7 +8,9 @@ from .firecares_core.views import ForgotUsername, ContactUs
 from .firestation.api import StaffingResource, FireStationResource, FireDepartmentResource
 from tastypie.api import Api
 from firestation.views import Home
-from osgeo_importer.urls import urlpatterns as importer_urlpatterns
+from osgeo_importer.urls import FileAddView, importer_api
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import user_passes_test, permission_required
 
 admin.autodiscover()
 v1_api = Api(api_name='v1')
@@ -47,10 +49,17 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain'), name='robots.txt'),
+
+    # importer routes
+    url(r'^uploads/new$', permission_required('change_firestation')(FileAddView.as_view()), name='uploads-new'),
+    url(r'^uploads/new/json$', permission_required('change_firestation')(FileAddView.as_view(json=True)), name='uploads-new-json'),
+
+    #url(r'^uploads/?$', permission_required('change_firestation' UploadListView.as_view()), name='uploads-list'),
+    url(r'', include(importer_api.urls)),
 )
 
 
-urlpatterns += importer_urlpatterns
+#urlpatterns += importer_urlpatterns
 
 if settings.DEBUG:
     urlpatterns += patterns('',

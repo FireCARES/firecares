@@ -85,16 +85,16 @@ class GeoDjangoImport(Import):
         data, _ = self.open_source_datastore(self.file, *args, **kwargs)
 
         field_mappings = {
-            'NAME': 'name',
-            'DEPARTMENT': 'department',
-            'STATION_NU': 'station_number',
-            'ADDRESS_LI': 'station_address__address_line1',
-            'ADDRESS_01': 'station_address__address_line2',
-            'COUNTRY_ID': 'station_address__country',
-            'STATE_PROV': 'station_address__state_province',
-            'CITY': 'station_address__city',
-            'POSTAL_COD': 'station_address__postal_code',
-            'FIRECARES_': 'id',
+            'name': 'name',
+            'department': 'department',
+            'station_nu': 'station_number',
+            'address_l1': 'station_address__address_line1',
+            'address_l2': 'station_address__address_line2',
+            'country': 'station_address__country',
+            'state': 'station_address__state_province',
+            'city': 'station_address__city',
+            'zipcode': 'station_address__postal_code',
+            'id': 'id',
         }
 
         results = []
@@ -132,63 +132,47 @@ class GeoDjangoImport(Import):
                         mapping['zipcode'] = address.postal_code
 
                 try:
-                    FireStation.objects.get(**mapping)
+                    object = FireStation.objects.get(**mapping)
                 except FireStation.DoesNotExist:
                     object, created = FireStation.objects.update_or_create(id=mapping['id'], defaults=mapping)
                     results.append([object, {}])
 
-            return results
-
-    def import_staffing(self, *args, **kwargs):
-        """
-        Parses incoming staffing records and updates internal objects.
-        """
-        data, _ = self.open_source_datastore(self.file, *args, **kwargs)
-
-        field_mappings = {
-            'ID': 'id',
-            'APPARATUS': 'apparatus',
-            'FF': 'firefighter',
-            'FF_PARAMED': 'firefighter_paramedic',
-            'FF_EMT': 'firefighter_emt',
-            'CHIEF_OFFI': 'chief_officer',
-            'OFFICER_PA': 'officer_paramedic',
-            'EMS_EMT': 'ems_emt',
-            'EMS_PARAME': 'ems_paramedic',
-            'STATION': 'firestation__id',
-            'OFFICER': 'officer',
-            'EMS_SUPERV': 'ems_supervisor',
-        }
-
-        results = []
-        for layer in data:
-            for feature in layer:
-                mapping = {}
-
-                for dirty_name in set(field_mappings.keys()) & set(feature.fields):
-                    cleaned_name = field_mappings[dirty_name]
-                    value = feature.get(dirty_name)
-                    #if value == 779:
-                    #    import ipdb; ipdb.set_trace()
-
-                    if cleaned_name == 'firestation__id' and value:
-                        mapping['firestation'] = FireStation.objects.get(id=value)
-                    else:
-                        mapping[cleaned_name] = value
-
-                try:
-                    Staffing.objects.get(**mapping)
-                except Staffing.DoesNotExist:
-                    object, created = Staffing.objects.update_or_create(id=mapping['id'], defaults=mapping)
-                    results.append([object, {}])
+                self.populate_staffing(feature, object)
 
             return results
+
+    @staticmethod
+    def populate_staffing(feature, station):
+        """
+        Populates staffing records from a feature.
+
+        Note: This replaces all staffing records vs updating existing records.
+        """
+        staffing_fields = dict(Staffing.APPARATUS_SHAPEFILE_CHOICES)
+        staffing_fields_aliases = dict((v, k) for k, v in staffing_fields.iteritems())
+
+        with transaction.atomic():
+
+            # Delete existing staffing objects
+            Staffing.objects.filter(firestation=station).delete()
+
+            for field in feature.fields:
+                for alias in staffing_fields_aliases.keys():
+
+                    if field.startswith(alias):
+                        staffing_value = feature.get(field)
+
+                        if not staffing_value:
+                            continue
+
+                        if field[-1].isdigit():
+                            field = field.rsplit('_', 1)[0]
+
+                        Staffing.objects.create(apparatus=staffing_fields_aliases[field],
+                                                personnel=staffing_value, firestation=station)
 
     @property
     def import_router(self):
-        if '-staffing' in self.file:
-            return self.import_staffing
-
         return self.import_stations
 
     @transaction.atomic()
