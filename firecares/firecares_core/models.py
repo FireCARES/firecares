@@ -86,7 +86,7 @@ class Address(models.Model):
                 params['postal_code'] = postal_codes[0]['short_name']
 
             if countries:
-                params['country'] = Country.objects.get(iso_code=countries[0]['short_name'])
+                params['country'], _ = Country.objects.get_or_create(iso_code=countries[0]['short_name'])
 
             if states:
                 params['state_province'] = states[0]['short_name']

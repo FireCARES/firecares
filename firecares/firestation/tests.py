@@ -732,6 +732,53 @@ class FireStationTests(TestCase):
         response = c.get(reverse('media'))
         self.assertEqual(response.status_code, 200)
 
+    def test_station_number_from_name(self):
+        """
+        Tests the station number from name method on the FireStation model.
+        """
+
+        fs = self.create_firestation()
+        fs.name = 'Engine 25'
+        self.assertEqual(fs.station_number_from_name(), '25')
+
+        fs.name = 'Lake Cities Fire Department Station 1'
+        self.assertEqual(fs.station_number_from_name(), '1')
+
+        fs.name = 'Lake Cities Fire Department Station 101'
+        self.assertEqual(fs.station_number_from_name(), '101')
+
+        fs.name = 'Central Oregon Coast Fire and Rescue District 7 Station 7400'
+        self.assertEqual(fs.station_number_from_name(), '7400')
+
+        fs.name = 'Walton County Fire Rescue Station 11A Mossy Head Fire and Rescue'
+        self.assertEqual(fs.station_number_from_name(), '11')
+
+        fs.name = 'Grand Traverse Rural Fire Department Battalion 3 Whitewater Township'
+        self.assertEqual(fs.station_number_from_name(), None)
+
+        fs.name = 'Fremont County Fire Protection District Battalion 12 Fort Washakie Fire Department'
+        self.assertEqual(fs.station_number_from_name(), None)
+
+    def test_create_station(self):
+        """
+        Tests the create station convenience method on the FireStation class.
+        """
+        fd = FireDepartment.objects.create(name='Test db', population=0)
+
+        fs = FireStation.create_station(department=fd,
+                                        address_string='9405 Devlins Grove Pl, Bristow, VA 20136',
+                                        name='Fire Station 25')
+
+        self.assertEqual(fs.station_number, 25)
+        self.assertEqual(fs.name, 'Fire Station 25')
+        self.assertEqual(fs.state, 'VA')
+        self.assertIsNotNone(fs.station_address)
+        self.assertEqual(fs.address, fs.station_address.address_line1)
+        self.assertEqual(fs.city, fs.station_address.city)
+        self.assertEqual(fs.zipcode, fs.station_address.postal_code)
+        self.assertEqual(fs.geom, fs.station_address.geom)
+        self.assertTrue(fs.department, fd)
+
     def test_api_formats(self):
         """
         Test that an API endpoint defaults to JSON vs XML and supports JSON and XML serialization formats

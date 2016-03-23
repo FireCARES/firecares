@@ -735,6 +735,47 @@ class FireStation(USGSStructureData):
     objects = models.GeoManager()
 
     @classmethod
+    def create_station(cls, address_string, department, **kwargs):
+        """
+        Convenience method used to create new stations.
+        """
+        addy = Address.create_from_string(address_string)
+
+        station = FireStation(department=department,
+                              station_address=addy,
+                              address=addy.address_line1,
+                              state=addy.state_province,
+                              city=addy.city,
+                              zipcode=addy.postal_code,
+                              geom=addy.geom,
+                              **kwargs)
+
+        if not kwargs.get('station_number'):
+            station.station_number = station.station_number_from_name()
+
+            if station.station_number:
+                station.station_number = int(station.station_number)
+
+        station.save()
+        return station
+
+    def station_number_from_name(self):
+        """
+        Pulls the station number out of the name.
+        """
+
+        match = re.search(r'((?<=Station\s)|(?<=Engine\s))\b\d+', self.name)
+
+        if match:
+            return match.group()
+
+        match = re.search(r'(?<!Battalion\s)\b\d+', self.name)
+
+        if match:
+            return match.group()
+
+
+    @classmethod
     def populate_address(cls):
         us, _ = Country.objects.get_or_create(iso_code='US')
         for obj in cls.objects.filter(station_address__isnull=True, address__isnull=False, zipcode__isnull=False):
