@@ -420,13 +420,21 @@ class FireStationTests(TestCase):
 
         urls = [
             'http://www.nist.gov/el/fire_research/upload/Report-on-Residential-Fireground-Field-Experiments.pdf',  # NIST TN 1661
-            'http://nvlpubs.nist.gov/nistpubs/TechnicalNotes/NIST.TN.1797.pdf',  # NIST TN 1797
             'http://www.nfpa.org/codes-and-standards/document-information-pages?mode=code&code=1710'  # NFPA 1710
         ]
 
         for url in urls:
             response = requests.head(url)
             self.assertEqual(response.status_code, 200, 'Url: {0} did not return a 200.'.format(url))
+
+        get_urls = [
+            'http://nvlpubs.nist.gov/nistpubs/TechnicalNotes/NIST.TN.1797.pdf',  # NIST TN 1797
+        ]
+
+        # Hack to get around fact that nist.gov returns a 404 for HEAD requests to the NIST.TN.1797.pdf, but a 200 for GETs :/
+        for url in get_urls:
+            response = requests.get(url, headers={'Range': 'bytes=0-0'})
+            self.assertEqual(response.status_code, 206, 'Url: {0} did not return a 206.'.format(url))
 
     def test_fts_functions_exist(self):
         """
