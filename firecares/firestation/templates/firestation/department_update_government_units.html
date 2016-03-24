@@ -276,6 +276,16 @@
                                         <span>{{ object.geom_area|floatformat:"2"|intcomma}} <span>mi&sup2;</span></span>
                                     </div>
                                 </div>
+                                {% if object.twitter_handle %}
+                                <div class="ct-u-displayTableRow">
+                                    <div class="ct-u-displayTableCell">
+                                        <span class="ct-fw-600">Twitter</span>
+                                    </div>
+                                    <div class="ct-u-displayTableCell text-right">
+                                        <span><a href="https://twitter.com/{{ object.twitter_handle }}" target="_blank">@{{object.twitter_handle}} <i class="fa fa-external-link ct-fw-600"></i></a></span>
+                                    </div>
+                                </div>
+                                {% endif %}
                                 {% if object.website %}
                                 <div class="ct-u-displayTableRow">
                                     <div class="ct-u-displayTableCell">
