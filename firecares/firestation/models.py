@@ -575,7 +575,7 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
                 return None
 
         geom_containers = self.government_unit_objects + [self]
-        objs = [x.geom for x in geom_containers if getattr(x, 'geom', None)]
+        objs = [x.geom.buffer(0) for x in geom_containers if getattr(x, 'geom', None)]
 
         if objs:
             geom = objs.pop()
