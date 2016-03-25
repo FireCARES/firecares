@@ -49,11 +49,11 @@ CELERYBEAT_SCHEDULE = {
     # Executes nightly at midnight.
     'cache_every_midnight': {
         'task': 'firecares.tasks.cache.cache_histogram_data',
-        'schedule': crontab(),
+        'schedule': crontab(minute=0, hour=0),
     },
     'ensure_valid_data_every_midnight': {
         'task': 'firecares.tasks.email.ensure_valid_data',
-        'schedule': crontab(),
+        'schedule': crontab(minute=0, hour=0),
     },
 }
 

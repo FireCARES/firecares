@@ -17,7 +17,7 @@ def ensure_valid_data():
     Alert admins of bad data.
     """
     cursor = connection.cursor()
-    cursor.execute("SELECT id, name, st_area(geom) FROM firestation_firedepartment where st_area(geom)>1.99")
+    cursor.execute("SELECT id, name, st_area(geom) FROM firestation_firedepartment where st_area(geom)>6.99")
     messages = []
 
     for id, name, area in cursor.fetchall():
