@@ -48,11 +48,11 @@ EMAIL_USE_TLS = True
 CELERYBEAT_SCHEDULE = {
     # Executes nightly at midnight.
     'cache_every_midnight': {
-        'task': 'tasks.cache.cache_histogram_data',
+        'task': 'firecares.tasks.cache.cache_histogram_data',
         'schedule': crontab(),
     },
     'ensure_valid_data_every_midnight': {
-        'task': 'tasks.email.ensure_valid_data',
+        'task': 'firecares.tasks.email.ensure_valid_data',
         'schedule': crontab(),
     },
 }
