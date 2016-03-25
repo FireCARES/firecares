@@ -51,6 +51,10 @@ CELERYBEAT_SCHEDULE = {
         'task': 'tasks.cache.cache_histogram_data',
         'schedule': crontab(),
     },
+    'ensure_valid_data_every_midnight': {
+        'task': 'tasks.email.ensure_valid_data',
+        'schedule': crontab(),
+    },
 }
 
 try:
