@@ -11,7 +11,6 @@ celery==3.1.18
 flower==0.8.1
 requests==2.7.0
 -e git://github.com/ProminentEdge/django-osgeo-importer.git@26132b316463572a59f9170c626fecf22861dbc3#egg=osgeo_importer
-git+https://github.com/django-tastypie/django-tastypie@8165c6fa75519aec8b1651be4bf9958f43e0262a#egg=TastyPie
 boto==2.38.0
 ipdb==0.8.1
 Pillow==2.9.0
@@ -32,3 +31,4 @@ ndg-httpsclient==0.4.0
 django-reversion==1.10.1
 diff-match-patch==20121119
 django-celery==3.1.17
+django-tastypie==0.13.3
