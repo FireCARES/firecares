@@ -88,6 +88,136 @@
         };
       });
 
+
+  module.directive('asterChart',
+      function() {
+        return {
+          restrict: 'CE',
+          replace: false,
+          scope: {
+             metricTitle: '@?',
+             description: '@?',
+             //array of objects with key, values
+             data: '=',
+             crossfilter: '&',
+             filterType: '@'
+          },
+          template: '<div class="aster-plot"><h5 class="aster-title">{{metricTitle}}</h5><svg></svg></div>',
+          // The linking function will add behavior to the template
+          link: function(scope, element, attrs) {
+              var id = attrs.id;
+              var width = 125,
+                height = 125,
+                padding = 10,
+                radius = Math.min(width-10-padding, height-10-padding) / 2,
+                innerRadius = 0.3 * radius,
+                max = d3.max(scope.data, function(d){return d.value}),
+                filters = [],
+                labelr = radius + 5;
+
+            var pie = d3.layout.pie()
+                .sort(null)
+                .value(function(d) { return scope.data.length; });
+
+            var arc = d3.svg.arc()
+              .innerRadius(innerRadius)
+              .outerRadius(function (d) {
+                return (radius - innerRadius) * (d.data.value / (max + (max * .1))) + innerRadius;
+              });
+
+            var outlineArc = d3.svg.arc()
+                    .innerRadius(innerRadius)
+                    .outerRadius(radius);
+
+            var svg = d3.select("#" + id + ' svg')
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+          scope.data.forEach(function(d) {
+            d.order = 1;
+            d.weight = 1;
+            d.score = d.value;
+            d.label =  d.key;
+          });
+
+          function handleClick(d, i) {
+            d3.select(this).classed("aster-selected", !d3.select(this).classed("aster-selected"));
+            console.log('Updating aster selection', i);
+            if (d3.select(this).classed("aster-selected")) {
+                filters.push(d.data.key);
+            } else {
+                i = filters.indexOf(d.data.key);
+                if (i > -1) {
+                    filters.splice(i, 1);
+                }
+            }
+
+            var hits = scope.crossfilter().filter(null);
+            if (filters.length > 0) {
+              hits = scope.crossfilter().filterFunction(function(d) {
+                for (i = 0; i < filters.length; i++) {
+                    if (d === filters[i]) {
+                        return true;
+                    }
+                }
+            });
+            }
+            console.log('filters: ', filters, 'length', hits.top(Infinity).length);
+            scope.$parent.heatMapDataFilters[scope.filterType] = hits;
+            console.log(scope.$parent.heatMapDataFilters);
+            scope.$parent.setHeatMapData();
+          }
+
+          var outerPath = svg.selectAll(".outlineArc")
+              .data(pie(scope.data))
+            .enter().append("path")
+              .attr("fill", "#efefef")
+              .attr("opacity", ".6")
+              .attr("stroke", "white")
+              .attr("stroke-width", "2")
+              .attr("class", "outlineArc")
+              .attr("d", outlineArc)
+              .on("click", handleClick);
+
+          var path = svg.selectAll(".solidArc")
+              .data(pie(scope.data))
+            .enter().append("path")
+              .attr("fill", "#ccc")
+              .attr("class", "solidArc")
+              .attr("stroke", "white")
+              .attr("stroke-width", "1")
+              .attr("d", arc)
+              .on("click", handleClick);
+
+              svg.selectAll('.solidArcLabel')
+                .data(pie(scope.data)).enter().append('text')
+                .attr("dy", ".35em")
+                  .attr("transform", function(d) {
+                    var c = arc.centroid(d),
+                        x = c[0],
+                        y = c[1],
+                        h = Math.sqrt(x*x + y*y);
+                    return "translate(" + ((x/h * labelr)-3) +  ',' +
+                       (y/h * labelr) +  ")";
+                }).attr('class', 'aster-label')
+                .text(function(d) { console.log(d); return d.data.key; });
+
+          // calculate the weighted mean score
+          var score =
+            scope.data.reduce(function(a, b) {
+              //console.log('a:' + a + ', b.score: ' + b.score + ', b.weight: ' + b.weight);
+              return a + (b.value * b.weight);
+            }, 0) /
+            scope.data.reduce(function(a, b) {
+              return a + b.weight;
+            }, 0);
+
+          }
+        };
+  });
+
   module.directive('bulletChart',
       function() {
         return {
@@ -98,7 +228,7 @@
              description: '@?',
              ranges: '=',
              measures: '=',
-             markers: '=',
+             markers: '='
           },
           template: '<div class="metric-description ct-u-marginBottom20"><h4>{[metricTitle]}</h4></div><svg></svg><div class="metric-description"><p>{[description]}</p></div>',
           // The linking function will add behavior to the template

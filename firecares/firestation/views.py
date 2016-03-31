@@ -13,6 +13,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.http.response import HttpResponseRedirect, HttpResponse
 from django.db import connection
+from django.db import connections
 from django.db.models import Max, Min
 from django.db.models.fields import FieldDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -136,7 +137,6 @@ class DepartmentDetailView(LoginRequiredMixin, CacheMixin, DetailView):
                 df.loc[df['id'] == self.object.id].dist_model_risk_model_deaths_injuries_quartile.values[0]
 
             # national_risk_band
-            from django.db import connections
             cursor = connections['default'].cursor()
             query = FireDepartment.objects.filter(dist_model_score__isnull=False).as_quartiles().values('id',
                                                                                                         'risk_model_size1_percent_size2_percent_sum_quartile',
