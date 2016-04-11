@@ -174,54 +174,24 @@
         <div class="container">
             <div class="row">
                 {% block content %}
-                <div class="col-md-6 hidden-xs hidden-sm">
-                    <div class="ct-headerText--normal">
-                        <h2 class="text-uppercase ct-fw-600 ct-u-marginBottom70">
-                            What is your
-                            <span class="ct-u-text--motive">SafeGrade?</span>
-                        </h2>
-                    </div>
-                    <div class="ct-iconBox ct-u-marginBottom40 ct-iconBox--2col">
-                        <div class="ct-icon text-center marketing-icon">
-                            <i class="icon-location-pin ct-fw-600"></i>
-                        </div>
-                        <div class="ct-iconBox--description">
-                            <span class="ct-title text-uppercase ct-fw-600">Identify Risks</span>
-                            <span class="ct-text">Identify the socio-economic risk factors for your community.</span>
-                        </div>
-                    </div>
-                    <div class="ct-iconBox ct-u-marginBottom40 ct-iconBox--2col">
-                        <div class="ct-icon text-center marketing-icon">
-                            <i class="icon-speedometer ct-fw-600"></i>
-                        </div>
-                        <div class="ct-iconBox--description">
-                            <span class="ct-title text-uppercase ct-fw-600">Analyze your performance.</span>
-                            <span class="ct-text">Compare your department's response performance to similar departments.</span>
-                        </div>
-                    </div>
-                    <div class="ct-iconBox ct-iconBox--2col">
-                        <div class="ct-icon text-center marketing-icon">
-                            <i class="icon-badge ct-fw-600"></i>
-                        </div>
-                        <div class="ct-iconBox--description">
-                            <span class="ct-title text-uppercase ct-fw-600">Get your grade.</span>
-                            <span class="ct-text">Learn if your performance is adequate for your community's risk level.</span>
-                        </div>
-                    </div>
-                </div>
-                  <div class="col-md-6">
+                  <div class="col-md-offset-2 col-md-8">
                     <div class="row">
                         <div class="contactForm validateIt ct-formContact--map ct-form--darkStyle" data-email-subject="Contact Form" data-show-errors="true">
                             <div class="form-group">
                                 <div class="ct-form--label--type2">
                                     <div class="ct-u-displayTableVertical">
                                         <div class="ct-u-displayTableCell text-center">
-                                            <span class="text-uppercase">Thank you!</span>
+                                            <span class="text-uppercase">Thanks!</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="ct-form--item ct-u-marginBottom20 form-group">
-                                    <p class="ct-u-text--white">Your message has been received and sent to FireCARES administrators.</p>
+                                <div class="ct-form--item ct-u-marginBottom20 form-group text-center">
+                                    <p class="ct-u-text--white">
+                                    {% block message %}
+                                        Your message has been received and sent to FireCARES administrators.
+                                    {% endblock %}
+                                    </p>
+                                    <a href="{% url 'firestation_home' %}"><img src="{{STATIC_URL}}firecares-header-logo.png" alt="FireCARES logo" class="ct-u-marginTop20" height="100px"></a>
                                 </div>
                             </div>
                         </div>
