@@ -1,13 +1,15 @@
 import requests
-from .forms import ForgotUsernameForm
+from .forms import ForgotUsernameForm, AccountRequestForm
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render
 from django.template import loader
-from django.views.generic import View
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import View, CreateView, TemplateView
 from firecares.firecares_core.forms import ContactForm
 from firecares.tasks.email import send_mail
 
@@ -76,3 +78,58 @@ class ContactUs(View):
                 # Captcha checking disabled
                 return self._save_and_notify(form)
         return render(request, self.template_name, {'form': form})
+
+
+class ShowMessage(TemplateView):
+    """
+    Generic view for showing messages to the user.
+
+    Set message with via self.request.session['message'] = 'message_string'.
+    """
+    template_name = 'show_message.html'
+
+    def get_context_data(self, **kwargs):
+        kwargs['message'] = self.request.session.pop('message', 'Your submission has been received.')
+        return super(ShowMessage, self).get_context_data(**kwargs)
+
+
+class AccountRequestView(CreateView):
+    """
+    Processes account requests.
+    """
+    template_name = 'firestation/home.html'
+    form_class = AccountRequestForm
+    http_method_names = ['post']
+    success_message = 'We will be in touch with you when FireCARES is ready. Please stay tuned to our partner websites'\
+                      ' and major fire service conferences for updates.'
+
+    def form_valid(self, form):
+        """
+        If the form is valid, save the associated model.
+        """
+        self.object = form.save()
+        self.send_email()
+        self.request.session['message'] = self.success_message
+        return HttpResponseRedirect(reverse('show_message'))
+
+    def form_invalid(self, form):
+        """
+        If the form is invalid, re-render the context data with the
+        data-filled form and errors.
+        """
+        if form.errors.get('email'):
+            self.request.session['message'] = form.errors['email'][0]
+        else:
+            self.request.session['message'] = 'Error processing request.'
+        return HttpResponseRedirect(reverse('show_message'))
+
+    def send_email(self):
+        """
+        Email admins when new account requests are received.
+        """
+        body = loader.render_to_string('contact/account_request_email.txt', dict(contact=self.object))
+        email_message = EmailMultiAlternatives('New account request received.',
+                                               body,
+                                               settings.DEFAULT_FROM_EMAIL,
+                                               [x[1] for x in settings.ADMINS])
+        send_mail.delay(email_message)

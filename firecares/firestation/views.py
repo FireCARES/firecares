@@ -17,7 +17,6 @@ from django.db.models import Max, Min
 from django.db.models.fields import FieldDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import IntegerField
-from django.db.models import F
 from django.utils.encoding import smart_str
 from firecares.firecares_core.mixins import LoginRequiredMixin, CacheMixin
 from firecares.firestation.managers import Ntile, Case, When
@@ -27,6 +26,8 @@ from firecares.usgs.models import (StateorTerritoryHigh, CountyorEquivalent,
     UnincorporatedPlace, MinorCivilDivision)
 from tempfile import mkdtemp
 from firecares.tasks.cleanup import remove_file
+
+
 
 class DISTScoreContextMixin(object):
     @staticmethod
@@ -524,9 +525,7 @@ class Stats(LoginRequiredMixin, TemplateView):
 
 class Home(CacheMixin, TemplateView):
     cache_timeout = 60 * 60 * 24
-
     template_name = 'firestation/home.html'
-
 
 class DownloadShapefile(LoginRequiredMixin, View):
     content_type = 'application/zip'

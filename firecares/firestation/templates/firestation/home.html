@@ -159,7 +159,39 @@
     </button>
 </div>
 
-<!--linear-gradient(0deg, #2d3a51, rgba(57, 173, 204, 1) 200.09%)-->
+<section class="sub-navbar hidden-xs">
+    <div class="container ct-u-paddingBoth20">
+        <span>
+            <a href="#about" class="text-uppercase">about firecares</a>
+            <a href="{% url 'firedepartment_list' %}" class="text-uppercase">browse</a>
+            <a href="{% url 'media' %}" class="text-uppercase">media</a>
+            <a href="#partners" class="text-uppercase">partners</a>
+            <a href="{% url 'contact_us' %}" class="text-uppercase">contact us</a>
+        </span>
+        <span class="right-navbar">
+            {% if not user.is_authenticated %}
+
+            <a href="#" class="text-uppercase sign-up-button" id="sign-up-popover" data-toggle="popover" title="Sign Up"
+               data-placement="bottom" tabindex="0" role="button">sign up</a>
+
+            <a href="{% url 'login' %}?next={% url 'firedepartment_list' %}" class="text-uppercase">login</a>
+            {% else %}
+            <a href="{% url 'logout' %}" class="text-uppercase">logout</a>
+            {% endif %}
+        </span>
+    </div>
+</section>
+
+
+<div id="popover_content_wrapper" style="display: none">
+  <form class="form-inline col-lg-12 ct-u-paddingBottom30 sign-up-popover-content" method="post" action="{% url 'account_request' %}">
+            <div class="text-center popup-content">Provide your email address and we will be in touch.</div>
+            <input id="contact_name_small" placeholder='example@domain.com' required name="email"
+                   type="email" class="form-control input-lg">
+            <div class="text-center">
+            <button type="submit" class="btn btn-primary">SIGN UP</button></div>
+        </form>
+</div>
 
 <div id="header"></div>
 <header class="ct-mediaSection text-center ct-u-text--white header-gradient">
@@ -187,26 +219,6 @@
     </div>
 </header>
 
-<section class="sub-navbar hidden-xs">
-    <div class="container ct-u-paddingBoth20">
-        <span>
-            <a href="#about" class="text-uppercase">about firecares</a>
-            <a href="{% url 'firedepartment_list' %}" class="text-uppercase">browse</a>
-            <a href="{% url 'media' %}" class="text-uppercase">media</a>
-            <a href="#partners" class="text-uppercase">partners</a>
-            <a href="{% url 'contact_us' %}" class="text-uppercase">contact us</a>
-        </span>
-        <span class="pull-right">
-            {% if not user.is_authenticated %}
-            <a href="{% url 'registration_register' %}" class="text-uppercase">sign up</a>
-            <a href="{% url 'login' %}?next={% url 'firedepartment_list' %}" class="text-uppercase">login</a>
-            {% else %}
-            <a href="{% url 'logout' %}" class="text-uppercase">logout</a>
-            {% endif %}
-        </span>
-    </div>
-</section>
-
 <section id="about" class="text-center ct-u-paddingBoth100 col-lg-12 section">
     <div class="row">
     <div class="col-lg-9">
@@ -221,7 +233,7 @@
             <div class="row">
                <div class="ct-iconBoxContainer center-block">
                    <div class="col-md-4">
-                       <div class="ct-iconBox">
+                       <div class="ct-iconBox default-cursor">
                            <div class="ct-icon center-block ct-u-marginBottom10 marketing-icon">
                                <i class="icon-location-pin ct-fw-600"></i>
                            </div>
@@ -232,7 +244,7 @@
                        </div>
                    </div>
                    <div class="col-md-4">
-                       <div class="ct-iconBox">
+                       <div class="ct-iconBox default-cursor">
                            <div class="ct-icon center-block ct-u-marginBottom10 marketing-icon">
                                <i class="icon-speedometer ct-fw-600"></i>
                            </div>
@@ -243,7 +255,7 @@
                        </div>
                    </div>
                    <div class="col-md-4">
-                       <div class="ct-iconBox">
+                       <div class="ct-iconBox default-cursor">
                            <div class="ct-icon center-block ct-u-marginBottom10 marketing-icon">
                                <i class="icon-badge ct-fw-600"></i>
                            </div>
@@ -263,7 +275,8 @@
         </div>
 </section>
 
-<section id="featured" class="section ct-u-paddingBottom20" style="min-height: 400px">
+
+<section id="featured" class="section ct-u-paddingBottom20 ct-u-paddingTop100 " style="min-height: 400px">
     <div class="ct-heading text-uppercase text-center ct-u-paddingBottom30">
         <h3>Over 30 million fires analyzed.</h3>
     </div>
@@ -277,6 +290,21 @@
         <div class="container">
             {% include 'firestation/_partners.html' %}
         </div>
+    </div>
+</section>
+
+<section class="ct-mediaSection account-request-section ct-u-paddingBoth90 ct-u-text--white text-center">
+    <div class="container">
+        <div class="ct-u-marginBottom15 text-center">
+            <h2 class="text-center">Sign up</h2>
+        </div>
+        <form class="form-inline col-lg-12 ct-u-paddingBottom30" method="post" action="{% url 'account_request' %}">
+            <div class="ct-u-paddingBottom30 account-request-section-content">Provide your email address and we will be in touch.</div>
+            <div class="ct-form--item ct-u-marginBottom20">
+                <input id="contact_name" placeholder='example@domain.com' required size="65" name="email" type="email" class="form-control input-lg">
+            </div>
+            <button type="submit" class="btn btn-primary">SIGN UP</button>
+        </form>
     </div>
 </section>
 

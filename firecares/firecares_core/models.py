@@ -6,7 +6,7 @@ from jsonfield import JSONField
 from time import sleep
 from django.utils import timezone
 from reversion import revisions as reversion
-
+from django.conf import settings
 
 class RecentlyUpdatedMixin(models.Model):
     """
@@ -150,5 +150,16 @@ class ContactRequest(models.Model):
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.email)
 
+
+class AccountRequest(models.Model):
+    """
+    Model to store account requests.
+    """
+    email = models.EmailField(unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
+
+    def __unicode__(self):
+        return "%s (%s)" % (self.email, self.created_at)
 
 reversion.register(Address)

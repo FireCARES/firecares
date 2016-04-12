@@ -1,4 +1,4 @@
-from .models import Address, ContactRequest
+from .models import Address, ContactRequest, AccountRequest
 from django.conf import settings
 from django.contrib.gis import admin
 
@@ -17,5 +17,12 @@ class ContactRequestAdmin(LocalOpenLayersAdmin):
     list_display = ['name', 'email', 'created_at']
     search_fields = ['name', 'email']
 
+
+class AccountRequestAdmin(LocalOpenLayersAdmin):
+    list_display = ['email', 'created_at']
+    search_fields = ['email']
+
+
 admin.site.register(Address, AddressAdmin)
 admin.site.register(ContactRequest, ContactRequestAdmin)
+admin.site.register(AccountRequest, AccountRequestAdmin)

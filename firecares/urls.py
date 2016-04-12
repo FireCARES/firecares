@@ -4,13 +4,14 @@ from django.contrib import admin
 from django.views.defaults import page_not_found
 from django.views.generic import TemplateView
 from .firecares_core.forms import FirecaresPasswordResetForm
-from .firecares_core.views import ForgotUsername, ContactUs
+from .firecares_core.views import ForgotUsername, ContactUs, AccountRequestView, ShowMessage
 from .firestation.api import StaffingResource, FireStationResource, FireDepartmentResource
 from tastypie.api import Api
 from firestation.views import Home
 from osgeo_importer.urls import FileAddView, importer_api
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import user_passes_test, permission_required
+from django.views.decorators.csrf import csrf_exempt
 
 admin.autodiscover()
 v1_api = Api(api_name='v1')
@@ -26,6 +27,8 @@ urlpatterns = patterns('',
     url(r'^contact-us/$', ContactUs.as_view(), name='contact_us'),
     url(r'^contact-us/thank-you/$', TemplateView.as_view(template_name='contact/thank_you.html'), name='contact_thank_you'),
     (r'^accounts/', include('registration.backends.default.urls')),
+    url(r'^account-request/$', csrf_exempt(AccountRequestView.as_view()), name='account_request'),
+    url(r'^thank-you/$', ShowMessage.as_view(), name='show_message'),
     url(r'^login/$', 'django.contrib.auth.views.login', name='login', kwargs={'template_name': 'accounts/login.html'}),
     url(r'^password-reset/$', 'django.contrib.auth.views.password_reset',
         name='password_reset',

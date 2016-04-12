@@ -1,4 +1,7 @@
 @charset "UTF-8";
+@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
+@import url(https://fonts.googleapis.com/css?family=Libre+Baskerville:400italic);
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700,800);
 /*------------------------------------------------------------------
 Project:	Estato - Developers HTML Template
 Version:	1.0
@@ -52,9 +55,6 @@ Licensed under the MIT license - http://opensource.org/licenses/MIT
 
 Copyright (c) 2014 Daniel Eden
 */
-@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
-@import url(https://fonts.googleapis.com/css?family=Libre+Baskerville:400italic);
-@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700,800);
 .animated {
   -webkit-animation-duration: 1s;
   animation-duration: 1s;
@@ -11578,6 +11578,62 @@ table.residential-fires {
 }
 .wizard-modal-window {
   z-index: 9000 !important;
+}
+.account-request-section {
+  background-color: #2d3a51;
+}
+.account-request-section h2 {
+  text-transform: uppercase;
+  font-weight: 100;
+}
+.account-request-section .header-element {
+  color: #f29a00;
+  margin-top: -30px;
+}
+.account-request-section .account-request-section-content {
+  font-weight: 100;
+  padding-top: 4px;
+}
+.account-request-section input {
+  background-color: #2d3a51;
+  border-color: white;
+  border-width: 1px;
+}
+.account-request-section button {
+  margin-top: 21px;
+}
+.default-cursor {
+  cursor: default !important;
+}
+.sign-up-button {
+  border: 2px #f29a00 solid;
+  border-radius: 5px;
+  padding: 4px !important;
+  background-color: #f29a00;
+  color: white !important;
+}
+.sign-up-button:hover {
+  background-color: white;
+  color: #2d3a51 !important;
+  opacity: .5;
+  padding: 0 15px;
+}
+.sign-up-popover-content .popup-content {
+  font-size: 14px;
+  padding-bottom: 15px;
+}
+.sign-up-popover-content input {
+  padding: 10px;
+  width: 100% !important;
+  background-color: white;
+}
+.sign-up-popover-content button {
+  margin-top: 15px;
+}
+.right-navbar {
+  right: 45px;
+  position: absolute;
+  width: 200px;
 }
 .ct-pageWrapper {
   z-index: 3;

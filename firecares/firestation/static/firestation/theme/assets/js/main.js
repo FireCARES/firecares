@@ -516,7 +516,11 @@ function makekenburns($element) {
 
         $("[data-toggle='tooltip']").tooltip();
 
-        $("[data-toggle='popover']").popover({trigger: "hover", html: true});
+        $("#sign-up-popover").popover({trigger: "click", html: true, content: function() {
+          return $('#popover_content_wrapper').html();
+        }});
+
+
 
         //Popup form center // --------------------------------
 

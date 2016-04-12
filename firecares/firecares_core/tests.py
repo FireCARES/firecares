@@ -1,4 +1,4 @@
-from .models import RecentlyUpdatedMixin
+from .models import RecentlyUpdatedMixin, AccountRequest
 
 from datetime import timedelta
 from urlparse import urlsplit, urlunsplit
@@ -244,3 +244,24 @@ class CoreTests(TestCase):
         c = Client()
         resp = c.get('/notarealpage/')
         self.assertContains(resp, 'Page not found', status_code=404)
+
+    def test_request_login(self):
+        """
+        Tests the account request workflow.
+        """
+        view = 'account_request'
+        c = Client()
+
+        with self.settings(ADMINS=(('Test Admin', 'admin@example.com'),)):
+            resp = c.post(reverse(view), {'email': 'test@example.com'}, follow=True)
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(1, AccountRequest.objects.count())
+
+            # Ensure duplicates are handled gracefully.
+            resp = c.post(reverse(view), {'email': 'test@example.com'}, follow=True)
+            self.assertEqual(resp.status_code, 200)
+
+            # Make sure admin email is triggered.
+            self.assertEqual(len(mail.outbox), 1)
+            print mail.outbox[0].message()
+
