@@ -126,6 +126,7 @@
                 weight: 0.8
               };
             });
+            map.fitBounds(serviceArea);
             map.spin(false);
           });
         }, function error(error) {
