@@ -28,6 +28,11 @@ LOGGING['loggers'] = {
         'level': 'ERROR',
         'propagate': True,
     },
+    'osgeo_importer': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+        'propagate': True,
+    },
 }
 
 
