@@ -11114,6 +11114,13 @@ table.residential-fires {
   opacity: 0.5;
   padding-top: 5px;
 }
+.gauge-description a {
+  color: #f29a00;
+  border-bottom: 1px dotted white;
+}
+.gauge-description a:hover {
+  border-bottom: 1px dotted;
+}
 .bar-gauge {
   background: #f6542f;
   background: -webkit-linear-gradient(left, #f6542f, #febe00 50%, #74ac49);
@@ -11234,6 +11241,13 @@ table.residential-fires {
   max-width: 90%;
   opacity: 0.5;
   padding-top: 5px;
+}
+.metric-description a {
+  color: #f29a00;
+  border-bottom: 1px dotted white;
+}
+.metric-description a:hover {
+  border-bottom: 1px dotted;
 }
 .metric-value-location {
   fill: #F6542F;
