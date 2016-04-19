@@ -40,9 +40,11 @@ The goal of the fire department performance score is to assess how well a fire d
             <div class="col-sm-12 col-md-12">
 
                 <div class="ct-u-marginBottom20" ng-app="fireStation" ng-controller="performanceScore">
-                    <gauge class="pull-right" description="This department is {[value]} seconds over the industry standard."
+                    {% verbatim %}
+                    <gauge class="pull-right" description="This department is {{ value }} seconds over the industry standard."
                                        metric-title="Performance Score" min="0"
-                                       max="200" value="{[ value ]}" inverse style="width: 300px;"></gauge>
+                                       max="200" value="{{ value }}" inverse style="width: 300px;"></gauge>
+                    {% endverbatim %}
                     <p>The goal of the fire department performance score is to assess how well a fire department performs compared to the "standardized" version of itself. One component of this metric is the structure fire spread category from the National Fire Incident Reporting System (NFIRS). This category provides information which quantifies the fire spread in a structure from confined to object of origin through spread beyond structure of origin. There are five categories defined in NFIRS, but for this analysis the data are collapsed into three categories: room of origin (lumping object and room together), floor of origin (lumping floor and structure together), and beyond structure of origin. The data are combined into these three bins which sets the baseline for the actual outcomes of the fire calls a particular department responds to. The resulting distribution of fire spread is the basis for comparison for developing the performance score.</p>
                     <p>The second component of this score is the model that defines how the fire department would perform if it were a standard, idealized version of itself. The concept is that there exists a fire department where all responses meet or exceed the national standards governing department performance. A fire department responding to a fire must complete a series of tasks before they can put water on the fire. For purposes of this model these tasks are broken up as follows:</p>
 
