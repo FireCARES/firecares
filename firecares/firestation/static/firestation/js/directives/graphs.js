@@ -105,6 +105,7 @@
           template: '<div class="aster-plot"><h5 class="aster-title">{{metricTitle}}</h5><svg></svg></div>',
           // The linking function will add behavior to the template
           link: function(scope, element, attrs) {
+              console.log(scope, element, attrs);
               var id = attrs.id;
               var width = 125,
                 height = 125,
@@ -112,8 +113,30 @@
                 radius = Math.min(width-10-padding, height-10-padding) / 2,
                 innerRadius = 0.3 * radius,
                 max = d3.max(scope.data, function(d){return d.value}),
-                filters = [],
-                labelr = radius + 5;
+                labelr = radius + 5,
+                element = element,
+                dragging;
+
+              scope.filters = [];
+
+            scope.$watchCollection('filters', function(newValue, oldValue) {
+                console.log('--Querying with new filters: ', newValue);
+                var hits = scope.crossfilter().filter(null);
+
+                if (newValue.length > 0) {
+                 hits = scope.crossfilter().filterFunction(function (d) {
+                    for (i = 0; i < newValue.length; i++) {
+                        if (d === newValue[i]) {
+                            return true;
+                        }
+                    }
+                 });
+                }
+                console.log('filters: ', scope.filters, 'length', hits.top(Infinity).length);
+                scope.$parent.heatMapDataFilters[scope.filterType] = hits;
+                console.log(scope.$parent.heatMapDataFilters);
+                scope.$parent.setHeatMapData();
+              });
 
             var pie = d3.layout.pie()
                 .sort(null)
@@ -135,6 +158,20 @@
                 .append("g")
                 .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
+            var drag = d3.behavior.drag()
+                .origin(function(d, i) { return d; })
+                .on("dragstart", dragmove)
+                .on("dragend", dragend);
+
+            function dragmove(d) {
+              dragging = true;
+              clear(this, d);
+            }
+
+            function dragend(d) {
+                dragging = false;
+                var hits = scope.crossfilter().filter(null);
+            }
           scope.data.forEach(function(d) {
             d.order = 1;
             d.weight = 1;
@@ -142,33 +179,24 @@
             d.label =  d.key;
           });
 
-          function handleClick(d, i) {
-            d3.select(this).classed("aster-selected", !d3.select(this).classed("aster-selected"));
-            console.log('Updating aster selection', i);
-            if (d3.select(this).classed("aster-selected")) {
-                filters.push(d.data.key);
-            } else {
-                i = filters.indexOf(d.data.key);
-                if (i > -1) {
-                    filters.splice(i, 1);
-                }
-            }
 
-            var hits = scope.crossfilter().filter(null);
-            if (filters.length > 0) {
-              hits = scope.crossfilter().filterFunction(function(d) {
-                for (i = 0; i < filters.length; i++) {
-                    if (d === filters[i]) {
-                        return true;
+
+          scope.selectObject = function(d) {
+            if (dragging) {
+                d3.select(this).classed("aster-selected", !d3.select(this).classed("aster-selected"));
+
+                if (d3.select(this).classed("aster-selected")) {
+                    console.log('about to update', scope.filters);
+                    scope.filters.push(d.data.key);
+                    scope.$apply();
+                } else {
+                    i = scope.filters.indexOf(d.data.key);
+                    if (i > -1) {
+                        scope.filters.splice(i, 1);
                     }
                 }
-            });
             }
-            console.log('filters: ', filters, 'length', hits.top(Infinity).length);
-            scope.$parent.heatMapDataFilters[scope.filterType] = hits;
-            console.log(scope.$parent.heatMapDataFilters);
-            scope.$parent.setHeatMapData();
-          }
+          };
 
           var outerPath = svg.selectAll(".outlineArc")
               .data(pie(scope.data))
@@ -179,7 +207,9 @@
               .attr("stroke-width", "2")
               .attr("class", "outlineArc")
               .attr("d", outlineArc)
-              .on("click", handleClick);
+              .on("click", handleClick)
+              .call(drag)
+              .on('mouseover', scope.selectObject);
 
           var path = svg.selectAll(".solidArc")
               .data(pie(scope.data))
@@ -189,7 +219,10 @@
               .attr("stroke", "white")
               .attr("stroke-width", "1")
               .attr("d", arc)
-              .on("click", handleClick);
+              .on("click.clr", function(d) {return clear(this, d)})
+              .on("click.handle", handleClick)
+              .call(drag)
+              .on('mouseover', scope.selectObject);
 
               svg.selectAll('.solidArcLabel')
                 .data(pie(scope.data)).enter().append('text')
@@ -204,10 +237,22 @@
                 }).attr('class', 'aster-label')
                 .text(function(d) { console.log(d); return d.data.key; });
 
+          function clear(selection, d) {
+              d3.selectAll(selection.parentElement.childNodes)
+                  .filter(function(n){return n!==d})
+                  .classed("aster-selected", false);
+              scope.filters = [];
+          };
+
+          function handleClick(d, i) {
+            if (d3.select(this).classed('aster-selected', true)) {
+              scope.filters.push(d.data.key);
+              scope.$apply();
+            }
+          }
           // calculate the weighted mean score
           var score =
             scope.data.reduce(function(a, b) {
-              //console.log('a:' + a + ', b.score: ' + b.score + ', b.weight: ' + b.weight);
               return a + (b.value * b.weight);
             }, 0) /
             scope.data.reduce(function(a, b) {
