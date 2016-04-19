@@ -656,7 +656,7 @@ class DownloadShapefile(LoginRequiredMixin, View):
         if os.path.exists(os.path.join(self.output_dir, filename + '.zip')):
             filename += '-' + str(uuid.uuid4())[:5]
 
-        zip_file = shutil.make_archive(self.output_dir + '/' + filename, 'zip', path)
+        zip_file = shutil.make_archive(self.output_dir + '/' + filename, 'zip', file_path)
 
         if self.request.META.get('SERVER_NAME') != 'testserver':
             remove_file.delay(path)
