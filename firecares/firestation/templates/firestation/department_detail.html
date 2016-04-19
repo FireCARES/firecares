@@ -223,7 +223,7 @@
 
                         <div class="ct-u-displayTableCell text-right">
                             {% if perms.firestation.change_firedeparment %}
-                            <a href="{% url 'firedepartment_update_government_units' object.id %}" class="usgs-update-link"><i class="fa fa-arrow-circle-o-up"></i>Update government units</a>
+                            <a href="{% url 'firedepartment_update_government_units' object.id %}" class="usgs-update-link"><i class="fa fa-edit"></i>Update government units</a>
                             <a href="" class="pointer usgs-update-link" ng-controller="ImportController" ng-click="open(null, '{{ STATIC_URL }}osgeo_importer/partials/uploadWizard.html', '{{ STATIC_URL }}mapstory/img/mapstory-icon.png', '{{STATIC_URL}}')">
                                 <i class="fa fa-cloud-upload"></i> Update Data
                             </a>
