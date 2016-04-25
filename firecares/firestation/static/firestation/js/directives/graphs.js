@@ -165,7 +165,10 @@
 
             function dragmove(d) {
               dragging = true;
-              clear(this, d);
+              d3.selectAll(this.parentElement.childNodes)
+                  .filter('.aster-selected')
+                  .classed('aster-selected', false);
+              //d3.select(this).classed('aster-selected', true);
             }
 
             function dragend(d) {
@@ -219,7 +222,6 @@
               .attr("stroke", "white")
               .attr("stroke-width", "1")
               .attr("d", arc)
-              .on("click.clr", function(d) {return clear(this, d)})
               .on("click.handle", handleClick)
               .call(drag)
               .on('mouseover', scope.selectObject);
@@ -237,18 +239,37 @@
                 }).attr('class', 'aster-label')
                 .text(function(d) { console.log(d); return d.data.key; });
 
-          function clear(selection, d) {
-              d3.selectAll(selection.parentElement.childNodes)
-                  .filter(function(n){return n!==d})
-                  .classed("aster-selected", false);
-              scope.filters = [];
-          };
+          function query(element) {
+            d3.selectAll(element.parentElement.childNodes)
+                .filter('.aster-selected')
+                .each(function(d) {
+                    console.log('adding ' + d + 'to filter');
+                })
+          }
 
           function handleClick(d, i) {
-            if (d3.select(this).classed('aster-selected', true)) {
+              var selected = d3.selectAll(this.parentElement.childNodes).filter('.aster-selected');
+
+              if (selected.empty()){
+               d3.select(this).classed('aster-selected', true);
+              } else if (selected[0].length == 1) {
+                  if (selected[0].indexOf(this) > -1) {
+                    d3.select(this).classed('aster-selected', false);
+                  } else {
+                    selected.classed('aster-selected', false);
+                    d3.select(this).classed('aster-selected', true);
+                  }
+              } else if (selected[0].length > 1) {
+                  d3.select(this).classed('aster-selected', true);
+                  d3.selectAll(this.parentElement.childNodes)
+                  .filter(function(n){console.log(n!==d);return n!==d})
+                  .classed("aster-selected", false);
+              }
+
+              scope.filters = [];
+              //console.log(query(this));
               scope.filters.push(d.data.key);
               scope.$apply();
-            }
           }
           // calculate the weighted mean score
           var score =
