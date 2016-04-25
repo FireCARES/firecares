@@ -33,6 +33,11 @@
       q="{{ request.GET.q }}"
       dist-model-score="{{ request.GET.dist_model_score }}"
       >
+
+    {% include 'firestation/_mobile_navbar.html' %}
+
+<div id="ct-js-wrapper" class="ct-pageWrapper">
+
 <div class="ct-navbarMobile">
     <button type="button" class="navbar-toggle">
         <span class="sr-only">Toggle navigation</span>
@@ -163,10 +168,6 @@
         </div>
     </div>
 </form>
-
-
-<div id="ct-js-wrapper" class="ct-pageWrapper">
-
 
 <div class="ct-site--map">
     <div class="container">
