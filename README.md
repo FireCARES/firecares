@@ -38,7 +38,6 @@ You'll need the following commands to run all of the unit tests.  Tests are run 
 
 ```
 vagrant ssh
-sudo -u postgres psql -c "alter user firecares superuser"`
 sudo su firecares
 workon firecares
 python manage.py test
