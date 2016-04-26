@@ -1,0 +1,45 @@
+<div class="ct-form--item ct-u-marginBoth10">
+    <label>Search all fields</label>
+    <input name="name" type="text" class="form-control input-lg" placeholder="Any" ng-model="params.q" ng-enter="search()">
+</div>
+<div class="ct-form--item ct-u-marginBoth10">
+    <label>Department name</label>
+    <input name="name" type="text" class="form-control input-lg" placeholder="Any" ng-model="params.name" ng-enter="search()">
+</div>
+<div class="ct-form--item ct-u-marginBoth10">
+    <label>FDID</label>
+    <input name="fdid" type="text" class="form-control input-lg" placeholder="Any" ng-model="params.fdid" ng-enter="search()">
+</div>
+<div class="ct-form--item ct-u-marginBottom10">
+    <label>State</label>
+    {% verbatim %}
+    <ui-select theme="bootstrap" name="state" class="ct-select-lg" ng-model="params.state">
+        <ui-select-match placeholder="Any">{{ $select.selected.name }}</ui-select-match>
+        <ui-select-choices repeat="state.abbr as state in states | orderBy: 'name' | filter: $select.search">
+            <span ng-bind-html="state.name | highlight: $select.search"></span>
+        </ui-select-choices>
+    </ui-select>
+    {% endverbatim %}
+</div>
+<div class="ct-form--item ct-u-marginBottom10">
+    <label>Region</label>
+    {% verbatim %}
+    <ui-select theme="bootstrap" name="region" class="ct-select-lg" ng-model="params.region">
+        <ui-select-match placeholder="Select region">{{ $select.selected }}</ui-select-match>
+        <ui-select-choices repeat="region in regions | filter: $select.search">
+            <span ng-bind-html="region | highlight: $select.search"></span>
+        </ui-select-choices>
+    </ui-select>
+    {% endverbatim %}
+</div>
+<div class="ct-form--item ct-u-marginBoth40">
+    <input name="dist_model_score" type="text" ng-model="params.dist_model_score" class="slider ct-js-sliderTicks" data-slider-handle="square" data-slider-min="{{ dist_min|floatformat|default:0 }}" data-slider-max="{{ dist_max|floatformat|default:1000 }}" data-slider-step="1"
+           data-slider-value="[{{request.GET.dist_model_score | default:dist_min}} , {{dist_max}}]"/>-->
+    <label class="text-center center-block">DIST Score (s)</label>
+</div>
+<div class="ct-u-displayTableCell">
+    <input name="population" humanize="1" type="text" ng-model="params.population" class="slider ct-js-sliderTicks"  data-slider-handle="square" data-slider-min="{{ population_min|floatformat|default:0 }}" data-slider-max="{{ population_max|floatformat|default:1000 }}"  data-slider-step="10"
+           data-slider-value="[{{request.GET.population | default:population_min}} , {{population_max}}]"/>
+    <label class="text-center center-block">Protected Population</label>
+</div>
+<button type="submit" class="btn btn-warning ct-u-marginTop10" ng-click="search()">Search or Filter Now</button>
