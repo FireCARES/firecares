@@ -34,24 +34,7 @@
       dist-model-score="{{ request.GET.dist_model_score }}"
       >
 
-    {% include 'firestation/_mobile_navbar.html' %}
-
-<div id="ct-js-wrapper" class="ct-pageWrapper">
-
-<div class="ct-navbarMobile">
-    <button type="button" class="navbar-toggle">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-    </button>
-    <a class="navbar-brand logo" href="{% url 'firestation_home' %}"><h1>FireCARES</h1></a>
-    <button type="button" class="searchForm-toggle">
-        <span class="sr-only">Toggle navigation</span>
-        <span><i class="fa fa-search"></i></span>
-    </button>
-</div>
-
+{% include 'firestation/_mobile_navbar.html' %}
 {% include "firestation/_navbar.html" %}
 
 <form class="ct-searchFormMobile ct-u-marginBottom50" role="form">
@@ -168,6 +151,22 @@
         </div>
     </div>
 </form>
+
+<div id="ct-js-wrapper" class="ct-pageWrapper">
+
+<div class="ct-navbarMobile">
+    <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand logo" href="{% url 'firestation_home' %}"><h1>FireCARES</h1></a>
+    <button type="button" class="searchForm-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span><i class="fa fa-search"></i></span>
+    </button>
+</div>
 
 <div class="ct-site--map">
     <div class="container">
