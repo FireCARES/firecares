@@ -1,4 +1,15 @@
-<form class="ct-searchFormMobile ct-u-marginBottom50" role="form">
+<div class="search"
+     sort-by="{{ request.GET.sortBy }}"
+     limit="{{ request.GET.limit }}"
+     fdid="{{ request.GET.fdid }}"
+     state="{{ request.GET.state }}"
+     region="{{ request.GET.region }}"
+     sort-fields='{{ sort_by_fields|safe }}'
+     name="{{ request.GET.name }}"
+     population="{{ request.GET.population }}"
+     q="{{ request.GET.q }}"
+     dist-model-score="{{ request.GET.dist_model_score }}">
+    <form class="ct-searchFormMobile ct-u-marginBottom50" role="form">
     <div class="form-group ">
         <div class="ct-form--label--type1">
             <div class="ct-u-displayTableVertical">
@@ -17,3 +28,4 @@
         {% include 'firestation/_search_form.html' %}
     </div>
 </form>
+</div>

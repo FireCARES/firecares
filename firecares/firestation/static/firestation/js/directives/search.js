@@ -56,7 +56,7 @@
         scope.regions = ['Any', 'Midwest', 'South', 'West'];
 
         scope.search = function() {
-          window.location = window.location.pathname + '?' + $.param( scope.params );
+          window.location = '/departments?' + $.param( scope.params );
         }
       }
     };
