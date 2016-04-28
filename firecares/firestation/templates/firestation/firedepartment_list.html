@@ -36,26 +36,7 @@
 
 {% include 'firestation/_mobile_navbar.html' %}
 {% include "firestation/_navbar.html" %}
-
-<form class="ct-searchFormMobile ct-u-marginBottom50" role="form">
-    <div class="form-group ">
-        <div class="ct-form--label--type1">
-            <div class="ct-u-displayTableVertical">
-                <div class="ct-u-displayTableCell">
-                    <div class="ct-input-group-btn">
-                        <button class="btn btn-primary">
-                            <i class="fa fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="ct-u-displayTableCell text-center">
-                    <span class="text-uppercase">Search for departments</span>
-                </div>
-            </div>
-        </div>
-        {% include 'firestation/_search.html' %}
-    </div>
-</form>
+{% include 'firestation/_mobile_search.html' %}
 
 <div id="ct-js-wrapper" class="ct-pageWrapper">
 
@@ -105,7 +86,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                {% include 'firestation/_search.html' %}
+                                {% include 'firestation/_search_form.html' %}
                             </div>
                         </form>
                     </div>

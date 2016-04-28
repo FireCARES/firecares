@@ -115,6 +115,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.template.context_processors.tz",
     "django.contrib.messages.context_processors.messages",
     "firecares.firecares_core.context_processors.third_party_tracking_ids",
+    "firecares.firecares_core.context_processors.fire_department_search",
 )
 
 MIDDLEWARE_CLASSES = (

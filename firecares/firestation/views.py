@@ -28,22 +28,6 @@ from tempfile import mkdtemp
 from firecares.tasks.cleanup import remove_file
 
 
-
-class DISTScoreContextMixin(object):
-    @staticmethod
-    def add_dist_values_to_context():
-        context = {}
-        score_metrics = FireDepartment.objects.all().aggregate(Max('dist_model_score'), Min('dist_model_score'))
-        context['dist_max'] = score_metrics['dist_model_score__max']
-        context['dist_min'] = score_metrics['dist_model_score__min']
-
-        population_metrics = FireDepartment.objects.all().aggregate(Max('population'), Min('population'))
-        context['population_max'] = population_metrics['population__max'] or 0
-        context['population_min'] = population_metrics['population__min'] or 0
-
-        return context
-
-
 class FeaturedDepartmentsMixin(object):
     """
     Mixin to add featured departments to a request.
@@ -54,7 +38,7 @@ class FeaturedDepartmentsMixin(object):
         return FireDepartment.priority_departments.all()
 
 
-class DepartmentDetailView(LoginRequiredMixin, CacheMixin, DISTScoreContextMixin, DetailView):
+class DepartmentDetailView(LoginRequiredMixin, CacheMixin, DetailView):
     model = FireDepartment
     template_name = 'firestation/department_detail.html'
     page = 1
@@ -191,7 +175,6 @@ class DepartmentDetailView(LoginRequiredMixin, CacheMixin, DISTScoreContextMixin
             except (KeyError, TypeError):
                 context['national_risk_model_deaths_injuries_sum_quartile'] = None
 
-        context.update(self.add_dist_values_to_context())
         return context
 
 
@@ -363,7 +346,7 @@ class LimitMixin(object):
         return context
 
 
-class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitMixin, DISTScoreContextMixin,
+class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitMixin,
                              FeaturedDepartmentsMixin):
     model = FireDepartment
     paginate_by = 30
@@ -424,7 +407,6 @@ class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitM
     def get_context_data(self, **kwargs):
         context = super(FireDepartmentListView, self).get_context_data(**kwargs)
         context = self.get_sort_context(context)
-        context.update(self.add_dist_values_to_context())
         context['featured_departments'] = self.get_featured_departments().order_by('?')[:5]
 
         page_obj = context['page_obj']
