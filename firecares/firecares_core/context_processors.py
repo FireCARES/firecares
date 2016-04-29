@@ -35,6 +35,6 @@ def fire_department_search(request):
         'population_min': score_metrics['population__min'] or 0,
     }
 
-    cache.set('fire_department_search_context', context)
+    cache.set('fire_department_search_context', context, 60 * 60 * 24)
 
     return context
