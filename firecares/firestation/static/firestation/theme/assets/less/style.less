@@ -2480,6 +2480,30 @@ header{
   }
 }
 
+// On small and large screens, keep sorting options inline to the right.
+@media (max-width: @screen-sm-max) and (min-width: @screen-sm-min), (min-width: @screen-lg-min) {
+  .ct-sortingBar {
+    .ct-sortingTitle {
+      float: left;
+    }
+    .ct-sortingOptions {
+      float: right;
+    }
+  }
+}
+
+// On xsmall and medium screens, put sorting options to the left on the next line.
+@media (max-width: @screen-xs-max) and (min-width: @screen-xs-min), (max-width: @screen-md-max) and (min-width: @screen-md-min){
+  .ct-sortingBar {
+    .ct-sortingTitle {
+      margin-bottom: 20px;
+    }
+    .ct-sortingOptions {
+      float: left;
+    }
+  }
+}
+
 .ct-showProducts--list{
   div[class^="col-"]{
     width: 100%;
@@ -3941,21 +3965,6 @@ header{
 
   .ct-mediaSection .ct-mediaSection-inner{
     display: block;
-  }
-
-  //sorting bar
-
-  .ct-sortingBar{
-    margin-top: 10px;
-    .ct-sortingTitle, ul{
-      float: none!important;
-    }
-    .ct-sortingTitle{
-      margin-bottom: 20px;
-    }
-    ul{
-      display: inline-block;
-    }
   }
 
   .ct-section--inline{

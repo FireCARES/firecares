@@ -1,7 +1,4 @@
 @charset "UTF-8";
-@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
-@import url(https://fonts.googleapis.com/css?family=Libre+Baskerville:400italic);
-@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700,800);
 /*------------------------------------------------------------------
 Project:	Estato - Developers HTML Template
 Version:	1.0
@@ -55,6 +52,9 @@ Licensed under the MIT license - http://opensource.org/licenses/MIT
 
 Copyright (c) 2014 Daniel Eden
 */
+@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
+@import url(https://fonts.googleapis.com/css?family=Libre+Baskerville:400italic);
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700,800);
 .animated {
   -webkit-animation-duration: 1s;
   animation-duration: 1s;
@@ -2872,11 +2872,11 @@ Version: 3.5.2 Timestamp: Sat Nov  1 14:43:36 EDT 2014
   -ms-user-select: none;
   user-select: none;
   background-color: #fff;
-  background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #eeeeee), color-stop(0.5, #ffffff));
-  background-image: -webkit-linear-gradient(center bottom, #eeeeee 0%, #ffffff 50%);
-  background-image: -moz-linear-gradient(center bottom, #eeeeee 0%, #ffffff 50%);
+  background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #eee), color-stop(0.5, #fff));
+  background-image: -webkit-linear-gradient(center bottom, #eee 0%, #fff 50%);
+  background-image: -moz-linear-gradient(center bottom, #eee 0%, #fff 50%);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#ffffff", endColorstr="#eeeeee", GradientType=0);
-  background-image: linear-gradient(to top, #eeeeee 0%, #ffffff 50%);
+  background-image: linear-gradient(to top, #eee 0%, #fff 50%);
 }
 html[dir="rtl"] .select2-container .select2-choice {
   padding: 0 8px 0 0;
@@ -2884,11 +2884,11 @@ html[dir="rtl"] .select2-container .select2-choice {
 .select2-container.select2-drop-above .select2-choice {
   border-bottom-color: #aaa;
   border-radius: 0 0 4px 4px;
-  background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #eeeeee), color-stop(0.9, #ffffff));
-  background-image: -webkit-linear-gradient(center bottom, #eeeeee 0%, #ffffff 90%);
-  background-image: -moz-linear-gradient(center bottom, #eeeeee 0%, #ffffff 90%);
+  background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #eee), color-stop(0.9, #fff));
+  background-image: -webkit-linear-gradient(center bottom, #eee 0%, #fff 90%);
+  background-image: -moz-linear-gradient(center bottom, #eee 0%, #fff 90%);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#ffffff", endColorstr="#eeeeee", GradientType=0);
-  background-image: linear-gradient(to bottom, #eeeeee 0%, #ffffff 90%);
+  background-image: linear-gradient(to bottom, #eee 0%, #fff 90%);
 }
 .select2-container.select2-allowclear .select2-choice .select2-chosen {
   margin-right: 42px;
@@ -2990,11 +2990,11 @@ html[dir="rtl"] .select2-container .select2-choice > .select2-chosen {
   border-radius: 0 4px 4px 0;
   background-clip: padding-box;
   background: #ccc;
-  background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #cccccc), color-stop(0.6, #eeeeee));
-  background-image: -webkit-linear-gradient(center bottom, #cccccc 0%, #eeeeee 60%);
-  background-image: -moz-linear-gradient(center bottom, #cccccc 0%, #eeeeee 60%);
+  background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #ccc), color-stop(0.6, #eee));
+  background-image: -webkit-linear-gradient(center bottom, #ccc 0%, #eee 60%);
+  background-image: -moz-linear-gradient(center bottom, #ccc 0%, #eee 60%);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#eeeeee", endColorstr="#cccccc", GradientType=0);
-  background-image: linear-gradient(to top, #cccccc 0%, #eeeeee 60%);
+  background-image: linear-gradient(to top, #ccc 0%, #eee 60%);
 }
 html[dir="rtl"] .select2-container .select2-choice .select2-arrow {
   left: 0;
@@ -3073,21 +3073,21 @@ html[dir="rtl"] .select2-search input {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
   background-color: #eee;
-  background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #ffffff), color-stop(0.5, #eeeeee));
-  background-image: -webkit-linear-gradient(center bottom, #ffffff 0%, #eeeeee 50%);
-  background-image: -moz-linear-gradient(center bottom, #ffffff 0%, #eeeeee 50%);
+  background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #fff), color-stop(0.5, #eee));
+  background-image: -webkit-linear-gradient(center bottom, #fff 0%, #eee 50%);
+  background-image: -moz-linear-gradient(center bottom, #fff 0%, #eee 50%);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#eeeeee", endColorstr="#ffffff", GradientType=0);
-  background-image: linear-gradient(to top, #ffffff 0%, #eeeeee 50%);
+  background-image: linear-gradient(to top, #fff 0%, #eee 50%);
 }
 .select2-dropdown-open.select2-drop-above .select2-choice,
 .select2-dropdown-open.select2-drop-above .select2-choices {
   border: 1px solid #5897fb;
   border-top-color: transparent;
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #ffffff), color-stop(0.5, #eeeeee));
-  background-image: -webkit-linear-gradient(center top, #ffffff 0%, #eeeeee 50%);
-  background-image: -moz-linear-gradient(center top, #ffffff 0%, #eeeeee 50%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #fff), color-stop(0.5, #eee));
+  background-image: -webkit-linear-gradient(center top, #fff 0%, #eee 50%);
+  background-image: -moz-linear-gradient(center top, #fff 0%, #eee 50%);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#eeeeee", endColorstr="#ffffff", GradientType=0);
-  background-image: linear-gradient(to bottom, #ffffff 0%, #eeeeee 50%);
+  background-image: linear-gradient(to bottom, #fff 0%, #eee 50%);
 }
 .select2-dropdown-open .select2-choice .select2-arrow {
   background: transparent;
@@ -3247,10 +3247,10 @@ disabled look for disabled choices in the results dropdown
   cursor: text;
   overflow: hidden;
   background-color: #fff;
-  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(1%, #eeeeee), color-stop(15%, #ffffff));
-  background-image: -webkit-linear-gradient(top, #eeeeee 1%, #ffffff 15%);
-  background-image: -moz-linear-gradient(top, #eeeeee 1%, #ffffff 15%);
-  background-image: linear-gradient(to bottom, #eeeeee 1%, #ffffff 15%);
+  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(1%, #eee), color-stop(15%, #fff));
+  background-image: -webkit-linear-gradient(top, #eee 1%, #fff 15%);
+  background-image: -moz-linear-gradient(top, #eee 1%, #fff 15%);
+  background-image: linear-gradient(to bottom, #eee 1%, #fff 15%);
 }
 html[dir="rtl"] .select2-container-multi .select2-choices {
   padding: 0 0 0 5px;
@@ -3292,7 +3292,7 @@ html[dir="rtl"] .select2-container-multi .select2-choices li {
   background: transparent !important;
 }
 .select2-container-multi .select2-choices .select2-search-field input.select2-active {
-  background: #ffffff url("select2-spinner.gif") no-repeat 100% !important;
+  background: #fff url("select2-spinner.gif") no-repeat 100% !important;
 }
 .select2-default {
   color: #999 !important;
@@ -3306,8 +3306,8 @@ html[dir="rtl"] .select2-container-multi .select2-choices li {
   cursor: default;
   border: 1px solid #aaaaaa;
   border-radius: 3px;
-  -webkit-box-shadow: 0 0 2px #ffffff inset, 0 1px 0 rgba(0, 0, 0, 0.05);
-  box-shadow: 0 0 2px #ffffff inset, 0 1px 0 rgba(0, 0, 0, 0.05);
+  -webkit-box-shadow: 0 0 2px #fff inset, 0 1px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: 0 0 2px #fff inset, 0 1px 0 rgba(0, 0, 0, 0.05);
   background-clip: padding-box;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -3316,10 +3316,10 @@ html[dir="rtl"] .select2-container-multi .select2-choices li {
   user-select: none;
   background-color: #e4e4e4;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#eeeeee", endColorstr="#f4f4f4", GradientType=0);
-  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(20%, #f4f4f4), color-stop(50%, #f0f0f0), color-stop(52%, #e8e8e8), color-stop(100%, #eeeeee));
-  background-image: -webkit-linear-gradient(top, #f4f4f4 20%, #f0f0f0 50%, #e8e8e8 52%, #eeeeee 100%);
-  background-image: -moz-linear-gradient(top, #f4f4f4 20%, #f0f0f0 50%, #e8e8e8 52%, #eeeeee 100%);
-  background-image: linear-gradient(to bottom, #f4f4f4 20%, #f0f0f0 50%, #e8e8e8 52%, #eeeeee 100%);
+  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(20%, #f4f4f4), color-stop(50%, #f0f0f0), color-stop(52%, #e8e8e8), color-stop(100%, #eee));
+  background-image: -webkit-linear-gradient(top, #f4f4f4 20%, #f0f0f0 50%, #e8e8e8 52%, #eee 100%);
+  background-image: -moz-linear-gradient(top, #f4f4f4 20%, #f0f0f0 50%, #e8e8e8 52%, #eee 100%);
+  background-image: linear-gradient(to bottom, #f4f4f4 20%, #f0f0f0 50%, #e8e8e8 52%, #eee 100%);
 }
 html[dir="rtl"] .select2-container-multi .select2-choices .select2-search-choice {
   margin: 3px 5px 3px 0;
@@ -5269,7 +5269,7 @@ p {
   line-height: 21px;
 }
 a {
-  color: #1f2530;
+  color: #1F2530;
   -webkit-transition: all 0.3s ease;
   -moz-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;
@@ -6186,8 +6186,8 @@ button {
 }
 .btn-default {
   color: #ffffff;
-  background-color: #ffffff;
-  border-color: #ffffff;
+  background-color: #fff;
+  border-color: #fff;
   color: #333;
 }
 .btn-default:hover,
@@ -6263,8 +6263,8 @@ button {
 }
 .btn-dark {
   color: #ffffff;
-  background-color: #333333;
-  border-color: #333333;
+  background-color: #333;
+  border-color: #333;
 }
 .btn-dark:hover,
 .btn-dark:focus,
@@ -8069,7 +8069,7 @@ img.mfp-img {
 }
 .fa-border {
   padding: .2em .25em .15em;
-  border: solid 0.08em #eeeeee;
+  border: solid 0.08em #eee;
   border-radius: .1em;
 }
 .fa-pull-left {
@@ -8184,7 +8184,7 @@ img.mfp-img {
   font-size: 2em;
 }
 .fa-inverse {
-  color: #ffffff;
+  color: #fff;
 }
 /* Font Awesome uses the Unicode Private Use Area (PUA) to ensure screen
    readers do not read off random characters that represent icons */
@@ -10984,7 +10984,7 @@ img.mfp-img {
   margin-left: 55px;
 }
 .community-stats h4 {
-  color: #f29a00;
+  color: #F29A00;
   font-size: 35px;
   margin-bottom: 5px;
 }
@@ -10995,12 +10995,12 @@ table.residential-fires {
   font-size: 14px;
 }
 .gauge {
-  background: #f6542f;
-  background: -webkit-linear-gradient(left, #f6542f, #febe00 50%, #74ac49);
-  background: -moz-linear-gradient(left, #f6542f, #febe00 50%, #74ac49);
+  background: #F6542F;
+  background: -webkit-linear-gradient(left, #F6542F, #FEBE00 50%, #74AC49);
+  background: -moz-linear-gradient(left, #F6542F, #FEBE00 50%, #74AC49);
   /* FF3.6+ */
-  background: -ms-linear-gradient(left, #f6542f, #febe00 50%, #74ac49);
-  background: -o-linear-gradient(left, #f6542f, #febe00 50%, #74ac49);
+  background: -ms-linear-gradient(left, #F6542F, #FEBE00 50%, #74AC49);
+  background: -o-linear-gradient(left, #F6542F, #FEBE00 50%, #74AC49);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff6542f', endColorstr='#ff74ac49', GradientType=1);
   width: 200px;
   height: 100px;
@@ -11011,12 +11011,12 @@ table.residential-fires {
   border: 1px solid white;
 }
 .gauge-inverse {
-  background: #74ac49;
-  background: -webkit-linear-gradient(left, #74ac49, #febe00 50%, #f6542f);
-  background: -moz-linear-gradient(left, #74ac49, #febe00 50%, #f6542f);
+  background: #74AC49;
+  background: -webkit-linear-gradient(left, #74AC49, #FEBE00 50%, #F6542F);
+  background: -moz-linear-gradient(left, #74AC49, #FEBE00 50%, #F6542F);
   /* FF3.6+ */
-  background: -ms-linear-gradient(left, #74ac49, #febe00 50%, #f6542f);
-  background: -o-linear-gradient(left, #74ac49, #febe00 50%, #f6542f);
+  background: -ms-linear-gradient(left, #74AC49, #FEBE00 50%, #F6542F);
+  background: -o-linear-gradient(left, #74AC49, #FEBE00 50%, #F6542F);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff74ac49', endColorstr='#fff6542f', GradientType=1);
 }
 .guage-min {
@@ -11115,19 +11115,19 @@ table.residential-fires {
   padding-top: 5px;
 }
 .gauge-description a {
-  color: #f29a00;
+  color: #F29A00;
   border-bottom: 1px dotted white;
 }
 .gauge-description a:hover {
   border-bottom: 1px dotted;
 }
 .bar-gauge {
-  background: #f6542f;
-  background: -webkit-linear-gradient(left, #f6542f, #febe00 50%, #74ac49);
-  background: -moz-linear-gradient(left, #f6542f, #febe00 50%, #74ac49);
+  background: #F6542F;
+  background: -webkit-linear-gradient(left, #F6542F, #FEBE00 50%, #74AC49);
+  background: -moz-linear-gradient(left, #F6542F, #FEBE00 50%, #74AC49);
   /* FF3.6+ */
-  background: -ms-linear-gradient(left, #f6542f, #febe00 50%, #74ac49);
-  background: -o-linear-gradient(left, #f6542f, #febe00 50%, #74ac49);
+  background: -ms-linear-gradient(left, #F6542F, #FEBE00 50%, #74AC49);
+  background: -o-linear-gradient(left, #F6542F, #FEBE00 50%, #74AC49);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff6542f', endColorstr='#ff74ac49', GradientType=1);
   height: 7px;
   width: 150px;
@@ -11161,12 +11161,12 @@ table.residential-fires {
   border-color: transparent #AAAAAA transparent transparent;
 }
 .bar-gauge-inverse {
-  background: #74ac49;
-  background: -webkit-linear-gradient(left, #74ac49, #febe00 50%, #f6542f);
-  background: -moz-linear-gradient(left, #74ac49, #febe00 50%, #f6542f);
+  background: #74AC49;
+  background: -webkit-linear-gradient(left, #74AC49, #FEBE00 50%, #F6542F);
+  background: -moz-linear-gradient(left, #74AC49, #FEBE00 50%, #F6542F);
   /* FF3.6+ */
-  background: -ms-linear-gradient(left, #74ac49, #febe00 50%, #f6542f);
-  background: -o-linear-gradient(left, #74ac49, #febe00 50%, #f6542f);
+  background: -ms-linear-gradient(left, #74AC49, #FEBE00 50%, #F6542F);
+  background: -o-linear-gradient(left, #74AC49, #FEBE00 50%, #F6542F);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff74ac49', endColorstr='#fff6542f', GradientType=1);
 }
 .bar-gauge-label {
@@ -11214,7 +11214,7 @@ table.residential-fires {
 }
 .firecares-graph .nvd3 text {
   font: 300 14px "Open Sans";
-  color: #2d3a51;
+  color: #2D3A51;
 }
 .firecares-graph .nvd3 .nv-axis path.domain {
   stroke-opacity: 1;
@@ -11243,7 +11243,7 @@ table.residential-fires {
   padding-top: 5px;
 }
 .metric-description a {
-  color: #f29a00;
+  color: #F29A00;
   border-bottom: 1px dotted white;
 }
 .metric-description a:hover {
@@ -11496,7 +11496,7 @@ table.residential-fires {
 }
 .marketing-icon i {
   font-size: 60px !important;
-  color: #f29a00;
+  color: #F29A00;
 }
 .ct-iconBox--2col .ct-iconBox--description,
 .ct-iconBox--2col .ct-icon {
@@ -11601,7 +11601,7 @@ table.residential-fires {
   font-weight: 100;
 }
 .account-request-section .header-element {
-  color: #f29a00;
+  color: #F29A00;
   margin-top: -30px;
 }
 .account-request-section .account-request-section-content {
@@ -11620,10 +11620,10 @@ table.residential-fires {
   cursor: default !important;
 }
 .sign-up-button {
-  border: 2px #f29a00 solid;
+  border: 2px #F29A00 solid;
   border-radius: 5px;
   padding: 4px !important;
-  background-color: #f29a00;
+  background-color: #F29A00;
   color: white !important;
 }
 .sign-up-button:hover {
@@ -12152,7 +12152,7 @@ header {
   font-weight: 100;
 }
 .ct-textBox span > span {
-  color: #f29a00;
+  color: #F29A00;
 }
 .ct-textBox .ct-productID {
   border-radius: 3px;
@@ -12982,7 +12982,7 @@ header {
   line-height: 50px;
 }
 .ct-productDetails .ct-u-displayTableCell span a i {
-  color: #f29a00;
+  color: #F29A00;
   font-weight: 600;
   margin-left: 2px;
 }
@@ -13395,7 +13395,7 @@ header {
   opacity: 1;
 }
 .ct-footer--extended {
-  background-color: #1f2530;
+  background-color: #1F2530;
 }
 .ct-footer--extended h1,
 .ct-footer--extended h2,
@@ -13661,7 +13661,7 @@ header {
 }
 .ct-itemProducts .ct-product--meta {
   padding: 7px 10px;
-  background-color: #1f2530;
+  background-color: #1F2530;
   border-radius: 0 0 4px 4px;
   text-align: right;
 }
@@ -13930,6 +13930,22 @@ header {
   color: #333!important;
   padding: 3px 55px 3px 13px;
   width: 160px;
+}
+@media (max-width: 991px) and (min-width: 768px), (min-width: 1200px) {
+  .ct-sortingBar .ct-sortingTitle {
+    float: left;
+  }
+  .ct-sortingBar .ct-sortingOptions {
+    float: right;
+  }
+}
+@media (max-width: 767px) and (min-width: 480px), (max-width: 1199px) and (min-width: 992px) {
+  .ct-sortingBar .ct-sortingTitle {
+    margin-bottom: 20px;
+  }
+  .ct-sortingBar .ct-sortingOptions {
+    float: left;
+  }
 }
 .ct-showProducts--list div[class^="col-"] {
   width: 100%;
@@ -14206,7 +14222,7 @@ header {
   cursor: pointer;
 }
 .ct-hover:hover .ct-imageBox {
-  background: #1f2530;
+  background: #1F2530;
 }
 .ct-hover:hover .ct-imageBox img {
   opacity: 0.3!important;
@@ -15151,19 +15167,6 @@ header {
   }
   .ct-mediaSection .ct-mediaSection-inner {
     display: block;
-  }
-  .ct-sortingBar {
-    margin-top: 10px;
-  }
-  .ct-sortingBar .ct-sortingTitle,
-  .ct-sortingBar ul {
-    float: none!important;
-  }
-  .ct-sortingBar .ct-sortingTitle {
-    margin-bottom: 20px;
-  }
-  .ct-sortingBar ul {
-    display: inline-block;
   }
   .ct-section--inline .btn {
     margin-bottom: 20px;
