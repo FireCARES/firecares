@@ -14682,9 +14682,6 @@ header {
 .ct-contactForm--small .ct-image--section img {
   width: 100%;
 }
-.widget {
-  margin-bottom: 30px;
-}
 .widget h1,
 .widget h2,
 .widget h3,
@@ -15056,9 +15053,6 @@ header {
   .ct-gallery-filters a {
     margin-bottom: 20px;
   }
-  .ct-js-sidebar {
-    margin-top: 60px;
-  }
   .ct-navigationThumbnail {
     margin-left: -167px;
   }
@@ -15133,9 +15127,6 @@ header {
   }
 }
 @media (max-width: 768px) {
-  .ct-formSearch--extended {
-    display: none;
-  }
   section:first-of-type .ct-heading {
     margin-top: 60px;
   }
