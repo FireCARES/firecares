@@ -4879,7 +4879,7 @@ html[dir="rtl"] .select2-container-multi .select2-search-choice-close {
 .snapjs-left .ct-menuMobile,
 .snapjs-right .ct-searchFormMobile,
 .snapjs-left .ct-searchFormMobile {
-  overflow: scroll;
+  overflow: auto;
 }
 .ct-navbarMobile {
   -webkit-transition: all 0.2s ease;
@@ -5015,7 +5015,7 @@ html[dir="rtl"] .select2-container-multi .select2-search-choice-close {
   max-width: 266px;
   right: -100%;
   padding: 25px 20px 30px 20px!important;
-  overflow: scroll;
+  overflow: auto;
 }
 .ct-searchFormMobile .ct-form--label--type1 {
   position: relative;
