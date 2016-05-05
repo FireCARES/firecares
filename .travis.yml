@@ -1,13 +1,14 @@
 language: python
 
 python:
-  - "2.7_with_system_site_packages"
-
-virtualenv:
-  system_site_packages: true
+  - 2.7
 
 addons:
-  postgresql: "9.4"
+  postgresql: 9.4
+
+cache:
+  directories:
+    - $HOME/.pip-cache/
 
 env:
   global:
@@ -19,6 +20,8 @@ before_install:
   - sudo apt-get install -y libxml2-dev libxslt1-dev git libpq-dev python-dev python-pip python-pycurl python-psycopg2
   - sudo apt-get install -y binutils gdal-bin python-gdal libpng-dev libfreetype6-dev pkg-config libffi-dev
   - sudo apt-get install -y libblas-dev liblapack-dev libatlas-base-dev gfortran python-numpy python-scipy python-matplotlib
+  - sudo mkdir -p /var/www
+  - sudo chmod -R 777 /var/www
 
 install:
   - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
@@ -29,8 +32,9 @@ install:
   - conda update --yes conda
   - conda create --yes -n condaenv python=2.7
   - conda install --yes -n condaenv pip scipy==0.16.0
+  - conda install --yes -n condaenv -c anaconda gdal=2.0.0=py27_1
   - source activate condaenv
-  - travis_wait "pip install -r requirements.txt"
+  - travis_wait "pip install -r requirements.txt --cache-dir $HOME/.pip-cache"
   - easy_install --upgrade numpy
 
 before_script:
