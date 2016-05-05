@@ -46,7 +46,7 @@ DEBUG_TOOLBAR_CONFIG = {
 #EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-CELERY_ALWAYS_EAGER = True
+CELERY_ALWAYS_EAGER = False
 
 try:
     from local_settings import *  # noqa
