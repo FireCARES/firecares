@@ -407,7 +407,9 @@ class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitM
     def get_context_data(self, **kwargs):
         context = super(FireDepartmentListView, self).get_context_data(**kwargs)
         context = self.get_sort_context(context)
-        context['featured_departments'] = self.get_featured_departments().order_by('?')[:5]
+        featured_departments = self.get_featured_departments().order_by('?')
+        context['featured_departments'] = featured_departments[:5]
+        context['featured_departments_short'] = featured_departments[:3]
 
         page_obj = context['page_obj']
         paginator = page_obj.paginator

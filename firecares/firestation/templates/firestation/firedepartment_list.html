@@ -49,14 +49,14 @@
         <a href="{% url 'firedepartment_list' %}">Search Results</a>
     </div>
 </div>
-<section class="ct-u-paddingTop50 ct-u-paddingBottom60">
+<section class="search-section">
 <div class="container">
 <div class="ct-section--products">
 <div class="row">
 <div class="col-md-4 col-lg-3">
     <div class="ct-js-sidebar">
         <div class="row">
-            <div class="col-sm-6 col-md-12 hidden-xs">
+            <div class="col-md-12 hidden-sm hidden-xs">
                 <div class="widget">
                     <div class="widget-inner">
                         <div class="search"
@@ -93,21 +93,36 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-6 col-md-12">
+            <div class="col-sm-12">
                 <div class="widget ct-widget--featuredItems">
                     <div class="widget-inner">
                         <h4 class="text-uppercase">Featured</h4>
-                        {% for department in featured_departments %}
-                        <div class="ct-itemProducts--small ct-itemProducts--small-type1 featured-department-map" style="background-image: url({{ department.thumbnail_no_marker }});">
-                            <a href="{{ department.get_absolute_url }}">
-                                <div class="ct-main-content featured-department-transparency" style="">
-                                    <label class="featured-department-map-label control-label sale">
-                                            {{ department.name }}
-                                    </label>
-                                </div>
-                            </a>
+                        <div class="hidden-xs hidden-sm">
+                            {% for department in featured_departments %}
+                            <div class="ct-itemProducts--small ct-itemProducts--small-type1 featured-department-map" style="background-image: url({{ department.thumbnail_no_marker }});">
+                                <a href="{{ department.get_absolute_url }}">
+                                    <div class="ct-main-content featured-department-transparency" style="">
+                                        <label class="featured-department-map-label control-label sale">
+                                                {{ department.name }}
+                                        </label>
+                                    </div>
+                                </a>
+                            </div>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
+                        <div class="hidden-md hidden-lg">
+                            {% for department in featured_departments_short %}
+                            <div class="ct-itemProducts--small ct-itemProducts--small-type1 featured-department-map" style="background-image: url({{ department.thumbnail_no_marker }});">
+                                <a href="{{ department.get_absolute_url }}">
+                                    <div class="ct-main-content featured-department-transparency" style="">
+                                        <label class="featured-department-map-label control-label sale">
+                                                {{ department.name }}
+                                        </label>
+                                    </div>
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             </div>

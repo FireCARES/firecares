@@ -2417,7 +2417,7 @@ header{
 .ct-sortingBar{
   .ct-sortingTitle{
    h1,h2,h3,h4,h5,h6{
-     font-size: 22px;
+     font-size: 26px;
      line-height: 30px;
      span{
        color: lighten(@gray-lighter,5%);
@@ -2480,8 +2480,8 @@ header{
   }
 }
 
-// On small and large screens, keep sorting options inline to the right.
-@media (max-width: @screen-sm-max) and (min-width: @screen-sm-min), (min-width: @screen-lg-min) {
+// On large screens, keep sorting options inline to the right.
+@media (min-width: @screen-lg) {
   .ct-sortingBar {
     .ct-sortingTitle {
       float: left;
@@ -2492,8 +2492,8 @@ header{
   }
 }
 
-// On xsmall and medium screens, put sorting options to the left on the next line.
-@media (max-width: @screen-xs-max) and (min-width: @screen-xs-min), (max-width: @screen-md-max) and (min-width: @screen-md-min){
+// On smaller screens, put sorting options to the left on the next line.
+@media (max-width: @screen-md-max){
   .ct-sortingBar {
     .ct-sortingTitle {
       margin-bottom: 20px;
@@ -3318,7 +3318,7 @@ header{
   h1,h2,h3,h4,h5,h6{
     margin-top: 0;
     margin-bottom: 30px;
-    font-size: 22px;
+    font-size: 26px;
     line-height: 18px;
     .btn{
       width: auto;
@@ -3918,12 +3918,6 @@ header{
    padding: 25px;
   }
 
-  //site map
-
-  .ct-site--map{
-    margin-top: 70px;
-  }
-
   //slider
 
   .ct-pageWrapper{
@@ -4336,3 +4330,22 @@ header{
     font-variant: small-caps;
   }
 }
+
+@media (max-width: @screen-md-max) {
+  .navbar-toggle {
+    display: inline-block !important;
+  }
+}
+
+@media (max-width: @screen-sm-max) {
+  .search-section {
+    padding: 30px 0 60px;
+  }
+}
+
+@media (min-width: @screen-md) {
+  .search-section {
+    padding: 50px 0 60px;
+  }
+}
+
