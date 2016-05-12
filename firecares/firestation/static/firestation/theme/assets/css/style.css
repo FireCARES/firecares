@@ -15421,6 +15421,7 @@ header {
   color: gray;
   font-variant: small-caps;
 }
+
 @media (max-width: 1199px) {
   .navbar-toggle {
     display: inline-block !important;
@@ -15435,4 +15436,12 @@ header {
   .search-section {
     padding: 50px 0 60px;
   }
+
+.disable-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
+

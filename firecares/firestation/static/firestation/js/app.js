@@ -9,6 +9,7 @@
       'fireStation.firestationDetailController',
       'fireStation.performanceScoreController',
       'fireStation.mapService',
+      'fireStation.heatmapService',
       'fireStation.gauge',
       'fireStation.search',
       'fireStation.graphs',

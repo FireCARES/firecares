@@ -1,24 +1,24 @@
 .map-well {
-  padding: 0;
+    padding: 0;
 }
 
 .map-well address {
-  padding: 6px;
-  margin: 0;
-  font-weight: 300;
+    padding: 6px;
+    margin: 0;
+    font-weight: 300;
 }
 
 h2 {
-  font-weight: 400;
-  line-height: 25px;
+    font-weight: 400;
+    line-height: 25px;
 }
 
 .response-capability-well {
-  background-color: white;
-  padding: 8px;
-  border: 0px;
-  box-shadow: none;
-  -webkit-box-shadow: none;
+    background-color: white;
+    padding: 8px;
+    border: 0px;
+    box-shadow: none;
+    -webkit-box-shadow: none;
 }
 
 /*
@@ -26,52 +26,51 @@ The .nav-action class mimics nav-tab links. Only used to avoid href="#"
 which moves the window when the user clicks on the link.
 */
 .nav-action {
-  cursor: pointer;
-  color: #0a75b6;
-  padding: 8px 12px;
-  line-height: 20px;
-  border: 1px solid transparent;
-  -webkit-border-radius: 4px 4px 0 0;
-  -moz-border-radius: 4px 4px 0 0;
-  border-radius: 4px 4px 0 0;
-  margin-right: 2px;
+    cursor: pointer;
+    color: #0a75b6;
+    padding: 8px 12px;
+    line-height: 20px;
+    border: 1px solid transparent;
+    -webkit-border-radius: 4px 4px 0 0;
+    -moz-border-radius: 4px 4px 0 0;
+    border-radius: 4px 4px 0 0;
+    margin-right: 2px;
 }
 
 .nav-action:hover {
-  border-color: #eeeeee #eeeeee #dddddd;
-  text-decoration: none;
-  background-color: #eeeeee;
+    border-color: #eeeeee #eeeeee #dddddd;
+    text-decoration: none;
+    background-color: #eeeeee;
 }
 
 input.ng-dirty, select.ng-dirty {
-  background-color: #dff0d8;
+    background-color: #dff0d8;
 }
 
-input.ng-pristine.ng-add,select.ng-pristine.ng-add {
-  background-color: white;
+input.ng-pristine.ng-add, select.ng-pristine.ng-add {
+    background-color: white;
 
 }
 
 input.ng-invalid:focus,
 input.ng-invalid {
-  background-color: #FFFFFF;
-  color: #b94a48;
-  border-color: #ee5f5b;
-  box-shadow: 0 0 6px #f8b9b7;
-  -webkit-box-shadow: 0 0 6px #f8b9b7;
-  -moz-box-shadow: 0 0 6px #f8b9b7;
+    background-color: #FFFFFF;
+    color: #b94a48;
+    border-color: #ee5f5b;
+    box-shadow: 0 0 6px #f8b9b7;
+    -webkit-box-shadow: 0 0 6px #f8b9b7;
+    -moz-box-shadow: 0 0 6px #f8b9b7;
 }
 
-.apparatus-help{
+.apparatus-help {
     color: gray;
 }
-
 
 .fire-station-header {
     padding-bottom: 15px;
 }
 
-.fire-station-header h1,h2,h3{
+.fire-station-header h1, h2, h3 {
     line-height: 30px;
 }
 
@@ -94,7 +93,7 @@ input.ng-invalid {
 }
 
 .header-extra-attribute:first-of-type {
-    padding-right:4px;
+    padding-right: 4px;
     padding-left: 0;
 }
 
@@ -125,52 +124,56 @@ input.ng-invalid {
 
 .axis path,
 .axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
 }
 
 .bar {
-  fill: orange;
+    fill: orange;
 }
 
-.solidArc:hover {
-  fill: orangered ;
-}
-
-.solidArc {
-    -moz-transition: all 0.3s;
-    -o-transition: all 0.3s;
-    -webkit-transition: all 0.3s;
-    transition: all 0.3s;
-}
-
-.x.axis path {
-  display: none;
-}
-.aster-plot{
-  padding: 0 10px;
-}
-
-.aster-score {
-  line-height: 1;
-  font-weight: bold;
-  font-size: 500%;
-}
-
-.aster-selected {
+.solidArc:not(.aster-selected):hover {
     fill: pink;
 }
 
+.solidArc {
+    -moz-transition: all 0.1s;
+    -o-transition: all 0.1s;
+    -webkit-transition: all 0.1s;
+    transition: all 0.1s;
+}
+
+.x.axis path {
+    display: none;
+}
+
+.aster-plot {
+    padding: 0 10px;
+}
+
+.aster-plot > svg {
+    cursor: crosshair;
+}
+
+.aster-score {
+    line-height: 1;
+    font-weight: bold;
+    font-size: 500%;
+}
+
+.aster-selected {
+    fill: orangered;
+}
 
 .aster-title {
-display: table-cell;
-font-size: 12px;
-font-weight: bold;
-opacity: .6;
-text-align: center;
-margin: 0 50%;
-width: 100px;
+    display: table-cell;
+    font-size: 12px;
+    font-weight: bold;
+    opacity: .6;
+    text-align: center;
+    margin: 0 50%;
+    width: 100px;
 }
 
 .aster-label {

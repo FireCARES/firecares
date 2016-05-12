@@ -126,13 +126,11 @@
                     <div class="ct-gallery ct-u-marginBottom30">
                         <div id="map"></div>
                     </div>
-                    <div class="row ct-u-marginBottom30">
+                    <div class="row ct-u-marginBottom30" ng-if="showAsterChart">
                         <div class="col-md-8 col-lg-9 pull-right">
-                            {% verbatim %}
-                            <aster-chart id="alarm-chart" filter-type='day' crossfilter="firesByDay" class="pull-left" ng-if="days" data="days" metric-title="Day of Week"></aster-chart>
-                            <aster-chart id="hour-chart" filter-type='hours' crossfilter="firesbyhour" class="pull-left" ng-if="hours" data="hours" metric-title="Hour of Day"></aster-chart>
-                            <aster-chart id="month-chart" filter-type='month' crossfilter="firesByMonth" ng-if="months" data="months" metric-title="Month of Year"></aster-chart>
-                            {% endverbatim %}
+                            <aster-chart id="month-chart" filter-type='months' class="pull-left" metric-title="Month of Year"></aster-chart>
+                            <aster-chart id="day-chart" filter-type="days" class="pull-left" metric-title="Day of Week"></aster-chart>
+                            <aster-chart id="hour-chart" filter-type='hours' class="pull-left" metric-title="Hour of Day"></aster-chart>
                         </div>
                     </div>
                     <div class="ct-heading ct-u-marginBottom20">
