@@ -116,7 +116,7 @@
                 description: '@?',
                 filterType: '@'
             },
-            template: '<div class="aster-plot"><h5 class="aster-title disable-select">{{metricTitle}}</h5><svg></svg></div>',
+            template: '<div class="aster-plot"><h5 class="aster-title no-select">{{metricTitle}}</h5><svg></svg></div>',
             // The linking function will add behavior to the template
             link: function(scope, element, attrs) {
                 console.log(scope, element, attrs);
@@ -127,30 +127,6 @@
                 var innerRadius = 0.3 * radius;
                 var labelr = radius + 5;
 
-                var arcScales = heatmap.totals[scope.filterType];
-                var max = d3.max(arcScales, function(d) {
-                    return d.value
-                });
-
-                var pie = d3.layout.pie()
-                    .sort(null)
-                    .value(function(d) {
-                        return arcScales.length;
-                    })
-                ;
-
-                var arc = d3.svg.arc()
-                    .innerRadius(innerRadius)
-                    .outerRadius(function(d) {
-                        return (radius - innerRadius) * (d.data.value / (max + (max * .1))) + innerRadius;
-                    })
-                ;
-
-                var outlineArc = d3.svg.arc()
-                    .innerRadius(innerRadius)
-                    .outerRadius(radius)
-                ;
-
                 var svg = d3.select(element).selectAll('svg')
                     .attr("width", width)
                     .attr("height", height)
@@ -158,61 +134,96 @@
                     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
                 ;
 
-                // var outerPath = svg.selectAll(".outlineArc")
-                //     .data(pie(arcScales))
-                //     .enter().append("path")
-                //     .attr("fill", "#efefef")
-                //     .attr("opacity", ".6")
-                //     .attr("stroke", "white")
-                //     .attr("stroke-width", "2")
-                //     .attr("class", "outlineArc")
-                //     .attr("d", outlineArc)
-                //     .on("mousedown", handleMouseDown);
-                //     // .call(drag)
-                //     // .on('mouseover', scope.selectObject);
+                var arcScales = heatmap.totals[scope.filterType];
+                var max = d3.max(arcScales, function(d) {
+                    return d.value
+                });
 
-                var path = svg.selectAll(".solidArc")
-                    .data(pie(arcScales))
-                    .enter().append("path")
-                    .attr("fill", "#ccc")
-                    .attr("class", "solidArc")
-                    .attr("stroke", "white")
-                    .attr("stroke-width", "2")
-                    .attr("d", arc)
-                    .on("mousedown", handleMouseDown)
-                    .on("mouseenter", handleMouseEnter)
+                var pie = d3.layout.pie()
+                    .sort(null)
+                    .value(function() {
+                        return arcScales.length;
+                    })
+                    .padAngle(.04)
                 ;
 
-                svg.selectAll('.solidArcLabel')
+                // Background Arcs
+                var bgArc = d3.svg.arc()
+                    .innerRadius(innerRadius)
+                    .outerRadius(radius)
+                ;
+
+                var bgArcPaths = svg.selectAll(".bgArc")
+                    .data(pie(arcScales))
+                    .enter().append("path")
+                    .attr("class", "bgArc")
+                    .attr("d", bgArc)
+                ;
+
+                // Foreground Arcs (data)
+                var dataArc = d3.svg.arc()
+                    .innerRadius(innerRadius)
+                    .outerRadius(function(d) {
+                        return (radius - innerRadius) * (d.data.value / (max + (max * .1))) + innerRadius;
+                    })
+                ;
+
+                var dataArcPaths = svg.selectAll(".dataArc")
+                    .data(pie(arcScales))
+                    .enter().append("path")
+                    .attr("class", "dataArc")
+                    .attr("d", dataArc)
+                ;
+
+                // Hit Arcs
+                var hitArcPaths = svg.selectAll(".hitArc")
+                    .data(pie(arcScales))
+                    .enter().append("path")
+                    .attr("class", "hitArc")
+                    .attr("d", bgArc)
+                    .on("mousedown", mouseDownHitArc)
+                    .on("mouseup", mouseUpHitArc)
+                    .on("mouseenter", mouseEnterHitArc)
+                ;
+
+                // Arc Labels
+                svg.selectAll('.arcLabel')
                     .data(pie(arcScales)).enter().append('text')
+                    .attr('class', 'aster-label no-select')
                     .attr("dy", ".35em")
                     .attr("transform", function(d) {
-                        var c = arc.centroid(d),
+                        var c = bgArc.centroid(d),
                             x = c[0],
                             y = c[1],
                             h = Math.sqrt(x * x + y * y);
                         return "translate(" + ((x / h * labelr) - 3) + ',' +
                             (y / h * labelr) + ")";
-                    }).attr('class', 'aster-label disable-select')
+                    })
                     .text(function(d) {
                         return d.data.key + 1;
                     })
                 ;
 
-                function handleMouseDown(d, i) {
-                    var selected = d3.selectAll(this.parentElement.childNodes).filter('.aster-selected');
+                var onlySelectedArc = null;
+                function mouseDownHitArc(d, i) {
+                    var selected = hitArcPaths.filter('.selected');
 
-                    // If we have a group selected, or the current single selection isn't this, deselect everything.
-                    if (selected[0].length > 1 || (selected[0].length == 1 && selected[0][0] != this)) {
-                        selected.classed('aster-selected', false);
+                    if (selected[0].length === 1 && selected[0][0] === this) {
+                        // Wait for a mouse up event to clear the last arc.
+                        onlySelectedArc = selected[0][0];
+                        return;
                     }
 
-                    // Toggle this element's selection.
-                    var thisSelected = d3.select(this).classed('aster-selected');
-                    d3.select(this).classed('aster-selected', !thisSelected);
+                    hitArcPaths.classed('selected', false);
+                    dataArcPaths.classed('selected', false);
+                    bgArcPaths.classed('selected', false);
 
-                    // Update heatmap filter.
-                    selected = d3.selectAll(this.parentElement.childNodes).filter('.aster-selected');
+                    var isSelected = d3.select(this).classed('selected');
+                    d3.select(this).classed('selected', !isSelected);
+                    d3.select(dataArcPaths[0][d.data.key]).classed('selected', !isSelected);
+                    d3.select(bgArcPaths[0][d.data.key]).classed('selected', !isSelected);
+
+                    var selected = hitArcPaths.filter('.selected');
                     if (selected.empty()) {
                         heatmap.resetFilter(scope.filterType);
                     } else {
@@ -222,6 +233,24 @@
                     scope.$apply();
                 }
 
+                function mouseUpHitArc(d, i) {
+                    var selected = hitArcPaths.filter('.selected');
+                    if (selected[0].length === 1 && selected[0][0] === onlySelectedArc) {
+                        hitArcPaths.classed('selected', false);
+                        dataArcPaths.classed('selected', false);
+                        bgArcPaths.classed('selected', false);
+
+                        var selected = hitArcPaths.filter('.selected');
+                        if (selected.empty()) {
+                            heatmap.resetFilter(scope.filterType);
+                        } else {
+                            heatmap.setFilter(scope.filterType, [d.data.key]);
+                        }
+
+                        scope.$apply();
+                    }
+                }
+
                 var mouseButtonDown = false;
                 element.on('mousedown', function() {
                     mouseButtonDown = true;
@@ -229,6 +258,7 @@
 
                 element.on('mouseup', function() {
                     mouseButtonDown = false;
+                    onlySelectedArc = null;
                 });
 
                 // Handle cases where the user dragged out of the page without lifting their mouse button,
@@ -237,15 +267,17 @@
                     mouseButtonDown = false;
                 });
 
-                function handleMouseEnter(d, i) {
+                function mouseEnterHitArc(d, i) {
                     if (!mouseButtonDown) {
                         return;
                     }
 
-                    var selected = d3.select(this).classed('aster-selected');
-                    d3.select(this).classed('aster-selected', !selected);
+                    var isSelected = d3.select(this).classed('selected');
+                    d3.select(this).classed('selected', !isSelected);
+                    d3.select(dataArcPaths[0][d.data.key]).classed('selected', !isSelected);
+                    d3.select(bgArcPaths[0][d.data.key]).classed('selected', !isSelected);
 
-                    if (!selected) {
+                    if (!isSelected) {
                         heatmap.addToFilter(scope.filterType, d.data.key);
                     } else {
                         heatmap.removeFromFilter(scope.filterType, d.data.key);
@@ -260,9 +292,8 @@
                         return d.value
                     });
 
-                    // Redraw the arcs.
-                    var paths = svg.selectAll('.solidArc');
-                    paths.attr("d", arc);
+                    // Redraw the data arcs.
+                    dataArcPaths.attr("d", dataArc);
                 });
             }
         };

@@ -133,15 +133,38 @@ input.ng-invalid {
     fill: orange;
 }
 
-.solidArc:not(.aster-selected):hover {
-    fill: pink;
-}
-
-.solidArc {
+.bgArc {
     -moz-transition: all 0.5s;
     -o-transition: all 0.5s;
     -webkit-transition: all 0.5s;
     transition: all 0.5s;
+
+    fill: rgba(188, 188, 188, 0.3);
+}
+
+.bgArc.selected {
+    fill: rgba(255, 69, 0, 0.3);
+}
+
+.dataArc {
+    -moz-transition: all 0.5s;
+    -o-transition: all 0.5s;
+    -webkit-transition: all 0.5s;
+    transition: all 0.5s;
+
+    fill: rgb(188, 188, 188);
+}
+
+.hitArc {
+    fill: transparent;
+}
+
+.hitArc:hover {
+    fill: rgba(0, 0, 0, 0.1);
+}
+
+.dataArc.selected {
+    fill: rgb(255, 69, 0);
 }
 
 .x.axis path {
