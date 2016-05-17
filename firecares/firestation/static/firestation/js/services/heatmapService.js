@@ -5,15 +5,23 @@
         .factory('heatmap', HeatmapService)
     ;
 
-    HeatmapService.$inject = ['$http', '$q'];
+    HeatmapService.$inject = ['$http', '$q', '$rootScope'];
 
-    function HeatmapService($http, $q) {
+    function HeatmapService($http, $q, $rootScope) {
         var _map = null;
-        var _layer = L.heatLayer([], {gradient: {0.55: '#74ac49', 0.65: '#febe00', 1: '#f6542f'}, radius: 5});
+        var _layer = L.heatLayer([], {
+            gradient: {0.55: '#74ac49', 0.65: '#febe00', 1: '#f6542f'},
+            radius: 10,
+            minOpacity: 0.5
+        });
         var _crossfilter = null;
-        var _firesByDate = null;
-        var _filteredFires = [];
-        var _filter = {
+        var _fires = {
+            dates: null,
+            months: null,
+            days: null,
+            hours: null
+        };
+        var _filters = {
             months: [],
             days: [],
             hours: []
@@ -40,95 +48,86 @@
             return lines
         }
 
-        function updateLayerOptions() {
-            if (!_crossfilter) {
-                return;
-            }
-
-            var portion = _filteredFires.length / _crossfilter.size();
-            var n = (22 - _map.getZoom()) / 22;
-            var i = 17 * n * (portion / 2 + .5) + 3;
-
-            _layer.setOptions({
-                radius: i,
-                blur: 1.3 * (i - 2.99),
-                minOpacity: (1 - portion) * (1 - n) * .5
-            });
-        }
-
         return {
             get layer()     { return _layer; },
-            get filter()    { return _filter; },
+            get filters()   { return _filters; },
             get totals()    { return _totals; },
 
             init: function(map) {
                 _map = map;
-                _map.on('zoomend', function() {
-                    updateLayerOptions();
-                });
             },
 
-            setFilter: function(filterType, indices) {
-                if (filterType == 'months') {
-                    this.filterMonths(indices);
-                } else if (filterType == 'days') {
-                    this.filterDays(indices);
-                } else if (filterType == 'hours') {
-                    this.filterHours(indices);
-                } else {
-                    console.error("Unsupported filter type '" + filterType + "'");
+            onRefresh: function(scope, callback) {
+                var handler = $rootScope.$on('heatmap.onRefresh', callback);
+				scope.$on('$destroy', handler);
+            },
+
+            reset: function() {
+                for (var i = 0; i < _filters.length; i++) {
+                    this.resetFilter(_filters[i]);
                 }
             },
 
-            filterMonths: function(months) {
-                _filter.months = months || [];
+            resetFilter: function(filterType) {
+                this.setFilter(filterType, []);
+            },
+
+            setFilter: function(filterType, indices) {
+                _filters[filterType] = indices || [];
+
+                var filter = _filters[filterType];
+                if (filter.length) {
+                    _fires[filterType].filter(function(d) {
+                        return (filter.indexOf(d) > -1);
+                    });
+                } else {
+                    _fires[filterType].filterAll();
+                }
+
                 this.refresh();
             },
 
-            filterDays: function(days) {
-                _filter.days = days || [];
-                this.refresh();
+            addToFilter: function(filterType, additions) {
+                // Allow single values to be passed in, as well as arrays.
+                if (!Array.isArray(additions)) {
+                    additions = [additions];
+                }
+
+                var filter = _filters[filterType];
+                for (var i = 0; i < additions.length; i++) {
+                    if (filter.indexOf(additions[i]) === -1) {
+                        filter.push(additions[i]);
+                    }
+                }
+
+                this.setFilter(filterType, filter);
             },
 
-            filterHours: function(hours) {
-                _filter.hours = hours || [];
-                this.refresh();
+            removeFromFilter: function(filterType, removals) {
+                // Allow single values to be passed in, as well as arrays.
+                if (!Array.isArray(removals)) {
+                    removals = [removals];
+                }
+
+                var filter = _filters[filterType];
+                for (var i = 0; i < removals.length; i++) {
+                    var index = filter.indexOf(removals[i]);
+                    if (index > -1) {
+                        filter.splice(index, 1);
+                    }
+                }
+
+                this.setFilter(filterType, filter);
             },
 
             refresh: function() {
-                var fires = _firesByDate.filter(function(date) {
-                    var month = date.getMonth();
-                    var day = date.getDay();
-                    var hour = date.getHours();
-
-                    if (_filter.months.length > 0) {
-                        if (_filter.months.indexOf(month) == -1) {
-                            return false;
-                        }
-                    }
-
-                    if (_filter.days.length > 0) {
-                        if (_filter.days.indexOf(day) == -1) {
-                            return false;
-                        }
-                    }
-
-                    if (_filter.hours.length > 0) {
-                        if (_filter.hours.indexOf(hour) == -1) {
-                            return false;
-                        }
-                    }
-
-                    return true;
-                });
-
-                _filteredFires = fires.top(Infinity);
-
-                _layer.setLatLngs(_filteredFires.map(function(fire) {
+                // Update layer with new fire points.
+                _layer.setLatLngs(_fires.dates.top(Infinity).map(function(fire) {
                     return [fire.y, fire.x];
                 }));
 
-                updateLayerOptions();
+                // Notify listeners.
+                $rootScope.$emit('heatmap.onRefresh');
             },
 
             download: function(url) {
@@ -138,25 +137,15 @@
                         .then(function(response) {
                             var lines = processData(response.data);
                             _crossfilter = crossfilter(lines);
-                            _firesByDate = _crossfilter.dimension(function(fire) {
-                                return new Date(fire.alarm);
-                            });
 
-                            // var month0Day2AllHours = firesByDate.filter(function(date) {
-                            //     var month = date.getMonth();
-                            //     var day = date.getDay();
-                            //     return (month == 0 && day == 2);
-                            // });
+                            _fires.dates = _crossfilter.dimension(function(d) { return new Date(d.alarm); });
+                            _fires.months = _crossfilter.dimension(function(d) { return new Date(d.alarm).getMonth(); });
+                            _fires.days = _crossfilter.dimension(function(d) { return new Date(d.alarm).getDay(); });
+                            _fires.hours = _crossfilter.dimension(function(d) { return new Date(d.alarm).getHours(); });
 
-                            ///////////////////////////////////////////
-                            var fires = {};
-                            fires.hours = _crossfilter.dimension(function(d) { return new Date(d.alarm).getHours(); });
-                            fires.days = _crossfilter.dimension(function(d) { return new Date(d.alarm).getDay(); });
-                            fires.months = _crossfilter.dimension(function(d) { return new Date(d.alarm).getMonth(); });
-                            _totals.hours = fires.hours.group().top(Infinity).sort(function(a, b) { return a.key - b.key; });
-                            _totals.days = fires.days.group().top(Infinity).sort(function(a, b) { return a.key - b.key; });
-                            _totals.months = fires.months.group().top(Infinity).sort(function(a, b) { return a.key - b.key; });
-                            ///////////////////////////////////////////
+                            _totals.months = _fires.months.group().top(Infinity).sort(function(a, b) { return a.key - b.key; });
+                            _totals.days = _fires.days.group().top(Infinity).sort(function(a, b) { return a.key - b.key; });
+                            _totals.hours = _fires.hours.group().top(Infinity).sort(function(a, b) { return a.key - b.key; });
 
                             self.refresh();
 

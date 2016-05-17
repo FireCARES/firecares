@@ -1,7 +1,7 @@
 'use strict';
 
 (function() {
-    var module = angular.module('fireStation.graphs', [])
+    angular.module('fireStation.graphs', [])
         .directive('lineChart', LineChartDirective)
         .directive('asterChart', AsterChartDirective)
         .directive('bulletChart', BulletChartDirective)
@@ -120,92 +120,56 @@
             // The linking function will add behavior to the template
             link: function(scope, element, attrs) {
                 console.log(scope, element, attrs);
-                var id = attrs.id;
-                var arcScales = heatmap.totals[scope.filterType];
-                var width = 150,
-                    height = 150,
-                    padding = 10,
-                    radius = Math.min(width - 10 - padding, height - 10 - padding) / 2,
-                    innerRadius = 0.3 * radius,
-                    max = d3.max(arcScales, function(d) {
-                        return d.value
-                    }),
-                    labelr = radius + 5,
-                    dragging;
+                var width = 150;
+                var height = 150;
+                var padding = 10;
+                var radius = Math.min(width - 10 - padding, height - 10 - padding) / 2;
+                var innerRadius = 0.3 * radius;
+                var labelr = radius + 5;
 
-                scope.filters = [];
+                var arcScales = heatmap.totals[scope.filterType];
+                var max = d3.max(arcScales, function(d) {
+                    return d.value
+                });
 
                 var pie = d3.layout.pie()
                     .sort(null)
                     .value(function(d) {
                         return arcScales.length;
-                    });
+                    })
+                ;
 
                 var arc = d3.svg.arc()
                     .innerRadius(innerRadius)
                     .outerRadius(function(d) {
                         return (radius - innerRadius) * (d.data.value / (max + (max * .1))) + innerRadius;
-                    });
+                    })
+                ;
 
                 var outlineArc = d3.svg.arc()
                     .innerRadius(innerRadius)
-                    .outerRadius(radius);
+                    .outerRadius(radius)
+                ;
 
-                var svg = d3.select("#" + id + ' svg')
+                var svg = d3.select(element).selectAll('svg')
                     .attr("width", width)
                     .attr("height", height)
                     .append("g")
-                    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+                    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+                ;
 
-                // var drag = d3.behavior.drag()
-                //     .origin(function (d, i) {
-                //         return d;
-                //     })
-                //     .on("dragstart", dragmove)
-                //     .on("dragend", dragend);
-                //
-                // function dragmove(d) {
-                //     dragging = true;
-                //     d3.selectAll(this.parentElement.childNodes)
-                //         .filter('.aster-selected')
-                //         .classed('aster-selected', false);
-                //     //d3.select(this).classed('aster-selected', true);
-                // }
-                //
-                // function dragend(d) {
-                //     dragging = false;
-                //     var hits = scope.crossfilter().filter(null);
-                // }
-
-                // scope.selectObject = function (d) {
-                //     if (dragging) {
-                //         d3.select(this).classed("aster-selected", !d3.select(this).classed("aster-selected"));
-                //
-                //         if (d3.select(this).classed("aster-selected")) {
-                //             console.log('about to update', scope.filters);
-                //             scope.filters.push(d.data.key);
-                //             scope.$apply();
-                //         } else {
-                //             var i = scope.filters.indexOf(d.data.key);
-                //             if (i > -1) {
-                //                 scope.filters.splice(i, 1);
-                //             }
-                //         }
-                //     }
-                // };
-
-                var outerPath = svg.selectAll(".outlineArc")
-                    .data(pie(arcScales))
-                    .enter().append("path")
-                    .attr("fill", "#efefef")
-                    .attr("opacity", ".6")
-                    .attr("stroke", "white")
-                    .attr("stroke-width", "2")
-                    .attr("class", "outlineArc")
-                    .attr("d", outlineArc)
-                    .on("click", handleClick)
-                    // .call(drag)
-                    .on('mouseover', scope.selectObject);
+                // var outerPath = svg.selectAll(".outlineArc")
+                //     .data(pie(arcScales))
+                //     .enter().append("path")
+                //     .attr("fill", "#efefef")
+                //     .attr("opacity", ".6")
+                //     .attr("stroke", "white")
+                //     .attr("stroke-width", "2")
+                //     .attr("class", "outlineArc")
+                //     .attr("d", outlineArc)
+                //     .on("mousedown", handleMouseDown);
+                //     // .call(drag)
+                //     // .on('mouseover', scope.selectObject);
 
                 var path = svg.selectAll(".solidArc")
                     .data(pie(arcScales))
@@ -215,9 +179,9 @@
                     .attr("stroke", "white")
                     .attr("stroke-width", "2")
                     .attr("d", arc)
-                    .on("click.handle", handleClick)
-                    // .call(drag)
-                    .on('mouseover', scope.selectObject);
+                    .on("mousedown", handleMouseDown)
+                    .on("mouseenter", handleMouseEnter)
+                ;
 
                 svg.selectAll('.solidArcLabel')
                     .data(pie(arcScales)).enter().append('text')
@@ -231,35 +195,26 @@
                             (y / h * labelr) + ")";
                     }).attr('class', 'aster-label disable-select')
                     .text(function(d) {
-                        console.log(d);
-                        return d.data.key;
-                    });
+                        return d.data.key + 1;
+                    })
+                ;
 
-                // function query(element) {
-                //     d3.selectAll(element.parentElement.childNodes)
-                //         .filter('.aster-selected')
-                //         .each(function (d) {
-                //             console.log('adding ' + d + 'to filter');
-                //         })
-                // }
-
-                function handleClick(d, i) {
+                function handleMouseDown(d, i) {
                     var selected = d3.selectAll(this.parentElement.childNodes).filter('.aster-selected');
 
-                    if (selected.empty()) {
-                        d3.select(this).classed('aster-selected', true);
-                    } else {
-                        if (selected[0].indexOf(this) > -1) {
-                            d3.select(this).classed('aster-selected', false);
-                        } else {
-                            selected.classed('aster-selected', false);
-                            d3.select(this).classed('aster-selected', true);
-                        }
+                    // If we have a group selected, or the current single selection isn't this, deselect everything.
+                    if (selected[0].length > 1 || (selected[0].length == 1 && selected[0][0] != this)) {
+                        selected.classed('aster-selected', false);
                     }
 
+                    // Toggle this element's selection.
+                    var thisSelected = d3.select(this).classed('aster-selected');
+                    d3.select(this).classed('aster-selected', !thisSelected);
+
+                    // Update heatmap filter.
                     selected = d3.selectAll(this.parentElement.childNodes).filter('.aster-selected');
                     if (selected.empty()) {
-                        heatmap.setFilter(scope.filterType, null);
+                        heatmap.resetFilter(scope.filterType);
                     } else {
                         heatmap.setFilter(scope.filterType, [d.data.key]);
                     }
@@ -267,22 +222,48 @@
                     scope.$apply();
                 }
 
-                // arcScales.forEach(function (d) {
-                //     d.order = 1;
-                //     d.weight = 1;
-                //     d.score = d.value;
-                //     d.label = d.key;
-                // });
+                var mouseButtonDown = false;
+                element.on('mousedown', function() {
+                    mouseButtonDown = true;
+                });
 
-                // calculate the weighted mean score
-                // var score =
-                //     arcScales.reduce(function (a, b) {
-                //         return a + b.value;
-                //     }, 0) /
-                //     arcScales.reduce(function (a, b) {
-                //         return a + 1;
-                //     }, 0);
+                element.on('mouseup', function() {
+                    mouseButtonDown = false;
+                });
 
+                // Handle cases where the user dragged out of the page without lifting their mouse button,
+                // or other cases where they were interrupted.
+                element.on('mouseenter', function() {
+                    mouseButtonDown = false;
+                });
+
+                function handleMouseEnter(d, i) {
+                    if (!mouseButtonDown) {
+                        return;
+                    }
+
+                    var selected = d3.select(this).classed('aster-selected');
+                    d3.select(this).classed('aster-selected', !selected);
+
+                    if (!selected) {
+                        heatmap.addToFilter(scope.filterType, d.data.key);
+                    } else {
+                        heatmap.removeFromFilter(scope.filterType, d.data.key);
+                    }
+
+                    scope.$apply();
+                }
+
+                heatmap.onRefresh(scope, function() {
+                    arcScales = heatmap.totals[scope.filterType];
+                    max = d3.max(arcScales, function(d) {
+                        return d.value
+                    });
+
+                    // Redraw the arcs.
+                    var paths = svg.selectAll('.solidArc');
+                    paths.attr("d", arc);
+                });
             }
         };
     }
