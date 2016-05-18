@@ -27,6 +27,9 @@
             hours: []
         };
         var _totals = {};
+        var _labels = {
+            days: ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+        };
 
         function processData(allText) {
             var allTextLines = allText.split(/\r\n|\n/);
@@ -52,6 +55,7 @@
             get layer()     { return _layer; },
             get filters()   { return _filters; },
             get totals()    { return _totals; },
+            get labels()    { return _labels; },
 
             init: function(map) {
                 _map = map;
@@ -59,6 +63,11 @@
 
             onRefresh: function(scope, callback) {
                 var handler = $rootScope.$on('heatmap.onRefresh', callback);
+				scope.$on('$destroy', handler);
+            },
+
+            onFilterChanged: function(filterType, scope, callback) {
+                var handler = $rootScope.$on('heatmap.' + filterType + 'FilterChanged', callback);
 				scope.$on('$destroy', handler);
             },
 
@@ -84,40 +93,50 @@
                     _fires[filterType].filterAll();
                 }
 
+                $rootScope.$emit('heatmap.' + filterType + 'FilterChanged', filter);
+
                 this.refresh();
             },
 
-            addToFilter: function(filterType, additions) {
+            add: function(filterType, keys) {
                 // Allow single values to be passed in, as well as arrays.
-                if (!Array.isArray(additions)) {
-                    additions = [additions];
+                if (!Array.isArray(keys)) {
+                    keys = [keys];
                 }
 
                 var filter = _filters[filterType];
-                for (var i = 0; i < additions.length; i++) {
-                    if (filter.indexOf(additions[i]) === -1) {
-                        filter.push(additions[i]);
+                for (var i = 0; i < keys.length; i++) {
+                    if (filter.indexOf(keys[i]) === -1) {
+                        filter.push(keys[i]);
                     }
                 }
 
                 this.setFilter(filterType, filter);
             },
 
-            removeFromFilter: function(filterType, removals) {
+            remove: function(filterType, keys) {
                 // Allow single values to be passed in, as well as arrays.
-                if (!Array.isArray(removals)) {
-                    removals = [removals];
+                if (!Array.isArray(keys)) {
+                    keys = [keys];
                 }
 
                 var filter = _filters[filterType];
-                for (var i = 0; i < removals.length; i++) {
-                    var index = filter.indexOf(removals[i]);
+                for (var i = 0; i < keys.length; i++) {
+                    var index = filter.indexOf(keys[i]);
                     if (index > -1) {
                         filter.splice(index, 1);
                     }
                 }
 
                 this.setFilter(filterType, filter);
+            },
+
+            toggle: function(filterType, key) {
+                if (_filters[filterType].indexOf(key) === -1) {
+                    this.add(filterType, key)
+                } else {
+                    this.remove(filterType, key);
+                }
             },
 
             refresh: function() {

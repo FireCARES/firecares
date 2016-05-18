@@ -116,17 +116,26 @@
                 description: '@?',
                 filterType: '@'
             },
-            template: '<div class="aster-plot"><h5 class="aster-title no-select">{{metricTitle}}</h5><svg></svg></div>',
+            template:   '<div class="aster-plot">' +
+                            '<div class="aster-header">' +
+                                '<div class="aster-title">{{metricTitle}}</div>' +
+                                '<span class="aster-reset pull-right" ng-click="reset()">x</span>' +
+                            '</div>' +
+                            '<svg class="no-select"></svg>' +
+                        '</div>',
             // The linking function will add behavior to the template
             link: function(scope, element, attrs) {
                 console.log(scope, element, attrs);
-                var width = 150;
-                var height = 150;
-                var padding = 10;
+                var width = 175;
+                var height = 175;
+                var padding = 25;
                 var radius = Math.min(width - 10 - padding, height - 10 - padding) / 2;
                 var innerRadius = 0.3 * radius;
-                var labelr = radius + 5;
+                var labelr = radius + 10;
 
+                //
+                // SVG Arcs
+                //
                 var svg = d3.select(element).selectAll('svg')
                     .attr("width", width)
                     .attr("height", height)
@@ -196,61 +205,22 @@
                             x = c[0],
                             y = c[1],
                             h = Math.sqrt(x * x + y * y);
-                        return "translate(" + ((x / h * labelr) - 3) + ',' +
+                        return "translate(" + ((x / h * labelr) - 4) + ',' +
                             (y / h * labelr) + ")";
                     })
                     .text(function(d) {
-                        return d.data.key + 1;
+                        var labels = heatmap.labels[scope.filterType];
+                        if (labels) {
+                            return labels[d.data.key];
+                        } else {
+                            return d.data.key + 1;
+                        }
                     })
                 ;
 
-                var onlySelectedArc = null;
-                function mouseDownHitArc(d, i) {
-                    var selected = hitArcPaths.filter('.selected');
-
-                    if (selected[0].length === 1 && selected[0][0] === this) {
-                        // Wait for a mouse up event to clear the last arc.
-                        onlySelectedArc = selected[0][0];
-                        return;
-                    }
-
-                    hitArcPaths.classed('selected', false);
-                    dataArcPaths.classed('selected', false);
-                    bgArcPaths.classed('selected', false);
-
-                    var isSelected = d3.select(this).classed('selected');
-                    d3.select(this).classed('selected', !isSelected);
-                    d3.select(dataArcPaths[0][d.data.key]).classed('selected', !isSelected);
-                    d3.select(bgArcPaths[0][d.data.key]).classed('selected', !isSelected);
-
-                    var selected = hitArcPaths.filter('.selected');
-                    if (selected.empty()) {
-                        heatmap.resetFilter(scope.filterType);
-                    } else {
-                        heatmap.setFilter(scope.filterType, [d.data.key]);
-                    }
-
-                    scope.$apply();
-                }
-
-                function mouseUpHitArc(d, i) {
-                    var selected = hitArcPaths.filter('.selected');
-                    if (selected[0].length === 1 && selected[0][0] === onlySelectedArc) {
-                        hitArcPaths.classed('selected', false);
-                        dataArcPaths.classed('selected', false);
-                        bgArcPaths.classed('selected', false);
-
-                        var selected = hitArcPaths.filter('.selected');
-                        if (selected.empty()) {
-                            heatmap.resetFilter(scope.filterType);
-                        } else {
-                            heatmap.setFilter(scope.filterType, [d.data.key]);
-                        }
-
-                        scope.$apply();
-                    }
-                }
-
+                //
+                // Input
+                //
                 var mouseButtonDown = false;
                 element.on('mousedown', function() {
                     mouseButtonDown = true;
@@ -258,7 +228,7 @@
 
                 element.on('mouseup', function() {
                     mouseButtonDown = false;
-                    onlySelectedArc = null;
+                    onlyFilteredKey = -1;
                 });
 
                 // Handle cases where the user dragged out of the page without lifting their mouse button,
@@ -267,26 +237,42 @@
                     mouseButtonDown = false;
                 });
 
+                var onlyFilteredKey = -1;
+                function mouseDownHitArc(d, i) {
+                    var filter = heatmap.filters[scope.filterType];
+                    if (filter.length === 1 && filter.indexOf(d.data.key) !== -1) {
+                        // Wait for a mouse up event to clear the last arc.
+                        onlyFilteredKey = d.data.key;
+                        return;
+                    }
+
+                    heatmap.setFilter(scope.filterType, [d.data.key]);
+                }
+
+                function mouseUpHitArc(d, i) {
+                    var filter = heatmap.filters[scope.filterType];
+                    if (filter.length === 1 && filter.indexOf(onlyFilteredKey) !== -1) {
+                        heatmap.resetFilter(scope.filterType);
+                    }
+                }
+
                 function mouseEnterHitArc(d, i) {
                     if (!mouseButtonDown) {
                         return;
                     }
 
-                    var isSelected = d3.select(this).classed('selected');
-                    d3.select(this).classed('selected', !isSelected);
-                    d3.select(dataArcPaths[0][d.data.key]).classed('selected', !isSelected);
-                    d3.select(bgArcPaths[0][d.data.key]).classed('selected', !isSelected);
-
-                    if (!isSelected) {
-                        heatmap.addToFilter(scope.filterType, d.data.key);
-                    } else {
-                        heatmap.removeFromFilter(scope.filterType, d.data.key);
-                    }
-
-                    scope.$apply();
+                    heatmap.toggle(scope.filterType, d.data.key);
                 }
 
+                scope.reset = function() {
+                    heatmap.resetFilter(scope.filterType);
+                };
+
+                //
+                // Heatmap events
+                //
                 heatmap.onRefresh(scope, function() {
+                    // Calculate the max arc scale.
                     arcScales = heatmap.totals[scope.filterType];
                     max = d3.max(arcScales, function(d) {
                         return d.value
@@ -294,6 +280,21 @@
 
                     // Redraw the data arcs.
                     dataArcPaths.attr("d", dataArc);
+                });
+
+                heatmap.onFilterChanged(scope.filterType, scope, function(ev, filter) {
+                    // Deselect all arcs.
+                    hitArcPaths.classed('selected', false);
+                    dataArcPaths.classed('selected', false);
+                    bgArcPaths.classed('selected', false);
+
+                    // Reselect the active ones.
+                    for (var i = 0; i < filter.length; i++) {
+                        var key = filter[i];
+                        d3.select(hitArcPaths[0][key]).classed('selected', true);
+                        d3.select(dataArcPaths[0][key]).classed('selected', true);
+                        d3.select(bgArcPaths[0][key]).classed('selected', true);
+                    }
                 });
             }
         };

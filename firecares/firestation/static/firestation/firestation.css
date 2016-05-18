@@ -133,6 +133,10 @@ input.ng-invalid {
     fill: orange;
 }
 
+aster-chart {
+    display: inline-block;
+}
+
 .bgArc {
     -moz-transition: all 0.5s;
     -o-transition: all 0.5s;
@@ -175,31 +179,37 @@ input.ng-invalid {
     padding: 0 10px;
 }
 
-.aster-plot {
+.aster-plot > svg {
     cursor: crosshair;
 }
 
-.aster-score {
-    line-height: 1;
-    font-weight: bold;
-    font-size: 500%;
+.aster-label {
+    font-size: 10px;
+    opacity: .6;
 }
 
 .aster-selected {
     fill: orangered;
 }
 
+.aster-header {
+    width: 100%;
+    text-align: left;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    margin-bottom: 5px;
+}
+
 .aster-title {
-    display: table-cell;
+    display: inline-block;
     font-size: 12px;
     font-weight: bold;
     opacity: .6;
-    text-align: center;
-    margin: 0 50%;
-    width: 100px;
+    margin-left: 10px;
+    margin-bottom: 2px;
 }
 
-.aster-label {
-    font-size: 10px;
+.aster-reset {
     opacity: .6;
+    margin-right: 10px;
+    cursor: pointer;
 }

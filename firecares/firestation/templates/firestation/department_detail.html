@@ -123,17 +123,15 @@
         <div class="ct-section--products">
             <div class="row">
                 <div class="col-md-8 col-lg-9">
-                    <div class="ct-gallery ct-u-marginBottom30">
+                    <div class="ct-gallery">
                         <div id="map"></div>
                     </div>
-                    <div class="row ct-u-marginBottom30" ng-if="showAsterChart">
-                        <div class="col-md-8 col-lg-9 pull-right">
-                            <aster-chart class="pull-left" filter-type="months" metric-title="Month"></aster-chart>
-                            <aster-chart class="pull-left" filter-type="days" metric-title="Day"></aster-chart>
-                            <aster-chart class="pull-left" filter-type="hours" metric-title="Hour"></aster-chart>
-                        </div>
+                    <div class="text-center ct-u-marginTop20" ng-if="showAsterChart">
+                        <aster-chart filter-type="months" metric-title="MONTH"></aster-chart>
+                        <aster-chart filter-type="days" metric-title="DAY"></aster-chart>
+                        <aster-chart filter-type="hours" metric-title="HOUR"></aster-chart>
                     </div>
-                    <div class="ct-heading ct-u-marginBottom20">
+                    <div class="ct-heading ct-u-marginTop30 ct-u-marginBottom20">
                         <h3>Community Risk Assessment</h3>
                     </div>
                     <div class="row ct-u-marginBottom30">
