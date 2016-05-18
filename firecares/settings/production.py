@@ -55,6 +55,11 @@ CELERYBEAT_SCHEDULE = {
         'task': 'firecares.tasks.email.ensure_valid_data',
         'schedule': crontab(minute=0, hour=0),
     },
+    # Executes once a week at midnight.
+    'ensure_valid_website_urls_every_week': {
+        'task': 'firecares.tasks.test_fd_urls.test_all_departments_urls',
+        'schedule': crontab(minute=0, hour=0, day_of_week='sunday'),
+    },
 }
 
 try:

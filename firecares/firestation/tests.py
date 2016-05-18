@@ -8,6 +8,7 @@ from django.db import connections
 from django.test import TestCase
 from django.test.client import Client
 from django.conf import settings
+from django.core import mail
 from django.core.cache import caches
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
@@ -24,11 +25,21 @@ from urlparse import urlsplit, urlunsplit
 from reversion.models import Revision
 from reversion import revisions as reversion
 from firecares.importers import GeoDjangoImport
+from firecares.tasks.test_fd_urls import test_all_departments_urls
+from firecares.settings import base
 
 User = get_user_model()
 
 
 class FireStationTests(TestCase):
+
+    def test_firestation_website_links(self):
+        FireDepartment.objects.create(name='Good', website='http://www.google.com')
+        test_all_departments_urls()
+        self.assertTrue(len(mail.outbox) == 0, "email sent to admin with errors")
+        FireDepartment.objects.create(name='Bad', website='www.mawebsith.com')
+        test_all_departments_urls()
+        self.assertTrue(len(mail.outbox) == 1, "email not sent to admin with errors")
 
     def setUp(self):
         self.response_capability_enabled = True
@@ -78,7 +89,6 @@ class FireStationTests(TestCase):
         # Ensure that the slug works as well
         response = c.get(reverse('firestation_detail_slug', args=[fs.pk, fs.slug]))
         self.assertEqual(response.status_code, 200)
-
 
     def test_authentication(self):
         """
