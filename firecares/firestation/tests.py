@@ -25,8 +25,7 @@ from urlparse import urlsplit, urlunsplit
 from reversion.models import Revision
 from reversion import revisions as reversion
 from firecares.importers import GeoDjangoImport
-from firecares.tasks.test_fd_urls import test_all_departments_urls
-from firecares.settings import base
+from firecares.tasks.quality_control import test_all_departments_urls
 
 User = get_user_model()
 

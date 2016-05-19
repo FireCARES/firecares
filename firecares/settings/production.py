@@ -57,7 +57,7 @@ CELERYBEAT_SCHEDULE = {
     },
     # Executes once a week at midnight.
     'ensure_valid_website_urls_every_week': {
-        'task': 'firecares.tasks.test_fd_urls.test_all_departments_urls',
+        'task': 'firecares.tasks.quality_control.test_all_departments_urls',
         'schedule': crontab(minute=0, hour=0, day_of_week='sunday'),
     },
 }

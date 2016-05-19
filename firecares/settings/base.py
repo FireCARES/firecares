@@ -255,7 +255,7 @@ CELERY_IMPORTS = (
     'firecares.tasks.update',
     'firecares.tasks.email',
     'firecares.tasks.cleanup',
-    'firecares.tasks.test_fd_urls',
+    'firecares.tasks.quality_control',
 )
 
 CELERY_QUEUES = [
