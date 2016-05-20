@@ -129,28 +129,46 @@ input.ng-invalid {
     shape-rendering: crispEdges;
 }
 
+.x.axis path {
+    display: none;
+}
+
 .bar {
     fill: orange;
 }
 
-aster-chart {
+aster-chart, bar-chart {
     display: inline-block;
+    padding: 0 10px;
 }
 
-.bgArc {
+aster-chart > svg, bar-chart > svg {
+    cursor: crosshair;
+}
+
+bar-chart > svg {
+    overflow: visible !important;
+    transform: scale(1, -1);
+}
+
+bar-chart > svg > g.bar-chart-labels {
+    transform: scale(1, -1);
+}
+
+.chart-section-bg {
     -moz-transition: all 0.5s;
     -o-transition: all 0.5s;
     -webkit-transition: all 0.5s;
     transition: all 0.5s;
 
-    fill: rgba(188, 188, 188, 0.3);
+    fill: rgba(188, 188, 188, 0.2);
 }
 
-.bgArc.selected {
+.chart-section-bg.selected {
     fill: rgba(255, 69, 0, 0.3);
 }
 
-.dataArc {
+.chart-section-data {
     -moz-transition: all 0.5s;
     -o-transition: all 0.5s;
     -webkit-transition: all 0.5s;
@@ -159,47 +177,31 @@ aster-chart {
     fill: rgb(188, 188, 188);
 }
 
-.hitArc {
-    fill: transparent;
-}
-
-.hitArc:hover {
-    fill: rgba(0, 0, 0, 0.1);
-}
-
-.dataArc.selected {
+.chart-section-data.selected {
     fill: rgb(255, 69, 0);
 }
 
-.x.axis path {
-    display: none;
+.chart-section-hit {
+    fill: transparent;
 }
 
-.aster-plot {
-    padding: 0 10px;
+.chart-section-hit:hover {
+    fill: rgba(0, 0, 0, 0.1);
 }
 
-.aster-plot > svg {
-    cursor: crosshair;
-}
-
-.aster-label {
+.chart-label {
     font-size: 10px;
     opacity: .6;
 }
 
-.aster-selected {
-    fill: orangered;
-}
-
-.aster-header {
+.chart-header {
     width: 100%;
     text-align: left;
     border-bottom: 1px solid rgba(0,0,0,0.1);
     margin-bottom: 5px;
 }
 
-.aster-title {
+.chart-title {
     display: inline-block;
     font-size: 12px;
     font-weight: bold;
@@ -208,8 +210,12 @@ aster-chart {
     margin-bottom: 2px;
 }
 
-.aster-reset {
+.chart-reset {
     opacity: .6;
     margin-right: 10px;
     cursor: pointer;
+}
+
+.chart-reset:hover {
+    opacity: 1;
 }

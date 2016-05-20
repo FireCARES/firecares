@@ -4,6 +4,7 @@
     angular.module('fireStation.graphs', [])
         .directive('lineChart', LineChartDirective)
         .directive('asterChart', AsterChartDirective)
+        .directive('barChart', BarChartDirective)
         .directive('bulletChart', BulletChartDirective)
     ;
 
@@ -113,21 +114,19 @@
             replace: false,
             scope: {
                 metricTitle: '@?',
-                description: '@?',
-                filterType: '@'
+                filterType: '@',
+                diameter: '@'
             },
-            template:   '<div class="aster-plot">' +
-                            '<div class="aster-header">' +
-                                '<div class="aster-title">{{metricTitle}}</div>' +
-                                '<span class="aster-reset pull-right" ng-click="reset()">x</span>' +
-                            '</div>' +
-                            '<svg class="no-select"></svg>' +
-                        '</div>',
+            template:   '<div class="chart-header">' +
+                            '<div class="chart-title">{{metricTitle}}</div>' +
+                            '<span class="chart-reset no-select pull-right" ng-click="reset()">x</span>' +
+                        '</div>' +
+                        '<svg class="no-select"></svg>',
             // The linking function will add behavior to the template
             link: function(scope, element, attrs) {
-                console.log(scope, element, attrs);
-                var width = 175;
-                var height = 175;
+                var diameter = (attrs.diameter) ? Number(attrs.diameter) : 175;
+                var width = diameter;
+                var height = diameter;
                 var padding = 25;
                 var radius = Math.min(width - 10 - padding, height - 10 - padding) / 2;
                 var innerRadius = 0.3 * radius;
@@ -143,17 +142,29 @@
                     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
                 ;
 
-                var arcScales = heatmap.totals[scope.filterType];
-                var max = d3.max(arcScales, function(d) {
+                var arcData = heatmap.totals[scope.filterType];
+                if (!arcData) {
+                    console.error("Heatmap does not have a '" + scope.filterType + "' filter.");
+                    return;
+                }
+
+                var max = d3.max(arcData, function(d) {
                     return d.value
                 });
 
                 var pie = d3.layout.pie()
                     .sort(null)
                     .value(function() {
-                        return arcScales.length;
+                        return arcData.length;
                     })
                     .padAngle(.04)
+                ;
+
+                var hitPie = d3.layout.pie()
+                    .sort(null)
+                    .value(function() {
+                        return arcData.length;
+                    })
                 ;
 
                 // Background Arcs
@@ -162,10 +173,10 @@
                     .outerRadius(radius)
                 ;
 
-                var bgArcPaths = svg.selectAll(".bgArc")
-                    .data(pie(arcScales))
+                var bgArcPaths = svg.selectAll(".chart-section-bg")
+                    .data(pie(arcData))
                     .enter().append("path")
-                    .attr("class", "bgArc")
+                    .attr("class", "chart-section-bg")
                     .attr("d", bgArc)
                 ;
 
@@ -177,18 +188,18 @@
                     })
                 ;
 
-                var dataArcPaths = svg.selectAll(".dataArc")
-                    .data(pie(arcScales))
+                var dataArcPaths = svg.selectAll(".chart-section-data")
+                    .data(pie(arcData))
                     .enter().append("path")
-                    .attr("class", "dataArc")
+                    .attr("class", "chart-section-data")
                     .attr("d", dataArc)
                 ;
 
                 // Hit Arcs
-                var hitArcPaths = svg.selectAll(".hitArc")
-                    .data(pie(arcScales))
+                var hitArcPaths = svg.selectAll(".chart-section-hit")
+                    .data(hitPie(arcData))
                     .enter().append("path")
-                    .attr("class", "hitArc")
+                    .attr("class", "chart-section-hit")
                     .attr("d", bgArc)
                     .on("mousedown", mouseDownHitArc)
                     .on("mouseup", mouseUpHitArc)
@@ -197,8 +208,8 @@
 
                 // Arc Labels
                 svg.selectAll('.arcLabel')
-                    .data(pie(arcScales)).enter().append('text')
-                    .attr('class', 'aster-label no-select')
+                    .data(pie(arcData)).enter().append('text')
+                    .attr('class', 'chart-label no-select')
                     .attr("dy", ".35em")
                     .attr("transform", function(d) {
                         var c = bgArc.centroid(d),
@@ -239,6 +250,10 @@
 
                 var onlyFilteredKey = -1;
                 function mouseDownHitArc(d, i) {
+                    if (d.data.value == 0) {
+                        return;
+                    }
+
                     var filter = heatmap.filters[scope.filterType];
                     if (filter.length === 1 && filter.indexOf(d.data.key) !== -1) {
                         // Wait for a mouse up event to clear the last arc.
@@ -261,6 +276,10 @@
                         return;
                     }
 
+                    if (d.data.value == 0) {
+                        return;
+                    }
+
                     heatmap.toggle(scope.filterType, d.data.key);
                 }
 
@@ -273,8 +292,8 @@
                 //
                 heatmap.onRefresh(scope, function() {
                     // Calculate the max arc scale.
-                    arcScales = heatmap.totals[scope.filterType];
-                    max = d3.max(arcScales, function(d) {
+                    arcData = heatmap.totals[scope.filterType];
+                    max = d3.max(arcData, function(d) {
                         return d.value
                     });
 
@@ -284,16 +303,291 @@
 
                 heatmap.onFilterChanged(scope.filterType, scope, function(ev, filter) {
                     // Deselect all arcs.
-                    hitArcPaths.classed('selected', false);
-                    dataArcPaths.classed('selected', false);
                     bgArcPaths.classed('selected', false);
+                    dataArcPaths.classed('selected', false);
+                    hitArcPaths.classed('selected', false);
 
                     // Reselect the active ones.
                     for (var i = 0; i < filter.length; i++) {
                         var key = filter[i];
-                        d3.select(hitArcPaths[0][key]).classed('selected', true);
-                        d3.select(dataArcPaths[0][key]).classed('selected', true);
                         d3.select(bgArcPaths[0][key]).classed('selected', true);
+                        d3.select(dataArcPaths[0][key]).classed('selected', true);
+                        d3.select(hitArcPaths[0][key]).classed('selected', true);
+                    }
+                });
+            }
+        };
+    }
+
+
+    BarChartDirective.$inject = ['heatmap'];
+
+    function BarChartDirective(heatmap) {
+        return {
+            restrict: 'CE',
+            replace: false,
+            scope: {
+                metricTitle: '@?',
+                filterType: '@',
+                width: '@',
+                height: '@',
+                maxYears: '@'
+            },
+            template:   '<div class="chart-header">' +
+                            '<div class="chart-title">{{metricTitle}}</div>' +
+                            '<span class="chart-reset no-select pull-right" ng-click="reset()">x</span>' +
+                        '</div>' +
+                        '<svg class="no-select"></svg>',
+            // The linking function will add behavior to the template
+            link: function(scope, element, attrs) {
+                var width = (attrs.width) ? Number(attrs.width) : element[0].parentElement.offsetWidth;
+                var height = (attrs.height) ? Number(attrs.height) : 150;
+                var maxYears = (attrs.maxYears) ? Number(attrs.maxYears) : 8;
+                var scaleSteps = 5;
+
+                var svg = d3.select(element).selectAll('svg')
+                    .attr("width", width)
+                    .attr("height", height)
+                    .attr('transform', 'scale(1, -1)')
+                ;
+
+                var svgBarGroup = svg.append('g')
+                    .attr('class', 'bar-chart-bars')
+                ;
+
+                var svgLabelGroup = svg.append('g')
+                    .attr('class', 'bar-chart-labels')
+                ;
+
+                var barData = heatmap.totals[scope.filterType];
+                if (!barData) {
+                    console.error("Heatmap does not have a '" + scope.filterType + "' filter.");
+                    return;
+                }
+
+                var availableYears = Math.floor(barData.length / 12);
+                var years = Math.min(availableYears, maxYears);
+
+                function calculateMax() {
+                    var rawMax = d3.max(barData, function(d) {
+                        return d.value
+                    });
+
+                    // Make sure our max breaks up into even parts for the scale.
+                    var multiple = scaleSteps - 1;
+                    if (rawMax > (multiple * 200)) {
+                        multiple *= 50;
+                    } else if (rawMax > (multiple * 100)) {
+                        multiple *= 25;
+                    } else if (rawMax > (multiple * 50)) {
+                        multiple *= 10;
+                    } else if (rawMax > (multiple * 25)) {
+                        multiple *= 5;
+                    } else {
+                        multiple *= 2;
+                    }
+
+                    return Math.ceil(rawMax / multiple) * multiple;
+                }
+
+                // NOTE: Because the SVG Y axis is top down, we have to flip the Y axis and reverse
+                //       the Y positioning of elements in order to get the bars animating correctly.
+                //       As a result, the vertical positioning math may be slightly counterintuitive.
+
+                // Create a bar for each month, for as many years as we're displaying.
+                var bgBars = [];
+                var dataBars = [];
+                var hitBars = [];
+                var keyToIndex = {};
+                var keyToData = {};
+                var leftPadding = 25;
+                var bottomPadding = 25;
+                var totalBarWidth = width - leftPadding;
+                var maxBarHeight = height - bottomPadding;
+                var numBars = years * 12;
+                var barPadding = 2;
+                var barWidth = totalBarWidth / numBars - barPadding;
+                var max = calculateMax();
+                for (var i = 0; i < numBars; i++) {
+                    var data = barData[barData.length - 1 - i];
+                    var barHeight = (data.value / (max + (max * .1))) * maxBarHeight;
+                    var bgBar = svgBarGroup.append('rect')
+                        .attr('class', 'chart-section-bg')
+                        .attr('x', leftPadding + totalBarWidth - i * (barWidth + barPadding) - barWidth - barPadding)
+                        .attr('y', bottomPadding)
+                        .attr('width', barWidth)
+                        .attr('height', maxBarHeight)
+                    ;
+
+                    bgBars.push(bgBar);
+
+                    var dataBar = svgBarGroup.append('rect')
+                        .attr('class', 'chart-section-data')
+                        .attr('x', leftPadding + totalBarWidth - i * (barWidth + barPadding) - barWidth - barPadding)
+                        .attr('y', bottomPadding)
+                        .attr('width', barWidth)
+                        .attr('height', barHeight)
+                    ;
+
+                    dataBars.push(dataBar);
+
+                    var hitBar = svgBarGroup.append('rect')
+                        .attr('class', 'chart-section-hit')
+                        .attr('x', leftPadding + totalBarWidth - i * (barWidth + barPadding) - barWidth - barPadding)
+                        .attr('y', bottomPadding)
+                        .attr('width', barWidth + barPadding)
+                        .attr('height', maxBarHeight)
+                        .attr('key', data.key)
+                        .on('mousedown', mouseDownHitBar)
+                        .on('mouseup', mouseUpHitBar)
+                        .on('mouseenter', mouseEnterHitBar)
+                    ;
+
+                    hitBars.push(hitBar);
+
+                    keyToIndex[data.key] = i;
+                    keyToData[data.key] = data;
+                }
+
+                // Year labels.
+                var yearWidth = (barWidth + barPadding) * 12;
+                for (i = 0; i < years; i++) {
+                    var x = width - i * yearWidth - yearWidth;
+                    if (x < 0) {
+                        continue;
+                    }
+
+                    var key = barData[barData.length - 1 - i * 12].key;
+                    var yearText = key.split('-')[0];
+                    svgLabelGroup.append('text')
+                        .attr('class', 'chart-label')
+                        .attr('x', x)
+                        .attr('y', 15 - bottomPadding)
+                        .attr('dx', 0)
+                        .attr('dy', 0)
+                        .text(yearText)
+                }
+
+                // Scale labels.
+                var scaleLabels = [];
+                var scaleStep = max / (scaleSteps - 1);
+                for (i = 0; i < scaleSteps; i++) {
+                    var scaleValue = Math.ceil(scaleStep * i);
+                    var scaleLabel = svgLabelGroup.append('text')
+                        .attr('class', 'chart-label')
+                        .attr('x', 18)
+                        .attr('y', -i * (maxBarHeight / (scaleSteps - 1) - 2) - bottomPadding)
+                        .attr('dx', 0)
+                        .attr('dy', 0)
+                        .attr('text-anchor', 'end')
+                        .text(scaleValue.toLocaleString())
+                    ;
+
+                    scaleLabels.push(scaleLabel);
+                }
+
+                //
+                // Input
+                //
+                var mouseButtonDown = false;
+                element.on('mousedown', function() {
+                    mouseButtonDown = true;
+                });
+
+                element.on('mouseup', function() {
+                    mouseButtonDown = false;
+                    onlyFilteredKey = -1;
+                });
+
+                // Handle cases where the user dragged out of the page without lifting their mouse button,
+                // or other cases where they were interrupted.
+                element.on('mouseenter', function() {
+                    mouseButtonDown = false;
+                });
+
+                var onlyFilteredKey = -1;
+                function mouseDownHitBar(d, i) {
+                    var key = d3.select(this).attr('key');
+
+                    var data = keyToData[key];
+                    if (data.value == 0) {
+                        return;
+                    }
+
+                    var filter = heatmap.filters[scope.filterType];
+                    if (filter.length === 1 && filter.indexOf(key) !== -1) {
+                        // Wait for a mouse up event to clear the last arc.
+                        onlyFilteredKey = key;
+                        return;
+                    }
+
+                    heatmap.setFilter(scope.filterType, [key]);
+                }
+
+                function mouseUpHitBar(d, i) {
+                    var filter = heatmap.filters[scope.filterType];
+                    if (filter.length === 1 && filter.indexOf(onlyFilteredKey) !== -1) {
+                        heatmap.resetFilter(scope.filterType);
+                    }
+                }
+
+                function mouseEnterHitBar(d, i) {
+                    if (!mouseButtonDown) {
+                        return;
+                    }
+
+                    var key = d3.select(this).attr('key');
+
+                    data = keyToData[key];
+                    if (data.value == 0) {
+                        return;
+                    }
+
+                    heatmap.toggle(scope.filterType, key);
+                }
+
+                scope.reset = function() {
+                    heatmap.resetFilter(scope.filterType);
+                };
+
+                //
+                // Heatmap events
+                //
+                heatmap.onRefresh(scope, function() {
+                    // Calculate the max bar scale.
+                    barData = heatmap.totals[scope.filterType];
+                    max = calculateMax();
+
+                    // Update the rect paths.
+                    for (var i = 0; i < dataBars.length; i++) {
+                        var value = barData[barData.length - 1 - i].value;
+                        var barHeight = (value / (max + (max * .1))) * maxBarHeight;
+                        dataBars[i].attr('height', barHeight);
+                    }
+
+                    // Update scale labels.
+                    scaleStep = max / (scaleSteps - 1);
+                    for (i = 0; i < scaleSteps; i++) {
+                        var scaleValue = Math.ceil(scaleStep * i);
+                        scaleLabels[i].text(scaleValue.toLocaleString());
+                    }
+                });
+
+                var bgBarSelection = svg.selectAll('.chart-section-bg');
+                var dataBarSelection = svg.selectAll('.chart-section-data');
+                var hitBarSelection = svg.selectAll('.chart-section-hit');
+                heatmap.onFilterChanged(scope.filterType, scope, function(ev, filter) {
+                    // Deselect all bars.
+                    bgBarSelection.classed('selected', false);
+                    dataBarSelection.classed('selected', false);
+                    hitBarSelection.classed('selected', false);
+
+                    // Reselect the active ones.
+                    for (var i = 0; i < filter.length; i++) {
+                        var index = keyToIndex[filter[i]];
+                        bgBars[index].classed('selected', true);
+                        dataBars[index].classed('selected', true);
+                        hitBars[index].classed('selected', true);
                     }
                 });
             }

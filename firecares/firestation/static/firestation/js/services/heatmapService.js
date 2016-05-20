@@ -24,7 +24,8 @@
         var _filters = {
             months: [],
             days: [],
-            hours: []
+            hours: [],
+            monthsByYear: []
         };
         var _totals = {};
         var _labels = {
@@ -93,6 +94,7 @@
                     _fires[filterType].filterAll();
                 }
 
+                // Notify listeners.
                 $rootScope.$emit('heatmap.' + filterType + 'FilterChanged', filter);
 
                 this.refresh();
@@ -161,10 +163,21 @@
                             _fires.months = _crossfilter.dimension(function(d) { return new Date(d.alarm).getMonth(); });
                             _fires.days = _crossfilter.dimension(function(d) { return new Date(d.alarm).getDay(); });
                             _fires.hours = _crossfilter.dimension(function(d) { return new Date(d.alarm).getHours(); });
+                            _fires.monthsByYear = _crossfilter.dimension(function(d) {
+                                var date = new Date(d.alarm);
+                                var year = date.getFullYear();
+                                var month = '' + date.getMonth();
+                                var pad = '00';
+                                month = pad.substring(0, pad.length - month.length) + month;
+                                return year + '-' + month;
+                            });
 
                             _totals.months = _fires.months.group().top(Infinity).sort(function(a, b) { return a.key - b.key; });
                             _totals.days = _fires.days.group().top(Infinity).sort(function(a, b) { return a.key - b.key; });
                             _totals.hours = _fires.hours.group().top(Infinity).sort(function(a, b) { return a.key - b.key; });
+                            _totals.monthsByYear = _fires.monthsByYear.group().top(Infinity).sort(function(a, b) {
+                                return a.key.localeCompare(b.key);
+                            });
 
                             self.refresh();
 

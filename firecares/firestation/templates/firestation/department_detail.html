@@ -126,10 +126,13 @@
                     <div class="ct-gallery">
                         <div id="map"></div>
                     </div>
-                    <div class="text-center ct-u-marginTop20" ng-if="showAsterChart">
-                        <aster-chart filter-type="months" metric-title="MONTH"></aster-chart>
-                        <aster-chart filter-type="days" metric-title="DAY"></aster-chart>
-                        <aster-chart filter-type="hours" metric-title="HOUR"></aster-chart>
+                    <div class="text-center ct-u-marginTop20" ng-if="showHeatmapFilters">
+                        <bar-chart class="hidden-xs" filter-type="monthsByYear" metric-title="HISTORY" width="600" height="150" max-years="8"></bar-chart>
+                        <bar-chart class="visible-xs" filter-type="monthsByYear" metric-title="HISTORY" width="400" height="150" max-years="6"></bar-chart>
+                        <br/>
+                        <aster-chart filter-type="months" metric-title="MONTH" diameter="175"></aster-chart>
+                        <aster-chart filter-type="days" metric-title="DAY" diameter="175"></aster-chart>
+                        <aster-chart filter-type="hours" metric-title="HOUR" diameter="175"></aster-chart>
                     </div>
                     <div class="ct-heading ct-u-marginTop30 ct-u-marginBottom20">
                         <h3>Community Risk Assessment</h3>

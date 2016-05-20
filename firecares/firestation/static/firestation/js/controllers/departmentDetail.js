@@ -19,7 +19,7 @@
 
         heatmap.init(departmentMap);
         $scope.heatmap = heatmap;
-        $scope.showAsterChart = false;
+        $scope.showHeatmapFilters = false;
 
         if (showStations) {
             FireStation.query({department: config.id}).$promise.then(function(data) {
@@ -73,21 +73,21 @@
 
         layersControl.addOverlay(heatmap.layer, 'Residential Fire Heatmap');
 
-        function showAsterChart(show) {
+        function showHeatmapFilters(show) {
             $timeout(function() {
-                $scope.showAsterChart = show;
+                $scope.showHeatmapFilters = show;
             });
         }
 
         departmentMap.on('overlayadd', function(layer) {
             if (layer._leaflet_id === heatmap.layer._leaflet_id) {
                 if (heatmap.heat) {
-                    showAsterChart(true);
+                    showHeatmapFilters(true);
                 } else {
                     departmentMap.spin(true);
-                    heatmap.download('https://s3.amazonaws.com/firecares-test/fdny-fires.csv')
+                    heatmap.download('https://s3.amazonaws.com/firecares-test/' + config.id + '-building-fires.csv')
                         .then(function() {
-                            showAsterChart(true);
+                            showHeatmapFilters(true);
                             departmentMap.spin(false);
                         })
                     ;
@@ -97,7 +97,7 @@
 
         departmentMap.on('overlayremove', function(layer) {
             if (layer._leaflet_id === heatmap.layer._leaflet_id) {
-                showAsterChart(false);
+                showHeatmapFilters(false);
             }
         });
     }
