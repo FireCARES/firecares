@@ -83,13 +83,42 @@
       layersControl.addOverlay(headquarters, 'Headquarters Location');
     }
 
+    var mouseOverAddedOpacity = 0.25; // put in settings?
+    var highlightColor = 'blue';      // put in settings?
+    var highlightPrevColor;
+    var highlightPrevOpacity;
+    function resetHighlight(e) {
+        // serviceArea.resetStyle(e.target); not doing it, working around it
+        var layer = e.target;
+        layer.setStyle({
+            fillOpacity: highlightPrevOpacity,
+            fillColor: highlightPrevColor
+        });
+    }
+
+    function highlightFeature(e) {
+        var layer = e.target;
+        highlightPrevOpacity = layer.options.fillOpacity;
+        highlightPrevColor = layer.options.fillColor;
+        layer.setStyle({
+            fillOpacity: highlightPrevOpacity + mouseOverAddedOpacity,
+            fillColor: highlightColor
+        });
+        if (!L.Browser.ie && !L.Browser.opera) {
+            layer.bringToFront();
+        }
+    }
+
     var serviceArea = L.geoJson(null, {
       onEachFeature: function(feature, layer) {
-        layer.bindPopup(feature.properties.Name + ' minutes');
+          layer.bindPopup(feature.properties.Name + ' minutes');
+          layer.on({
+                mouseover: highlightFeature,
+                mouseout: resetHighlight
+          });
       }
     });
     layersControl.addOverlay(serviceArea, 'Service area');
-
 
     if ( config.district) {
       var district = L.geoJson(config.district, {
