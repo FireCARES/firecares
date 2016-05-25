@@ -29,7 +29,7 @@
         };
         var _totals = {};
         var _labels = {
-            days: ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+            days: ['Sat', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sun']
         };
 
         function processData(allText) {
@@ -159,14 +159,14 @@
                             var lines = processData(response.data);
                             _crossfilter = crossfilter(lines);
 
-                            _fires.dates = _crossfilter.dimension(function(d) { return new Date(d.alarm); });
-                            _fires.months = _crossfilter.dimension(function(d) { return new Date(d.alarm).getMonth(); });
-                            _fires.days = _crossfilter.dimension(function(d) { return new Date(d.alarm).getDay(); });
-                            _fires.hours = _crossfilter.dimension(function(d) { return new Date(d.alarm).getHours(); });
+                            _fires.dates = _crossfilter.dimension(function(d) { return moment(d.alarm, 'YYYY-MM-DD HH:mm:ss').toDate(); });
+                            _fires.months = _crossfilter.dimension(function(d) { return moment(d.alarm, 'YYYY-MM-DD HH:mm:ss').month(); });
+                            _fires.days = _crossfilter.dimension(function(d) { return moment(d.alarm, 'YYYY-MM-DD HH:mm:ss').day(); });
+                            _fires.hours = _crossfilter.dimension(function(d) { return moment(d.alarm, 'YYYY-MM-DD HH:mm:ss').hours(); });
                             _fires.monthsByYear = _crossfilter.dimension(function(d) {
-                                var date = new Date(d.alarm);
-                                var year = date.getFullYear();
-                                var month = '' + date.getMonth();
+                                var date = moment(d.alarm, 'YYYY-MM-DD HH:mm:ss');
+                                var year = date.year();
+                                var month = '' + date.month();
                                 var pad = '00';
                                 month = pad.substring(0, pad.length - month.length) + month;
                                 return year + '-' + month;

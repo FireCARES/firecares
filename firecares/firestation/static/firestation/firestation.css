@@ -148,10 +148,16 @@ aster-chart > svg, bar-chart > svg {
 
 bar-chart > svg {
     overflow: visible !important;
+    -moz-transform: scale(1, -1);
+    -o-transform: scale(1, -1);
+    -webkit-transform: scale(1, -1);
     transform: scale(1, -1);
 }
 
 bar-chart > svg > g.bar-chart-labels {
+    -moz-transform: scale(1, -1);
+    -o-transform: scale(1, -1);
+    -webkit-transform: scale(1, -1);
     transform: scale(1, -1);
 }
 
@@ -169,11 +175,6 @@ bar-chart > svg > g.bar-chart-labels {
 }
 
 .chart-section-data {
-    -moz-transition: all 0.5s;
-    -o-transition: all 0.5s;
-    -webkit-transition: all 0.5s;
-    transition: all 0.5s;
-
     fill: rgb(188, 188, 188);
 }
 

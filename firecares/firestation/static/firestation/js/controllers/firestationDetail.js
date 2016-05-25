@@ -158,7 +158,7 @@
             map.fitBounds(serviceArea);
             map.spin(false);
           });
-        }, function error(error) {
+        }, function error(err) {
           map.spin(false);
         });
       }

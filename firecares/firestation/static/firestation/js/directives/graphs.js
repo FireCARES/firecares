@@ -115,7 +115,8 @@
             scope: {
                 metricTitle: '@?',
                 filterType: '@',
-                diameter: '@'
+                diameter: '@',
+                labelOffset: '@'
             },
             template:   '<div class="chart-header">' +
                             '<div class="chart-title">{{metricTitle}}</div>' +
@@ -127,10 +128,14 @@
                 var diameter = (attrs.diameter) ? Number(attrs.diameter) : 175;
                 var width = diameter;
                 var height = diameter;
-                var padding = 25;
-                var radius = Math.min(width - 10 - padding, height - 10 - padding) / 2;
+                var padding = 50;
+                var radius = (diameter - padding) / 2;
                 var innerRadius = 0.3 * radius;
                 var labelr = radius + 10;
+
+                if (attrs.labelOffset) {
+                    labelr += Number(attrs.labelOffset);
+                }
 
                 //
                 // SVG Arcs
@@ -210,15 +215,16 @@
                 svg.selectAll('.arcLabel')
                     .data(pie(arcData)).enter().append('text')
                     .attr('class', 'chart-label no-select')
-                    .attr("dy", ".35em")
                     .attr("transform", function(d) {
                         var c = bgArc.centroid(d),
                             x = c[0],
                             y = c[1],
                             h = Math.sqrt(x * x + y * y);
-                        return "translate(" + ((x / h * labelr) - 4) + ',' +
+                        return "translate(" + ((x / h * labelr)) + ',' +
                             (y / h * labelr) + ")";
                     })
+                    .attr('text-anchor', 'middle')
+                    .attr('alignment-baseline', 'central')
                     .text(function(d) {
                         var labels = heatmap.labels[scope.filterType];
                         if (labels) {
@@ -297,8 +303,27 @@
                         return d.value
                     });
 
-                    // Redraw the data arcs.
-                    dataArcPaths.attr("d", dataArc);
+                    for (var i = 0; i < dataArcPaths[0].length; i++) {
+                        var arcPath = d3.select(dataArcPaths[0][i]);
+                        var nextD = dataArc(arcPath.data()[0]);
+                        arcPath.attr('nextD', nextD);
+                    }
+
+                    // Animate the data arcs to their new size.
+                    dataArcPaths.transition()
+                        .duration(500)
+                        .ease('cubic-out')
+                        .attrTween("d", arcTween); // redraw the arcs
+
+                    function arcTween(next) {
+                        var dataArc = d3.select(this);
+                        var curD = SVGArcStrToArray(dataArc.attr('d'));
+                        var nextD = SVGArcStrToArray(dataArc.attr('nextD'));
+                        var interp = d3.interpolate(curD, nextD);
+                        return function(t) {
+                            return SVGArcArrayToStr(interp(t));
+                        };
+                    }
                 });
 
                 heatmap.onFilterChanged(scope.filterType, scope, function(ev, filter) {
@@ -348,7 +373,6 @@
                 var svg = d3.select(element).selectAll('svg')
                     .attr("width", width)
                     .attr("height", height)
-                    .attr('transform', 'scale(1, -1)')
                 ;
 
                 var svgBarGroup = svg.append('g')
@@ -558,11 +582,26 @@
                     barData = heatmap.totals[scope.filterType];
                     max = calculateMax();
 
-                    // Update the rect paths.
+                    // Animate to the new bar heights.
                     for (var i = 0; i < dataBars.length; i++) {
                         var value = barData[barData.length - 1 - i].value;
-                        var barHeight = (value / (max + (max * .1))) * maxBarHeight;
-                        dataBars[i].attr('height', barHeight);
+                        dataBars[i].attr('nextHeight', (value / (max + (max * .1))) * maxBarHeight);
+
+                        dataBars[i].transition()
+                            .duration(500)
+                            .ease('cubic-out')
+                            .attrTween('height', barTween)
+                        ;
+                    }
+
+                    function barTween() {
+                        var dataBar = d3.select(this);
+                        var curHeight = dataBar.attr('height');
+                        var nextHeight = dataBar.attr('nextHeight');
+                        var interp = d3.interpolate(curHeight, nextHeight);
+                        return function(t) {
+                            return interp(t);
+                        }
                     }
 
                     // Update scale labels.
@@ -635,6 +674,67 @@
                     .call(chart);
             }
         };
+    }
+
+    //
+    // Helper functions
+    //
+
+    // Convert SVG arc 'd' string to an array of commands.
+    // https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths
+    function SVGArcStrToArray(str) {
+        // Chop closing 'Z' command at the end.
+        str = str.substring(0, str.length - 1);
+
+        var cmds = str.split(/(?=[LMA])/);
+
+        var array = [];
+        for (var i = 0; i < cmds.length; i++) {
+            var cmdStr = cmds[i];
+            var cmd = {};
+            cmd.type = cmdStr.charAt(0);
+            cmd.values = [];
+
+            // Remove 'type' character from start of cmd string.
+            cmdStr = cmdStr.substring(1);
+
+            // Command values come in a two dimensional array, dilineated by ' ' and ','.
+            var cmdStrNums = cmdStr.split(' ');
+            for (var j = 0; j < cmdStrNums.length; j++) {
+                var numStrs = cmdStrNums[j].split(',');
+                var nums = [];
+                for (var k = 0; k < numStrs.length; k++) {
+                    nums.push(Number(numStrs[k]));
+                }
+
+                cmd.values.push(nums);
+            }
+
+            array.push(cmd);
+        }
+
+        return array;
+    }
+
+    // Convert arc SVG array of commands back to 'd' string.
+    function SVGArcArrayToStr(array) {
+        var str = '';
+        for (var i = 0; i < array.length; i++) {
+            var section = array[i];
+            str += section.type;
+
+            var valuesStrArray = [];
+            for (var j = 0; j < section.values.length; j++) {
+                valuesStrArray.push(section.values[j].join(','));
+            }
+
+            str += valuesStrArray.join(' ');
+        }
+
+        // Add closing 'Z' command.
+        str += 'Z';
+
+        return str;
     }
 }());
 
