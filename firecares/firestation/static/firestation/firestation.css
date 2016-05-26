@@ -140,6 +140,12 @@ input.ng-invalid {
 aster-chart, bar-chart {
     display: inline-block;
     padding: 0 10px;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 aster-chart > svg, bar-chart > svg {
@@ -162,10 +168,10 @@ bar-chart > svg > g.bar-chart-labels {
 }
 
 .chart-section-bg {
-    -moz-transition: all 0.5s;
-    -o-transition: all 0.5s;
-    -webkit-transition: all 0.5s;
-    transition: all 0.5s;
+    -moz-transition: fill 0.2s;
+    -o-transition: fill 0.2s;
+    -webkit-transition: fill 0.2s;
+    transition: fill 0.2s;
 
     fill: rgba(188, 188, 188, 0.2);
 }
@@ -175,6 +181,11 @@ bar-chart > svg > g.bar-chart-labels {
 }
 
 .chart-section-data {
+    -moz-transition: fill 0.2s;
+    -o-transition: fill 0.2s;
+    -webkit-transition: fill 0.2s;
+    transition: fill 0.2s;
+
     fill: rgb(188, 188, 188);
 }
 
