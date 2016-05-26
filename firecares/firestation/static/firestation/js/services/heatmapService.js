@@ -29,6 +29,7 @@
         };
         var _totals = {};
         var _labels = {
+            months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
             days: ['Sat', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sun']
         };
 
