@@ -239,13 +239,16 @@
                 // Input
                 //
                 var mouseButtonDown = false;
-                element.on('mousedown', function() {
-                    mouseButtonDown = true;
-                });
+                var lastArcKey = -1;
+                var mouseDownArcIndex = -1;
+                var selectDirection = 0;
+                var selectedIndices = [];
 
                 element.on('mouseup', function() {
                     mouseButtonDown = false;
-                    onlyFilteredKey = -1;
+                    lastArcKey = -1;
+                    mouseDownArcIndex = -1;
+                    selectDirection = 0;
                 });
 
                 // Handle cases where the user dragged out of the page without lifting their mouse button,
@@ -254,42 +257,123 @@
                     mouseButtonDown = false;
                 });
 
-                var onlyFilteredKey = -1;
                 function mouseDownHitArc(d, i) {
                     if (d.data.value == 0) {
                         return;
                     }
 
+                    mouseDownArcIndex = hitArcPaths[0].indexOf(this);
+                    selectedIndices = [mouseDownArcIndex];
+                    mouseButtonDown = true;
+
                     var filter = heatmap.filters[scope.filterType];
                     if (filter.length === 1 && filter.indexOf(d.data.key) !== -1) {
                         // Wait for a mouse up event to clear the last arc.
-                        onlyFilteredKey = d.data.key;
+                        lastArcKey = d.data.key;
                         return;
                     }
 
                     heatmap.setFilter(scope.filterType, [d.data.key]);
                 }
 
-                function mouseUpHitArc(d, i) {
+                function mouseUpHitArc(d) {
                     var filter = heatmap.filters[scope.filterType];
-                    if (filter.length === 1 && filter.indexOf(onlyFilteredKey) !== -1) {
+                    if (filter.length === 1 && filter.indexOf(lastArcKey) !== -1) {
                         heatmap.resetFilter(scope.filterType);
                     }
                 }
 
-                function mouseEnterHitArc(d, i) {
+                function mouseEnterHitArc(d) {
                     if (!mouseButtonDown) {
                         return;
                     }
 
+                    // Ignore empty arcs.
                     if (d.data.value == 0) {
                         return;
                     }
 
-                    heatmap.toggle(scope.filterType, d.data.key);
+                    // Reset the flag for the last arc toggle on mouse up.
+                    lastArcKey = -1;
+
+                    var index = hitArcPaths[0].indexOf(this);
+
+                    // For the first multi-selection, determine the direction we're most likely trying to select in.
+                    // Once the direction has been decided, keep selecting in that direction until we revert back
+                    // to a single selection. Then start the process over again.
+                    if (index === mouseDownArcIndex) {
+                        selectDirection = 0;
+                    } else if (selectDirection === 0) {
+                        // Clockwise.
+                        var distanceCW = 0;
+                        var testIndex = mouseDownArcIndex;
+                        while (distanceCW < hitArcPaths[0].length) {
+                            testIndex++;
+                            distanceCW++;
+
+                            if (testIndex >= hitArcPaths[0].length) {
+                                testIndex = 0;
+                            }
+
+                            if (testIndex === index) {
+                                break;
+                            }
+                        }
+
+                        // Counter clockwise.
+                        var distanceCCW = 0;
+                        testIndex = mouseDownArcIndex;
+                        while (distanceCCW < hitArcPaths[0].length) {
+                            testIndex--;
+                            distanceCCW++;
+
+                            if (testIndex < 0) {
+                                testIndex = hitArcPaths[0].length - 1;
+                            }
+
+                            if (testIndex === index) {
+                                break;
+                            }
+                        }
+
+                        if (distanceCCW < distanceCW) {
+                            selectDirection = -1;
+                        } else {
+                            selectDirection = 1;
+                        }
+                    }
+
+                    // Choose the selected indices based on our select direction.
+                    selectedIndices = [];
+                    var select = mouseDownArcIndex;
+                    selectedIndices.push(select);
+                    while (select !== index) {
+                        select += selectDirection;
+
+                        // Loop the indices.
+                        if (select >= hitArcPaths[0].length) {
+                            select = 0;
+                        } else if (select < 0) {
+                            select = hitArcPaths[0].length - 1;
+                        }
+
+                        selectedIndices.push(select);
+                    }
+
+                    // Convert indices to keys and update the filter.
+                    var keys = [];
+                    for (var i = 0; i < selectedIndices.length; i++) {
+                        var selectedIndex = selectedIndices[i];
+                        var path = d3.select(hitArcPaths[0][selectedIndex]);
+                        var data = path.data()[0];
+                        keys.push(data.data.key);
+                    }
+
+                    heatmap.setFilter(scope.filterType, keys);
                 }
 
                 scope.reset = function() {
+                    selectedIndices = [];
                     heatmap.resetFilter(scope.filterType);
                 };
 
@@ -315,7 +399,7 @@
                         .ease('cubic-out')
                         .attrTween("d", arcTween); // redraw the arcs
 
-                    function arcTween(next) {
+                    function arcTween() {
                         var dataArc = d3.select(this);
                         var curD = SVGArcStrToArray(dataArc.attr('d'));
                         var nextD = SVGArcStrToArray(dataArc.attr('nextD'));
@@ -441,6 +525,7 @@
                         .attr('y', bottomPadding)
                         .attr('width', barWidth)
                         .attr('height', maxBarHeight)
+                        .attr('key', data.key)
                     ;
 
                     bgBars.push(bgBar);
@@ -451,6 +536,7 @@
                         .attr('y', bottomPadding)
                         .attr('width', barWidth)
                         .attr('height', barHeight)
+                        .attr('key', data.key)
                     ;
 
                     dataBars.push(dataBar);
@@ -514,22 +600,24 @@
                 // Input
                 //
                 var mouseButtonDown = false;
-                element.on('mousedown', function() {
-                    mouseButtonDown = true;
-                });
+                var lastBarKey = -1;
+                var mouseDownBarIndex = -1;
+                var selectedIndices = [];
 
                 element.on('mouseup', function() {
                     mouseButtonDown = false;
-                    onlyFilteredKey = -1;
+                    lastBarKey = -1;
+                    mouseDownBarIndex = -1;
                 });
 
                 // Handle cases where the user dragged out of the page without lifting their mouse button,
                 // or other cases where they were interrupted.
                 element.on('mouseenter', function() {
                     mouseButtonDown = false;
+                    lastBarKey = -1;
+                    mouseDownBarIndex = -1;
                 });
 
-                var onlyFilteredKey = -1;
                 function mouseDownHitBar(d, i) {
                     var key = d3.select(this).attr('key');
 
@@ -538,39 +626,64 @@
                         return;
                     }
 
+                    mouseDownBarIndex = keyToIndex[key];
+                    selectedIndices = [mouseDownBarIndex];
+                    mouseButtonDown = true;
+
                     var filter = heatmap.filters[scope.filterType];
                     if (filter.length === 1 && filter.indexOf(key) !== -1) {
                         // Wait for a mouse up event to clear the last arc.
-                        onlyFilteredKey = key;
+                        lastBarKey = key;
                         return;
                     }
 
                     heatmap.setFilter(scope.filterType, [key]);
                 }
 
-                function mouseUpHitBar(d, i) {
+                function mouseUpHitBar(d) {
                     var filter = heatmap.filters[scope.filterType];
-                    if (filter.length === 1 && filter.indexOf(onlyFilteredKey) !== -1) {
+                    if (filter.length === 1 && filter.indexOf(lastBarKey) !== -1) {
                         heatmap.resetFilter(scope.filterType);
                     }
                 }
 
-                function mouseEnterHitBar(d, i) {
+                function mouseEnterHitBar(d) {
                     if (!mouseButtonDown) {
                         return;
                     }
 
                     var key = d3.select(this).attr('key');
 
+                    // Ignore empty bars.
                     data = keyToData[key];
                     if (data.value == 0) {
                         return;
                     }
 
-                    heatmap.toggle(scope.filterType, key);
+                    // Select a contiguous range between the bar we're dragging from and the bar we're currently over.
+                    var index = keyToIndex[key];
+                    selectedIndices = [mouseDownBarIndex];
+                    if (index !== mouseDownBarIndex) {
+                        var selectDirection = (index > mouseDownBarIndex) ? 1 : -1;
+                        var select = mouseDownBarIndex;
+                        while (select !== index) {
+                            select += selectDirection;
+                            selectedIndices.push(select);
+                        }
+                    }
+
+                    // Convert indices to keys and update the filter.
+                    var keys = [];
+                    for (var i = 0; i < selectedIndices.length; i++) {
+                        var selectedIndex = selectedIndices[i];
+                        keys.push(hitBars[selectedIndex].attr('key'));
+                    }
+
+                    heatmap.setFilter(scope.filterType, keys);
                 }
 
                 scope.reset = function() {
+                    selectedIndices = [];
                     heatmap.resetFilter(scope.filterType);
                 };
 

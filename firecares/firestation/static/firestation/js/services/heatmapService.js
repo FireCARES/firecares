@@ -83,8 +83,8 @@
                 this.setFilter(filterType, []);
             },
 
-            setFilter: function(filterType, indices) {
-                _filters[filterType] = indices || [];
+            setFilter: function(filterType, keys) {
+                _filters[filterType] = keys || [];
 
                 var filter = _filters[filterType];
                 if (filter.length) {
