@@ -18,19 +18,20 @@
         var _fires = {
             dates: null,
             months: null,
-            days: null,
+            daysOfWeek: null,
             hours: null
         };
         var _filters = {
             months: [],
-            days: [],
+            daysOfWeek: [],
             hours: [],
-            monthsByYear: []
+            yearsMonths: []
         };
         var _totals = {};
         var _labels = {
             months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            days: ['Sat', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sun']
+            daysOfWeek: ['Sat', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sun'],
+            hours: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24']
         };
 
         function processData(allText) {
@@ -51,6 +52,15 @@
                 }
             }
             return lines
+        }
+
+        // Manually calculate day of week to avoid slow Date parsing.
+        // https://en.wikipedia.org/wiki/Determination_of_the_day_of_the_week#Implementation-dependent_methods
+        function dayOfWeek(y, m, d)
+        {
+            var t = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4];
+            y -= m < 3;
+            return (y + Math.floor(y/4) - Math.floor(y/100) + Math.floor(y/400) + t[m-1] + d) % 7;
         }
 
         return {
@@ -152,31 +162,54 @@
                 $rootScope.$emit('heatmap.onRefresh');
             },
 
+            keyForYearsMonths: function(year, month) {
+                month = '' + (month + 1);
+                var pad = '00';
+                month = pad.substring(0, pad.length - month.length) + month;
+                return year + '-' + month;
+            },
+
             download: function(url) {
                 var self = this;
                 return $q(function(resolve, reject) {
                     $http.get(url)
                         .then(function(response) {
                             var lines = processData(response.data);
+
+                            // Preprocess dates into individual parts. This is MUCH faster than
+                            // doing it for each dimension, and speeds up loading significantly.
+                            for (var i = 0; i < lines.length; i++) {
+                                var line = lines[i];
+                                var dateTime = line.alarm.split(' ');
+                                var yearMonthDay = dateTime[0].split('-');
+                                var hoursMinutesSeconds = dateTime[1].split(':');
+
+                                var year = Number(yearMonthDay[0]);
+                                var month = Number(yearMonthDay[1]);
+                                var day = Number(yearMonthDay[2]);
+
+                                line.dateTime = {
+                                    year: year,
+                                    month: month - 1,
+                                    dayOfWeek: dayOfWeek(year, month, day),
+                                    hours: Number(hoursMinutesSeconds[0])
+                                };
+                            }
+
                             _crossfilter = crossfilter(lines);
 
-                            _fires.dates = _crossfilter.dimension(function(d) { return moment(d.alarm, 'YYYY-MM-DD HH:mm:ss').toDate(); });
-                            _fires.months = _crossfilter.dimension(function(d) { return moment(d.alarm, 'YYYY-MM-DD HH:mm:ss').month(); });
-                            _fires.days = _crossfilter.dimension(function(d) { return moment(d.alarm, 'YYYY-MM-DD HH:mm:ss').day(); });
-                            _fires.hours = _crossfilter.dimension(function(d) { return moment(d.alarm, 'YYYY-MM-DD HH:mm:ss').hours(); });
-                            _fires.monthsByYear = _crossfilter.dimension(function(d) {
-                                var date = moment(d.alarm, 'YYYY-MM-DD HH:mm:ss');
-                                var year = date.year();
-                                var month = '' + date.month();
-                                var pad = '00';
-                                month = pad.substring(0, pad.length - month.length) + month;
-                                return year + '-' + month;
+                            _fires.dates = _crossfilter.dimension(function(d) { return d.alarm; });
+                            _fires.months = _crossfilter.dimension(function(d) { return d.dateTime.month; });
+                            _fires.daysOfWeek = _crossfilter.dimension(function(d) { return d.dateTime.dayOfWeek; });
+                            _fires.hours = _crossfilter.dimension(function(d) { return d.dateTime.hours; });
+                            _fires.yearsMonths = _crossfilter.dimension(function(d) {
+                                return self.keyForYearsMonths(d.dateTime.year, d.dateTime.month);
                             });
 
                             _totals.months = _fires.months.group().top(Infinity).sort(function(a, b) { return a.key - b.key; });
-                            _totals.days = _fires.days.group().top(Infinity).sort(function(a, b) { return a.key - b.key; });
+                            _totals.daysOfWeek = _fires.daysOfWeek.group().top(Infinity).sort(function(a, b) { return a.key - b.key; });
                             _totals.hours = _fires.hours.group().top(Infinity).sort(function(a, b) { return a.key - b.key; });
-                            _totals.monthsByYear = _fires.monthsByYear.group().top(Infinity).sort(function(a, b) {
+                            _totals.yearsMonths = _fires.yearsMonths.group().top(Infinity).sort(function(a, b) {
                                 return a.key.localeCompare(b.key);
                             });
 

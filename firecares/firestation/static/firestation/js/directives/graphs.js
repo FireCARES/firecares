@@ -137,6 +137,40 @@
                     labelr += Number(attrs.labelOffset);
                 }
 
+                var labels = heatmap.labels[scope.filterType];
+                if (!labels) {
+                    console.error("No labels found for '" + scope.filterType + "' filter.");
+                    return;
+                }
+
+                var arcData = heatmap.totals[scope.filterType];
+                if (!arcData) {
+                    console.error("Heatmap does not have a '" + scope.filterType + "' filter.");
+                    return;
+                }
+
+                var max = d3.max(arcData, function(d) { return d.value });
+
+                // Fill in any gaps in the data with zeroed dummy entries.
+                var missingKeys = [];
+                for (var i = 0; i < labels.length; i++) {
+                    missingKeys.push(i);
+                }
+
+                for (i = 0; i < arcData.length; i++) {
+                    var arcKey = arcData[i].key;
+                    missingKeys.splice(missingKeys.indexOf(arcKey), 1);
+                }
+
+                for (i = 0; i < missingKeys.length; i++) {
+                    arcData.push({
+                        key: missingKeys[i],
+                        value: 0
+                    });
+                }
+
+                arcData.sort(function(a, b) { return a.key - b.key; });
+
                 //
                 // SVG Arcs
                 //
@@ -147,30 +181,22 @@
                     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
                 ;
 
-                var arcData = heatmap.totals[scope.filterType];
-                if (!arcData) {
-                    console.error("Heatmap does not have a '" + scope.filterType + "' filter.");
-                    return;
-                }
-
-                var max = d3.max(arcData, function(d) {
-                    return d.value
-                });
-
                 var pie = d3.layout.pie()
                     .sort(null)
-                    .value(function() {
-                        return arcData.length;
-                    })
+                    .value(function() { return labels.length; })
                     .padAngle(.04)
                 ;
 
                 var hitPie = d3.layout.pie()
                     .sort(null)
-                    .value(function() {
-                        return arcData.length;
-                    })
+                    .value(function() { return labels.length; })
                 ;
+
+                var pathSortByKey = function(a, b) {
+                    var dataA = d3.select(a).data()[0];
+                    var dataB = d3.select(b).data()[0];
+                    return dataA.data.key - dataB.data.key;
+                };
 
                 // Background Arcs
                 var bgArc = d3.svg.arc()
@@ -185,11 +211,16 @@
                     .attr("d", bgArc)
                 ;
 
+                bgArcPaths[0].sort(pathSortByKey);
+
                 // Foreground Arcs (data)
+                var maxPaddingScale = .075;
                 var dataArc = d3.svg.arc()
                     .innerRadius(innerRadius)
                     .outerRadius(function(d) {
-                        return (radius - innerRadius) * (d.data.value / (max + (max * .1))) + innerRadius;
+                        var value = d.data.value || 0;
+                        var scale = (max) ? (value / (max + (max * maxPaddingScale))) : 0;
+                        return (radius - innerRadius) * scale + innerRadius;
                     })
                 ;
 
@@ -199,6 +230,8 @@
                     .attr("class", "chart-section-data")
                     .attr("d", dataArc)
                 ;
+
+                dataArcPaths[0].sort(pathSortByKey);
 
                 // Hit Arcs
                 var hitArcPaths = svg.selectAll(".chart-section-hit")
@@ -210,6 +243,8 @@
                     .on("mouseup", mouseUpHitArc)
                     .on("mouseenter", mouseEnterHitArc)
                 ;
+
+                hitArcPaths[0].sort(pathSortByKey);
 
                 // Arc Labels
                 svg.selectAll('.arcLabel')
@@ -226,12 +261,7 @@
                     .attr('text-anchor', 'middle')
                     .attr('alignment-baseline', 'central')
                     .text(function(d) {
-                        var labels = heatmap.labels[scope.filterType];
-                        if (labels) {
-                            return labels[d.data.key];
-                        } else {
-                            return d.data.key + 1;
-                        }
+                        return labels[d.data.key];
                     })
                 ;
 
@@ -262,7 +292,7 @@
                         return;
                     }
 
-                    mouseDownArcIndex = hitArcPaths[0].indexOf(this);
+                    mouseDownArcIndex = d.data.key;
                     selectedIndices = [mouseDownArcIndex];
                     mouseButtonDown = true;
 
@@ -473,8 +503,36 @@
                     return;
                 }
 
-                var availableYears = Math.floor(barData.length / 12);
-                var years = Math.min(availableYears, maxYears);
+                var latestYear = new Date(barData[barData.length - 1].key).getFullYear();
+                var oldestYear = new Date(barData[0].key).getFullYear();
+                var yearSpan = latestYear - oldestYear;
+                var years = Math.min(yearSpan, maxYears);
+
+                barData = normalizedBarData(barData);
+
+                function normalizedBarData(barData) {
+                    // Fill in any gaps in the data with zeroed dummy entries.
+                    var barDataByKey = {};
+                    for (i = 0; i < barData.length; i++) {
+                        barDataByKey[barData[i].key] = barData[i];
+                    }
+
+                    var oldestVisibleYear = latestYear - years + 1;
+                    var results = [];
+                    for (var year = oldestVisibleYear; year <= latestYear; year++) {
+                        for (var month = 0; month < 12; month++) {
+                            var key = heatmap.keyForYearsMonths(year, month);
+                            var existingData = barDataByKey[key];
+                            var value = (existingData) ? existingData.value : 0;
+                            results.push({
+                                key: key,
+                                value: value
+                            });
+                        }
+                    }
+
+                    return results;
+                }
 
                 function calculateMax() {
                     var rawMax = d3.max(barData, function(d) {
@@ -512,13 +570,11 @@
                 var bottomPadding = 25;
                 var totalBarWidth = width - leftPadding;
                 var maxBarHeight = height - bottomPadding;
-                var numBars = years * 12;
                 var barPadding = 2;
-                var barWidth = totalBarWidth / numBars - barPadding;
+                var barWidth = totalBarWidth / barData.length - barPadding;
                 var max = calculateMax();
-                for (var i = 0; i < numBars; i++) {
+                for (var i = 0; i < barData.length; i++) {
                     var data = barData[barData.length - 1 - i];
-                    var barHeight = (data.value / (max + (max * .1))) * maxBarHeight;
                     var bgBar = svgBarGroup.append('rect')
                         .attr('class', 'chart-section-bg')
                         .attr('x', leftPadding + totalBarWidth - i * (barWidth + barPadding) - barWidth - barPadding)
@@ -530,6 +586,7 @@
 
                     bgBars.push(bgBar);
 
+                    var barHeight = (max) ? ((data.value / max) * maxBarHeight) : 0;
                     var dataBar = svgBarGroup.append('rect')
                         .attr('class', 'chart-section-data')
                         .attr('x', leftPadding + totalBarWidth - i * (barWidth + barPadding) - barWidth - barPadding)
@@ -691,14 +748,14 @@
                 // Heatmap events
                 //
                 heatmap.onRefresh(scope, function() {
-                    // Calculate the max bar scale.
-                    barData = heatmap.totals[scope.filterType];
+                    barData = normalizedBarData(heatmap.totals[scope.filterType]);
                     max = calculateMax();
 
                     // Animate to the new bar heights.
                     for (var i = 0; i < dataBars.length; i++) {
                         var value = barData[barData.length - 1 - i].value;
-                        dataBars[i].attr('nextHeight', (value / (max + (max * .1))) * maxBarHeight);
+                        var nextBarHeight = (max) ? ((value / max) * maxBarHeight) : 0;
+                        dataBars[i].attr('nextHeight', nextBarHeight);
 
                         dataBars[i].transition()
                             .duration(500)
@@ -737,6 +794,14 @@
                     // Reselect the active ones.
                     for (var i = 0; i < filter.length; i++) {
                         var index = keyToIndex[filter[i]];
+
+                        // HACK: It's possible to select bars farther back than the shorter mobile chart displays.
+                        //       Just ignore invalid indices for now. Ideally, we should only have one chart that
+                        //       dynamically resizes based on the screen size.
+                        if (!index) {
+                            continue;
+                        }
+
                         bgBars[index].classed('selected', true);
                         dataBars[index].classed('selected', true);
                         hitBars[index].classed('selected', true);
