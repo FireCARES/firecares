@@ -71,7 +71,7 @@
         };
 
 
-        layersControl.addOverlay(heatmap.layer, 'Residential Fire Heatmap');
+        layersControl.addOverlay(heatmap.layer, 'Heatmap of Low Risk Fires');
 
         function showHeatmapFilters(show) {
             $timeout(function() {
