@@ -175,6 +175,10 @@
                     $http.get(url)
                         .then(function(response) {
                             var lines = processData(response.data);
+                            if (lines.length == 0) {
+                                reject(new Error("Heatmap data is not yet available for this department."));
+                                return;
+                            }
 
                             // Preprocess dates into individual parts. This is MUCH faster than
                             // doing it for each dimension, and speeds up loading significantly.

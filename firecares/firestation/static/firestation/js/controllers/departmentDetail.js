@@ -5,9 +5,9 @@
         .controller('jurisdictionController', JurisdictionController)
     ;
 
-    JurisdictionController.$inject = ['$scope', '$timeout', 'FireStation', 'map', 'heatmap'];
+    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap'];
 
-    function JurisdictionController($scope, $timeout, FireStation, map, heatmap) {
+    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap) {
         var departmentMap = map.initMap('map', {scrollWheelZoom: false});
         var showStations = true;
         var stationIcon = L.FireCARESMarkers.firestationmarker();
@@ -16,10 +16,6 @@
         $scope.stations = [];
         var layersControl = L.control.layers().addTo(departmentMap);
         var fires = L.featureGroup().addTo(departmentMap);
-
-        heatmap.init(departmentMap);
-        $scope.heatmap = heatmap;
-        $scope.showHeatmapFilters = false;
 
         if (showStations) {
             FireStation.query({department: config.id}).$promise.then(function(data) {
@@ -70,35 +66,61 @@
             departmentMap.toggleFullscreen();
         };
 
+        //
+        // Heatmap
+        //
 
-        layersControl.addOverlay(heatmap.layer, 'Heatmap of Low Risk Fires');
+        var heatmapDataUrl = 'https://s3.amazonaws.com/firecares-test/' + config.id + '-building-fires.csv';
+        $http.head(heatmapDataUrl)
+            .then(function(response) {
+                var contentLength = Number(response.headers('Content-Length'));
 
-        function showHeatmapFilters(show) {
-            $timeout(function() {
-                $scope.showHeatmapFilters = show;
-            });
-        }
-
-        departmentMap.on('overlayadd', function(layer) {
-            if (layer._leaflet_id === heatmap.layer._leaflet_id) {
-                if (heatmap.heat) {
-                    showHeatmapFilters(true);
-                } else {
-                    departmentMap.spin(true);
-                    heatmap.download('https://s3.amazonaws.com/firecares-test/' + config.id + '-building-fires.csv')
-                        .then(function() {
-                            showHeatmapFilters(true);
-                            departmentMap.spin(false);
-                        })
-                    ;
+                // Don't show the heatmap layer option for a department with no heatmap data.
+                // HACK: A department with no heatmap data will still return the table header for the empty data, which
+                //       has a length of 45 bytes. Remember to change this value if the columns ever change in any way.
+                if (contentLength <= 45) {
+                    return;
                 }
-            }
-        });
 
-        departmentMap.on('overlayremove', function(layer) {
-            if (layer._leaflet_id === heatmap.layer._leaflet_id) {
-                showHeatmapFilters(false);
-            }
-        });
+                heatmap.init(departmentMap);
+                $scope.heatmap = heatmap;
+                $scope.showHeatmapCharts = false;
+
+                layersControl.addOverlay(heatmap.layer, 'Heatmap of Low Risk Fires');
+
+                departmentMap.on('overlayadd', function(layer) {
+                    if (layer._leaflet_id === heatmap.layer._leaflet_id) {
+                        if (heatmap.heat) {
+                            showHeatmapCharts(true);
+                        } else {
+                            departmentMap.spin(true);
+                            heatmap.download(heatmapDataUrl)
+                                .then(function() {
+                                    showHeatmapCharts(true);
+                                }, function(err) {
+                                    alert(err.message);
+                                    layersControl.removeLayer(heatmap.layer);
+                                })
+                                .finally(function() {
+                                    departmentMap.spin(false);
+                                })
+                            ;
+                        }
+                    }
+                });
+
+                departmentMap.on('overlayremove', function(layer) {
+                    if (layer._leaflet_id === heatmap.layer._leaflet_id) {
+                        showHeatmapCharts(false);
+                    }
+                });
+
+                function showHeatmapCharts(show) {
+                    $timeout(function() {
+                        $scope.showHeatmapCharts = show;
+                    });
+                }
+            })
+        ;
     }
 })();
