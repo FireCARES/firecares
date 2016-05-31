@@ -80,27 +80,21 @@
 </div>
 
 <div id="header"></div>
-<header class="ct-mediaSection text-center ct-u-text--white header-gradient">
-    <div class="ct-mediaSection-inner">
-        <div class="ct-headerText--normal">
-            <div class="container">
-                <img src="{{STATIC_URL}}firecares-header-logo.png" alt="">
-                <h4 class="ct-u-marginBottom50" style="color:#f29a00">Do you know your safe grade?</h4>
-                <!--<a class="btn btn-default btn-transparent--border ct-u-text--white ct-js-btnScroll" href="{% url 'firedepartment_list' %}">Browse Departments</a>-->
-                <div class="container firecares-searchbox">
-                    <div>
-                        <form class="form-inline col-lg-12 ct-u-paddingBottom30" method="get" action="{% url 'firedepartment_list' %}/">
-                          <div class="form-group col-lg-12">
-                            <label class="sr-only" for="exampleInputAmount">Amount (in dollars)</label>
-                            <div class="input-group col-lg-5 ct-u-marginBottom10">
-                              <input type="text" name="q" class="form-control"  id="search" placeholder="Search for departments by name, zip, city, or state.">
-                            </div>
-                            <button type="submit" class="btn btn-primary ct-u-marginBottom10">Search</button>
-                          </div>
-                        </form>
-                    </div>
+<header class="home-header text-center ct-u-text--white header-gradient">
+    <img src="{{STATIC_URL}}firecares-header-logo.png" alt="">
+    <h4 class="ct-u-marginBottom50" style="color:#f29a00">Do you know your safe grade?</h4>
+    <!--<a class="btn btn-default btn-transparent--border ct-u-text--white ct-js-btnScroll" href="{% url 'firedepartment_list' %}">Browse Departments</a>-->
+    <div class="container firecares-searchbox">
+        <div>
+            <form class="form-inline col-lg-12" method="get" action="{% url 'firedepartment_list' %}/">
+              <div class="form-group col-lg-12">
+                <label class="sr-only" for="exampleInputAmount">Amount (in dollars)</label>
+                <div class="input-group col-lg-5 ct-u-marginBottom10">
+                  <input type="text" name="q" class="form-control"  id="search" placeholder="Search for departments by name, zip, city, or state.">
                 </div>
-            </div>
+                <button type="submit" class="btn btn-primary ct-u-marginBottom10">Search</button>
+              </div>
+            </form>
         </div>
     </div>
 </header>

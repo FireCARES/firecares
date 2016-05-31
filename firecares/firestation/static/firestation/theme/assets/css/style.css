@@ -11467,6 +11467,9 @@ table.residential-fires {
   opacity: .5;
   padding: 0 15px;
 }
+.home-header {
+  padding: 40px 40px 50px;
+}
 .header-gradient {
   background: -moz-radial-gradient(center, ellipse cover, #495e82 0%, #2d3a51 100%);
   /* ff3.6+ */
@@ -15027,9 +15030,6 @@ header {
     padding: 0;
     display: block;
   }
-  .onepager header .ct-headerText--normal img {
-    margin-top: 100px;
-  }
   .onepager header .ct-headerText--normal h3 {
     text-shadow: 0px 1px 3px rgba(4, 4, 4, 0.4);
   }
@@ -15421,7 +15421,6 @@ header {
   color: gray;
   font-variant: small-caps;
 }
-
 @media (max-width: 1199px) {
   .navbar-toggle {
     display: inline-block !important;
@@ -15436,7 +15435,7 @@ header {
   .search-section {
     padding: 50px 0 60px;
   }
-
+}
 .no-select {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -15444,4 +15443,3 @@ header {
   -ms-user-select: none;
   user-select: none;
 }
-
