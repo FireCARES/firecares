@@ -235,6 +235,7 @@ class DepartmentUpdateGovernmentUnits(LoginRequiredMixin, DetailView):
 
         if request.POST.get('update_geom'):
             self.object.set_geometry_from_government_unit()
+            self.object.set_population_from_government_unit()
 
         messages.add_message(request, messages.SUCCESS, 'Government unit associations updated')
 
