@@ -90,7 +90,7 @@
               <div class="form-group col-lg-12">
                 <label class="sr-only" for="exampleInputAmount">Amount (in dollars)</label>
                 <div class="input-group col-lg-5 ct-u-marginBottom10">
-                  <input type="text" name="q" class="form-control"  id="search" placeholder="Search for departments by name, zip, city, or state.">
+                  <input type="text" name="q" class="form-control" id="search" placeholder="Search for departments by name, zip, city, or state.">
                 </div>
                 <button type="submit" class="btn btn-primary ct-u-marginBottom10">Search</button>
               </div>
@@ -99,7 +99,7 @@
     </div>
 </header>
 
-<section id="about" class="text-center ct-u-paddingBoth100 col-lg-12 section">
+<section id="about" class="text-center ct-u-paddingTop100 col-lg-12 section">
     <div class="row">
     <div class="col-lg-7">
             <div class="ct-heading text-uppercase ct-u-marginBottom40">
@@ -158,7 +158,7 @@
 </section>
 
 
-<section id="featured" class="section ct-u-paddingBottom20 ct-u-paddingTop100 " style="min-height: 400px">
+<section id="featured" class="section col-lg-12 ct-u-paddingTop100 " style="min-height: 400px">
     <div class="ct-heading text-uppercase text-center ct-u-paddingBottom30">
         <h3>Over 30 million fires analyzed.</h3>
     </div>
@@ -167,20 +167,16 @@
 
 </div>
 
-<section class="section" id="partners">
-    <div class="ct-u-paddingBottom60 text-center">
-        <div class="container">
-            {% include 'firestation/_partners.html' %}
-        </div>
-    </div>
-</section>
+<div id="partners">
+    {% include 'firestation/_partners.html' %}
+</div>
 
 <section class="ct-mediaSection account-request-section ct-u-paddingBoth90 ct-u-text--white text-center" id="signup">
     <div class="container">
         <div class="ct-u-marginBottom15 text-center">
             <h2 class="text-center">Sign up</h2>
         </div>
-        <form class="form-inline col-lg-12 ct-u-paddingBottom30" method="post" action="{% url 'account_request' %}">
+        <form class="form-inline col-lg-12" method="post" action="{% url 'account_request' %}">
             <div class="ct-u-paddingBottom30 account-request-section-content">Provide your email address and we will be in touch.</div>
             <div class="ct-form--item ct-u-marginBottom20">
                 <input id="contact_name" placeholder='example@domain.com' required size="65" name="email" type="email" class="form-control input-lg">
