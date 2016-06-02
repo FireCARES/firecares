@@ -11462,6 +11462,11 @@ table.residential-fires {
 .home-header {
   padding: 40px;
 }
+@media (max-width: 991px) {
+  .home-computer-img {
+    max-width: 100%;
+  }
+}
 .header-gradient {
   background: -moz-radial-gradient(center, ellipse cover, #495e82 0%, #2d3a51 100%);
   /* ff3.6+ */
