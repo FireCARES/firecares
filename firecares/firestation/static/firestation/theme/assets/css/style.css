@@ -4927,10 +4927,6 @@ html[dir="rtl"] .select2-container-multi .select2-search-choice-close {
   background-color: #333;
 }
 .ct-menuMobile {
-  -webkit-transition: all 0.2s ease;
-  -moz-transition: all 0.2s ease;
-  -o-transition: all 0.2s ease;
-  transition: all 0.2s ease;
   position: fixed;
   top: 0;
   left: -100%;
