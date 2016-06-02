@@ -15440,15 +15440,7 @@ header {
   -ms-user-select: none;
   user-select: none;
 }
-@media (max-width: 767px) {
-  .pull-left-xs {
-    float: left;
-  }
-  .pull-right-xs {
-    float: right;
-  }
-}
-@media (min-width: 768px) and (max-width: 991px) {
+@media (min-width: 768px) {
   .pull-left-sm {
     float: left;
   }
@@ -15456,7 +15448,7 @@ header {
     float: right;
   }
 }
-@media (min-width: 992px) and (max-width: 1199px) {
+@media (min-width: 992px) {
   .pull-left-md {
     float: left;
   }
