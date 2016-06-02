@@ -101,7 +101,8 @@ function makekenburns($element) {
 
         snapper.settings({
             addBodyClasses: true,
-            slideIntent: 20
+            slideIntent: 20,
+            touchToDrag: false
         });
     }
 
