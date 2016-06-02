@@ -11638,7 +11638,6 @@ table.residential-fires {
   display: none;
 }
 .ct-pageWrapper {
-  z-index: 3;
   background-color: #ffffff;
   overflow: hidden;
 }
