@@ -11437,9 +11437,17 @@ table.residential-fires {
   background-color: inherit;
   outline: none;
 }
-.home-search-input {
-  display: inline-block;
-  max-width: 370px;
+.firecares-searchbox {
+  text-align: center;
+}
+.firecares-searchbox .form-control {
+  min-width: 350px;
+}
+@media (max-width: 768px) {
+  .firecares-searchbox .input-group {
+    display: inline-table;
+    vertical-align: middle;
+  }
 }
 .sub-navbar {
   border: none;
