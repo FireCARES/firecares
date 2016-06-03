@@ -12097,14 +12097,6 @@ header {
 .ct-heading--main {
   padding: 60px 0;
 }
-.ct-heading--main h1,
-.ct-heading--main h2,
-.ct-heading--main h3,
-.ct-heading--main h4,
-.ct-heading--main h5,
-.ct-heading--main h6 {
-  line-height: 18px;
-}
 .ct-buttonBox {
   display: inline-block;
   padding: 10px 0 10px 20px;
