@@ -9,8 +9,7 @@
 {% endblock %}
 
 {% block form %}
-    <div class="form-group">
-    <div class="ct-form--label--type2">
+    <div class="ct-form--label--type3">
         <div class="ct-u-displayTableVertical">
             <div class="ct-u-displayTableCell">
                 <div class="ct-input-group-btn">
@@ -24,16 +23,17 @@
             </div>
         </div>
     </div>
-    {% with WIDGET_ERROR_CLASS='form-error' %}
-    <div class="ct-form--item ct-u-marginBottom20 form-group">
-        <label>Your Email</label>
-        {% render_field form.email type="email" class+="form-control input-lg" %}
-        {{ form.email.errors }}
+    <div class="form-group">
+        {% with WIDGET_ERROR_CLASS='form-error' %}
+        <div class="ct-form--item ct-u-marginBottom20 form-group">
+            <label>Your Email</label>
+            {% render_field form.email type="email" class+="form-control input-lg" %}
+            {{ form.email.errors }}
+        </div>
+        {{ form.non_field_errors }}
+        {% endwith %}
+        <div class="ct-form--item">
+            <button type="submit" class="btn btn-warning center-block">Send username to my email</button>
+        </div>
     </div>
-    {{ form.non_field_errors }}
-    {% endwith %}
-    <div class="ct-form--item">
-        <button type="submit" class="btn btn-warning center-block">Send username to my email</button>
-    </div>
-</div>
 {% endblock %}
