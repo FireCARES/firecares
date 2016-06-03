@@ -11563,8 +11563,7 @@ table.residential-fires {
   width: 100%;
 }
 .g-recaptcha {
-  position: relative;
-  left: 25%;
+  display: inline-block;
   margin-bottom: 22px;
 }
 /* Normalizing bootstrap versions between Estato theme and included bootstrap */
