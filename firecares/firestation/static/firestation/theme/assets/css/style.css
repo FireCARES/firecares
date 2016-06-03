@@ -5374,8 +5374,7 @@ table > thead > tr > th {
   background-color: #333333;
   border-radius: 3px;
   position: relative;
-  top: -10px;
-  padding: 50px 20px 30px 20px;
+  padding: 60px 20px 30px 20px;
   width: 100%;
 }
 .ct-formSearch--extended label,
@@ -5406,7 +5405,9 @@ table > thead > tr > th {
   height: 100%;
 }
 .ct-formRegister {
-  max-width: 370px;
+  display: inline-block;
+  width: 370px;
+  max-width: 100%;
 }
 .ct-formSubmission label {
   font-size: 18px;
@@ -5590,7 +5591,7 @@ form input {
 }
 .ct-formContact--map {
   width: 370px;
-  top: 7%;
+  max-width: 100%;
 }
 .ct-formRegister .select2-container .select2-choice .select2-chosen,
 .ct-formContact--map .select2-container .select2-choice .select2-chosen,
@@ -7198,9 +7199,6 @@ video {
 }
 .ct-mediaSection[data-type="parallax"].ct-mediaSection--stellar {
   overflow: hidden;
-}
-.ct-mediaSection[data-type="parallax"] .ct-mediaSection-inner {
-  display: table-cell;
 }
 .ct-mediaSection[data-type="video"] {
   display: block;
@@ -15024,9 +15022,6 @@ header {
   .onepager header .ct-headerText--normal h3 {
     text-shadow: 0px 1px 3px rgba(4, 4, 4, 0.4);
   }
-  header.ct-mediaSection {
-    padding: 30px 0;
-  }
   .ct-blog--small .ct-articleBox {
     margin-bottom: 30px;
   }
@@ -15038,9 +15033,6 @@ header {
   }
   .ct-navigationThumbnail {
     margin-left: -167px;
-  }
-  .ct-formRegister {
-    margin-top: 50px;
   }
   .ct-iconBox--2col {
     float: none!important;

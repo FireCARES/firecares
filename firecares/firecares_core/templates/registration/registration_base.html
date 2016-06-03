@@ -54,17 +54,16 @@
         {% endblock %}
     </div>
 </div>
-<header class="ct-mediaSection" data-stellar-background-ratio="0.3" data-height="630" data-type="parallax" data-bg-image="{{STATIC_URL}}images/firefighter-header.jpg" data-bg-image-mobile="assets/images/content/registration-parallax.jpg">
+<header class="ct-mediaSection" data-stellar-background-ratio="0.3" data-type="parallax" data-bg-image="{{STATIC_URL}}images/firefighter-header.jpg" data-bg-image-mobile="assets/images/content/registration-parallax.jpg">
     <div class="ct-mediaSection-inner">
         <div class="container">
-            <div class="row">
+            <div class="col-md-12">
                 {% block content %}
                 <div class="col-md-6 hidden-xs hidden-sm">
                     {% include 'firestation/_safegrade.html' %}
                 </div>
-                <div class="col-md-6">
-                    <div class="row">
-                    <form role="form" class="ct-formRegister pull-right" method="post">
+                <div class="col-md-6 text-center">
+                    <form role="form" class="ct-formRegister pull-right-md" method="post">
                         {% csrf_token %}
                         {% block form %}
                         <div class="ct-form--label--type3">
@@ -104,7 +103,6 @@
                         </div>
                         {% endblock %}
                     </form>
-                    </div>
                 </div>
                 {% endblock %}
             </div>
