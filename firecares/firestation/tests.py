@@ -395,7 +395,7 @@ class FireStationTests(TestCase):
         ]
 
         for url in urls:
-            response = requests.head(url)
+            response = requests.head(url, allow_redirects=True)
             self.assertEqual(response.status_code, 200, 'Url: {0} did not return a 200.'.format(url))
 
         get_urls = [
