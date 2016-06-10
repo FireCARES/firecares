@@ -603,6 +603,7 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
         else:
             self.population = None
 
+        self.population_class = self.get_population_class()
         self.save()
 
     @classmethod
