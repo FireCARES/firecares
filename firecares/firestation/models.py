@@ -5,8 +5,6 @@ import sys
 import csv
 import os
 import re
-
-
 from .managers import PriorityDepartmentsManager, CalculationManager
 from django.conf import settings
 from django.contrib.gis.db import models
@@ -24,6 +22,7 @@ from django.core.urlresolvers import reverse
 from django.db.transaction import rollback
 from django.db.utils import IntegrityError, ProgrammingError
 from django.utils.functional import cached_property
+from django.utils.deconstruct import deconstructible
 from firecares.firecares_core.models import Address
 from firecares.firecares_core.validators import validate_choice
 from numpy import histogram
@@ -31,6 +30,8 @@ from phonenumber_field.modelfields import PhoneNumberField
 from firecares.firecares_core.models import Country
 from genericm2m.models import RelatedObjectsDescriptor
 from reversion import revisions as reversion
+from storages.backends.s3boto import S3BotoStorage
+
 
 class USGSStructureData(models.Model):
     """
@@ -1238,6 +1239,27 @@ def create_quartile_views(sender, **kwargs):
             cursor.execute("DROP VIEW IF EXISTS population_class_%s_quartiles;", [population_class])
 
         cursor.execute("CREATE MATERIALIZED VIEW population_class_%s_quartiles AS ({0});".format(query), [population_class])
+
+
+@deconstructible
+class DocumentS3Storage(S3BotoStorage):
+    pass
+
+
+def document_upload_to(instance, filename):
+    return 'departments/' + str(instance.department.pk) + '/' + filename
+
+
+class Document(models.Model):
+    """
+    Generic document for storing files uploaded by departments.
+    """
+
+    department = models.ForeignKey(FireDepartment, null=True, blank=True, on_delete=models.SET_NULL)
+    filename = models.CharField(max_length=260, null=True, blank=True)
+    file = models.FileField(storage=DocumentS3Storage(bucket='firecares-uploads'), upload_to=document_upload_to)
+    created = models.DateTimeField(auto_now_add=True)
+
 
 post_migrate.connect(create_quartile_views)
 reversion.register(FireStation)

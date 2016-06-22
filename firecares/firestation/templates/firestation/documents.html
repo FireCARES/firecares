@@ -1,0 +1,193 @@
+{% load humanize %}
+{% load firecares %}
+<!DOCTYPE html>
+<!--[if IE 8 ]>
+<html class="no-js ie8" lang="en"> <![endif]-->
+<!--[if IE 9 ]>
+<html class="no-js ie9" lang="en"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="description" content="{{ object.description }} Learn more about this community's risks.">
+    <meta name="author" content="Prominent Edge LLC">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <title>Documents: {{ object.name }}</title>
+    {% include 'firestation/_favicon.html' %}
+    {% include "firestation/_firecares_style.html" %}
+    {% include 'google_analytics.html' %}
+    {% include 'google_analytics.html' %}
+</head>
+
+<body class="ct-headroom--fixedTopBar cssAnimate" ng-app="fireStation">
+
+{% include 'firestation/_mobile_navbar.html' %}
+{% include 'firestation/_mobile_search.html' %}
+
+<div id="ct-js-wrapper" class="ct-pageWrapper">
+
+<div class="ct-navbarMobile">
+    <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand logo" href="{% url 'firestation_home' %}"><h1>FireCARES</h1></a>
+    <button type="button" class="searchForm-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span><i class="fa fa-search"></i></span>
+    </button>
+</div>
+
+{% include "firestation/_navbar.html" %}
+
+<div class="ct-site--map">
+    <div class="container">
+        <a href="{% url 'firestation_home' %}">Home</a>
+        <a href="{% url 'firedepartment_list' %}">Departments</a>
+        <a href="{% url 'firedepartment_detail' object.id %}">{{ object.name }}</a>
+        <a href="{% url 'documents' object.id %}">Documents</a>
+    </div>
+</div>
+<header class="ct-mediaSection">
+    <div class="ct-mediaSection-inner">
+        <div class="container">
+            <div class="ct-u-displayTableVertical">
+                <div class="ct-textBox ct-u-text--white ct-u-displayTableCell text-left">
+                    <h2>{{ object.name }}</h2>
+                    <h4>{{ object.headquarters_address.get_row_display }}</h4>
+                    <span class="ct-productID ct-fw-300">
+                        FDID: <span>{{ object.fdid }}</span>
+                    </span>
+                </div>
+                <div class="ct-u-displayTableCell text-right">
+                    <a href="search-grid.html" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-star fa-2x"></i></a>
+                    <a href="javascript:window.print()" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-printer fa-2x"></i></a>
+                    <a class="btn btn-sm btn-transparent–border ct-u-text--white disabled"><i class="icon-docs fa-2x"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="container ct-u-paddingBoth30">
+    <div class="row">
+        <div class="col-md-12">
+            <p class="upload-header">Upload New</p>
+            <div class="ct-u-marginBottom30 text-center">
+                <form class="text-left" action="documents" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="upload-choose-file">
+                        <input id="file" name="file" type="file" style="display: none;" onchange="fileChanged(this)"/>
+                        <label for="file" class="btn btn-primary btn-sm upload-choose-file-button">Choose</label>
+                        <span id="upload-file-chosen" class="upload-file-chosen">Select file...</span>
+                    </div>
+                    <button class="btn btn-primary upload-button" onclick="submitClicked(this)" type="submit" disabled>Upload</button>
+                    {{ form.file.errors }}
+                </form>
+            </div>
+
+            {% if documents %}
+                <p class="documents-header">Documents</p>
+                <div class="ct-u-marginBottom30">
+                    <table class="table table-striped documents-table">
+                        <thead>
+                        <tr class="text-right">
+                            <th class="documents-table-column-name">Name</th>
+                            <th class="documents-table-column-created">Posted</th>
+                            <th class="documents-table-column-remove">Remove</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {%  for doc in documents %}
+                        <tr>
+                            <td class="documents-table-column-name"><a class="document-link" href="{% url 'documents_file' object.id doc.filename %}">{{ doc.filename }}</a></td>
+                            <td class="documents-table-column-created">{{ doc.created|date:'m/d/y' }} at {{ doc.created|date:'h:iA'|lower }}</td>
+                            <td class="documents-table-column-remove"><a class="cursor-pointer document-link" style="margin-right: 20px;" onclick="deleteDocument(this)" filename="{{ doc.filename }}"><i class="icon-trash"></i></a></td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if documents.paginator.num_pages > 1 %}
+                    <div class="ct-pagination text-right">
+                        <ul class="pagination">
+                            {% if documents.has_previous %}
+                                <li><a href="?page={{documents.previous_page_number }}" aria-label="Previous"><span aria-hidden="true"><i class="fa fa-angle-left"></i></span></a></li>
+                            {% endif %}
+
+                            {% for p in documents.paginator.page_range %}
+                                {% if p != documents.number %}
+                                     <li><a href="?page={{ p }}">{{ p }}</a></li>
+                                {% else %}
+                                     <li class="active"><a href="?page={{ p }}">{{ p }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if documents.has_next %}
+                                <li><a href="?page={{documents.next_page_number}}" aria-label="Next"><span aria-hidden="true"><i class="fa fa-angle-right"></i></span></a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                {% endif %} <!-- if documents.paginator.num_pages > 1 -->
+            {% else %}
+                <p class="documents-empty-message">
+                    <span class="light-bold">Start by uploading a new document.</span> You haven't added anything yet.
+                </p>
+            {% endif %} <!-- if not documents -->
+        </div>
+    </div>
+</div>
+
+{% include 'firestation/_footer.html' %}
+</div>
+
+{% include "firestation/_firecares_scripts.html" %}
+
+<script>
+    var originalFileChosenText = $('#upload-file-chosen').html();
+
+    function fileChanged(el) {
+        var path = $(el).val();
+        if (path.length == 0) {
+            $(el).closest('form').find(':submit').prop('disabled', true);
+            $('#upload-file-chosen').html(originalFileChosenText);
+            return;
+        }
+
+        $(el).closest('form').find(':submit').prop('disabled', false);
+        var pathParts = path.split('\\');
+        var filename = pathParts[pathParts.length - 1];
+        $('#upload-file-chosen').html(filename);
+    }
+
+    function submitClicked(el) {
+        $(el).prop('disabled', true);
+        $(el).html('Uploading...');
+        $(el).closest('form').submit();
+    }
+
+    function deleteDocument(el) {
+        $.ajax({
+            url: 'documents-delete',
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            dataType: 'json',
+            data: {
+                filename: el.getAttribute('filename')
+            },
+            success: function() {
+                location.reload();
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

@@ -984,3 +984,35 @@ class FireStationTests(TestCase):
         response = c.get(reverse('department_districts_shapefile', args=[fd.id, fd.slug]))
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.has_header('X-Accel-Redirect'))
+
+    def test_documents(self):
+        c = Client()
+        c.login(**{'username': 'admin', 'password': 'admin'})
+        try:
+            fd = FireDepartment.objects.get(id=0)
+        except FireDepartment.DoesNotExist:
+            fd = FireDepartment.objects.create(id=0,
+                                               name='Test db',
+                                               population=0,
+                                               population_class=1,
+                                               department_type='test')
+
+        # Documents page
+        response = c.get(reverse('documents', args=[fd.id]))
+        self.assertEqual(response.status_code, 200)
+
+        # Upload document
+        filename = 'unit_test.txt'
+        file_content = 'file upload success'
+        text_file = SimpleUploadedFile(filename, file_content, content_type='text/plain')
+        response = c.post(reverse('documents', args=[fd.id]), {'file': text_file})
+        self.assertEqual(response.status_code, 302)
+
+        # Download document
+        response = c.get(reverse('documents_file', args=[fd.id, filename]))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.has_header('X-Accel-Redirect'))
+
+        # Delete document
+        response = c.post(reverse('documents_delete', args=[fd.id]), {'filename': filename})
+        self.assertEqual(response.status_code, 200)

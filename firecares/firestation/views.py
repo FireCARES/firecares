@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
-from django.http.response import HttpResponseRedirect, HttpResponse
+from django.http.response import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.db import connection
 from django.db import connections
 from django.db.models import Max, Min
@@ -27,6 +27,9 @@ from firecares.usgs.models import (StateorTerritoryHigh, CountyorEquivalent,
     UnincorporatedPlace, MinorCivilDivision)
 from tempfile import mkdtemp
 from firecares.tasks.cleanup import remove_file
+from .forms import DocumentUploadForm
+from django.views.generic.edit import FormView
+from .models import Document
 
 
 class FeaturedDepartmentsMixin(object):
@@ -670,4 +673,64 @@ class DownloadShapefile(LoginRequiredMixin, View):
         response['Content-Disposition'] = 'attachment; filename="{0}.zip"'.format(smart_str(filename))
         response['X-Accel-Redirect'] = smart_str(zip_file)
         response.content = file_path
+        return response
+
+
+class DocumentsView(LoginRequiredMixin, FormView):
+    template_name = 'firestation/documents.html'
+    success_url = 'documents'
+    form_class = DocumentUploadForm
+    objects_per_page = 10
+
+    def get_context_data(self, **kwargs):
+        context = super(DocumentsView, self).get_context_data(**kwargs)
+
+        department = FireDepartment.objects.get(pk=self.kwargs.get('pk'))
+        document_list = Document.objects.filter(department=department).order_by('-created')
+
+        paginator = Paginator(document_list, self.objects_per_page)
+        page = self.request.GET.get('page')
+        try:
+            documents = paginator.page(page)
+        except PageNotAnInteger:
+            documents = paginator.page(1)
+        except EmptyPage:
+            documents = paginator.page(paginator.num_pages)
+
+        context['documents'] = documents
+        context['object'] = department
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = DocumentUploadForm(department_pk=self.kwargs.get('pk'), **self.get_form_kwargs())
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        document = form.save(commit=False)
+        document.department = FireDepartment.objects.get(pk=self.kwargs.get('pk'))
+        document.filename = os.path.basename(os.path.normpath(document.file.name))
+        document.save()
+
+        return super(DocumentsView, self).form_valid(form)
+
+
+class DocumentsDeleteView(LoginRequiredMixin, View):
+
+    def post(self, request, *args, **kwargs):
+        department = FireDepartment.objects.get(pk=kwargs.get('pk'))
+        document = Document.objects.get(department=department, filename=request.POST.get('filename'))
+        document.file.delete()
+        document.delete()
+        return JsonResponse({})
+
+
+class DocumentsFileView(LoginRequiredMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        response = HttpResponse()
+        response['X-Accel-Redirect'] = '/files/firecares-uploads/departments/%s/%s' % (kwargs.get('pk'), kwargs.get('filename'))
         return response

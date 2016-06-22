@@ -4337,6 +4337,81 @@ header{
   pointer-events: none;
 }
 
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.upload-header {
+  font-size: 14pt;
+  margin-bottom: 10px;
+}
+
+.upload-choose-file {
+  display: inline-block;
+  border: solid 2px rgba(0, 0, 0, 0.2);
+  border-radius: @border-radius-small;
+  padding: 1px;
+  max-width: 400px;
+  width: 100%;
+}
+
+.upload-choose-file-button {
+  line-height: 16px;
+}
+
+.upload-file-chosen {
+  color: rgba(0, 0, 0, 0.5);
+  margin-left: 10px;
+}
+
+.upload-button {
+  font-size: 13pt;
+}
+
+.documents-table {
+  thead tr th {
+    background-color: white;
+    color: rgba(0, 0, 0, 0.35)
+  }
+  tbody tr td {
+    color: rgba(0, 0, 0, 0.5)
+  }
+}
+
+.documents-header {
+  font-size: 18pt;
+  margin-bottom: 10px;
+}
+
+.documents-table-column-name {
+  width: 600px;
+  text-align: left;
+}
+
+.documents-table-column-created {
+  width: 200px;
+  text-align: center;
+}
+
+.documents-table-column-remove {
+  width: 150px;
+  text-align: right;
+}
+
+.document-link {
+  color: #ff7f00;
+}
+
+.document-link:hover {
+  color: inherit;
+}
+
+.documents-empty-message {
+  background-color: #ebebeb;
+  padding: 15px 20px;
+  font-size: 12pt;
+}
+
 // Responsive Pull. Works like bootstrap columns, where smaller screen size classes cascade upwards.
 
 @media (min-width: @screen-sm-min) {
