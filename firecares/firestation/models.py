@@ -1249,6 +1249,11 @@ class DocumentS3Storage(S3BotoStorage):
 def document_upload_to(instance, filename):
     return 'departments/' + str(instance.department.pk) + '/' + filename
 
+document_storage = DocumentS3Storage(bucket=settings.DOCUMENT_UPLOAD_BUCKET)
+# Use the default storage backend in testing mode when the AWS key and token are not provided.
+if settings.TESTING and not (settings.AWS_ACCESS_KEY_ID and settings.AWS_SECRET_ACCESS_KEY):
+    document_storage = None
+
 
 class Document(models.Model):
     """
@@ -1257,7 +1262,7 @@ class Document(models.Model):
 
     department = models.ForeignKey(FireDepartment, null=True, blank=True, on_delete=models.SET_NULL)
     filename = models.CharField(max_length=260, null=True, blank=True)
-    file = models.FileField(storage=DocumentS3Storage(bucket=settings.DOCUMENT_UPLOAD_BUCKET), upload_to=document_upload_to)
+    file = models.FileField(storage=document_storage, upload_to=document_upload_to)
     created = models.DateTimeField(auto_now_add=True)
 
 

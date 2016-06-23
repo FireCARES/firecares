@@ -1,6 +1,6 @@
 import os
 from kombu import Queue
-
+import sys
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
@@ -9,7 +9,7 @@ ADMINS = (
 )
 
 MANAGERS = ADMINS
-
+TESTING = sys.argv[1:2] == ['test']
 
 DATABASES = {
     'default': {
