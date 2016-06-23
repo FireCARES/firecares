@@ -1257,7 +1257,7 @@ class Document(models.Model):
 
     department = models.ForeignKey(FireDepartment, null=True, blank=True, on_delete=models.SET_NULL)
     filename = models.CharField(max_length=260, null=True, blank=True)
-    file = models.FileField(storage=DocumentS3Storage(bucket='firecares-uploads'), upload_to=document_upload_to)
+    file = models.FileField(storage=DocumentS3Storage(bucket=settings.DOCUMENT_UPLOAD_BUCKET), upload_to=document_upload_to)
     created = models.DateTimeField(auto_now_add=True)
 
 
