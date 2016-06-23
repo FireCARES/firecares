@@ -9,6 +9,7 @@ import uuid
 from django.views.generic import DetailView, ListView, TemplateView, View
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
+from django.contrib.auth.decorators import permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.http.response import HttpResponseRedirect, HttpResponse, JsonResponse
@@ -18,6 +19,7 @@ from django.db.models import Max, Min
 from django.db.models.fields import FieldDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import IntegerField
+from django.utils.decorators import method_decorator
 from django.utils.encoding import smart_str
 from firecares.firecares_core.mixins import LoginRequiredMixin, CacheMixin
 from firecares.firestation.managers import Ntile, Case, When
@@ -30,6 +32,7 @@ from firecares.tasks.cleanup import remove_file
 from .forms import DocumentUploadForm
 from django.views.generic.edit import FormView
 from .models import Document
+
 
 
 class FeaturedDepartmentsMixin(object):
@@ -515,6 +518,7 @@ class Home(CacheMixin, TemplateView):
     cache_timeout = 60 * 60 * 24
     template_name = 'firestation/home.html'
 
+
 class DownloadShapefile(LoginRequiredMixin, View):
     content_type = 'application/zip'
     output_dir = '/tmp'
@@ -680,16 +684,17 @@ class DocumentsView(LoginRequiredMixin, FormView):
     template_name = 'firestation/documents.html'
     success_url = 'documents'
     form_class = DocumentUploadForm
-    objects_per_page = 10
+    objects_per_page = 25
 
     def get_context_data(self, **kwargs):
         context = super(DocumentsView, self).get_context_data(**kwargs)
 
-        department = FireDepartment.objects.get(pk=self.kwargs.get('pk'))
-        document_list = Document.objects.filter(department=department).order_by('-created')
+        department = get_object_or_404(FireDepartment, pk=self.kwargs.get('pk'))
+        document_list = department.document_set.all().order_by('-created')
 
         paginator = Paginator(document_list, self.objects_per_page)
         page = self.request.GET.get('page')
+
         try:
             documents = paginator.page(page)
         except PageNotAnInteger:
@@ -702,6 +707,7 @@ class DocumentsView(LoginRequiredMixin, FormView):
 
         return context
 
+    @method_decorator(permission_required('firestation.can_create_document'))
     def post(self, request, *args, **kwargs):
         form = DocumentUploadForm(department_pk=self.kwargs.get('pk'), **self.get_form_kwargs())
         if form.is_valid():
@@ -720,9 +726,12 @@ class DocumentsView(LoginRequiredMixin, FormView):
 
 class DocumentsDeleteView(LoginRequiredMixin, View):
 
+    @method_decorator(permission_required('firestation.can_delete_document'))
     def post(self, request, *args, **kwargs):
-        department = FireDepartment.objects.get(pk=kwargs.get('pk'))
-        document = Document.objects.get(department=department, filename=request.POST.get('filename'))
+        department = get_object_or_404(FireDepartment, pk=kwargs.get('pk'))
+        document = get_object_or_404(Document,
+                                     department=department,
+                                     filename=request.POST.get('filename'))
         document.file.delete()
         document.delete()
         return JsonResponse({})

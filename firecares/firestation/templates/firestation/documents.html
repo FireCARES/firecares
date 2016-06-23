@@ -76,19 +76,23 @@
 <div class="container ct-u-paddingBoth30">
     <div class="row">
         <div class="col-md-12">
+            {% if perms.firestation.can_create_document %}
+            <div>
             <p class="upload-header">Upload New</p>
-            <div class="ct-u-marginBottom30 text-center">
-                <form class="text-left" action="documents" method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="upload-choose-file">
-                        <input id="file" name="file" type="file" style="display: none;" onchange="fileChanged(this)"/>
-                        <label for="file" class="btn btn-primary btn-sm upload-choose-file-button">Choose</label>
-                        <span id="upload-file-chosen" class="upload-file-chosen">Select file...</span>
-                    </div>
-                    <button class="btn btn-primary upload-button" onclick="submitClicked(this)" type="submit" disabled>Upload</button>
-                    {{ form.file.errors }}
-                </form>
+                <div class="ct-u-marginBottom30 text-center">
+                    <form class="text-left" action="documents" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="upload-choose-file">
+                            <input id="file" name="file" type="file" style="display: none;" onchange="fileChanged(this)"/>
+                            <label for="file" class="btn btn-primary btn-sm upload-choose-file-button">Choose</label>
+                            <span id="upload-file-chosen" class="upload-file-chosen">Select file...</span>
+                        </div>
+                        <button class="btn btn-primary upload-button" onclick="submitClicked(this)" type="submit" disabled>Upload</button>
+                        {{ form.file.errors }}
+                    </form>
+                </div>
             </div>
+            {% endif %}
 
             {% if documents %}
                 <p class="documents-header">Documents</p>
@@ -136,7 +140,11 @@
                 {% endif %} <!-- if documents.paginator.num_pages > 1 -->
             {% else %}
                 <p class="documents-empty-message">
-                    <span class="light-bold">Start by uploading a new document.</span> You haven't added anything yet.
+                    {% if perms.firestation.can_create_document %}
+                        <span class="light-bold">Start by uploading a new document.</span> You haven't added anything yet.
+                    {% else %}
+                        <span class="light-bold">No documents have been added for this department.</span>
+                    {% endif %}
                 </p>
             {% endif %} <!-- if not documents -->
         </div>

@@ -53,6 +53,14 @@ class FireStationTests(TestCase):
             self.user.set_password(self.password)
             self.user.save()
 
+        self.non_admin = 'non_admin'
+        self.non_admin_password = 'non_admin'
+        self.non_admin_user, created = User.objects.get_or_create(username=self.non_admin)
+
+        if created:
+            self.non_admin_user.set_password(self.non_admin_password)
+            self.non_admin_user.save()
+
     def assert_redirect_to_login(self, response):
         self.assertEqual(response.status_code, 302)
         split = urlsplit(response.url)
@@ -1016,3 +1024,20 @@ class FireStationTests(TestCase):
         # Delete document
         response = c.post(reverse('documents_delete', args=[fd.id]), {'filename': filename})
         self.assertEqual(response.status_code, 200)
+
+        c.logout()
+        c.login(username=self.non_admin_user, password=self.non_admin_password)
+
+        response = c.get(reverse('documents', args=[fd.id]))
+        self.assertEqual(response.status_code, 200)
+
+        response = c.post(reverse('documents', args=[fd.id]), {'file': text_file})
+        self.assertEqual(response.status_code, 302)
+
+        response = c.get(reverse('documents_file', args=[fd.id, filename]))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.has_header('X-Accel-Redirect'))
+
+        # Delete document
+        response = c.post(reverse('documents_delete', args=[fd.id]), {'filename': filename})
+        self.assertEqual(response.status_code, 302)
