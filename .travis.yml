@@ -32,7 +32,7 @@ install:
   - conda install --yes -n condaenv pip scipy==0.16.0
   - conda install --yes -n condaenv -c anaconda gdal=2.0.0=py27_1
   - source activate condaenv
-  - travis_wait "pip install -r requirements.txt"
+  - pip install -r requirements.txt
   - easy_install --upgrade numpy
 
 before_script:
