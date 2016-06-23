@@ -6,9 +6,7 @@ python:
 addons:
   postgresql: 9.4
 
-cache:
-  directories:
-    - $HOME/.pip-cache/
+cache: pip
 
 env:
   global:
@@ -34,7 +32,7 @@ install:
   - conda install --yes -n condaenv pip scipy==0.16.0
   - conda install --yes -n condaenv -c anaconda gdal=2.0.0=py27_1
   - source activate condaenv
-  - travis_wait "pip install -r requirements.txt --cache-dir $HOME/.pip-cache"
+  - travis_wait "pip install -r requirements.txt"
   - easy_install --upgrade numpy
 
 before_script:
