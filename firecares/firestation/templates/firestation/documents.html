@@ -108,7 +108,7 @@
                         <tbody>
                         {%  for doc in documents %}
                         <tr>
-                            <td class="documents-table-column-name"><a class="document-link" href="{% url 'documents_file' object.id doc.filename %}">{{ doc.filename }}</a></td>
+                            <td class="documents-table-column-name"><a class="document-link" href="{% url 'documents_file' object.id doc.filename %}" target="_blank">{{ doc.filename }}</a></td>
                             <td class="documents-table-column-created">{{ doc.created|date:'m/d/y' }} at {{ doc.created|date:'h:iA'|lower }}</td>
                             <td class="documents-table-column-remove"><a class="cursor-pointer document-link" style="margin-right: 20px;" onclick="deleteDocument(this)" filename="{{ doc.filename }}"><i class="icon-trash"></i></a></td>
                         </tr>
