@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
+from django.conf import settings
 from django.http.response import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.db import connection
 from django.db import connections
@@ -741,5 +742,7 @@ class DocumentsFileView(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         response = HttpResponse()
-        response['X-Accel-Redirect'] = '/files/firecares-uploads/departments/%s/%s' % (kwargs.get('pk'), kwargs.get('filename'))
+        response['X-Accel-Redirect'] = '/files/%s/departments/%s/%s' % (settings.DOCUMENT_UPLOAD_BUCKET,
+                                                                        kwargs.get('pk'),
+                                                                        kwargs.get('filename'))
         return response
