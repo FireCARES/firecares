@@ -720,6 +720,7 @@ class DocumentsView(LoginRequiredMixin, FormView):
         document = form.save(commit=False)
         document.department = FireDepartment.objects.get(pk=self.kwargs.get('pk'))
         document.filename = os.path.basename(os.path.normpath(document.file.name))
+        document.uploaded_by = self.request.user
         document.save()
 
         return super(DocumentsView, self).form_valid(form)

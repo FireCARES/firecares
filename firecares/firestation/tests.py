@@ -18,7 +18,7 @@ from django.contrib.auth import get_user_model
 from firecares.usgs.models import UnincorporatedPlace, MinorCivilDivision
 from firecares.firecares_core.models import Address, Country
 from firecares.firecares_core.mixins import hash_for_cache
-from firecares.firestation.models import create_quartile_views
+from firecares.firestation.models import create_quartile_views, Document
 from firecares.firestation.templatetags.firecares import quartile_text, risk_level
 from firecares.firestation.managers import CalculationsQuerySet
 from urlparse import urlsplit, urlunsplit
@@ -1015,6 +1015,9 @@ class FireStationTests(TestCase):
         text_file = SimpleUploadedFile(filename, file_content, content_type='text/plain')
         response = c.post(reverse('documents', args=[fd.id]), {'file': text_file})
         self.assertEqual(response.status_code, 302)
+
+        # Ensure that the document is owned by the uploaded user
+        self.assertEqual(Document.objects.all().first().uploaded_by, self.user)
 
         # Download document
         response = c.get(reverse('documents_file', args=[fd.id, filename]))

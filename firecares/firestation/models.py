@@ -1264,6 +1264,7 @@ class Document(models.Model):
     filename = models.CharField(max_length=260, null=True, blank=True)
     file = models.FileField(storage=document_storage, upload_to=document_upload_to)
     created = models.DateTimeField(auto_now_add=True)
+    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
 
 
 post_migrate.connect(create_quartile_views)
