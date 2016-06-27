@@ -1266,6 +1266,9 @@ class Document(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
 
+    def __unicode__(self):
+        return '{0} uploaded by: {1} at {2}'.format(self.filename or '', self.uploaded_by or 'Unknown', self.created)
+
 
 post_migrate.connect(create_quartile_views)
 reversion.register(FireStation)
