@@ -1,4 +1,4 @@
-from .models import FireStation, FireDepartment, Staffing
+from .models import FireStation, FireDepartment, Staffing, Document
 from firecares.firecares_core.models import Address
 from firecares.firecares_core.admin import LocalOpenLayersAdmin
 from django.contrib.gis import admin
@@ -54,6 +54,17 @@ class ResponseCapabilityAdmin(LocalOpenLayersAdmin):
     exclude = ['firestation']
 
 
+class DocumentAdmin(admin.ModelAdmin):
+    exclude = ["created"]
+    list_display = ['filename', 'created', 'uploaded_by', 'department']
+    list_filter = ['uploaded_by', 'created']
+
+    class Meta:
+        model = Document
+
+
 admin.site.register(FireStation, FireStationAdmin)
 admin.site.register(FireDepartment, FireDepartmentAdmin)
 admin.site.register(Staffing, ResponseCapabilityAdmin)
+admin.site.register(Document, DocumentAdmin)
+
