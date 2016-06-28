@@ -2,6 +2,19 @@ from django.contrib import sitemaps
 from firecares.firestation.models import FireDepartment
 
 
+class NavigationPages(object):
+    featured = True  # priority 1
+    modified = None
+    url = None
+
+    def __init__(self, url, modified=None):
+        self.url = url
+        self.modified = modified
+
+    def get_absolute_url(self):
+        return self.url
+
+
 class BaseSitemap(sitemaps.Sitemap):
 
     max_population = 1
@@ -12,7 +25,20 @@ class BaseSitemap(sitemaps.Sitemap):
         for fd in fds:
             if fd.population > self.max_population:
                 self.max_population = fd.population
-        return fds
+        # make a list of all fire departments and add navigation pages
+        items = []
+        items.extend(fds)
+        items.append(NavigationPages('/media'))
+        items.append(NavigationPages('/performance-score'))
+        items.append(NavigationPages('/community-risk'))
+        items.append(NavigationPages('/'))
+        items.append(NavigationPages('/login'))
+        items.append(NavigationPages('/accounts/register'))
+        items.append(NavigationPages('/#about'))
+        items.append(NavigationPages('/#partners'))
+        items.append(NavigationPages('/contact-us'))
+        items.append(NavigationPages('/departments'))
+        return items
 
     def location(self, item):
         return item.get_absolute_url()
