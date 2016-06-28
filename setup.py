@@ -51,7 +51,8 @@ install_requires = [
         "django-json-field==0.5.7",
         "geopy==1.9.1",
         "django-statsd-mozilla==0.3.15",
-        "django-generic-m2m==0.3.0"
+        "django-generic-m2m==0.3.0",
+        'beautifulsoup4==4.4.1'
 ]
 
 setup(

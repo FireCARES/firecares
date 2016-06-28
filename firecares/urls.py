@@ -9,9 +9,11 @@ from .firestation.api import StaffingResource, FireStationResource, FireDepartme
 from tastypie.api import Api
 from firestation.views import Home
 from osgeo_importer.urls import FileAddView, importer_api
+from django.contrib.sitemaps.views import sitemap
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import user_passes_test, permission_required
 from django.views.decorators.csrf import csrf_exempt
+from sitemaps import BaseSitemap
 
 admin.autodiscover()
 v1_api = Api(api_name='v1')
@@ -19,6 +21,9 @@ v1_api.register(StaffingResource())
 v1_api.register(FireStationResource())
 v1_api.register(FireDepartmentResource())
 
+sitemaps = {
+    'base': BaseSitemap,
+}
 
 urlpatterns = patterns('',
     url(r'^$', Home.as_view(), name='firestation_home'),
@@ -52,6 +57,7 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain'), name='robots.txt'),
+    url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 
     # importer routes
     url(r'^uploads/new$', permission_required('change_firestation')(FileAddView.as_view()), name='uploads-new'),

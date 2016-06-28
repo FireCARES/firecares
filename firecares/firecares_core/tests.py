@@ -1,4 +1,5 @@
 from .models import RecentlyUpdatedMixin, AccountRequest
+from firecares.firestation.models import FireDepartment
 
 from datetime import timedelta
 from urlparse import urlsplit, urlunsplit
@@ -9,12 +10,40 @@ from django.core.management import call_command
 from django.core.urlresolvers import reverse, resolve
 from django.test import Client, TestCase
 from django.utils import timezone
+from bs4 import BeautifulSoup
 
 User = get_user_model()
 
 
 class CoreTests(TestCase):
     fixtures = ['test_forgot.json']
+
+    def test_sitemap(self):
+        """
+        Ensures the generated sitemap has correct priorities
+        """
+
+        FireDepartment.objects.create(name='testy2', population=2, featured=True)
+        FireDepartment.objects.create(name='testy3', population=3)
+        FireDepartment.objects.create(name='testy4', population=4)
+
+        c = Client()
+        response = c.get('/sitemap.xml')
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, 'xml')
+        sitemap_list = soup.find_all('url')
+        self.assertEqual(len(sitemap_list), 3)
+        # find the three elements
+        for testy in sitemap_list:
+            if 'testy2' in testy.loc.get_text():
+                testy2 = testy
+            elif 'testy3' in testy.loc.get_text():
+                testy3 = testy
+            elif 'testy4' in testy.loc.get_text():
+                testy4 = testy
+        # assert that testy2 has higher priority than testy4 (because its featured) and 4 has more than 3
+        self.assertGreater(float(testy2.priority.get_text()), float(testy4.priority.get_text()))
+        self.assertGreater(float(testy4.priority.get_text()), float(testy3.priority.get_text()))
 
     def test_home_does_not_require_login(self):
         """
