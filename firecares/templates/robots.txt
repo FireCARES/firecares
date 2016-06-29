@@ -2,3 +2,4 @@ User-agent: *
 Sitemap: https://firecares.org/sitemap.xml
 Disallow: /service-area/
 Disallow: /tmp/
+Disallow: /autocomplete/
