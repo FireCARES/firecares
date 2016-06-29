@@ -13,7 +13,7 @@ from django.contrib.sitemaps.views import sitemap
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import user_passes_test, permission_required
 from django.views.decorators.csrf import csrf_exempt
-from sitemaps import BaseSitemap
+from sitemaps import BaseSitemap, DepartmentsSitemap
 
 admin.autodiscover()
 v1_api = Api(api_name='v1')
@@ -23,6 +23,7 @@ v1_api.register(FireDepartmentResource())
 
 sitemaps = {
     'base': BaseSitemap,
+    'departments': DepartmentsSitemap,
 }
 
 urlpatterns = patterns('',
