@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from firecares.firestation.models import FireDepartment
 from geopy.geocoders import GoogleV3
-from geopy.exc import GeocoderQuotaExceeded
+from geopy.exc import GeocoderQuotaExceeded, GeocoderTimedOut
 from time import sleep
 from django.db import connections
 from django.contrib.gis.geos import GEOSGeometry, Point
@@ -51,8 +51,13 @@ class Command(BaseCommand):
         cmd = cursor.mogrify(select, (fd.state, fd.fdid, fd.geom.centroid.wkt, options['distance']))
         print cmd
         cursor.execute(cmd)
+        over_quota_exceptions = 0
 
         for res in cursor.fetchall():
+            if over_quota_exceptions >= 10:
+                self.stdout.write('Too many consecutive timeouts.')
+                break
+
             print 'Row: ', res
             state, fdid, num_mile, street_pre, streetname, streettype, streetsuf, city, state_id, zip5, zip4, state_abbreviation, geom, count = res
 
@@ -71,6 +76,9 @@ class Command(BaseCommand):
             geom = GEOSGeometry(geom)
             if state_id == 'OO':
                 state_id = ''
+
+            if zip5 == '00000':
+                zip5 = ''
 
             query_string = ' '.join([n for n in [num_mile, street_pre, streetname, streettype, streetsuf, city, state_id or state, zip5] if n])
 
@@ -97,9 +105,15 @@ class Command(BaseCommand):
 
             except GeocoderQuotaExceeded:
                 self.stdout.write('Geocoding Quota exceeded.')
+                over_quota_exceptions += 1
+                sleep(1)
+                continue
+            except GeocoderTimedOut:
+                self.stdout.write('Geocoder Timed Out.')
                 sleep(1)
                 continue
 
+            over_quota_exceptions = 0
             print '\n'
 
         cursor.execute('SET transform_null_equals TO OFF;')
