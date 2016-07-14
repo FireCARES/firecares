@@ -15497,3 +15497,8 @@ header {
     float: right;
   }
 }
+.fire-department-card-favorite-button {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+}

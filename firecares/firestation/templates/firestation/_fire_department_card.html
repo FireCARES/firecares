@@ -1,6 +1,7 @@
 {% load humanize %}
 {% load firecares %}
 {% load cache %}
+{% load favit_tags %}
 
 {% cache 600 fire-department-card department.id %}
 <div class="ct-itemProducts ct-u-marginBottom30 ct-hover fire-department-card">
@@ -20,6 +21,9 @@
                 <div class="ct-product--tilte">
                     {{ department.name }}
                 </div>
+            </div>
+            <div class="fire-department-card-favorite-button">
+                {% favorite_button department 'favit/altButton.html' %}
             </div>
         </div>
         <div class="ct-product--meta">

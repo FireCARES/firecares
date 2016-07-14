@@ -46,7 +46,9 @@
 <div class="ct-site--map">
     <div class="container">
         <a href="{% url 'firestation_home' %}">Home</a>
+        {% block sitemap %}
         <a href="{% url 'firedepartment_list' %}">Search Results</a>
+        {% endblock sitemap %}
     </div>
 </div>
 <section class="search-section">
@@ -60,6 +62,9 @@
                 <div class="widget">
                     <div class="widget-inner">
                         <div class="search"
+                             {% block favorites_search_field %}
+                             favorites="{{ request.GET.favorites }}"
+                             {% endblock favorites_search_field %}
                              sort-by="{{ request.GET.sortBy }}"
                              limit="{{ request.GET.limit }}"
                              fdid="{{ request.GET.fdid }}"
@@ -93,6 +98,7 @@
                     </div>
                 </div>
             </div>
+            {% block featured_departments %}
             <div class="col-sm-12">
                 <div class="widget ct-widget--featuredItems">
                     <div class="widget-inner">
@@ -126,13 +132,17 @@
                     </div>
                 </div>
             </div>
+            {% endblock featured_departments %}
         </div>
     </div>
 </div>
 <div class="col-md-8 col-lg-9">
+{% block sorting_bar %}
 <div class="ct-sortingBar ct-u-paddingRight10 ct-u-paddingLeft10 ct-u-marginBottom30">
     <div class="ct-sortingTitle">
+        {% block list_title %}
         <h4 class="text-uppercase">Search Results<span> ({{ object_list.count }})</span></h4>
+        {% endblock list_title %}
     </div>
     <div class="ct-sortingOptions" ng-cloak>
         <ul class="list-inline list-unstyled ct-u-paddingBoth15 pull-right">
@@ -176,15 +186,16 @@
     </div>
     <div class="clearfix"></div>
 </div>
+{% endblock sorting_bar %}
 <div class="row ct-js-search-results ct-showProducts--default">
 
+{% block object_list_view %}
 {% for department in object_list %}
     <div class="col-sm-6 col-md-6 col-lg-4">
         {% include "firestation/_fire_department_card.html" %}
     </div>
 {% endfor %}
-
-
+{% endblock object_list_view %}
 
 <div class="clearfix visible-md"></div>
 </div>

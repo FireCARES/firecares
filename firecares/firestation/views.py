@@ -33,7 +33,7 @@ from firecares.tasks.cleanup import remove_file
 from .forms import DocumentUploadForm
 from django.views.generic.edit import FormView
 from .models import Document
-
+from favit.models import Favorite
 
 
 class FeaturedDepartmentsMixin(object):
@@ -374,6 +374,13 @@ class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitM
     range_fields = ['population', 'dist_model_score']
 
     def handle_search(self, queryset):
+
+        # search in favorite departments only
+        if self.request.GET.get('favorites', 'false') == 'true':
+            favorite_departments = map(lambda obj: obj.target.pk,
+                   Favorite.objects.for_user(self.request.user, model=FireDepartment))
+            queryset = queryset.filter(pk__in=favorite_departments)
+
         # If there is a 'q' argument, this is a full text search.
         if self.request.GET.get('q'):
             queryset = queryset.full_text_search(self.request.GET.get('q'))
@@ -449,6 +456,62 @@ class SimilarDepartmentsListView(FireDepartmentListView, CacheMixin):
         queryset = department.similar_departments
         queryset = self.handle_search(queryset)
         return queryset
+
+
+class FireDepartmentFavoriteListView(FireDepartmentListView):
+    """
+    Implements the Favorite Department list view.
+    """
+
+    def get_queryset(self):
+        return map(lambda obj: obj.target,
+                   Favorite.objects.for_user(self.request.user, model=FireDepartment))
+
+
+class FireStationFavoriteListView(LoginRequiredMixin, ListView):
+    """
+    Implements the Favorite Station list view.
+    """
+
+    model = FireStation
+    paginate_by = 10
+
+    def get_queryset(self):
+        return map(lambda obj: obj.target,
+                   Favorite.objects.for_user(self.request.user, model=FireStation))
+
+    def get_context_data(self, **kwargs):
+        context = super(FireStationFavoriteListView, self).get_context_data(**kwargs)
+
+        page = self.request.GET.get('page')
+        if not page:
+            page = 1
+        favorite_stations = self.get_queryset()
+        paginator = Paginator(favorite_stations, self.paginate_by)
+        try:
+            stations = paginator.page(page)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            stations = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results.
+            stations = paginator.page(paginator.num_pages)
+        context['firestations'] = stations
+        context['firestations_total_count'] = len(favorite_stations)
+
+        page = int(page)
+        min_page = page - 5
+        min_page = max(1, min_page)
+        max_page = page + 6
+        max_page = min(paginator.num_pages+1, max_page)
+        context['windowed_range'] = range(min_page, max_page)
+
+        if min_page > 1:
+            context['first_page'] = 1
+        if max_page < paginator.num_pages:
+            context['last_page'] = paginator.num_pages
+
+        return context
 
 
 class FireStationDetailView(LoginRequiredMixin, CacheMixin, DetailView):

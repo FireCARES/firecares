@@ -1,0 +1,25 @@
+{% extends "firestation/firedepartment_list.html" %}
+
+{% load favit_tags %}
+
+{% block sitemap %}
+    <a href="{% url 'firestation_favorite_list' %}">Favorite Stations</a>
+{% endblock sitemap %}
+
+{% block featured_departments %}
+{% endblock featured_departments %}
+
+{% block sorting_bar %}
+{% endblock sorting_bar %}
+
+{% block object_list_view %}
+
+    <div class="ct-sortingBar ct-u-marginBottom20">
+        <div class="ct-sortingTitle">
+            <h4 class="text-uppercase">Favorite Stations<span> ({{ firestations_total_count }})</span></h4>
+        </div>
+    </div>
+
+    {% include "firestation/_fire_station_table.html" %}
+
+{% endblock object_list_view %}

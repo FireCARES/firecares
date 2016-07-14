@@ -10,6 +10,10 @@
     <label>FDID</label>
     <input name="fdid" type="text" class="form-control input-lg" placeholder="Any" ng-model="params.fdid" ng-enter="search()">
 </div>
+<div class="ct-form--item ct-u-marginBoth10">
+    <label>Search favorites only</label>
+    <input name="favorites" type="checkbox" class="form-control input-lg" ng-model="params.favorites" ng-enter="search()">
+</div>
 <div class="ct-form--item ct-u-marginBottom10">
     <label>State</label>
     {% verbatim %}
