@@ -5,9 +5,9 @@
         .controller('jurisdictionController', JurisdictionController)
     ;
 
-    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap'];
+    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', 'favorite'];
 
-    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap) {
+    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, favorite) {
         var departmentMap = map.initMap('map', {scrollWheelZoom: false});
         var showStations = true;
         var stationIcon = L.FireCARESMarkers.firestationmarker();
@@ -65,6 +65,8 @@
         $scope.toggleFullScreenMap = function() {
             departmentMap.toggleFullscreen();
         };
+
+        $scope.onFavorite = favorite.onFavorite;
 
         //
         // Heatmap
