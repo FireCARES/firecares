@@ -1,22 +1,26 @@
 'use strict';
 
-// General purpose favorite service using django-favit:
-//     https://github.com/streema/django-favit
-// enable the service by adding its function to the scope in the controller:
-//     $scope.onFavorite = favorite.onFavorite;
+// AngularJS button click handler service
 // to add a favorite button use the template tag:
 //     {% favorite_button object %}
 // load the tag with:
 //     {% load favit_tags %}
-// the tag is using an HTML fragment that can be found at:
-//     firecares/template/favit/button.html
+// the tag is using an HTML fragment at:
+//     firecares/template/favit/button.html (uses favoriteController and calls onFavorite on click)
 (function () {
     angular.module('fireStation.favoriteService', [])
         .service('favorite', FavoriteService)
+        .controller('favoriteController', FavoriteController)
     ;
 
-    FavoriteService.$inject = ['$http'];
+    // The controller is used in the HTML fragment
+    FavoriteController.$inject = ['$scope', 'favorite'];
+    function FavoriteController($scope, favorite) {
+        $scope.onFavorite = favorite.onFavorite;
+    }
 
+    // The service sends a POST request to favit and manages the button HTML elements
+    FavoriteService.$inject = ['$http'];
     function FavoriteService($http) {
 
         var disabled = []; // object ids that are currently being processed (TODO maybe its better to store this flag on the button element somehow?)
