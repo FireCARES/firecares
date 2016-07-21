@@ -33,7 +33,7 @@ from firecares.tasks.cleanup import remove_file
 from .forms import DocumentUploadForm
 from django.views.generic.edit import FormView
 from .models import Document
-
+from favit.models import Favorite
 
 
 class FeaturedDepartmentsMixin(object):
@@ -449,6 +449,19 @@ class SimilarDepartmentsListView(FireDepartmentListView, CacheMixin):
         queryset = department.similar_departments
         queryset = self.handle_search(queryset)
         return queryset
+
+
+class FireDepartmentFavoriteListView(FireDepartmentListView):
+    """
+    Implements the Favorite Department list view.
+    """
+
+    def get_queryset(self):
+        favorite_departments = set()
+        favorites = Favorite.objects.for_user(self.request.user, model=FireDepartment)
+        for fav in favorites:
+            favorite_departments.add(fav.target.pk)
+        return FireDepartment.objects.filter(pk__in=favorite_departments)
 
 
 class FireStationDetailView(LoginRequiredMixin, CacheMixin, DetailView):
