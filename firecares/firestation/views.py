@@ -464,6 +464,21 @@ class FireDepartmentFavoriteListView(FireDepartmentListView):
         return FireDepartment.objects.filter(pk__in=favorite_departments)
 
 
+class FireStationFavoriteListView(LoginRequiredMixin, ListView, LimitMixin):
+    """
+    Implements the Favorite Station list view.
+    """
+
+    model = FireStation
+
+    def get_queryset(self):
+        favorite_stations = set()
+        favorites = Favorite.objects.for_user(self.request.user, model=FireStation)
+        for fav in favorites:
+            favorite_stations.add(fav.target.pk)
+        return FireStation.objects.filter(pk__in=favorite_stations)
+
+
 class FireStationDetailView(LoginRequiredMixin, CacheMixin, DetailView):
     model = FireStation
 
