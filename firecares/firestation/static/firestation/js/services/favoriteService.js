@@ -45,10 +45,10 @@
                 //console.log(resp); // resp.data.fav_count
                 if (resp.data.status == 'added') {
                     console.log('favorite added');
-                    star.removeClass('icon-star').addClass('icon-star-full'); // set icon
+                    star.css('color', 'gold'); // set icon color as selected
                 } else {
                     console.log('favorite removed');
-                    star.removeClass('icon-star-full').addClass('icon-star'); // set icon
+                    star.css('color', ''); // set icon color as not selected
                 }
                 disabled.splice(disabled.indexOf(id), 1); // enable requests for this object
             }, function error(err) {

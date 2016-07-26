@@ -1,3 +1,3 @@
 <a ng-controller="favoriteController" ng-click="onFavorite('{{ target_model }}', '{{ target_object_id }}')" class="btn btn-sm btn-transparent–border ct-u-text--white">
-    <i id="favorite-star" class="icon-star{% if undo %}-full{% endif %} fa-2x"></i>
+    <i id="favorite-star" {% if undo %}style="color:gold"{% endif %} class="icon-star fa-2x"></i>
 </a>
