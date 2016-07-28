@@ -30,6 +30,7 @@ class Command(BaseCommand):
         select state, fdid, num_mile, street_pre, streetname, streettype, streetsuf, city, state_id, zip5, zip4, state, a.geom, count(*)
         from incidentaddress a
         where bkgpidfp10=%s and fdid<>(select fdid from firestation_firedepartment where id in (select department_for_block_group(%s)))
+        and geocodable is not false
         group by state, fdid, num_mile, street_pre, streetname, streettype, streetsuf, city, state_id, zip5, zip4, state, a.geom
         """
 
