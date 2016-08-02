@@ -374,6 +374,13 @@ class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitM
     range_fields = ['population', 'dist_model_score']
 
     def handle_search(self, queryset):
+
+        # search in favorite departments only
+        if self.request.GET.get('favorites', 'false') == 'true':
+            favorite_departments = map(lambda obj: obj.target.pk,
+                   Favorite.objects.for_user(self.request.user, model=FireDepartment))
+            queryset = queryset.filter(pk__in=favorite_departments)
+
         # If there is a 'q' argument, this is a full text search.
         if self.request.GET.get('q'):
             queryset = queryset.full_text_search(self.request.GET.get('q'))
@@ -457,11 +464,8 @@ class FireDepartmentFavoriteListView(FireDepartmentListView):
     """
 
     def get_queryset(self):
-        favorite_departments = set()
-        favorites = Favorite.objects.for_user(self.request.user, model=FireDepartment)
-        for fav in favorites:
-            favorite_departments.add(fav.target.pk)
-        return FireDepartment.objects.filter(pk__in=favorite_departments)
+        return map(lambda obj: obj.target,
+                   Favorite.objects.for_user(self.request.user, model=FireDepartment))
 
 
 class FireStationFavoriteListView(LoginRequiredMixin, ListView, LimitMixin):
@@ -472,11 +476,8 @@ class FireStationFavoriteListView(LoginRequiredMixin, ListView, LimitMixin):
     model = FireStation
 
     def get_queryset(self):
-        favorite_stations = set()
-        favorites = Favorite.objects.for_user(self.request.user, model=FireStation)
-        for fav in favorites:
-            favorite_stations.add(fav.target.pk)
-        return FireStation.objects.filter(pk__in=favorite_stations)
+        return map(lambda obj: obj.target,
+                   Favorite.objects.for_user(self.request.user, model=FireStation))
 
 
 class FireStationDetailView(LoginRequiredMixin, CacheMixin, DetailView):

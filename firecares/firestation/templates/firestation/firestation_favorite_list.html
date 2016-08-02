@@ -1,111 +1,20 @@
-{% load firecares humanize %}
+{% extends "firestation/firedepartment_list.html" %}
 
-<!DOCTYPE html>
-<!--[if IE 8 ]>
-<html class="no-js ie8" lang="en"> <![endif]-->
-<!--[if IE 9 ]>
-<html class="no-js ie9" lang="en"> <![endif]-->
-<!--[if (gt IE 9)|!(IE)]><!-->
-<html class="no-js" lang="en" ng-app="fireStation"> <!--<![endif]-->
-<head lang="en">
-    <meta charset="UTF-8">
-    <meta name="description" content="Compare your fire department's community risk level with their capacity to respond.">
-    <meta name="author" content="Prominent Edge LLC">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+{% block sitemap %}
+    <a href="{% url 'firestation_favorite_list' %}">Favorite Stations</a>
+{% endblock sitemap %}
 
-    <title>Search for a Community · FireCARES</title>
+{% block featured_departments %}
+{% endblock featured_departments %}
 
-    {% include 'firestation/_favicon.html' %}
-    {% include "firestation/_firecares_style.html" %}
-    {% include 'google_analytics.html' %}
-</head>
+{% block list_title %}
+    <h4 class="text-uppercase">Favorite Stations<span> ({{ object_list | length }})</span></h4>
+{% endblock %}
 
-<body class="ct-headroom--fixedTopBar cssAnimate">
+{% block sorting_bar %}
+{% endblock sorting_bar %}
 
-{% include 'firestation/_mobile_navbar.html' %}
-{% include "firestation/_navbar.html" %}
-{% include 'firestation/_mobile_search.html' %}
-
-<div id="ct-js-wrapper" class="ct-pageWrapper">
-
-<div class="ct-navbarMobile">
-    <button type="button" class="navbar-toggle">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-    </button>
-    <a class="navbar-brand logo" href="{% url 'firestation_home' %}"><h1>FireCARES</h1></a>
-    <button type="button" class="searchForm-toggle">
-        <span class="sr-only">Toggle navigation</span>
-        <span><i class="fa fa-search"></i></span>
-    </button>
-</div>
-
-<div class="ct-site--map">
-    <div class="container">
-        <a href="{% url 'firestation_home' %}">Home</a>
-        <a href="{% url 'firestation_favorite_list' %}">Favorite Stations</a>
-    </div>
-</div>
-<section class="search-section">
-<div class="container">
-<div class="ct-section--products">
-<div class="row">
-<div class="col-md-4 col-lg-3">
-    <div class="ct-js-sidebar">
-        <div class="row">
-            <div class="col-md-12 hidden-sm hidden-xs">
-                <div class="widget">
-                    <div class="widget-inner">
-                        <div class="search"
-                             sort-by="{{ request.GET.sortBy }}"
-                             limit="{{ request.GET.limit }}"
-                             fdid="{{ request.GET.fdid }}"
-                             state="{{ request.GET.state }}"
-                             region="{{ request.GET.region }}"
-                             sort-fields='{{ sort_by_fields|safe }}'
-                             name="{{ request.GET.name }}"
-                             population="{{ request.GET.population }}"
-                             q="{{ request.GET.q }}"
-                             dist-model-score="{{ request.GET.dist_model_score }}">
-                            <form class="ct-formSearch--extended ct-u-marginBottom30" role="form" id="searchForm">
-                                <div class="ct-form--label--type3">
-                                    <div class="ct-u-displayTableVertical">
-                                        <div class="ct-u-displayTableCell">
-                                            <div class="ct-input-group-btn">
-                                                <button class="btn btn-primary pointer-events-none">
-                                                    <i class="fa fa-search"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="ct-u-displayTableCell text-center">
-                                            <span class="text-uppercase">Search for departments</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    {% include 'firestation/_search_form.html' %}
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
-<div class="col-md-8 col-lg-9">
-<div class="ct-sortingBar ct-u-paddingRight10 ct-u-paddingLeft10 ct-u-marginBottom30">
-    <div class="ct-sortingTitle">
-        <h4 class="text-uppercase">Favorite Stations<span> ({{ object_list.count }})</span></h4>
-    </div>
-    <div class="clearfix"></div>
-</div>
-<div class="row ct-js-search-results ct-showProducts--default">
-
+{% block object_list_view %}
     <div class="ct-section--products ct-section--products2col ct-u-marginBottom30">
         <table class="table table-striped" style="font-size:14px;">
             <thead>
@@ -124,33 +33,4 @@
             </tbody>
         </table>
     </div>
-
-<div class="clearfix visible-md"></div>
-</div>
-
-{% include 'firestation/_pagination.html' %}
-
-</div>
-</div>
-</div>
-</div>
-</section>
-
-
-{% include "firestation/_footer.html" %}
-
-</div>
-
-{% include "firestation/_firecares_scripts.html" %}
-
-<script type="text/javascript">
-      $('#sort-select').on("select2-selecting", function(e) {
-        window.location.href = e.choice.id;
-       });
-      $('#limit-select').on("select2-selecting", function(e) {
-        window.location.href = e.choice.id;
-       });
-</script>
-
-</body>
-</html>
+{% endblock object_list_view %}

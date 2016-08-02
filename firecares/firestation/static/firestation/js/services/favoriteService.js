@@ -45,7 +45,7 @@
                 //console.log(resp); // resp.data.fav_count
                 if (resp.data.status == 'added') {
                     console.log('favorite added');
-                    star.css('color', 'gold'); // set icon color as selected
+                    star.css('color', '#FEBE00'); // set icon color as selected (also hard coded in favit/button.html)
                 } else {
                     console.log('favorite removed');
                     star.css('color', ''); // set icon color as not selected
