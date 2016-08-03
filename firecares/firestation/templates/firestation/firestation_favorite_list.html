@@ -1,5 +1,7 @@
 {% extends "firestation/firedepartment_list.html" %}
 
+{% load favit_tags %}
+
 {% block sitemap %}
     <a href="{% url 'firestation_favorite_list' %}">Favorite Stations</a>
 {% endblock sitemap %}
@@ -21,6 +23,7 @@
             <tr>
                 <th>Station Name</th>
                 <th>Address</th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
@@ -28,6 +31,7 @@
             <tr>
                 <td><a href="{% url 'firestation_detail_slug' station.id station.slug %}">{{ station.name }}</a></td>
                 <td>{{ station.address }}</td>
+                <td>{% favorite_button station %}</td>
             </tr>
             {% endfor %}
             </tbody>
