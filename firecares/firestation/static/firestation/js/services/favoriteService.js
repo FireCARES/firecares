@@ -17,20 +17,32 @@
     FavoriteController.$inject = ['$scope', 'favorite'];
     function FavoriteController($scope, favorite) {
         $scope.onFavorite = favorite.onFavorite;
+        $scope.setFavoriteButtonColorSelected = favorite.setFavoriteButtonColorSelected;
     }
 
     // The service sends a POST request to favit and manages the button HTML elements
     FavoriteService.$inject = ['$http'];
     function FavoriteService($http) {
 
+        var selected_color = '#FEBE00'
+        var unselected_color = ''
+        var icon_id = 'favorite-star'
+
         var disabled = []; // object ids that are currently being processed (TODO maybe its better to store this flag on the button element somehow?)
+
+        this.setFavoriteButtonColorSelected = function () {
+            var star = angular.element(document.getElementById(icon_id));
+            star.css('color', selected_color);
+        };
 
         this.onFavorite = function (model, id) {
             if (disabled.indexOf(id) != -1) // if this object is currently being processed disable additional requests
                 return;
             //console.log("Favorite an object for the current user, object id:" + id + " object model: " + model);
-            var star = angular.element(document.getElementById('favorite-star'));
             disabled.push(id); // disable further requests for this object
+            var star = angular.element(document.getElementById(icon_id));
+            // flip the visual selection indication of the button immediately so the input feels responsive
+            star.css('color', star.css('color') == selected_color ? unselected_color : selected_color);
             $http({
                 method: 'POST',
                 url: '/favit/add-or-remove',
@@ -45,10 +57,10 @@
                 //console.log(resp); // resp.data.fav_count
                 if (resp.data.status == 'added') {
                     console.log('favorite added');
-                    star.css('color', '#FEBE00'); // set icon color as selected (also hard coded in favit/button.html)
+                    star.css('color', selected_color);
                 } else {
                     console.log('favorite removed');
-                    star.css('color', ''); // set icon color as not selected
+                    star.css('color', unselected_color);
                 }
                 disabled.splice(disabled.indexOf(id), 1); // enable requests for this object
             }, function error(err) {
