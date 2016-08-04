@@ -13,13 +13,13 @@
 {% endblock sorting_bar %}
 
 {% block object_list_view %}
-{% with object_list as firestations %}
 
-    <div class="ct-u-marginBottom20">           <!-- TODO: where is that grey color defined? (used in department_list) -->
-        <h1 class="text-uppercase fa-2x ct-sortingTitle">Favorite Stations<span style="color: #b3b3b3"> ({{ object_list | length }})</span></h1>
+    <div class="ct-sortingBar ct-u-marginBottom20">
+        <div class="ct-sortingTitle">
+            <h4 class="text-uppercase">Favorite Stations<span> ({{ firestations_total_count }})</span></h4>
+        </div>
     </div>
 
     {% include "firestation/_fire_station_table.html" %}
 
-{% endwith %}
 {% endblock object_list_view %}
