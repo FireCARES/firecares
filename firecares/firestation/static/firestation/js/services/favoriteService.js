@@ -25,7 +25,7 @@
     function FavoriteService($http) {
 
         var selected_color = '#FEBE00'
-        var unselected_color = 'silver' // TEST this should be empty string
+        var unselected_color = ''
         var icon_id = 'favorite-star-' // + id (id prevents multiple favorite buttons on the same page from colliding)
 
         var disabled = []; // object ids that are currently being processed (TODO maybe its better to store this flag on the button element somehow?)

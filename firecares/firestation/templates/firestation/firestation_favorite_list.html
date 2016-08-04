@@ -9,32 +9,17 @@
 {% block featured_departments %}
 {% endblock featured_departments %}
 
-{% block list_title %}
-    <h4 class="text-uppercase">Favorite Stations<span> ({{ object_list | length }})</span></h4>
-{% endblock %}
-
 {% block sorting_bar %}
 {% endblock sorting_bar %}
 
 {% block object_list_view %}
-    <div class="ct-section--products ct-section--products2col ct-u-marginBottom30">
-        <table class="table table-striped" style="font-size:14px;">
-            <thead>
-            <tr>
-                <th>Station Name</th>
-                <th>Address</th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            {%  for station in object_list %}
-            <tr>
-                <td><a href="{% url 'firestation_detail_slug' station.id station.slug %}">{{ station.name }}</a></td>
-                <td>{{ station.address }}</td>
-                <td>{% favorite_button station %}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+{% with object_list as firestations %}
+
+    <div class="ct-u-marginBottom20">           <!-- TODO: where is that grey color defined? (used in department_list) -->
+        <h1 class="text-uppercase fa-2x ct-sortingTitle">Favorite Stations<span style="color: #b3b3b3"> ({{ object_list | length }})</span></h1>
     </div>
+
+    {% include "firestation/_fire_station_table.html" %}
+
+{% endwith %}
 {% endblock object_list_view %}
