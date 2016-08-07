@@ -59,7 +59,7 @@ class DepartmentDetailView(LoginRequiredMixin, CacheMixin, DetailView):
 
         page = self.request.GET.get('page')
 
-        paginator = Paginator(context['firedepartment'].firestation_set.order_by('station_number'), self.objects_per_page)
+        paginator = Paginator(context['firedepartment'].firestation_set.filter(archived=False).order_by('station_number'), self.objects_per_page)
 
         try:
             stations = paginator.page(page)
@@ -453,8 +453,8 @@ class SimilarDepartmentsListView(FireDepartmentListView, CacheMixin):
 
 class FireStationDetailView(LoginRequiredMixin, CacheMixin, DetailView):
     model = FireStation
-
     cache_timeout = 60 * 60 * 24
+    cache_permission_differentiators = ['firestation.change_firestation']
 
 
 class SpatialIntersectView(ListView):

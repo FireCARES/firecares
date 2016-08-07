@@ -1,8 +1,8 @@
 'use strict';
 
 (function() {
-  angular.module('fireStation.firestationDetailController', [])
-  .controller('fireStationController', function($scope, $window, $http, Staffing, $timeout, map, FireStation, $filter, $interpolate) {
+  angular.module('fireStation.firestationDetailController', ['xeditable', 'ui.bootstrap'])
+  .controller('fireStationController', function($scope, $window, $http, Staffing, $timeout, map, FireStation, $filter, $interpolate, $compile) {
 
     var thisFirestation = '/api/v1/firestations/' + config.id + '/';
     var serviceAreaData = null;
@@ -10,8 +10,9 @@
       x: config.geom.coordinates[0],
       y: config.geom.coordinates[1]
     };
-
     var serviceAreaURL = $interpolate('https://geo.firecares.org/?f=json&Facilities={"features":[{"geometry":{"x":{{x}},"spatialReference":{"wkid":4326},"y":{{y}}}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4,4,4&Break_Values=4 6 8&returnZ=false&returnM=false')(stationGeom);
+
+    $scope.station = FireStation.get({id: config.id});
 
     var options = {
       boxZoom: true,
@@ -40,30 +41,6 @@
       $scope.forms = data;
     });
 
-    FireStation.query({department: config.departmentId}).$promise.then(function(data) {
-      $scope.stations = $filter('filter')(data.objects, function(val, idx, array) {
-        return val.id !== config.id;
-      });
-
-      var stationMarkers = [];
-      var numFireStations = $scope.stations.length;
-      for (var i = 0; i < numFireStations; i++) {
-        var station = $scope.stations[i];
-        var marker = L.marker(station.geom.coordinates.reverse(), {icon: stationIcon, opacity: 0.6});
-        marker.bindPopup('<b>' + station.name + '</b><br/>' + station.address + ', ' + station.city + ' ' +
-            station.state);
-        stationMarkers.push(marker);
-      }
-
-      if (numFireStations > 0) {
-        var stationLayer = L.featureGroup(stationMarkers);
-
-        // Uncomment to show Fire Stations by default
-        // stationLayer.addTo(departmentMap);
-
-        layersControl.addOverlay(stationLayer, 'Other Fire Stations');
-      }
-    });
 
     var map = map.initMap('map', {scrollWheelZoom: false});
     var stationIcon = L.FireCARESMarkers.firestationmarker();
@@ -71,11 +48,18 @@
     var layersControl = L.control.layers().addTo(map);
     var headquartersGeom = config.headquarters ? L.latLng(config.headquarters.coordinates.reverse()) : null;
     var stationGeom = config.geom ? L.latLng(config.geom.coordinates.reverse()) : null;
-
-    var station = L.marker(stationGeom, {icon: stationIcon, zIndexOffset: 1000});
+    var station = L.marker(stationGeom, {icon: stationIcon, zIndexOffset: 1000, draggable: config.draggable});
     station.bindPopup('<b>' + config.stationName + '</b>');
     station.addTo(map);
     layersControl.addOverlay(station, 'This Station');
+
+    station.on("dragend", function(e) {
+        var html = '<div id="confirmation">Save this as the new location for this station?<br/><br/><span class="editable-buttons"><button type="submit" ng-click="updateGeom([' + e.target.getLatLng().lng +','+ e.target.getLatLng().lat + '])" class="btn btn-primary"><span class="glyphicon glyphicon-ok"></span></button><button type="button" class="btn btn-default" ng-click="closeMapPopup()"><span class="glyphicon glyphicon-remove"></span></button></span></div>';
+        var popup = L.popup().setLatLng(e.target.getLatLng())
+        .setContent(html);
+        setTimeout(function(){popup.openOn(map); $compile($('#confirmation'))($scope);}, 1);
+
+    });
 
     if ( config.headquarters) {
       var headquarters = L.marker(headquartersGeom, {icon: headquartersIcon, zIndexOffset: 1000});
@@ -164,6 +148,17 @@
       }
     });
 
+    $scope.closeMapPopup = function() {
+        return map.closePopup();
+    };
+
+    $scope.updateGeom = function(coords) {
+        $scope.station.geom.coordinates = coords;
+        $scope.updateStation().$promise.then(function(data){
+            $scope.closeMapPopup();
+        });
+    };
+
     $scope.ClearForm = function(form) {
       form.apparatus = 'Engine';
       form.personnel = 0;
@@ -228,6 +223,10 @@
     $scope.toggleFullScreenMap = function() {
         map.toggleFullscreen();
     };
+
+    $scope.updateStation = function() {
+        return FireStation.update({id: $scope.station.id}, $scope.station);
+      };
 
     $scope.showMessage = function(message, message_type) {
       /*

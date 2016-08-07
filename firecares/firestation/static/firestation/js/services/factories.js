@@ -4,7 +4,12 @@
     angular.module('fireStation.factories', ['ngResource'])
 
     .factory('FireStation', function ($resource) {
-        return $resource('/api/v1/firestations/:id/', {}, {'query': {'method': 'GET', isArray: false}});
+        return $resource('/api/v1/firestations/:id/', {},
+            {
+                'query': {'method': 'GET', isArray: false},
+                'update': { method:'PUT' }
+
+        });
     })
 
     .factory('FireDepartment', function ($resource) {

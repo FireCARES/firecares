@@ -27,10 +27,64 @@
         headquarters: {{ object.department.headquarters_geom.json|safe|default:"null" }},
         headquartersName: "{{ object.department.name }} Headquarters",
         id: {{object.id}},
-        departmentId: {{ object.department_id|default:"null" }}
+        departmentId: {{ object.department_id|default:"null" }},
+        draggable: {{ perms.firestation.can_change_firestation|yesno:"true,false" }}
     };
     </script>
     {% include 'google_analytics.html' %}
+
+    <style>
+    .firestationDetail .ct-formSearch--extended {
+        background-color:#fff;
+    }
+    .firestationDetail .form-control {
+      border: 2px solid #fff;
+      background-color: #eee;
+    }
+    .firestationDetail .select2-container .select2-choice .select2-arrow {
+      border-left: 2px solid #ddd;
+      color: #000;
+    }
+    .firestationDetail .slider.slider-horizontal .slider-handle {
+      border: 4px solid #ddd;
+    }
+    .firestationDetail .slider.slider-horizontal .slider-track {
+      background: #ddd;
+    }
+
+    .editable-buttons span {
+        line-height: 1 !important;
+        padding: 0px;
+    }
+
+    .editable-buttons button {
+        padding: 1px 5px;
+    }
+
+    .editable-controls label {
+        line-height: 50px;
+        margin-right: 10px;
+    }
+
+    .editable-buttons .btn-primary {
+        background-color: #5cb85c;
+        border-color: #4cae4c;
+    }
+
+    .editable-buttons .btn-primary:hover {
+        background-color: darkolivegreen;
+        border-color: darkolivegreen;
+    }
+
+    .editable-buttons .btn-default:hover {
+        background-color: #cd412c;
+        border-color: #cd412c;
+    }
+
+    .ct-u-displayTableCell .popover-wrapper form {
+        top: -83px;
+    }
+    </style>
 </head>
 
 <body class="ct-headroom--fixedTopBar cssAnimate" ng-controller="fireStationController" ng-app="fireStation">
@@ -115,13 +169,107 @@
                     <div class="ct-heading ct-u-marginBottom20">
                         <h3>Details</h3>
                     </div>
-                    <div class="ct-u-displayTableVertical ct-productDetails">
+
+                    <div class="ct-u-displayTableVertical ct-productDetails firestationDetail">
                         <div class="ct-u-displayTableRow">
                             <div class="ct-u-displayTableCell">
-                                <span class="ct-fw-600">Department</span>
+                                <span class="ct-fw-600">Name</span>
                             </div>
                             <div class="ct-u-displayTableCell text-right">
-                                <span>{{ object.department }}</span>
+                                <span style="line-height: 10px;">
+                                    {% if perms.firestation.can_change_firestation %}
+                                        {% verbatim %}
+                                          <div class="popover-wrapper" style="line-height: 1;">
+                                            <a href="#" onaftersave="updateStation()" editable-text="station.name">
+                                            {{ station.name}}
+                                        </a>
+                                          </div>
+                                        {% endverbatim %}
+                                    {% else %}
+                                        {{ object.name}}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="ct-u-displayTableRow">
+                            <div class="ct-u-displayTableCell">
+                                <span class="ct-fw-600">Number</span>
+                            </div>
+                            <div class="ct-u-displayTableCell text-right">
+                                <span style="line-height: 10px;">
+                                    {% if perms.firestation.can_change_firestation %}
+                                        {% verbatim %}
+                                          <div class="popover-wrapper" style="line-height: 1;">
+                                            <a href="#" onaftersave="updateStation()" editable-text="station.station_number">
+                                            {{ station.station_number}}
+                                        </a>
+                                          </div>
+                                        {% endverbatim %}
+                                    {% else %}
+                                        {{ object.station_number }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="ct-u-displayTableRow">
+                            <div class="ct-u-displayTableCell">
+                                <span class="ct-fw-600">Address</span>
+                            </div>
+                            <div class="ct-u-displayTableCell text-right">
+                                <span style="line-height: 10px;">
+                                    {% if perms.firestation.can_change_firestation %}
+                                        {% verbatim %}
+                                          <div class="popover-wrapper" style="line-height: 1;">
+                                            <a href="#" onaftersave="updateStation()" editable-text="station.address" e-title="Address?">
+                                            {{ station.address}}
+                                        </a>
+                                          </div>
+                                        {% endverbatim %}
+                                    {% else %}
+                                        {{ object.address }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="ct-u-displayTableRow">
+                            <div class="ct-u-displayTableCell">
+                                <span class="ct-fw-600">City</span>
+                            </div>
+                            <div class="ct-u-displayTableCell text-right">
+                                <span style="line-height: 10px;">
+                                    {% if perms.firestation.can_change_firestation %}
+                                        {% verbatim %}
+                                          <div class="popover-wrapper" style="line-height: 1;">
+                                            <a href="#" onaftersave="updateStation()" editable-text="station.city">
+                                            {{ station.city}}
+                                        </a>
+                                          </div>
+                                        {% endverbatim %}
+                                    {% else %}
+                                        {{ object.city }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="ct-u-displayTableRow">
+                            <div class="ct-u-displayTableCell">
+                                <span class="ct-fw-600">Zip</span>
+                            </div>
+                            <div class="ct-u-displayTableCell text-right">
+                                <span style="line-height: 10px;">
+                                    {% if perms.firestation.can_change_firestation %}
+                                        {% verbatim %}
+                                          <div class="popover-wrapper" style="line-height: 1;">
+                                            <a href="#" onaftersave="updateStation()" editable-text="station.zipcode">
+                                            {{ station.zipcode}}
+                                        </a>
+                                          </div>
+                                        {% endverbatim %}
+                                    {% else %}
+                                        {{ object.zipcode }}
+                                    {% endif %}
+                                </span>
                             </div>
                         </div>
                         <div class="ct-u-displayTableRow">
@@ -129,15 +277,39 @@
                                 <span class="ct-fw-600">State</span>
                             </div>
                             <div class="ct-u-displayTableCell text-right">
-                                <span>{{ object.state }}</span>
+                                <span style="line-height: 10px;">
+                                    {% if perms.firestation.can_change_firestation %}
+                                        {% verbatim %}
+                                          <div class="popover-wrapper" style="line-height: 1;">
+                                            <a href="#" onaftersave="updateStation()" editable-text="station.state">
+                                            {{ station.state}}
+                                        </a>
+                                          </div>
+                                        {% endverbatim %}
+                                    {% else %}
+                                        {{ object.state }}
+                                    {% endif %}
+                                </span>
                             </div>
                         </div>
                         <div class="ct-u-displayTableRow">
                             <div class="ct-u-displayTableCell">
-                                <span class="ct-fw-600">FDID</span>
+                                <span class="ct-fw-600">Status</span>
                             </div>
                             <div class="ct-u-displayTableCell text-right">
-                                <span>{{ object.fdid }}</span>
+                                <span style="line-height: 10px;">
+                                    {% if perms.firestation.can_change_firestation %}
+                                        {% verbatim %}
+                                          <div class="popover-wrapper" style="line-height: 1;">
+                                            <a href="#" onaftersave="updateStation()" editable-checkbox="station.archived" e-title="Archive?">
+                                            {{ station.archived && "Archived" || "Active" }}
+                                        </a>
+                                          </div>
+                                        {% endverbatim %}
+                                    {% else %}
+                                        {{ object.archived|yesno:"Archived,Active"  }}
+                                    {% endif %}
+                                </span>
                             </div>
                         </div>
                     </div>
