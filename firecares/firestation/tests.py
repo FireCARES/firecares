@@ -74,7 +74,7 @@ class FireStationTests(TestCase):
         c = Client()
         c.login(**{'username': 'admin', 'password': 'admin'})
 
-        response = c.get(reverse('firedepartment_favorite_list'))
+        response = c.get(reverse('firedepartment_list')+'?favorites=true')
         self.assertTrue(fd1 in response.context['object_list'])
         self.assertTrue(fd2 in response.context['object_list'])
         self.assertTrue(fd3 not in response.context['object_list'])

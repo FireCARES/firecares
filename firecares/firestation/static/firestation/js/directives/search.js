@@ -60,9 +60,6 @@
         scope.regions = ['Any', 'Midwest', 'South', 'West'];
 
         scope.search = function() {
-          if (scope.params.favorites )
-            window.location = '/departments/favorites?' + $.param( scope.params );
-          else
             window.location = '/departments?' + $.param( scope.params );
         }
       }

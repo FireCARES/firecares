@@ -62,9 +62,7 @@
                 <div class="widget">
                     <div class="widget-inner">
                         <div class="search"
-                             {% block favorites_search_field %}
                              favorites="{{ request.GET.favorites }}"
-                             {% endblock favorites_search_field %}
                              sort-by="{{ request.GET.sortBy }}"
                              limit="{{ request.GET.limit }}"
                              fdid="{{ request.GET.fdid }}"
@@ -141,7 +139,7 @@
 <div class="ct-sortingBar ct-u-paddingRight10 ct-u-paddingLeft10 ct-u-marginBottom30">
     <div class="ct-sortingTitle">
         {% block list_title %}
-        <h4 class="text-uppercase">Search Results<span> ({{ object_list.count }})</span></h4>
+        <h4 class="text-uppercase">Search Results<span> ({{ departments_total_count }})</span></h4>
         {% endblock list_title %}
     </div>
     <div class="ct-sortingOptions" ng-cloak>

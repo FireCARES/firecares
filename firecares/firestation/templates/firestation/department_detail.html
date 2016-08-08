@@ -394,25 +394,8 @@
                                 </div>
                             </div>
                             {% include "firestation/_fire_station_table.html" %}
-
-                        <div class="ct-pagination text-center ct-u-marginBottom30">
-                            <ul class="pagination">
-                                {% if firestations.has_previous %}
-                                        <li><a href="?page={{firestations.previous_page_number }}#stations" aria-label="Previous"><span aria-hidden="true"><i class="fa fa-angle-left"></i></span></a></li>
-                                {% endif %}
-
-                                    {% for p in firestations.paginator.page_range %}
-                                        {% if p != firestations.number %}
-                                             <li><a href="?page={{ p }}#stations">{{ p }}</a></li>
-                                        {% else %}
-                                             <li class="active"><a href="?page={{ p }}#stations">{{ p }}</a></li>
-                                        {% endif %}
-                                    {% endfor %}
-
-                                {% if firestations.has_next %}
-                                        <li><a href="?page={{firestations.next_page_number}}#stations" aria-label="Next"><span aria-hidden="true"><i class="fa fa-angle-right"></i></span></a></li>
-                                {% endif %}
-                                </ul>
+                            <div class="ct-u-marginBottom30">
+                                {% include 'firestation/_pagination.html' with url_postfix='#stations' %}
                             </div>
                             {% endif %} <!-- if not firestations -->
                         </div>
