@@ -60,7 +60,45 @@
         scope.regions = ['Any', 'Midwest', 'South', 'West'];
 
         scope.search = function() {
+            // clean the empty url parameters TODO how can this be written better?
+            if (scope.params.favorites == '')
+                delete scope.params.favorites;
+            if (scope.params.fdid == '')
+                delete scope.params.fdid;
+            if (scope.params.state == '')
+                delete scope.params.state;
+            if (scope.params.name == '')
+                delete scope.params.name;
+            if (scope.params.region == '')
+                delete scope.params.region;
+            if (scope.params.population == '')
+                delete scope.params.population;
+            if (scope.params.q == '')
+                delete scope.params.q;
+            if (scope.params.dist_model_score == '')
+                delete scope.params.dist_model_score;
+            if (scope.params.sortBy == '')
+                delete scope.params.sortBy;
+            if (scope.params.limit == '')
+                delete scope.params.limit;
             window.location = '/departments?' + $.param( scope.params );
+        }
+
+        scope.searchFavoriteStations = function() {
+            // clean the empty url parameters TODO how can this be written better?
+            delete scope.params.favorites;
+            delete scope.params.fdid;
+            delete scope.params.state;
+            delete scope.params.name;
+            delete scope.params.region;
+            delete scope.params.population;
+            delete scope.params.q;
+            delete scope.params.dist_model_score;
+            if (scope.params.sortBy == '')
+                delete scope.params.sortBy;
+            if (scope.params.limit == '')
+                delete scope.params.limit;
+            window.location = '/stations/favorites?' + $.param( scope.params );
         }
       }
     };

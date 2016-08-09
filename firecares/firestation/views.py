@@ -481,20 +481,33 @@ class SimilarDepartmentsListView(FireDepartmentListView, CacheMixin):
         return queryset
 
 
-class FireStationFavoriteListView(LoginRequiredMixin, PaginationMixin, ListView):
+class FireStationFavoriteListView(LoginRequiredMixin, PaginationMixin, ListView, SafeSortMixin, LimitMixin):
     """
     Implements the Favorite Station list view.
     """
 
     model = FireStation
-    paginate_by = 10
+    paginate_by = 15
+    sort_by_fields = [
+        ('name', 'Name Ascending'),
+        ('-name', 'Name Descending')
+    ]
 
     def get_queryset(self):
-        return map(lambda obj: obj.target,
-                   Favorite.objects.for_user(self.request.user, model=FireStation))
+        favorites = Favorite.objects.for_user(self.request.user, model=FireStation)
+        favorite_station_pk = map(lambda obj: obj.target.pk, favorites)
+        queryset = FireStation.objects.all().filter(pk__in=favorite_station_pk)
+
+        order_by = self.request.GET.get('sortBy')
+        if self.model_field_valid(order_by, choices=[name for name, verbose_name in self.sort_by_fields]):
+            queryset = queryset.order_by(order_by)
+
+        self.limit_queryset(self.request.GET.get('limit'))
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super(FireStationFavoriteListView, self).get_context_data(**kwargs)
+        context = self.get_sort_context(context)
 
         paginator = context['paginator']
         page_obj = context['page_obj']
