@@ -430,7 +430,6 @@ function makekenburns($element) {
                 if(!$tilesItems.hasClass("is-active"))
                 {
                     var $existListClass = $(".ct-showProducts--list");
-
                     if($existListClass){
                         $showProducts.removeClass("ct-showProducts--list");
                         $showProducts.addClass("ct-showProducts--default");
@@ -440,15 +439,24 @@ function makekenburns($element) {
                         $(this).addClass("is-active");
                         $listItems.removeClass("is-active");
                     }
+
+                    var $favoriteButton = $(".fire-department-card-favorite-button-list");
+                    if($favoriteButton){
+                        $favoriteButton.removeClass("fire-department-card-favorite-button-list");
+                        $favoriteButton.addClass("fire-department-card-favorite-button");
+                        var $buttonStyle = $(".buttonWhiteStyleMark");
+                        if ($buttonStyle)
+                            $buttonStyle.attr("style", "color: white");
+                    }
                 }
             });
 
             $listItems.on("click", function(e){
                 e.preventDefault();
 
-                if(!$listItems.hasClass("is-active")){
+                if(!$listItems.hasClass("is-active"))
+                {
                     var $existDefaultClass = $(".ct-showProducts--list");
-
                     if($existDefaultClass){
                         $showProducts.removeClass("ct-showProducts--default");
                         $showProducts.addClass("ct-showProducts--list");
@@ -457,6 +465,15 @@ function makekenburns($element) {
 
                         $(this).addClass("is-active");
                         $tilesItems.removeClass("is-active");
+                    }
+
+                    var $favoriteButton = $(".fire-department-card-favorite-button");
+                    if($favoriteButton){
+                        $favoriteButton.removeClass("fire-department-card-favorite-button");
+                        $favoriteButton.addClass("fire-department-card-favorite-button-list");
+                        var $buttonStyle = $(".buttonWhiteStyleMark");
+                        if ($buttonStyle)
+                            $buttonStyle.attr("style", "color: black");
                     }
                 }
             });

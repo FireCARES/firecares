@@ -14,7 +14,7 @@
         <tr>
             <td><a href="{% url 'firestation_detail_slug' station.id station.slug %}">{{ station.name }}</a></td>
             <td>{{ station.address }}</td>
-            <td>{% favorite_button station 'favit/altButton.html' %}</td>
+            <td>{% favorite_button station 'favit/buttonBlack.html' %}</td>
         </tr>
         {% endfor %}
         </tbody>

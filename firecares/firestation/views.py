@@ -52,13 +52,12 @@ class PaginationMixin(object):
         context = super(PaginationMixin, self).get_context_data(**kwargs)
         paginator = context['paginator']
         page_obj = context['page_obj']
-        min_page = page_obj.number - 5
-        min_page = max(1, min_page)
-        max_page = page_obj.number + 6
-        last_page_range = paginator.num_pages
-        if last_page_range > 1:
-            last_page_range += 1
-        max_page = min(last_page_range, max_page)
+        return PaginationMixin.populate_context_data(context, paginator, page_obj.number)
+
+    @staticmethod
+    def populate_context_data(context, paginator, page_number):
+        min_page = max(1, page_number - 2)
+        max_page = min(paginator.num_pages, min_page + 5)
         context['windowed_range'] = range(min_page, max_page)
         if min_page > 1:
             context['first_page'] = 1
@@ -88,23 +87,9 @@ class DepartmentDetailView(LoginRequiredMixin, CacheMixin, DetailView):
             # If page is out of range (e.g. 9999), deliver last page of results.
             stations = paginator.page(paginator.num_pages)
         context['firestations'] = stations
-
-        # TODO use PaginationMixin
         if not page:
             page = 1
-        page_number = int(page)
-        min_page = page_number - 5
-        min_page = max(1, min_page)
-        max_page = page_number + 6
-        last_page_range = paginator.num_pages
-        if last_page_range > 1:
-            last_page_range += 1
-        max_page = min(last_page_range, max_page)
-        context['windowed_range'] = range(min_page, max_page)
-        if min_page > 1:
-            context['first_page'] = 1
-        if max_page < paginator.num_pages:
-            context['last_page'] = paginator.num_pages
+        PaginationMixin.populate_context_data(context, paginator, int(page))
 
         # population stats provide summary statistics for fields within the current objects population class
         context['population_stats'] = self.object.population_class_stats

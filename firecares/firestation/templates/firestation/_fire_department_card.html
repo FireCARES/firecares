@@ -23,9 +23,6 @@
                 </div>
             </div>
         </div>
-        <div class="fire-department-card-favorite-button">
-            {% favorite_button department 'favit/altButton.html' %}
-        </div>
         <div class="ct-product--meta">
             <div class="ct-icons">
                 <span tooltip="Predicted number of fires" tooltip-append-to-body="true" tooltip-popup-delay="700">
@@ -46,6 +43,9 @@
                 <span tooltip="State" tooltip-append-to-body="true" tooltip-popup-delay="700">
                     <i class="fa fa-map-pin"></i> {{ department.state }}
                 </span>
+                <div class="fire-department-card-favorite-button">
+                    {% favorite_button department 'favit/buttonWhite.html' %}
+                </div>
             </div>
             <div class="ct-text"></div>
         </div>
