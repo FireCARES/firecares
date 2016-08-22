@@ -83,10 +83,9 @@ class FireStationResource(JSONDefaultModelResource):
         queryset = FireStation.objects.all()
         authorization = DjangoAuthorization()
         authentication = MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
-        cache = SimpleCache()
         list_allowed_methods = ['get']
-        detail_allowed_methods = ['get']
-        filtering = {'department': ('exact',), 'state': ('exact',)}
+        detail_allowed_methods = ['get', 'put']
+        filtering = {'department': ('exact',), 'state': ('exact',), 'id': ('exact',)}
         excludes = ['addressbuildingname', 'complex_id', 'data_security', 'distribution_policy', 'fcode', 'foot_id',
                     'ftype', 'globalid', 'gnis_id', 'islandmark', 'loaddate', 'objectid', 'permanent_identifier',
                     'pointlocationtype', 'source_datadesc', 'source_datasetid', 'source_featureid', 'source_originator',

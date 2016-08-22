@@ -298,6 +298,49 @@ class FireStationTests(TestCase):
         self.assertEqual(response.status_code, 405)
         self.assertTrue(FireStation.objects.get(id=self.fire_station.id))
 
+    def test_update_station_from_api(self):
+        url = '{0}{1}/'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'firestations']),
+                                       self.fire_station.id)
+
+        count = FireStation.objects.all().count()
+        c = Client()
+        c.login(**{'username': 'admin', 'password': 'admin'})
+
+        response = c.get(url)
+        js = json.loads(response.content)
+        self.assertEqual(js['archived'], False)
+
+        js['archived'] = True
+        response = c.put(url, data=json.dumps(js), content_type='application/json')
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(count, FireStation.objects.all().count())
+        self.assertTrue(FireStation.objects.get(id=self.fire_station.id).archived)
+
+        # test as non_admin
+        c.login(**{'username': 'non_admin', 'password': 'non_admin'})
+        response = c.get(url)
+        js = json.loads(response.content)
+
+        js['archived'] = False
+        response = c.put(url, data=json.dumps(js), content_type='application/json')
+        self.assertEqual(response.status_code, 401)
+
+        from django.contrib.auth.models import Permission
+        self.non_admin_user.user_permissions.add(Permission.objects.get(name='Can change Fire Station'))
+
+        response = c.put(url, data=json.dumps(js), content_type='application/json')
+        self.assertEqual(response.status_code, 204)
+
+    def test_read_firestation(self):
+        url = '{0}{1}/'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'firestations']),
+                                       self.fire_station.id)
+
+        c = Client()
+        c.login(**{'username': 'non_admin', 'password': 'non_admin'})
+
+        response = c.get(url)
+        self.assertEqual(response.status_code, 200)
+
     def test_get_population_class(self):
         """
         Tests the population class logic.

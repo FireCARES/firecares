@@ -17,7 +17,7 @@ from django.db.models import Avg, Max, Min, Q
 from django.db.models.loading import get_model
 from django.db.models.signals import post_migrate
 from django.utils.text import slugify
-from firecares.firecares_core.models import RecentlyUpdatedMixin
+from firecares.firecares_core.models import RecentlyUpdatedMixin, Archivable
 from django.core.urlresolvers import reverse
 from django.db.transaction import rollback
 from django.db.utils import IntegrityError, ProgrammingError
@@ -204,7 +204,7 @@ class USGSStructureData(models.Model):
                 return local_count - upstream_count
 
 
-class FireDepartment(RecentlyUpdatedMixin, models.Model):
+class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
     """
     Models Fire Departments.
     """
@@ -723,7 +723,7 @@ class FireDepartment(RecentlyUpdatedMixin, models.Model):
         return self.name
 
 
-class FireStation(USGSStructureData):
+class FireStation(USGSStructureData, Archivable):
     """
     Fire Stations.
     """

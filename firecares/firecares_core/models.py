@@ -27,6 +27,17 @@ class RecentlyUpdatedMixin(models.Model):
         abstract = True
 
 
+class Archivable(models.Model):
+    """
+    A mixin used to allow archiving objects.
+    """
+
+    archived = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+
+
 class Country(models.Model):
     """Model for countries"""
     iso_code = models.CharField(max_length=2, primary_key=True)
