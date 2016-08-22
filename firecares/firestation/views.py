@@ -69,7 +69,7 @@ class PaginationMixin(object):
 class DepartmentDetailView(LoginRequiredMixin, CacheMixin, DetailView):
     model = FireDepartment
     template_name = 'firestation/department_detail.html'
-    stations_per_page = 10
+    objects_per_page = 10
     cache_timeout = 60 * 15
     cache_permission_differentiators = ['firestation.change_firedepartment']
 
