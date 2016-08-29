@@ -8,7 +8,6 @@ from celery import Celery
 from django.conf import settings
 from django.db import connections
 from firecares.utils.s3put import singlepart_upload
-from firecares.utils import convert_png_to_jpg
 from firecares.firestation.models import FireStation
 from celery.task import current
 
@@ -47,7 +46,6 @@ def debug_task(self):
 def cache_thumbnail(id, upload_to_s3=False, marker=True):
     try:
         import shutil
-        print settings.MAPBOX_ACCESS_TOKEN
         from firecares.firestation.models import FireDepartment
         department = FireDepartment.objects.get(id=id)
 
@@ -60,8 +58,7 @@ def cache_thumbnail(id, upload_to_s3=False, marker=True):
         full_filename = os.path.join('/home/firecares/department-thumbnails', filename)
 
         if not generate_thumbnail.startswith('/static'):
-            f = download_file(generate_thumbnail, full_filename.replace('jpg', 'png'))
-            full_filename = convert_png_to_jpg(f)
+            download_file(generate_thumbnail, full_filename)
         else:
             shutil.copy('/webapps/firecares/firecares/firecares/firestation/static/firestation/theme/assets/images/content/property-1.jpg', full_filename)
 
