@@ -11678,6 +11678,14 @@ table.residential-fires {
 .ct-u-displayTableCell .popover-wrapper form {
   top: -83px;
 }
+.learn-more-link a {
+  color: #f29a00;
+  border-bottom: 1px dotted white;
+}
+.learn-more-link a:hover {
+  color: #f29a00;
+  border-bottom: 1px dotted;
+}
 .ct-pageWrapper {
   background-color: #ffffff;
   overflow: hidden;
