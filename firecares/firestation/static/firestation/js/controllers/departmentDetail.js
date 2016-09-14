@@ -87,9 +87,8 @@
                 $scope.showHeatmapCharts = false;
 
                 layersControl.addOverlay(heatmap.layer, 'Heatmap of Low Risk Fires');
-
                 departmentMap.on('overlayadd', function(layer) {
-                    if (layer._leaflet_id === heatmap.layer._leaflet_id) {
+                    if (layer.layer._leaflet_id === heatmap.layer._leaflet_id) {
                         if (heatmap.heat) {
                             showHeatmapCharts(true);
                         } else {
@@ -110,7 +109,7 @@
                 });
 
                 departmentMap.on('overlayremove', function(layer) {
-                    if (layer._leaflet_id === heatmap.layer._leaflet_id) {
+                    if (layer.layer._leaflet_id === heatmap.layer._leaflet_id) {
                         showHeatmapCharts(false);
                     }
                 });

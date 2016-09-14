@@ -154,7 +154,9 @@
 
             refresh: function() {
                 // Update layer with new fire points.
-                _layer.setLatLngs(_fires.dates.top(Infinity).map(function(fire) {
+                _layer.setLatLngs(_fires.dates.top(Infinity).filter(function(fire) {
+                    return (fire.y !== "" && fire.x !== "");
+                }).map(function(fire) {
                     return [fire.y, fire.x];
                 }));
 
