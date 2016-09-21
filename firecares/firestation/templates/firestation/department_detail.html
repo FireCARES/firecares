@@ -1,5 +1,6 @@
 {% load humanize %}
 {% load firecares %}
+{% load favit_tags %}
 <!DOCTYPE html>
 <!--[if IE 8 ]>
 <html class="no-js ie8" lang="en"> <![endif]-->
@@ -71,7 +72,7 @@
                     </span>
                 </div>
                 <div class="ct-u-displayTableCell text-right">
-                    <a href="search-grid.html" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-star fa-2x"></i></a>
+                    {% favorite_button object %}
                     <a href="javascript:window.print()" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-printer fa-2x"></i></a>
                     <a href="{% url 'documents' object.id %}" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-docs fa-2x"></i></a>
                 </div>
@@ -392,43 +393,9 @@
                                   </ul>
                                 </div>
                             </div>
-                            <div class="ct-section--products ct-section--products2col ct-u-marginBottom30">
-                                <table class="table table-striped" style="font-size:14px;">
-                                    <thead>
-                                    <tr>
-                                        <th>Station Name</th>
-                                        <th>Address</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {%  for station in firestations %}
-                                    <tr>
-                                        <td><a href="{% url 'firestation_detail_slug' station.id station.slug %}">{{ station.name }}</a></td>
-                                        <td>{{ station.address }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                        <div class="ct-pagination text-center ct-u-marginBottom30">
-                            <ul class="pagination">
-                                {% if firestations.has_previous %}
-                                        <li><a href="?page={{firestations.previous_page_number }}#stations" aria-label="Previous"><span aria-hidden="true"><i class="fa fa-angle-left"></i></span></a></li>
-                                {% endif %}
-
-                                    {% for p in firestations.paginator.page_range %}
-                                        {% if p != firestations.number %}
-                                             <li><a href="?page={{ p }}#stations">{{ p }}</a></li>
-                                        {% else %}
-                                             <li class="active"><a href="?page={{ p }}#stations">{{ p }}</a></li>
-                                        {% endif %}
-                                    {% endfor %}
-
-                                {% if firestations.has_next %}
-                                        <li><a href="?page={{firestations.next_page_number}}#stations" aria-label="Next"><span aria-hidden="true"><i class="fa fa-angle-right"></i></span></a></li>
-                                {% endif %}
-                                </ul>
+                            {% include "firestation/_fire_station_table.html" %}
+                            <div class="ct-u-marginBottom30">
+                                {% include 'firestation/_pagination.html' with url_postfix='#stations' %}
                             </div>
                             {% endif %} <!-- if not firestations -->
                         </div>

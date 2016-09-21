@@ -12,6 +12,10 @@
         scope.sortFields = [];
         scope.limits = [15, 30, 60, 90];
 
+        attrs.$observe('favorites', function() {
+          scope.params.favorites = attrs.favorites == 'true';
+        });
+
         attrs.$observe('fdid', function() {
           scope.params.fdid = attrs.fdid;
         });
@@ -56,8 +60,25 @@
         scope.regions = ['Any', 'Midwest', 'South', 'West'];
 
         scope.search = function() {
-          window.location = '/departments?' + $.param( scope.params );
+            scope.cleanURLParameters();
+            window.location = '/departments?' + $.param( scope.params );
         }
+
+        scope.searchFavoriteStations = function() {
+            scope.cleanURLParameters();
+            window.location = '/stations/favorites?' + $.param( scope.params );
+        }
+
+        scope.cleanURLParameters = function() {
+            var parameters = ['favorites', 'fdid', 'state', 'name', 'region', 'population', 'q', 'dist_model_score', 'sortBy', 'limit'];
+            for (var i = 0; i < parameters.length; i++) {
+                var parameterKey = parameters[i];
+                if (scope.params[parameterKey] === '') {
+                    delete scope.params[parameterKey];
+                }
+            }
+        }
+
       }
     };
   })
