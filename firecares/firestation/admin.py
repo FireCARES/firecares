@@ -1,4 +1,4 @@
-from .models import FireStation, FireDepartment, Staffing, Document
+from .models import FireStation, FireDepartment, Staffing, Document, IntersectingDepartmentLog
 from firecares.firecares_core.models import Address
 from firecares.firecares_core.admin import LocalOpenLayersAdmin
 from django.contrib.gis import admin
@@ -63,8 +63,12 @@ class DocumentAdmin(admin.ModelAdmin):
         model = Document
 
 
+class IntersectingDepartmentLogAdmin(admin.ModelAdmin):
+    pass
+
 admin.site.register(FireStation, FireStationAdmin)
 admin.site.register(FireDepartment, FireDepartmentAdmin)
 admin.site.register(Staffing, ResponseCapabilityAdmin)
 admin.site.register(Document, DocumentAdmin)
+admin.site.register(IntersectingDepartmentLog, IntersectingDepartmentLogAdmin)
 

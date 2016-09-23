@@ -3,7 +3,7 @@ import os
 import requests
 import string
 from .forms import StaffingForm
-from .models import FireDepartment, FireStation, Staffing, PopulationClass9Quartile
+from .models import FireDepartment, FireStation, Staffing, PopulationClass9Quartile, IntersectingDepartmentLog
 from django.db import connections
 from django.test import TestCase
 from django.test.client import Client
@@ -1087,3 +1087,67 @@ class FireStationTests(TestCase):
         # Delete document
         response = c.post(reverse('documents_delete', args=[fd.id]), {'filename': filename})
         self.assertEqual(response.status_code, 302)
+
+    def test_remove_intersecting_depts(self):
+        us = Country.objects.create(iso_code='US', name='United States')
+        address = Address.objects.create(address_line1='Test', country=us, geom=Point(-118.42170426600454, 34.09700463377199))
+
+        geom = MultiPolygon([Polygon([(-118.62170426600454, 33.897004633771985),
+                                      (-118.22170426600454, 33.897004633771985),
+                                      (-118.22170426600454, 34.29700463377199),
+                                      (-118.62170426600454, 34.29700463377199),
+                                      (-118.62170426600454, 33.897004633771985)])])
+
+        geom2 = MultiPolygon([geom.buffer(.2).envelope])
+
+        fd, _ = FireDepartment.objects.get_or_create(id=0,
+                                                     name='Test db',
+                                                     population=90000,
+                                                     population_class=1,
+                                                     department_type='test',
+                                                     headquarters_address=address,
+                                                     geom=geom)
+
+        fd2, _ = FireDepartment.objects.get_or_create(id=1,
+                                                      name='Test db',
+                                                      population=100000,
+                                                      population_class=1,
+                                                      department_type='test',
+                                                      headquarters_address=address,
+                                                      geom=geom2)
+
+        c = Client()
+        c.login(username=self.non_admin_user, password=self.non_admin_password)
+        response = c.get(reverse('remove_intersecting_departments', args=[fd2.id]))
+        self.assertEqual(response.status_code, 302)
+
+        response = c.post(reverse('remove_intersecting_departments', args=[fd2.id]), data={'departments': [0]})
+        self.assertEqual(response.status_code, 302)
+
+        c.logout()
+        c.login(username='admin', password='admin')
+
+        response = c.get(reverse('remove_intersecting_departments', args=[fd2.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(fd, response.context['intersecting_departments'])
+
+        response = c.post(reverse('remove_intersecting_departments', args=[fd2.id]), data={'departments': '0'}, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        fd2 = FireDepartment.objects.get(id=1)
+
+        self.assertEqual(fd2.population, 10000)
+        self.assertEqual(fd2.geom.area, geom2.difference(fd.geom).area)
+
+        response = c.get(reverse('remove_intersecting_departments', args=[fd2.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(fd, response.context['intersecting_departments'])
+
+        log = IntersectingDepartmentLog.objects.first()
+        self.assertEqual(log.parent, fd2)
+        self.assertEqual(log.removed_department, fd)
+
+
+
+
+

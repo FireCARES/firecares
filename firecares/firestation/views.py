@@ -32,7 +32,7 @@ from tempfile import mkdtemp
 from firecares.tasks.cleanup import remove_file
 from .forms import DocumentUploadForm
 from django.views.generic.edit import FormView
-from .models import Document
+from .models import Document, create_quartile_views
 
 
 
@@ -248,6 +248,47 @@ class DepartmentUpdateGovernmentUnits(LoginRequiredMixin, DetailView):
 
         return redirect(self.object)
 
+
+class RemoveIntersectingDepartments(LoginRequiredMixin, DetailView):
+    """
+    View to update a Department's government unit.
+    """
+    model = FireDepartment
+    template_name = 'firestation/department_remove_intersecting_departments.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(RemoveIntersectingDepartments, self).get_context_data(**kwargs)
+
+        geom = self.object.headquarters_geom.buffer(0.01)
+
+        context['intersecting_departments'] = self.get_intersecting_departments()
+
+        return context
+
+    def get_intersecting_departments(self):
+        return FireDepartment.objects \
+            .filter(geom__intersects=self.object.geom) \
+            .exclude(id=self.object.id) \
+            .exclude(id__in=self.object.intersecting_department.all().values_list('removed_department_id', flat=True))
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        context = self.get_context_data()
+
+        departments = map(int, request.POST.getlist('departments'))
+
+        population_class = self.object.get_population_class()
+
+        # Make sure POSTed departments are still intersecting.
+        for i in set(departments).intersection(set(self.get_intersecting_departments().values_list('id', flat=True))):
+            self.object.remove_from_department(FireDepartment.objects.get(id=i))
+
+        if self.object.get_population_class() != population_class:
+            create_quartile_views(None)
+
+        messages.add_message(request, messages.SUCCESS, 'Removed intersecting departments.')
+
+        return redirect(self.object)
 
 class SafeSortMixin(object):
     """

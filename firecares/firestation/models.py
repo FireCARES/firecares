@@ -204,6 +204,19 @@ class USGSStructureData(models.Model):
                 return local_count - upstream_count
 
 
+class IntersectingDepartmentLog(models.Model):
+    """
+    Keeps track of departments removed from other departments.
+    """
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    parent = models.ForeignKey('FireDepartment', related_name='intersecting_department')
+    removed_department = models.ForeignKey('FireDepartment', related_name='removed_intersecting_departments')
+
+    def __unicode__(self):
+        return u'Removed {} from {}.'.format(self.removed_department.name, self.parent.name)
+
+
 class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
     """
     Models Fire Departments.
@@ -721,6 +734,23 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def remove_from_department(self, department):
+        """
+        Removes a departments geometry and population from this department's.
+        """
+        if self.geom and department.geom:
+            try:
+                self.geom = MultiPolygon(self.geom.difference(department.geom))
+            except TypeError:
+                self.geom = self.geom.difference(department.geom)
+
+        if department.population and self.population:
+            self.population = self.population - department.population
+            self.population_class = self.get_population_class()
+
+        IntersectingDepartmentLog.objects.create(parent=self, removed_department=department)
+        self.save()
 
 
 class FireStation(USGSStructureData, Archivable):
