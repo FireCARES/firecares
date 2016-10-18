@@ -257,6 +257,7 @@ CELERY_IMPORTS = (
     'firecares.tasks.email',
     'firecares.tasks.cleanup',
     'firecares.tasks.quality_control',
+    'firecares.tasks.slack',
 )
 
 CELERY_QUEUES = [
@@ -266,6 +267,7 @@ CELERY_QUEUES = [
     Queue('email', routing_key='email'),
     Queue('cleanup', routing_key='cleanup'),
     Queue('quality-control', routing_key='quality-control'),
+    Queue('slack', routing_key='slack'),
 ]
 
 ACCOUNT_ACTIVATION_DAYS = 7
