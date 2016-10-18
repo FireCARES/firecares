@@ -1,10 +1,10 @@
 import logging
 
 from django.conf import settings
-from django.core.cache import cache
-from django.http import JsonResponse
 from django.http import HttpResponseForbidden, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
+from django.utils.decorators import method_decorator
 from firecares.tasks.cache import clear_cache
 from firecares.tasks.slack import send_slack_message
 
@@ -18,6 +18,10 @@ class FireCARESSlack(View):
     http_method_names = ['post']
     commands = ['clear_cache']
 
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super(FireCARESSlack, self).dispatch(*args, **kwargs)
+    
     def clear_cache(self, request, *args, **kwargs):
         response_url = self.request.POST.get('response_url')
         clear_cache.delay(link=send_slack_message.s(response_url, {'text': 'Cache successfully cleared!'}),
