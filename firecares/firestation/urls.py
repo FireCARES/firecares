@@ -1,6 +1,7 @@
 from .views import (DepartmentDetailView, Stats, FireDepartmentListView,
                     SimilarDepartmentsListView, DepartmentUpdateGovernmentUnits, FireStationDetailView,
                     DownloadShapefile, DocumentsView, DocumentsFileView, DocumentsDeleteView, RemoveIntersectingDepartments)
+from .slack import FireCARESSlack
 from django.contrib.auth.decorators import permission_required
 from django.views.generic import TemplateView
 from django.conf.urls import patterns, url
@@ -25,4 +26,5 @@ urlpatterns = patterns('',
                        url(r'^performance-score$', cache_page(60 * 60 * 24)(TemplateView.as_view(template_name='firestation/performance_score_model.html')), name='models_performance_score'),
                        url(r'^stats/fire-stations/?$', Stats.as_view(), name='firestation_stats'),
                        url(r'^media$', cache_page(60 * 60 * 24)(TemplateView.as_view(template_name='firestation/media.html')), name='media'),
+                       url(r'^slack/firecares$', FireCARESSlack.as_view(), name='slack'),
                        )

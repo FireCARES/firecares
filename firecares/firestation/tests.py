@@ -5,7 +5,7 @@ import string
 from .forms import StaffingForm
 from .models import FireDepartment, FireStation, Staffing, PopulationClass9Quartile, IntersectingDepartmentLog
 from django.db import connections
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.test.client import Client
 from django.conf import settings
 from django.core import mail
@@ -1146,6 +1146,36 @@ class FireStationTests(TestCase):
         log = IntersectingDepartmentLog.objects.first()
         self.assertEqual(log.parent, fd2)
         self.assertEqual(log.removed_department, fd)
+
+    @override_settings(SLACK_FIRECARES_COMMAND_TOKEN='test')
+    def test_clear_cache(self):
+        c = Client()
+        c.login(username=self.non_admin_user, password=self.non_admin_password)
+        response = c.get(reverse('slack'))
+        self.assertEqual(response.status_code, 405)
+
+        data = dict(token='fail',
+                    team_id='T0001',
+                    team_domain='example',
+                    channel_id='C2147483705',
+                    channel_name='test',
+                    user_id='U2147483697',
+                    user_name='Steve',
+                    command='/firecares',
+                    text='clear_cache',
+                    response_url='https://hooks.slack.com/commands/1234/5678')
+
+        response = c.post(reverse('slack'), data)
+        self.assertEqual(response.status_code, 403)
+
+        data['token'] = 'test'
+        response = c.post(reverse('slack'), data)
+        self.assertEqual(response.status_code, 200)
+
+        # "text" holds the command which must be whitelisted in the view.
+        data['text'] = 'test'
+        response = c.post(reverse('slack'), data)
+        self.assertEqual(response.status_code, 403)
 
 
 
