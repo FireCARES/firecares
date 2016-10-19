@@ -6,7 +6,7 @@ from django.views.generic import View
 from django.utils.decorators import method_decorator
 from firecares.tasks.cache import clear_cache as clear_cache_task
 from firecares.tasks.slack import send_slack_message
-from firecares.tasks.update import update_nfirs_counts
+from firecares.tasks.update import update_nfirs_counts, update_performance_score
 from firecares.firecares_core.models import AccountRequest
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ class FireCARESSlack(View):
     Class that routes and executes Slack commands.
     """
     http_method_names = ['post']
-    commands = ['clear_cache', 'account_requests', 'update_nfirs_counts']
+    commands = ['clear_cache', 'account_requests', 'update_nfirs_counts', 'update_performance_scores']
 
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
@@ -33,6 +33,7 @@ class FireCARESSlack(View):
         *clear_cache*: Nuclear option, clears the entire cache.
         *account_requests*: Returns the number of active account requests.
         *update_nfirs_counts*: Updates the annual residential fire and casualty counts for a department. ```(Args: [<department_id>])```
+        *update_performance_scores*: Updates the performance score for a department. ```(Args: [<department_id>])```
         """
 
         return {'text': msg}
@@ -50,6 +51,13 @@ class FireCARESSlack(View):
             update_nfirs_counts.apply_async((department,),
                                         link=send_slack_message.s(self.response_url, {'text': 'NFIRS counts updated for department: {}'.format(department)}),
                                         link_error=send_slack_message.s(self.response_url, {'text': 'Error updating NFIRS counts for department: {}'.format(department)}))
+        return HttpResponse()
+
+    def update_performance_scores(self, request, *args, **kwargs):
+        for department in self.command_args:
+            update_performance_score.apply_async((department,),
+                                        link=send_slack_message.s(self.response_url, {'text': 'Performance score updated for department: {}'.format(department)}),
+                                        link_error=send_slack_message.s(self.response_url, {'text': 'Error updating performance score for department: {}'.format(department)}))
         return HttpResponse()
 
     def parse_message(self):
