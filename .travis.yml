@@ -45,4 +45,7 @@ script:
   - python manage.py test
 
 notifications:
-  slack: prominentedge:9VnNQcaSr6mHKSC2XHwEjkam
+  slack:
+   rooms:
+     - prominentedge:9VnNQcaSr6mHKSC2XHwEjkam
+     - firecares:JWUqmlSAsq4CKoTWU7enwO4m
