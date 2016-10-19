@@ -1172,6 +1172,12 @@ class FireStationTests(TestCase):
         response = c.post(reverse('slack'), data)
         self.assertEqual(response.status_code, 200)
 
+        # sending an empty command should return help text
+        data['text'] = ''
+        response = c.post(reverse('slack'), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get('Content-Type'), 'application/json')
+
         # "text" holds the command which must be whitelisted in the view.
         data['text'] = 'test'
         response = c.post(reverse('slack'), data)
