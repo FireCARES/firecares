@@ -40,7 +40,7 @@ class FireCARESSlack(View):
 
     def clear_cache(self, request, *args, **kwargs):
         clear_cache_task.apply_async(link=send_slack_message.s(self.response_url, {'text': 'Cache successfully cleared!'}),
-                                     link_error=send_slack_message.s(self.response_url, {'text': 'Cache clearing cache.'}))
+                                     link_error=send_slack_message.s(self.response_url, {'text': 'Error clearing cache.'}))
         return HttpResponse()
 
     def account_requests(self, request, *args, **kwargs):
