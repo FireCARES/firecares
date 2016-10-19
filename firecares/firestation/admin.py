@@ -45,8 +45,8 @@ class FireDepartmentAdminForm(AutocompleteModelForm):
 class FireDepartmentAdmin(VersionAdmin, LocalOpenLayersAdmin):
     form = FireDepartmentAdminForm
     search_fields = ['name']
-    list_display = ['name', 'state', 'created', 'modified']
-    list_filter = ['state']
+    list_display = ['name', 'state', 'created', 'modified', 'archived']
+    list_filter = ['state', 'archived']
 
 
 class ResponseCapabilityAdmin(LocalOpenLayersAdmin):

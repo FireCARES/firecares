@@ -69,6 +69,11 @@
                     <span class="ct-productID ct-fw-300">
                         FDID: <span>{{ object.fdid }}</span>
                     </span>
+                    {% if object.archived %}
+                        <span class="ct-productID ct-fw-300" style="margin-left: 10px">
+                            <span>ARCHIVED</span>
+                        </span>
+                    {% endif %}
                 </div>
                 <div class="ct-u-displayTableCell text-right">
                     <a href="search-grid.html" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-star fa-2x"></i></a>

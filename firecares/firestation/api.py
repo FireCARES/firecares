@@ -60,7 +60,7 @@ class FireDepartmentResource(JSONDefaultModelResource):
 
     class Meta:
         resource_name = 'fire-departments'
-        queryset = FireDepartment.objects.all()
+        queryset = FireDepartment.objects.filter(archived=False)
         authorization = DjangoAuthorization()
         authentication = MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
         cache = SimpleCache()

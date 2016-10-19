@@ -399,11 +399,20 @@ class FireStationTests(TestCase):
                                            population_class=9,
                                            department_type='test')
 
+        fd_archived = FireDepartment.objects.create(name='Test db',
+                                           population=0,
+                                           population_class=9,
+                                           department_type='test',
+                                           archived=True)
+
         # update materialized view manually after adding new record
         cursor = connections['default'].cursor()
         cursor.execute("REFRESH MATERIALIZED VIEW population_class_9_quartiles;")
 
         self.assertTrue(PopulationClass9Quartile.objects.get(id=fd.id))
+
+        # Ensure archived departments are not included in quartile results.
+        self.assertNotIn(fd_archived.id, PopulationClass9Quartile.objects.all().values_list('id', flat=True))
 
         # make sure the population class logic works
         self.assertTrue(fd.population_class_stats)
@@ -412,7 +421,10 @@ class FireStationTests(TestCase):
         c = Client()
         c.login(**{'username': 'admin', 'password': 'admin'})
         response = c.get(fd.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
 
+        # make sure the department page does not return an error for archived departments
+        response = c.get(fd_archived.get_absolute_url())
         self.assertEqual(response.status_code, 200)
 
     def test_quartile_text(self):

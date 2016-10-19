@@ -21,7 +21,7 @@ def fire_department_search(request):
     if context:
         return context
 
-    score_metrics = FireDepartment.objects.all().aggregate(
+    score_metrics = FireDepartment.objects.filter(archived=False).aggregate(
         Max('dist_model_score'),
         Min('dist_model_score'),
         Max('population'),

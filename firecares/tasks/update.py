@@ -13,7 +13,7 @@ from firecares.utils import dictfetchall
 
 
 def update_scores():
-    for fd in FireDepartment.objects.all():
+    for fd in FireDepartment.objects.filter(archived=False):
         update_performance_score.delay(fd.id)
 
 

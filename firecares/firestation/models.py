@@ -360,7 +360,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
         Returns summary statistics for calculation fields in the same population class.
         """
 
-        if not self.population_class:
+        if not self.population_class or self.archived:
             return []
 
         cache_key = 'population_class_{0}_stats'.format(self.population_class)
@@ -402,6 +402,9 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
         """
         Returns the appropriate population metrics table for this object.
         """
+        if self.archived:
+            return
+
         try:
             return get_model('firestation.PopulationClass{0}Quartile'.format(self.population_class))
         except LookupError:
@@ -511,7 +514,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
         Identifies similar departments based on the protected population size and region.
         """
 
-        params = {}
+        params = {'archived': self.archived}
 
         if self.population >= 1000000:
             params['population__gte'] = 1000000
@@ -1257,8 +1260,7 @@ def create_quartile_views(sender, **kwargs):
                     WHERE year >= 2010 and metric='residential_structure_fires'
                     GROUP BY fire_department_id) nfirs
                 on ("firestation_firedepartment".id=nfirs.fire_department_id)
-
-                WHERE population_class={0}
+                WHERE population_class={0} and archived=False
             """.format(population_class)
         cursor = connections['default'].cursor()
 

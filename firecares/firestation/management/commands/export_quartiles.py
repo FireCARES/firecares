@@ -24,14 +24,14 @@ class Command(BaseCommand):
                             }
 
         for clazz in range(0, 10):
-            djqscsv.write_csv(FireDepartment.objects.filter(population_class=clazz).as_quartiles().values(*values), open('/tmp/population_class_{0}.csv'.format(clazz), 'wb'), use_verbose_names=False, field_header_map=field_map_header)
+            djqscsv.write_csv(FireDepartment.objects.filter(archived=False, population_class=clazz).as_quartiles().values(*values), open('/tmp/population_class_{0}.csv'.format(clazz), 'wb'), use_verbose_names=False, field_header_map=field_map_header)
 
         # by region
         for region in ['West', 'South', 'Midwest', 'Northeast']:
-            djqscsv.write_csv(FireDepartment.objects.filter(population_class__lte=8, region=region).as_quartiles().values(*values), open('/tmp/non_metropolitan_{0}.csv'.format(region), 'wb'), use_verbose_names=False, field_header_map=field_map_header)
+            djqscsv.write_csv(FireDepartment.objects.filter(archived=False, population_class__lte=8, region=region).as_quartiles().values(*values), open('/tmp/non_metropolitan_{0}.csv'.format(region), 'wb'), use_verbose_names=False, field_header_map=field_map_header)
 
         for region in ['West', 'South', 'Midwest', 'Northeast']:
             for clazz in range(0, 9):
-                djqscsv.write_csv(FireDepartment.objects.filter(population_class=clazz, region=region).as_quartiles().values(*values), open('/tmp/{0}_population_class_{1}.csv'.format(region, clazz), 'wb'), use_verbose_names=False, field_header_map=field_map_header)
+                djqscsv.write_csv(FireDepartment.objects.filter(archived=False, population_class=clazz, region=region).as_quartiles().values(*values), open('/tmp/{0}_population_class_{1}.csv'.format(region, clazz), 'wb'), use_verbose_names=False, field_header_map=field_map_header)
 
-        djqscsv.write_csv(FireDepartment.objects.filter(population_class__in=[7, 8], region='Northeast').as_quartiles().values(*values), open('/tmp/{0}_population_class_7_8.csv'.format('Northeast', clazz), 'wb'), use_verbose_names=False, field_header_map=field_map_header)
+        djqscsv.write_csv(FireDepartment.objects.filter(archived=False, population_class__in=[7, 8], region='Northeast').as_quartiles().values(*values), open('/tmp/{0}_population_class_7_8.csv'.format('Northeast', clazz), 'wb'), use_verbose_names=False, field_header_map=field_map_header)

@@ -145,7 +145,7 @@ class DepartmentDetailView(LoginRequiredMixin, CacheMixin, DetailView):
 
             # national_risk_band
             cursor = connections['default'].cursor()
-            query = FireDepartment.objects.filter(dist_model_score__isnull=False).as_quartiles().values('id',
+            query = FireDepartment.objects.filter(dist_model_score__isnull=False, archived=False).as_quartiles().values('id',
                                                                                                         'risk_model_size1_percent_size2_percent_sum_quartile',
                                                                                                         'risk_model_deaths_injuries_sum_quartile').query.__str__()
 
@@ -399,7 +399,7 @@ class FireDepartmentListView(LoginRequiredMixin, ListView, SafeSortMixin, LimitM
                              FeaturedDepartmentsMixin):
     model = FireDepartment
     paginate_by = 30
-    queryset = FireDepartment.objects.all()
+    queryset = FireDepartment.objects.filter(archived=False)
     sort_by_fields = [
         ('name', 'Name Ascending'),
         ('-name', 'Name Descending'),

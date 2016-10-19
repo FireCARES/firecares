@@ -74,6 +74,6 @@ def test_all_departments_urls():
     Asynchronously resolve departments urls and record failures in a CSV file.
     """
     callback = test_all_departments_urls_callback.s()
-    header = [test_department_url.si(fd.id) for fd in FireDepartment.objects.filter(website__isnull=False)
+    header = [test_department_url.si(fd.id) for fd in FireDepartment.objects.filter(archived=False, website__isnull=False)
                                                           .exclude(website__exact='')]
     return chord(header)(callback)
