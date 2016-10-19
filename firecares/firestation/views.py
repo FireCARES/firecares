@@ -30,6 +30,7 @@ from firecares.usgs.models import (StateorTerritoryHigh, CountyorEquivalent,
     UnincorporatedPlace, MinorCivilDivision)
 from tempfile import mkdtemp
 from firecares.tasks.cleanup import remove_file
+from firecares.tasks.update import create_quartile_views_task
 from .forms import DocumentUploadForm
 from django.views.generic.edit import FormView
 from .models import Document, create_quartile_views
@@ -245,7 +246,7 @@ class DepartmentUpdateGovernmentUnits(LoginRequiredMixin, DetailView):
             self.object.set_population_from_government_unit()
 
         messages.add_message(request, messages.SUCCESS, 'Government unit associations updated')
-
+        create_quartile_views_task.delay()
         return redirect(self.object)
 
 
