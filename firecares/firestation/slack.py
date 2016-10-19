@@ -31,11 +31,11 @@ class FireCARESSlack(View):
         """
 
         msg = """
-        *q*: Searches firecares for a department. ```(Args: [<query>])```
+        *q*: Searches firecares for a department. (Args: [<query>])
         *clear_cache*: Nuclear option, clears the entire cache.
         *account_requests*: Returns the number of active account requests.
-        *update_nfirs_counts*: Updates the annual residential fire and casualty counts for a department. ```(Args: [<department_id>])```
-        *update_performance_scores*: Updates the performance score for a department. ```(Args: [<department_id>])```
+        *update_nfirs_counts*: Updates the annual residential fire and casualty counts for a department. (Args: [<department_id>])
+        *update_performance_scores*: Updates the performance score for a department. (Args: [<department_id>])
         """
 
         return {'text': msg}
@@ -64,7 +64,7 @@ class FireCARESSlack(View):
 
     def q(self, request, *args, **kwargs):
         departments = FireDepartment.objects.all().full_text_search(' '.join(self.command_args))
-        msg = ['{index}. <http://firecares.org{url}|{name}>'.format(index=n+1, name=department.name, url=department.get_absolute_url()) for n, department in enumerate(departments)]
+        msg = ['{index}. <http://firecares.org{url}|{name}>, {state}'.format(index=n+1, name=department.name, url=department.get_absolute_url(), state=department.state) for n, department in enumerate(departments)]
         return JsonResponse({'text': '\n'.join(msg)})
 
     def parse_message(self):
