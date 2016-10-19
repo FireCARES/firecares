@@ -7,6 +7,7 @@ from django.views.generic import View
 from django.utils.decorators import method_decorator
 from firecares.tasks.cache import clear_cache as clear_cache_task
 from firecares.tasks.slack import send_slack_message
+from firecares.firecares_core.models import AccountRequest
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ class FireCARESSlack(View):
     Class that routes and executes Slack commands.
     """
     http_method_names = ['post']
-    commands = ['clear_cache']
+    commands = ['clear_cache', 'account_requests']
 
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
@@ -29,6 +30,7 @@ class FireCARESSlack(View):
         """
 
         msg = """clear_cache: Nuclear option, clears the entire cache.
+        account_requests: Returns the number of active account requests.
         """
 
         return {'text': msg}
@@ -37,6 +39,9 @@ class FireCARESSlack(View):
         clear_cache_task.apply_async(link=send_slack_message.s(self.response_url, {'text': 'Cache successfully cleared!'}),
                                      link_error=send_slack_message.s(self.response_url, {'text': 'Cache clearing cache.'}))
         return HttpResponse()
+
+    def account_requests(self, request, *args, **kwargs):
+        return JsonResponse({'text': 'There are currently {0} pending account requests.'.format(AccountRequest.objects.count())})
 
     def parse_message(self):
         """
