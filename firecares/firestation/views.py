@@ -501,8 +501,6 @@ class SimilarDepartmentsListView(FireDepartmentListView):
     Implements the Similar Department list view.
     """
 
-    cache_timeout = 60 * 60 * 24
-
     def get_queryset(self):
         department = get_object_or_404(FireDepartment, pk=self.kwargs.get('pk'))
         queryset = department.similar_departments
