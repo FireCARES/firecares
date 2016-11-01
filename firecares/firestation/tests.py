@@ -9,7 +9,6 @@ from django.test import TestCase, override_settings
 from django.test.client import Client
 from django.conf import settings
 from django.core import mail
-from django.core.cache import caches
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.core.urlresolvers import reverse, resolve
@@ -17,8 +16,7 @@ from django.contrib.gis.geos import Point, Polygon, MultiPolygon
 from django.contrib.auth import get_user_model
 from firecares.usgs.models import UnincorporatedPlace, MinorCivilDivision
 from firecares.firecares_core.models import Address, Country
-from firecares.firecares_core.mixins import hash_for_cache
-from firecares.firestation.models import create_quartile_views, Document
+from firecares.firestation.models import Document
 from firecares.firestation.templatetags.firecares import quartile_text, risk_level
 from firecares.firestation.managers import CalculationsQuerySet
 from urlparse import urlsplit, urlunsplit
@@ -74,7 +72,7 @@ class FireStationTests(TestCase):
         c = Client()
         c.login(**{'username': 'admin', 'password': 'admin'})
 
-        response = c.get(reverse('firedepartment_list')+'?favorites=true')
+        response = c.get(reverse('firedepartment_list') + '?favorites=true')
         self.assertTrue(fd1 in response.context['object_list'])
         self.assertTrue(fd2 in response.context['object_list'])
         self.assertTrue(fd3 not in response.context['object_list'])
@@ -290,7 +288,7 @@ class FireStationTests(TestCase):
         """
 
         url = '{0}{1}/'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'firestations']),
-                                       self.fire_station.id)
+                               self.fire_station.id)
         c = Client()
         c.login(**{'username': 'admin', 'password': 'admin'})
 
@@ -300,7 +298,7 @@ class FireStationTests(TestCase):
 
     def test_update_station_from_api(self):
         url = '{0}{1}/'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'firestations']),
-                                       self.fire_station.id)
+                               self.fire_station.id)
 
         count = FireStation.objects.all().count()
         c = Client()
@@ -333,7 +331,7 @@ class FireStationTests(TestCase):
 
     def test_read_firestation(self):
         url = '{0}{1}/'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'firestations']),
-                                       self.fire_station.id)
+                               self.fire_station.id)
 
         c = Client()
         c.login(**{'username': 'non_admin', 'password': 'non_admin'})
@@ -448,10 +446,10 @@ class FireStationTests(TestCase):
                                            department_type='test')
 
         fd_archived = FireDepartment.objects.create(name='Test db',
-                                           population=0,
-                                           population_class=9,
-                                           department_type='test',
-                                           archived=True)
+                                                    population=0,
+                                                    population_class=9,
+                                                    department_type='test',
+                                                    archived=True)
 
         # update materialized view manually after adding new record
         cursor = connections['default'].cursor()
@@ -552,8 +550,7 @@ class FireStationTests(TestCase):
                                       department_type='test',
                                       state='VA')
 
-
-        dep = FireDepartment.objects.all().extra(select={'val':'select fts_document from firestation_firedepartment a where a.id=firestation_firedepartment.id'})
+        dep = FireDepartment.objects.all().extra(select={'val': 'select fts_document from firestation_firedepartment a where a.id=firestation_firedepartment.id'})
         self.assertEqual(dep[0].val, "'db':2 'test':1 'va':3")
 
     def test_full_text_search_update_trigger(self):
@@ -622,7 +619,7 @@ class FireStationTests(TestCase):
         self.assertTrue(lafd in response.context['object_list'])
         self.assertFalse(rfd in response.context['object_list'])
 
-        response = c.get(reverse('firedepartment_list'), {'q': '', 'state':'CA'})
+        response = c.get(reverse('firedepartment_list'), {'q': '', 'state': 'CA'})
         self.assertTrue(lafd in response.context['object_list'])
 
     def test_generate_thumbnail_url(self):
@@ -634,7 +631,7 @@ class FireStationTests(TestCase):
 
         # with no geometry make sure the thumbnail is the place holder
         self.assertEqual(lafd.generate_thumbnail(), '/static/firestation/theme/assets/images/content/property-1.jpg')
-        lafd_poly = Polygon.from_bbox((-118.42170426600454, 34.09700463377199, -118.40170426600453,  34.117004633771984))
+        lafd_poly = Polygon.from_bbox((-118.42170426600454, 34.09700463377199, -118.40170426600453, 34.117004633771984))
 
         us = Country.objects.create(iso_code='US', name='United States')
         address = Address.objects.create(address_line1='Test', country=us, geom=Point(-118.42170426600454, 34.09700463377199))
@@ -739,64 +736,6 @@ class FireStationTests(TestCase):
         self.assertEqual(response.status_code, 200)
         response = c.post(reverse('firedepartment_update_government_units', args=[fd_null_geom.pk]), {'minor_civil_divisions': [div2.pk], 'update_geom': [1]})
         self.assertRedirects(response, reverse('firedepartment_detail_slug', args=[fd_null_geom.pk, fd_null_geom.slug]), fetch_redirect_response=False)
-
-    def test_firedepartment_detail_page_caching(self):
-        # Requires having something *other* than the DummyCache in order test caching
-        call_command('loaddata', 'firecares/firestation/fixtures/test_government_unit_association.json')
-        # need to create the quartile views in order for the dept detail page to be retrieved
-        create_quartile_views(None)
-
-        c = Client()
-        fd = FireDepartment.objects.get(pk=86610)
-
-        # Login and make sure that we get a 200 back from the govt unit association update page
-        c.login(**{'username': 'admin', 'password': 'admin'})
-        response = c.get(reverse('firedepartment_update_government_units', args=[fd.pk]))
-        self.assertEqual(response.status_code, 200)
-
-        cache = caches['default']
-        # remove cached items from other test runs
-        cache.clear()
-        response = c.get(reverse('firedepartment_detail', args=[fd.pk]))
-        prefix = hash_for_cache('firestation.change_firedepartment:True', '/departments/86610')
-        keys = cache._cache.keys()
-        self.assertTrue(any([prefix in x for x in keys]))
-
-        # prime the cache with a slugged page path that is very long
-        response = c.get(reverse('firedepartment_detail_slug', args=[fd.pk, fd.slug]))
-        c.logout()
-
-        # tester_mcgee doesn't have firestation.change_firedepartment permissions, so *should* have an empty PERMS qualifier
-        c.login(**{'username': 'tester_mcgee', 'password': 'test'})
-        response = c.get(reverse('firedepartment_detail', args=[fd.pk]))
-        keys = cache._cache.keys()
-        prefix = hash_for_cache(':True', '/departments/86610')
-        self.assertTrue(any([prefix in x for x in keys]))
-
-        # ensure that NONE of the keys blow out the max memcached key length
-        self.assertFalse(any([len(k) > 250 for k in keys]))
-
-    def test_homepage_auth_caching(self):
-        cache = caches['default']
-        cache.clear()
-
-        c = Client()
-
-        # Hit w/o being logged in
-        resp = c.get(reverse('firestation_home'))
-        prefix = hash_for_cache(':False', '/')
-        keys = cache._cache.keys()
-        self.assertTrue(any([prefix in x for x in keys]))
-
-        # After logging in, we should have a different cache key for this page since we've authed
-        c.login(**{'username': 'admin', 'password': 'admin'})
-        resp2 = c.get(reverse('firestation_home'))
-        prefix = hash_for_cache(':True', '/')
-        keys = cache._cache.keys()
-        self.assertTrue(any([prefix in x for x in keys]))
-
-        # If the body of the response is the same, then we have issues
-        self.assertNotEqual(resp.content, resp2.content)
 
     def test_robots(self):
         """
@@ -1242,8 +1181,3 @@ class FireStationTests(TestCase):
         data['text'] = 'test'
         response = c.post(reverse('slack'), data)
         self.assertEqual(response.status_code, 403)
-
-
-
-
-
