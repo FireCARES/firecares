@@ -1,6 +1,7 @@
 {% load humanize %}
 {% load firecares %}
 {% load cache %}
+{% load favit_tags %}
 
 {% cache 600 fire-department-card department.id %}
 <div class="ct-itemProducts ct-u-marginBottom30 ct-hover fire-department-card">
@@ -42,6 +43,9 @@
                 <span tooltip="State" tooltip-append-to-body="true" tooltip-popup-delay="700">
                     <i class="fa fa-map-pin"></i> {{ department.state }}
                 </span>
+                <div class="fire-department-card-favorite-button">
+                    {% favorite_button department 'favit/buttonWhite.html' %}
+                </div>
             </div>
             <div class="ct-text"></div>
         </div>

@@ -3,27 +3,27 @@
 <div class="ct-pagination text-center">
     <ul class="pagination">
     {% if first_page %}
-            <li><a href="?{% url_replace request 'page' first_page %}" aria-label="First"><i class="fa fa-angle-double-left"></i></span></a></li>
+            <li><a href="?{% url_replace request 'page' first_page %}{{ url_postfix }}" aria-label="First"><i class="fa fa-angle-double-left"></i></span></a></li>
     {% endif %}
 
     {% if page_obj.has_previous %}
-            <li><a href="?{% url_replace request 'page' page_obj.previous_page_number %}" aria-label="Previous"><span aria-hidden="true"><i class="fa fa-angle-left"></i></span></a></li>
+            <li><a href="?{% url_replace request 'page' page_obj.previous_page_number %}{{ url_postfix }}" aria-label="Previous"><span aria-hidden="true"><i class="fa fa-angle-left"></i></span></a></li>
     {% endif %}
 
         {% for p in windowed_range %}
             {% if p != page_obj.number %}
-                 <li><a href="?{% url_replace request 'page' p %}">{{ p }}</a></li>
+                 <li><a href="?{% url_replace request 'page' p %}{{ url_postfix }}">{{ p }}</a></li>
             {% else %}
-                 <li class="active"><a href="?{% url_replace request 'page' p %}">{{ p }}</a></li>
+                 <li class="active"><a href="?{% url_replace request 'page' p %}{{ url_postfix }}">{{ p }}</a></li>
             {% endif %}
         {% endfor %}
 
     {% if page_obj.has_next %}
-            <li><a href="?{% url_replace request 'page' page_obj.next_page_number %}" aria-label="Next"><span aria-hidden="true"><i class="fa fa-angle-right"></i></span></a></li>
+            <li><a href="?{% url_replace request 'page' page_obj.next_page_number %}{{ url_postfix }}" aria-label="Next"><span aria-hidden="true"><i class="fa fa-angle-right"></i></span></a></li>
     {% endif %}
 
     {% if last_page %}
-            <li><a href="?{% url_replace request 'page' last_page %}" aria-label="Last"><i class="fa fa-angle-double-right"></i></span></a></li>
+            <li><a href="?{% url_replace request 'page' last_page %}{{ url_postfix }}" aria-label="Last"><i class="fa fa-angle-double-right"></i></span></a></li>
     {% endif %}
     </ul>
 </div>

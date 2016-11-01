@@ -166,7 +166,8 @@ INSTALLED_APPS = (
     'django_slack',
     'osgeo_importer',
     'djcelery',
-    'reversion'
+    'reversion',
+    'favit',
 )
 
 OSGEO_IMPORTER = 'firecares.importers.GeoDjangoImport'

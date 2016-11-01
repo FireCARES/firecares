@@ -1,0 +1,56 @@
+{% extends "firestation/firedepartment_list.html" %}
+
+{% load favit_tags %}
+
+{% block sitemap %}
+    <a href="{% url 'firestation_favorite_list' %}">Favorite Stations</a>
+{% endblock sitemap %}
+
+{% block featured_departments %}
+{% endblock featured_departments %}
+
+{% block sorting_bar %}
+
+    <div class="ct-sortingBar ct-u-paddingRight10 ct-u-paddingLeft10 ct-u-marginBottom30">
+    <div class="ct-sortingTitle">
+        <h4 class="text-uppercase">Favorite Stations<span> ({{ firestations_total_count }})</span></h4>
+    </div>
+    <div class="ct-sortingOptions" ng-cloak>
+        <ul class="list-inline list-unstyled ct-u-paddingBoth15 pull-right">
+            <li>
+                <form>
+                    {% verbatim %}
+                    <ui-select theme="select2" name="sortBy"  id="sort-select" ng-model="params.sortBy" ng-change="searchFavoriteStations()">
+                        <ui-select-match placeholder="Sort">Sort: {{ $select.selected.name  }}</ui-select-match>
+                        <ui-select-choices repeat="sort.field as sort in sortFields | orderBy: 'name' | filter: $select.search">
+                            <span ng-bind-html="sort.name | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
+                    {% endverbatim %}
+                </form>
+            </li>
+            <li>
+                <form>
+                    {% verbatim %}
+                    <ui-select theme="select2" name="limitBy" id="limit-select" ng-model="params.limit"
+                               ng-change="searchFavoriteStations()">
+                        <ui-select-match placeholder="Page size">Page size</ui-select-match>
+                        <ui-select-choices repeat="limit in limits">
+                            <span ng-bind-html="limit + ' stations per page'"></span>
+                        </ui-select-choices>
+                    </ui-select>
+                    {% endverbatim %}
+                </form>
+            </li>
+        </ul>
+    </div>
+    <div class="clearfix"></div>
+</div>
+
+{% endblock sorting_bar %}
+
+{% block object_list_view %}
+
+    {% include "firestation/_fire_station_table.html" %}
+
+{% endblock object_list_view %}

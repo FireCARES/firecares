@@ -60,6 +60,8 @@ urlpatterns = patterns('',
     url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain'), name='robots.txt'),
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 
+    url(r'^favit/', include('favit.urls')),
+
     # importer routes
     url(r'^uploads/new$', permission_required('change_firestation')(FileAddView.as_view()), name='uploads-new'),
     url(r'^uploads/new/json$', permission_required('change_firestation')(FileAddView.as_view(json=True)), name='uploads-new-json'),

@@ -4045,7 +4045,7 @@ html[dir="rtl"] .select2-container-multi .select2-search-choice-close {
 /*!
  * Yamm!3 - Yet another megamenu for Bootstrap 3
  * http://geedmo.github.com/yamm3
- * 
+ *
  * @geedmo - Licensed under the MIT license
  */
 .yamm .nav,
@@ -6731,7 +6731,7 @@ button {
   box-shadow: 0 3px 5px 0 rgba(4, 4, 4, 0.1);
   top: -6px;
 }
-/* 
+/*
  * 	Core Owl Carousel CSS File
  *	v1.3.3
  */
@@ -10024,7 +10024,7 @@ img.mfp-img {
 }
 /*
  Use the following CSS code if you want to have a class per icon.
- Instead of a list of all class selectors, you can use the generic [class*="icon-"] selector, but it's slower: 
+ Instead of a list of all class selectors, you can use the generic [class*="icon-"] selector, but it's slower:
 */
 .icon-user,
 .icon-people,
@@ -15548,4 +15548,9 @@ header {
   .pull-right-lg {
     float: right;
   }
+}
+.fire-department-card-favorite-button {
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
 }
