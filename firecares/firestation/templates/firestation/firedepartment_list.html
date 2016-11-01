@@ -145,7 +145,7 @@
             <li>
                 <form>
                     {% verbatim %}
-                    <ui-select theme="select2" name="sortBy"  id="sort-select" ng-model="params.sortBy" ng-change="search()">
+                    <ui-select theme="select2" name="sortBy" id="sort-select" ng-model="params.sortBy" ng-change="search()">
                         <ui-select-match placeholder="Sort results">Sort: {{ $select.selected.name  }}</ui-select-match>
                         <ui-select-choices repeat="sort.field as sort in sortFields | orderBy: 'name' | filter: $select.search">
                             <span ng-bind-html="sort.name | highlight: $select.search"></span>

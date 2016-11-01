@@ -1,9 +1,7 @@
 {% load humanize %}
 {% load firecares %}
-{% load cache %}
 {% load favit_tags %}
 
-{% cache 600 fire-department-card department.id %}
 <div class="ct-itemProducts ct-u-marginBottom30 ct-hover fire-department-card">
 
     {% if object.recently_updated %}
@@ -51,4 +49,3 @@
         </div>
     </a>
 </div>
-{% endcache %}

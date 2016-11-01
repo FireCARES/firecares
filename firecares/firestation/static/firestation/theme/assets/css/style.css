@@ -4045,7 +4045,7 @@ html[dir="rtl"] .select2-container-multi .select2-search-choice-close {
 /*!
  * Yamm!3 - Yet another megamenu for Bootstrap 3
  * http://geedmo.github.com/yamm3
- *
+ * 
  * @geedmo - Licensed under the MIT license
  */
 .yamm .nav,
@@ -6731,7 +6731,7 @@ button {
   box-shadow: 0 3px 5px 0 rgba(4, 4, 4, 0.1);
   top: -6px;
 }
-/*
+/* 
  * 	Core Owl Carousel CSS File
  *	v1.3.3
  */
@@ -10024,7 +10024,7 @@ img.mfp-img {
 }
 /*
  Use the following CSS code if you want to have a class per icon.
- Instead of a list of all class selectors, you can use the generic [class*="icon-"] selector, but it's slower:
+ Instead of a list of all class selectors, you can use the generic [class*="icon-"] selector, but it's slower: 
 */
 .icon-user,
 .icon-people,
@@ -11679,11 +11679,11 @@ table.residential-fires {
   top: -83px;
 }
 .learn-more-link a {
-  color: #f29a00;
+  color: #F29A00;
   border-bottom: 1px dotted white;
 }
 .learn-more-link a:hover {
-  color: #f29a00;
+  color: #F29A00;
   border-bottom: 1px dotted;
 }
 .ct-pageWrapper {
@@ -14003,7 +14003,7 @@ header {
   float: right;
   position: absolute;
   top: 0;
-  right: 0;
+  right: 10px;
   background-color: transparent;
 }
 .ct-showProducts--list .ct-itemProducts .ct-product--meta .ct-text {
@@ -15551,6 +15551,11 @@ header {
 }
 .fire-department-card-favorite-button {
   position: absolute;
-  bottom: -10px;
-  right: -10px;
+  right: 8px;
+  bottom: 5px;
+}
+.fire-department-card-favorite-button-list {
+  position: absolute;
+  right: 0;
+  bottom: 27px;
 }
