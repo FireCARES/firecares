@@ -1,7 +1,7 @@
 {% extends "firestation/firedepartment_list.html" %}
 
 {% load favit_tags %}
-
+{% load firecares humanize %}
 {% block sitemap %}
     <a href="{% url 'firestation_favorite_list' %}">Favorite Stations</a>
 {% endblock sitemap %}
@@ -13,7 +13,7 @@
 
     <div class="ct-sortingBar ct-u-paddingRight10 ct-u-paddingLeft10 ct-u-marginBottom30">
     <div class="ct-sortingTitle">
-        <h4 class="text-uppercase">Favorite Stations<span> ({{ firestations_total_count }})</span></h4>
+        <h4 class="text-uppercase">Favorite Stations<span> ({{ firestations_total_count|intcomma }})</span></h4>
     </div>
     <div class="ct-sortingOptions" ng-cloak>
         <ul class="list-inline list-unstyled ct-u-paddingBoth15 pull-right">
