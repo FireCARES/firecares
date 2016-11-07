@@ -252,7 +252,6 @@
 
             }
           }
-
         });
         layersControl.addOverlay(parcels, 'Parcels');
 
@@ -271,11 +270,12 @@
             // No perceived error event, so resort to timeout
             var to = $timeout(function() {
               $scope.messages = [];
-              $scope.messages.push({class: 'alert-danger', text: 'Shapefile appears to be invalid, please check your target file and re-upload.'})
+              $scope.messages.push({class: 'alert-danger', text: 'Shapefile appears to be invalid or unparseable, please ensure your target file is a .zip file with the mandatory .shp, .dbf and .shx files and re-upload.  If there is a .shp.xml file in the zipped bundle, removing that file from the bundle could help.'})
             }, 2000);
             var shp = new L.Shapefile(content).on('data:loaded', function(e) {
               $scope.$apply(function() {
                 $timeout.cancel(to);
+                $scope.messages = [];
                 $scope.shp = e.target;
                 $scope.shp.addTo(departmentMap);
                 departmentMap.fitBounds($scope.shp);
@@ -301,13 +301,13 @@
             if (countyBoundary) {
               departmentMap.removeLayer(countyBoundary);
               layersControl.removeLayer(countyBoundary);
-              countyBoundary = $scope.shp;
-              countyBoundary.setStyle({color: '#0074D9', fillOpacity: .05, opacity: .8, weight: 2});
-              layersControl.addOverlay(countyBoundary, 'Jurisdiction Boundary');
-              $scope.shp = null;
-              $scope.messages = [];
-              $scope.messages.push({class: 'alert-success', text: 'Department jurisdiction boundary updated.'});
             }
+            countyBoundary = $scope.shp;
+            countyBoundary.setStyle({color: '#0074D9', fillOpacity: .05, opacity: .8, weight: 2});
+            layersControl.addOverlay(countyBoundary, 'Jurisdiction Boundary');
+            $scope.shp = null;
+            $scope.messages = [];
+            $scope.messages.push({class: 'alert-success', text: 'Department jurisdiction boundary updated.'});
           }, function() {
             $scope.messages.push({class: 'alert-danger', text: 'Server issue updating jurisdiction boundary.'});
           });
