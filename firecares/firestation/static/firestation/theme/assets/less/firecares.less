@@ -761,7 +761,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#495E82', end
 
 .usgs-update-link {
   display: inline-block;
-  margin-right: 2em;
+  margin-left: 2em;
 
   &.active {
     color: @brand-primary;
@@ -771,10 +771,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#495E82', end
     i {
       color: @brand-primary;
     }
-  }
-
-  &.no-right-margin {
-    margin-right: 0;
   }
 }
 
@@ -796,6 +792,10 @@ form[name='boundaryUpload'] {
       }
     }
   }
+}
+
+.in-front {
+  z-index: 9999;
 }
 
 .usgs {

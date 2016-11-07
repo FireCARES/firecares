@@ -11505,16 +11505,13 @@ table.residential-fires {
 }
 .usgs-update-link {
   display: inline-block;
-  margin-right: 2em;
+  margin-left: 2em;
 }
 .usgs-update-link.active {
   color: #F29A00;
 }
 .usgs-update-link:hover i {
   color: #F29A00;
-}
-.usgs-update-link.no-right-margin {
-  margin-right: 0;
 }
 form[name='boundaryUpload'] a {
   border: 1px solid #F29A00;
@@ -11530,6 +11527,9 @@ form[name='boundaryUpload'] a.commit {
 }
 form[name='boundaryUpload'] a.commit:hover {
   color: white;
+}
+.in-front {
+  z-index: 9999;
 }
 .usgs .metric-card {
   background-color: #F7F7F7;
