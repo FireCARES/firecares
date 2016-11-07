@@ -13,7 +13,16 @@
     })
 
     .factory('FireDepartment', function ($resource) {
-        return $resource('/api/v1/fire-departments/:id/', {}, {'query': {'method': 'GET', isArray: false}});
+        return $resource('/api/v1/fire-departments/:id/', {id: '@id'},
+          {
+            'query': {
+              'method': 'GET',
+              isArray: false
+            },
+            'update': {
+              'method': 'PUT'
+            }
+          });
     })
 
     .factory('USGSUnit', function ($resource) {

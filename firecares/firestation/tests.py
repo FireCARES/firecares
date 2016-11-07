@@ -1146,6 +1146,66 @@ class FireStationTests(TestCase):
         self.assertEqual(log.parent, fd2)
         self.assertEqual(log.removed_department, fd)
 
+    def test_update_firedeparment_boundaries(self):
+        us = Country.objects.create(iso_code='US', name='United States')
+        address = Address.objects.create(address_line1='Test', country=us, geom=Point(-118.42170426600454, 34.09700463377199))
+        geom = MultiPolygon([Polygon([(-118.62170426600454, 33.897004633771985),
+                                      (-118.22170426600454, 33.897004633771985),
+                                      (-118.22170426600454, 34.29700463377199),
+                                      (-118.62170426600454, 34.29700463377199),
+                                      (-118.62170426600454, 33.897004633771985)])])
+        fd, _ = FireDepartment.objects.get_or_create(id=0,
+                                                     name='Test geom update',
+                                                     population=90000,
+                                                     population_class=1,
+                                                     department_type='test',
+                                                     headquarters_address=address,
+                                                     geom=geom)
+        new_geom = """
+{
+  "geom": {
+    "coordinates": [
+      [
+        [
+          [
+            0, 0
+          ],
+          [
+            1, 1
+          ],
+          [
+            2, 0
+          ],
+          [
+            1, -1
+          ],
+          [
+            0, 0
+          ]
+        ]
+      ]
+    ],
+    "type": "MultiPolygon"
+  }
+}
+"""
+        c = Client()
+        c.login(username=self.non_admin_user, password=self.non_admin_password)
+        url = '{root}{fd}/'.format(root=reverse('api_dispatch_list', args=[self.current_api_version, 'fire-departments']),
+                                   fd=fd.id)
+        # Ensure that a non-admin user can't update the department geom
+        response = c.put(url, data=new_geom, content_type='application/json')
+        self.assertEqual(response.status_code, 401)
+        c.logout()
+
+        c.login(**{'username': 'admin', 'password': 'admin'})
+        response = c.put(url, data=new_geom, content_type='application/json')
+        self.assertEqual(response.status_code, 204)
+        response = c.get(url)
+        # Verify new geometry
+        self.assertDictEqual(json.loads(response.content).get('geom'), json.loads(new_geom).get('geom'))
+
+
     @override_settings(SLACK_FIRECARES_COMMAND_TOKEN='test')
     def test_clear_cache(self):
         c = Client()

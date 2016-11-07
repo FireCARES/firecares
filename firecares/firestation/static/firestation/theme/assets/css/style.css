@@ -11496,15 +11496,40 @@ table.residential-fires {
   width: auto;
 }
 .usgs-messages ul {
-  margin-top: 1em;
   margin-bottom: 0;
   padding-left: 0;
 }
 .usgs-messages .alert {
   margin-bottom: 0;
+  margin-top: 1em;
 }
 .usgs-update-link {
+  display: inline-block;
   margin-right: 2em;
+}
+.usgs-update-link.active {
+  color: #F29A00;
+}
+.usgs-update-link:hover i {
+  color: #F29A00;
+}
+.usgs-update-link.no-right-margin {
+  margin-right: 0;
+}
+form[name='boundaryUpload'] a {
+  border: 1px solid #F29A00;
+  width: 40%;
+  display: block;
+  float: left;
+  text-align: center;
+  margin: 1em 5%;
+}
+form[name='boundaryUpload'] a.commit {
+  background-color: #F29A00;
+  color: #eeeeee;
+}
+form[name='boundaryUpload'] a.commit:hover {
+  color: white;
 }
 .usgs .metric-card {
   background-color: #F7F7F7;
