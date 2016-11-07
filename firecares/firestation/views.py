@@ -24,7 +24,6 @@ from django.utils.decorators import method_decorator
 from django.utils.encoding import smart_str
 from firecares.firecares_core.mixins import LoginRequiredMixin
 from firecares.firestation.managers import Ntile, Case, When
-from firecares.firestation.models import FireStation, FireDepartment, Staffing
 from firecares.usgs.models import (StateorTerritoryHigh, CountyorEquivalent,
     Reserve, NativeAmericanArea, IncorporatedPlace,
     UnincorporatedPlace, MinorCivilDivision)
@@ -32,7 +31,7 @@ from tempfile import mkdtemp
 from firecares.tasks.cleanup import remove_file
 from .forms import DocumentUploadForm
 from django.views.generic.edit import FormView
-from .models import Document, create_quartile_views
+from .models import Document, FireStation, FireDepartment, Staffing, create_quartile_views
 from favit.models import Favorite
 
 
@@ -622,7 +621,10 @@ class DownloadShapefile(LoginRequiredMixin, View):
     output_dir = '/tmp'
 
     def get_queryset(self, *args, **kwargs):
-        return kwargs.get('department').firestation_set.all()
+        if kwargs.get('feature_type') == 'department_boundary':
+            return FireDepartment.objects.filter(id=kwargs.get('pk'))
+        else:
+            return kwargs.get('department').firestation_set.all()
 
     def create_shapefile(self, queryset, filename, geom):
         path = mkdtemp()
@@ -754,6 +756,55 @@ class DownloadShapefile(LoginRequiredMixin, View):
 
         return file_path, zip_file
 
+    def create_department_boundary_shapefile(self, queryset, filename, geom):
+        path = mkdtemp()
+        file_path = os.path.join(path, filename)
+        geom_type = ogr.wkbPoint
+
+        if queryset.model._meta.get_field_by_name(geom)[0].geom_type == 'MULTIPOLYGON':
+            geom_type = ogr.wkbMultiPolygon
+
+        driver = ogr.GetDriverByName("ESRI Shapefile")
+
+        # create the data source
+        data_source = driver.CreateDataSource(file_path)
+
+        # create the spatial reference, WGS84
+        srs = osr.SpatialReference()
+        srs.ImportFromEPSG(4326)
+
+        # create the layer
+        layer = data_source.CreateLayer(filename, srs, geom_type)
+        for row in queryset:
+            raw_geom = getattr(row, geom)
+            wkt = None
+
+            if raw_geom:
+              wkt = raw_geom.wkt
+            else:
+                continue
+
+            feature = ogr.Feature(layer.GetLayerDefn())
+            point = ogr.CreateGeometryFromWkt(wkt)
+
+            # Set the feature geometry using the point
+            feature.SetGeometry(point)
+            layer.CreateFeature(feature)
+            feature.Destroy()
+
+        data_source.Destroy()
+
+        if os.path.exists(os.path.join(self.output_dir, filename + '.zip')):
+            filename += '-' + str(uuid.uuid4())[:5]
+
+        zip_file = shutil.make_archive(self.output_dir + '/' + filename, 'zip', file_path)
+
+        if self.request.META.get('SERVER_NAME') != 'testserver':
+            remove_file.delay(path)
+            remove_file.delay(zip_file, countdown=600)
+
+        return file_path, zip_file
+
     def filename(self, *args, **kwargs):
         return '{0}-{1}-{2}'.format(kwargs.get('department').id,
                                     kwargs.get('department').slug,
@@ -763,15 +814,18 @@ class DownloadShapefile(LoginRequiredMixin, View):
         response = HttpResponse(content_type=self.content_type)
         geom = self.kwargs.get('geometry_field', 'geom')
 
-        geom_type = 'stations'
+        geom_type = self.kwargs.get('geom_type', 'stations')
 
         if geom == 'district':
             geom_type = 'districts'
 
         department = get_object_or_404(FireDepartment, id=kwargs['pk'])
-        queryset = self.get_queryset(department=department)
         filename = self.filename(department=department, geom_type=geom_type)
-        file_path, zip_file = self.create_shapefile(queryset, filename, geom)
+        queryset = self.get_queryset(department=department, **kwargs)
+        if kwargs.get('feature_type') == 'department_boundary':
+            file_path, zip_file = self.create_department_boundary_shapefile(queryset, filename, geom)
+        else:
+            file_path, zip_file = self.create_shapefile(queryset, filename, geom)
         response['Content-Disposition'] = 'attachment; filename="{0}.zip"'.format(smart_str(filename))
         response['X-Accel-Redirect'] = smart_str(zip_file)
         response.content = file_path

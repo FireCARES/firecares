@@ -45,15 +45,15 @@ class PrettyJSONSerializer(Serializer):
         options = options or {}
         data = self.to_simple(data, options)
         return json.dumps(data, cls=DjangoJSONEncoder,
-                sort_keys=True, ensure_ascii=False, indent=self.json_indent)
+                          sort_keys=True, ensure_ascii=False, indent=self.json_indent)
 
 
-class JSONDefaultModelResource(ModelResource):
+class JSONDefaultModelResourceMixin(object):
     def determine_format(self, request):
-        return 'application/json' if not request.GET.get('format') else super(JSONDefaultModelResource, self).determine_format(request)
+        return 'application/json' if not request.GET.get('format') else super(JSONDefaultModelResourceMixin, self).determine_format(request)
 
 
-class FireDepartmentResource(JSONDefaultModelResource):
+class FireDepartmentResource(ModelResource):
     """
     The Fire Department API.
     """
@@ -65,13 +65,13 @@ class FireDepartmentResource(JSONDefaultModelResource):
         authentication = MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
         cache = SimpleCache()
         list_allowed_methods = ['get']
-        detail_allowed_methods = ['get']
+        detail_allowed_methods = ['get', 'put']
         filtering = {'state': ALL, 'featured': ALL}
         serializer = PrettyJSONSerializer()
         limit = 120
 
 
-class FireStationResource(JSONDefaultModelResource):
+class FireStationResource(JSONDefaultModelResourceMixin, ModelResource):
     """
     The Fire Station API.
     """
@@ -95,7 +95,7 @@ class FireStationResource(JSONDefaultModelResource):
         limit = 120
 
 
-class StaffingResource(JSONDefaultModelResource):
+class StaffingResource(JSONDefaultModelResourceMixin, ModelResource):
     """
     The ResponseCapability API.
     """

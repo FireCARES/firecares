@@ -749,18 +749,53 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#495E82', end
 // Government unit linking
 .usgs-messages {
   ul {
-    margin-top: 1em;
     margin-bottom: 0;
     padding-left: 0;
   }
 
   .alert {
     margin-bottom: 0;
+    margin-top: 1em;
   }
 }
 
 .usgs-update-link {
+  display: inline-block;
   margin-right: 2em;
+
+  &.active {
+    color: @brand-primary;
+  }
+
+  &:hover {
+    i {
+      color: @brand-primary;
+    }
+  }
+
+  &.no-right-margin {
+    margin-right: 0;
+  }
+}
+
+form[name='boundaryUpload'] {
+  a {
+    border: 1px solid @brand-primary;
+    width: 40%;
+    display: block;
+    float: left;
+    text-align: center;
+    margin: 1em 5%;
+
+    &.commit {
+      background-color: @brand-primary;
+      color: @gray-lightest;
+
+      &:hover {
+        color: white;
+      }
+    }
+  }
 }
 
 .usgs {

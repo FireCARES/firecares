@@ -87,9 +87,8 @@
 </header>
 <section class="ct-u-paddingBottom60">
     <div class="container">
-        <div class="ct-productMeta--single ">
-            {% if messages %}
-            <div class="row usgs-messages">
+        <div class="ct-productMeta--single">
+            <div class="row usgs-messages" ng-cloak>
                 <div class="col-md-12 col-lg-12">
                     <ul>
                         {% for message in messages %}
@@ -98,14 +97,17 @@
                             {{ message }}
                         </div>
                         {% endfor %}
+                        <div class="alert" role="alert" ng-repeat="message in messages" ng-class="message.class">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <span ng-bind="message.text"/>
+                        </div>
                     </ul>
                 </div>
             </div>
-            {% endif %}
         </div>
         <div class="ct-productMeta--single ">
             <div class="row">
-                <div class="col-md-8 col-lg-9">
+                <div class="col-md-12">
                     <div class="ct-u-displayTableVertical">
                         <div class="ct-u-displayTableCell text-left">
                             <i class="fa fa-clock-o"></i><h6>Last Updated: {{ object.modified }}</h6>
@@ -117,14 +119,34 @@
                         <div class="ct-u-displayTableCell text-right">
                             {% if perms.firestation.change_firedeparment %}
                             <a href="{% url 'firedepartment_update_government_units' object.id %}" class="usgs-update-link"><i class="fa fa-edit"></i>Update government units</a>
+                            <a href="" class="usgs-update-link" ng-click="toggleBoundary()" ng-class="{active: shp !== null}">
+                                <i class="fa fa-cloud-upload"></i> Upload Boundary
+                            </a>
                             <a href="" class="pointer usgs-update-link" ng-controller="ImportController" ng-click="open(null, '{{ STATIC_URL }}osgeo_importer/partials/uploadWizard.html', '{{ STATIC_URL }}mapstory/img/mapstory-icon.png', '{{STATIC_URL}}')">
                                 <i class="fa fa-cloud-upload"></i> Update Data
                             </a>
                             <a href="{% url 'remove_intersecting_departments' object.id %}" class="usgs-update-link"><i class="fa fa-scissors"></i>Remove Intersections</a>
                             {% endif %}
-                            <a href="" ng-click="toggleFullScreenMap()"><i class="fa fa-arrows-alt"></i> View Fullscreen Map</a>
+                            <a href="" class="usgs-update-link" ng-click="toggleFullScreenMap()"><i class="fa fa-arrows-alt"></i> View Fullscreen Map</a>
+                            <div class="dropdown pull-right">
+                              <a href="" class="usgs-update-link dropdown-toggle no-right-margin" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                <i class="fa fa-download"></i>
+                              </a>
+                              <ul class="dropdown-menu download-menu" aria-labelledby="dropdownMenu1">
+                                <li><a href="{% url 'department_boundary_shapefile' object.id object.slug %}">Download District Boundary <span class="format">(shp)</span></a></li>
+                              </ul>
+                            </div>
                         </div>
                     </div>
+                    {% if perms.firestation.change_firedeparment %}
+                    <div ng-show="shp" class="ng-cloak col-md-9">
+                        <form name="boundaryUpload">
+                            <input class="hide" type="file" name="newBoundary" onchange="angular.element(this).scope().processBoundaryShapefile(this.files[0])"/>
+                            <a href="" class="commit" ng-click="commitBoundary()">Save updated boundary</a>
+                            <a href="" ng-click="cancelBoundary()">Cancel</a>
+                        </form>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

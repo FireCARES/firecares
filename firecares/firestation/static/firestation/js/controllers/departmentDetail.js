@@ -5,15 +5,18 @@
         .controller('jurisdictionController', JurisdictionController)
     ;
 
-    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', '$filter'];
+    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', '$filter', 'FireDepartment'];
 
-    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter) {
+    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter, FireDepartment) {
         var departmentMap = map.initMap('map', {scrollWheelZoom: false});
         var showStations = true;
         var stationIcon = L.FireCARESMarkers.firestationmarker();
         var headquartersIcon = L.FireCARESMarkers.headquartersmarker();
         var fitBoundsOptions = {};
+        var countyBoundary = null;
+        $scope.messages = [];
         $scope.stations = [];
+        $scope.uploadBoundary = false;
         var layersControl = L.control.layers().addTo(departmentMap);
         var fires = L.featureGroup().addTo(departmentMap);
 
@@ -53,7 +56,7 @@
         }
 
         if (config.geom != null) {
-            var countyBoundary = L.geoJson(config.geom, {
+            countyBoundary = L.geoJson(config.geom, {
                 style: function(feature) { return {color: '#0074D9', fillOpacity: .05, opacity: .8, weight: 2}; }
             }).addTo(departmentMap);
             layersControl.addOverlay(countyBoundary, 'Jurisdiction Boundary');
@@ -253,5 +256,67 @@
         });
         layersControl.addOverlay(parcels, 'Parcels');
 
+        $scope.shp = null;
+
+        $scope.toggleBoundary = function() {
+          if (!$scope.shp) {
+            angular.element("input[name='newBoundary']").click();
+          }
+        };
+
+        $scope.processBoundaryShapefile = function(file) {
+          var fr = new FileReader();
+          fr.onload = function(f) {
+            var content = f.currentTarget.result;
+            // No perceived error event, so resort to timeout
+            var to = $timeout(function() {
+              $scope.messages = [];
+              $scope.messages.push({class: 'alert-danger', text: 'Shapefile appears to be invalid, please check your target file and re-upload.'})
+            }, 2000);
+            var shp = new L.Shapefile(content).on('data:loaded', function(e) {
+              $scope.$apply(function() {
+                $timeout.cancel(to);
+                $scope.shp = e.target;
+                $scope.shp.addTo(departmentMap);
+                departmentMap.fitBounds($scope.shp);
+              });
+            });
+          };
+          fr.readAsArrayBuffer(file);
+        };
+
+        $scope.commitBoundary = function() {
+          var features = $scope.shp.getLayers()[0].toGeoJSON();
+          // Force multipolygon
+          if (features.geometry.type === "Polygon") {
+            features.geometry.coordinates = [features.geometry.coordinates];
+            features.geometry.type = "MultiPolygon";
+          }
+          var fd = new FireDepartment({
+            id: config.id,
+            geom: features.geometry
+          });
+          fd.$update().then(function() {
+            // Remove old jurisdiction boundary
+            if (countyBoundary) {
+              departmentMap.removeLayer(countyBoundary);
+              layersControl.removeLayer(countyBoundary);
+              countyBoundary = $scope.shp;
+              countyBoundary.setStyle({color: '#0074D9', fillOpacity: .05, opacity: .8, weight: 2});
+              layersControl.addOverlay(countyBoundary, 'Jurisdiction Boundary');
+              $scope.shp = null;
+              $scope.messages = [];
+              $scope.messages.push({class: 'alert-success', text: 'Department jurisdiction boundary updated.'});
+            }
+          }, function() {
+            $scope.messages.push({class: 'alert-danger', text: 'Server issue updating jurisdiction boundary.'});
+          });
+        };
+
+        $scope.cancelBoundary = function() {
+          departmentMap.removeLayer($scope.shp);
+          $scope.shp = null;
+          angular.element("form[name='boundaryUpload']").get(0).reset();
+        };
     }
 })();
