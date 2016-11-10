@@ -1266,11 +1266,10 @@ def create_quartile_views(sender, **kwargs):
 
         # CREATE OR REPLACE does not
         try:
-            cursor.execute("DROP MATERIALIZED VIEW IF EXISTS population_class_%s_quartiles;", [population_class])
+            cursor.execute("REFRESH MATERIALIZED VIEW population_class_%s_quartiles;", [population_class])
         except ProgrammingError:
-            cursor.execute("DROP VIEW IF EXISTS population_class_%s_quartiles;", [population_class])
+            cursor.execute("CREATE MATERIALIZED VIEW population_class_%s_quartiles AS ({0});".format(query), [population_class])
 
-        cursor.execute("CREATE MATERIALIZED VIEW population_class_%s_quartiles AS ({0});".format(query), [population_class])
 
 
 @deconstructible
