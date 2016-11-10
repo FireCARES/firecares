@@ -1,5 +1,10 @@
 {% load compress %}
 
+<style rel="stylesheet" type="text/css">
+    [ng\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){
+        display: none !important;
+    }
+</style>
 {% compress css %}
 <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}firestation/theme/assets/css/imports.css"/>
 <link rel="stylesheet" href="{{ STATIC_URL }}angular-xeditable/xeditable.min.css" />

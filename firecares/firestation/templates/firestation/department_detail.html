@@ -87,8 +87,8 @@
 </header>
 <section class="ct-u-paddingBottom60">
     <div class="container">
-        <div class="ct-productMeta--single">
-            <div class="row usgs-messages ng-cloak">
+        <div class="ct-productMeta--single ng-cloak">
+            <div class="row usgs-messages">
                 <div class="col-md-12 col-lg-12">
                     <ul>
                         {% for message in messages %}
@@ -162,12 +162,14 @@
                         </div>
                     </div>
                     {% if perms.firestation.change_firedepartment %}
-                    <div ng-show="shp" class="ng-cloak">
-                        <form name="boundaryUpload">
-                            <input class="hide" type="file" name="newBoundary" onchange="angular.element(this).scope().processBoundaryShapefile(this.files[0])"/>
-                            <a href="" class="commit" ng-click="commitBoundary()">Save updated boundary</a>
-                            <a href="" ng-click="cancelBoundary()">Cancel</a>
-                        </form>
+                    <div class="ng-cloak">
+                        <div ng-show="shp">
+                            <form name="boundaryUpload">
+                                <input class="hide" type="file" name="newBoundary" onchange="angular.element(this).scope().processBoundaryShapefile(this.files[0])"/>
+                                <a href="" class="commit" ng-click="commitBoundary()">Save updated boundary</a>
+                                <a href="" ng-click="cancelBoundary()">Cancel</a>
+                            </form>
+                        </div>
                     </div>
                     {% endif %}
                 </div>
