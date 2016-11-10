@@ -12,7 +12,6 @@ class FireStationAdminForm(AutocompleteModelForm):
         self.fields['station_address'].queryset = Address.objects.select_related().all()
 
 
-
 class FireStationAdmin(VersionAdmin, LocalOpenLayersAdmin):
     form = FireStationAdminForm
     list_display = ['state', 'name', 'created', 'modified']
