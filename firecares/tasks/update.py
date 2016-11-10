@@ -1,7 +1,6 @@
 from firecares.celery import app
 from django.db import connections
 from django.db.utils import ConnectionDoesNotExist
-from firecares.firestation.models import create_quartile_views
 from firecares.firestation.models import FireDepartment, create_quartile_views
 from firecares.firestation.models import NFIRSStatistic as nfirs
 from fire_risk.models import DIST, NotEnoughRecords
