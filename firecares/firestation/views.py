@@ -16,7 +16,6 @@ from django.conf import settings
 from django.http.response import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.db import connection
 from django.db import connections
-from django.db.models import Max, Min
 from django.db.models.fields import FieldDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import IntegerField
