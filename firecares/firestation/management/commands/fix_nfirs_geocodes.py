@@ -55,8 +55,7 @@ class Command(BaseCommand):
 
         for res in cursor.fetchall():
             if over_quota_exceptions >= 10:
-                self.stdout.write('Too many consecutive timeouts.')
-                break
+                raise GeocoderQuotaExceeded('Too many consecutive timeouts.')
 
             print 'Row: ', res
             state, fdid, num_mile, street_pre, streetname, streettype, streetsuf, city, state_id, zip5, zip4, state_abbreviation, geom, count = res
