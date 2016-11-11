@@ -7,7 +7,7 @@ from optparse import make_option
 
 def chunks(l, n):
     for i in xrange(0, len(l), n):
-        yield l[i:i+n]
+        yield l[i:i + n]
 
 
 class Command(BaseCommand):

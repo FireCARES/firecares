@@ -60,7 +60,6 @@ class Command(BaseCommand):
             print 'Row: ', res
             state, fdid, num_mile, street_pre, streetname, streettype, streetsuf, city, state_id, zip5, zip4, state_abbreviation, geom, count = res
 
-
             update = '''
             update incidentaddress
             set geom=ST_GeomFromText('POINT({results.longitude} {results.latitude})', 4326)
@@ -69,8 +68,8 @@ class Command(BaseCommand):
 
             where_clause = cursor.mogrify('''WHERE state=%s and fdid=%s and num_mile=%s and street_pre=%s and streetsuf=%s and city=%s
              and state_id=%s and zip4=%s and zip5=%s and streetname=%s''', (state, fdid, num_mile, street_pre,
-                                                                           streetsuf, city, state_id, zip4, zip5,
-                                                                           streetname))
+                                                                            streetsuf, city, state_id, zip4, zip5,
+                                                                            streetname))
 
             geom = GEOSGeometry(geom)
             if state_id == 'OO':
@@ -88,7 +87,7 @@ class Command(BaseCommand):
                     continue
 
                 results_point = Point(results.longitude, results.latitude)
-                distance_improvement = fd.geom.centroid.distance(geom)-fd.geom.centroid.distance(results_point)
+                distance_improvement = fd.geom.centroid.distance(geom) - fd.geom.centroid.distance(results_point)
 
                 if distance_improvement > 0:
                     print 'Moving geometry from: {geom.x}, {geom.y} to {results.longitude}, {results.latitude}.'.format(geom=geom, results=results)
@@ -116,4 +115,3 @@ class Command(BaseCommand):
             print '\n'
 
         cursor.execute('SET transform_null_equals TO OFF;')
-    

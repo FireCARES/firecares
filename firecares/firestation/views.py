@@ -24,8 +24,8 @@ from django.utils.encoding import smart_str
 from firecares.firecares_core.mixins import LoginRequiredMixin
 from firecares.firestation.managers import Ntile, Case, When
 from firecares.usgs.models import (StateorTerritoryHigh, CountyorEquivalent,
-    Reserve, NativeAmericanArea, IncorporatedPlace,
-    UnincorporatedPlace, MinorCivilDivision)
+                                   Reserve, NativeAmericanArea, IncorporatedPlace,
+                                   UnincorporatedPlace, MinorCivilDivision)
 from tempfile import mkdtemp
 from firecares.tasks.cleanup import remove_file
 from .forms import DocumentUploadForm
@@ -161,9 +161,8 @@ class DepartmentDetailView(LoginRequiredMixin, DetailView):
 
             # national_risk_band
             cursor = connections['default'].cursor()
-            query = FireDepartment.objects.filter(dist_model_score__isnull=False, archived=False).as_quartiles().values('id',
-                                                                                                        'risk_model_size1_percent_size2_percent_sum_quartile',
-                                                                                                        'risk_model_deaths_injuries_sum_quartile').query.__str__()
+            query = FireDepartment.objects.filter(dist_model_score__isnull=False, archived=False).as_quartiles()\
+                .values('id', 'risk_model_size1_percent_size2_percent_sum_quartile', 'risk_model_deaths_injuries_sum_quartile').query.__str__()
 
             qu = """
             WITH results as (
@@ -279,8 +278,6 @@ class RemoveIntersectingDepartments(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(RemoveIntersectingDepartments, self).get_context_data(**kwargs)
 
-        geom = self.object.headquarters_geom.buffer(0.01)
-
         context['intersecting_departments'] = self.get_intersecting_departments()
 
         return context
@@ -293,7 +290,6 @@ class RemoveIntersectingDepartments(LoginRequiredMixin, DetailView):
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        context = self.get_context_data()
 
         departments = map(int, request.POST.getlist('departments'))
 
@@ -309,6 +305,7 @@ class RemoveIntersectingDepartments(LoginRequiredMixin, DetailView):
         messages.add_message(request, messages.SUCCESS, 'Removed intersecting departments.')
 
         return redirect(self.object)
+
 
 class SafeSortMixin(object):
     """
@@ -439,7 +436,7 @@ class FireDepartmentListView(LoginRequiredMixin, PaginationMixin, ListView, Safe
         # search in favorite departments only
         if self.request.GET.get('favorites', 'false') == 'true':
             favorite_departments = map(lambda obj: obj.target.pk,
-                   Favorite.objects.for_user(self.request.user, model=FireDepartment))
+                                       Favorite.objects.for_user(self.request.user, model=FireDepartment))
             queryset = queryset.filter(pk__in=favorite_departments)
 
         # If there is a 'q' argument, this is a full text search.
@@ -699,8 +696,7 @@ class DownloadShapefile(LoginRequiredMixin, View):
             wkt = None
 
             if raw_geom:
-              wkt = raw_geom.wkt
-
+                wkt = raw_geom.wkt
             else:
                 continue
 
@@ -729,7 +725,6 @@ class DownloadShapefile(LoginRequiredMixin, View):
                         apparatus_alias_index += '_{0}'.format(n)
 
                     feature.SetField(apparatus_alias_index, record.personnel)
-
 
             # Create the point from the Well Known Txt
             point = ogr.CreateGeometryFromWkt(wkt)
@@ -779,7 +774,7 @@ class DownloadShapefile(LoginRequiredMixin, View):
             wkt = None
 
             if raw_geom:
-              wkt = raw_geom.wkt
+                wkt = raw_geom.wkt
             else:
                 continue
 

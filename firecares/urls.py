@@ -10,8 +10,7 @@ from tastypie.api import Api
 from firestation.views import Home
 from osgeo_importer.urls import FileAddView, importer_api
 from django.contrib.sitemaps.views import sitemap
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.decorators import user_passes_test, permission_required
+from django.contrib.auth.decorators import permission_required
 from django.views.decorators.csrf import csrf_exempt
 from sitemaps import BaseSitemap, DepartmentsSitemap
 
@@ -27,7 +26,7 @@ sitemaps = {
 }
 
 urlpatterns = patterns('',
-    url(r'^$', Home.as_view(), name='firestation_home'),
+    url(r'^$', Home.as_view(), name='firestation_home'),  # noqa
     (r'^api/', include(v1_api.urls)),
     url(r'^', include('firecares.firestation.urls')),
     url(r'^contact-us/$', ContactUs.as_view(), name='contact_us'),
@@ -66,13 +65,12 @@ urlpatterns = patterns('',
     url(r'^uploads/new$', permission_required('change_firestation')(FileAddView.as_view()), name='uploads-new'),
     url(r'^uploads/new/json$', permission_required('change_firestation')(FileAddView.as_view(json=True)), name='uploads-new-json'),
 
-    #url(r'^uploads/?$', permission_required('change_firestation' UploadListView.as_view()), name='uploads-list'),
+    # url(r'^uploads/?$', permission_required('change_firestation' UploadListView.as_view()), name='uploads-list'),
     url(r'', include(importer_api.urls)),
 )
 
 
-#urlpatterns += importer_urlpatterns
+# urlpatterns += importer_urlpatterns
 
 if settings.DEBUG:
-    urlpatterns += patterns('',
-        url(r'^.*/$', page_not_found),)
+    urlpatterns += patterns('', url(r'^.*/$', page_not_found),)

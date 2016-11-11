@@ -3,11 +3,9 @@ import requests
 from django.core.management.base import BaseCommand
 from firecares.firestation.models import FireDepartment
 from collections import OrderedDict
-
-
-validate_endpoint = 'http://geojsonlint.com/validate'
 from django.contrib.gis.geos import GeometryCollection
 
+validate_endpoint = 'http://geojsonlint.com/validate'
 
 
 class Command(BaseCommand):
@@ -28,7 +26,6 @@ class Command(BaseCommand):
 
             feature_collection = []
             feature = {'type': 'Feature', 'geometry': GeometryCollection([department.headquarters_address.geom])}
-
 
             if department.geom:
                 feature['geometry'].append(department.geom)

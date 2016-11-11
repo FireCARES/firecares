@@ -3,10 +3,9 @@ import requests
 from django.core.management.base import BaseCommand
 from firecares.firestation.models import FireDepartment
 from collections import OrderedDict
-
+from django.contrib.gis.geos import GeometryCollection
 
 validate_endpoint = 'http://geojsonlint.com/validate'
-from django.contrib.gis.geos import GeometryCollection
 
 
 class Command(BaseCommand):

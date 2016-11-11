@@ -1,10 +1,10 @@
-from firecares.tasks.update import update_nfirs_counts
 from django.core.management.base import BaseCommand
 from firecares.firestation.models import FireDepartment, FireStation
 from firecares.firecares_core.models import Address
 from django.db import transaction
 from django.contrib.gis.geos import Point
 from datetime import datetime
+
 
 class Command(BaseCommand):
     help = 'Adds a firestation to the given department'
@@ -14,30 +14,30 @@ class Command(BaseCommand):
 
         # Named (optional) arguments
         parser.add_argument('--address',
-            dest='address',
-            default=None,
-            help='Address of department')
+                            dest='address',
+                            default=None,
+                            help='Address of department')
 
         parser.add_argument('--name',
-            dest='name',
-            default=None,
-            help='Name of station')
+                            dest='name',
+                            default=None,
+                            help='Name of station')
 
         parser.add_argument('--number',
-            dest='number',
-            default=None,
-            help='Station number')
+                            dest='number',
+                            default=None,
+                            help='Station number')
 
         parser.add_argument('--fdid',
-            dest='fdid',
-            default=None,
-            help='The stations FDID')
+                            dest='fdid',
+                            default=None,
+                            help='The stations FDID')
 
         parser.add_argument('--dryrun',
-            dest='dryrun',
-            default=False,
-            action='store_true',
-            help='Run as dry run')
+                            dest='dryrun',
+                            default=False,
+                            action='store_true',
+                            help='Run as dry run')
 
     def handle(self, *args, **options):
         name = options.get('name')
@@ -70,25 +70,20 @@ class Command(BaseCommand):
                 else:
                     geom = address.geom
 
-
                 if not dryrun:
                     station = FireStation.objects.create(name=name, fdid=fdid, station_number=number,
-                                               geom=geom, station_address=address, address=address.address_line1,
-                                               city=address.city, state=address.state_province,
-                                               zipcode=address.postal_code, department=fd,
-                                               source_datadesc='FireCARES add station command.',
-                                               loaddate=datetime.now(),
-                                               ftype='Emergency Response and Law Enforcement')
+                                                         geom=geom, station_address=address, address=address.address_line1,
+                                                         city=address.city, state=address.state_province,
+                                                         zipcode=address.postal_code, department=fd,
+                                                         source_datadesc='FireCARES add station command.',
+                                                         loaddate=datetime.now(),
+                                                         ftype='Emergency Response and Law Enforcement')
 
                     print 'station successfully created: {0}'.format(station.id)
 
                 else:
                     print 'Create new FireStation with these params: {0}'.format(dict(name=name, fdid=fdid, station_number=number,
-                                               geom=geom, station_address=address, department=fd,
-                                               source_datadesc='FireCARES add station command.',
-                                               loaddate=datetime.now(),
-                                               ftype='Emergency Response and Law Enforcement'))
-
-
-
-
+                                                                                      geom=geom, station_address=address, department=fd,
+                                                                                      source_datadesc='FireCARES add station command.',
+                                                                                      loaddate=datetime.now(),
+                                                                                      ftype='Emergency Response and Law Enforcement'))

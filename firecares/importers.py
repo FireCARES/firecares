@@ -1,7 +1,6 @@
 from osgeo_importer.importers import Import, GDALInspector
-from osgeo_importer.inspectors import InspectorMixin, NoDataSourceFound
+from osgeo_importer.inspectors import NoDataSourceFound
 from django.contrib.gis.gdal import DataSource
-from django.contrib.gis.geos import Point
 from firecares.firestation.models import FireDepartment, FireStation, Staffing
 from firecares.firecares_core.models import Address, Country
 from django.db import transaction
@@ -12,7 +11,7 @@ class GeoDjangoInspector(GDALInspector):
     def __init__(self, connection_string, *args, **kwargs):
         self.file = connection_string
         self.data = None
-        super(GeoDjangoInspector, self).__init__( connection_string, *args, **kwargs)
+        super(GeoDjangoInspector, self).__init__(connection_string, *args, **kwargs)
 
     def open(self, *args, **kwargs):
         """

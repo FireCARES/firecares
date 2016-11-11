@@ -6,9 +6,7 @@ import mimetypes
 import requests
 from celery import Celery
 from django.conf import settings
-from django.db import connections
 from firecares.utils.s3put import singlepart_upload
-from firecares.firestation.models import FireStation
 from celery.task import current
 
 # set the default Django settings module for the 'celery' program.

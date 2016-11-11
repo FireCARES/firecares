@@ -9,7 +9,7 @@ from .managers import PriorityDepartmentsManager, CalculationManager
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point, MultiPolygon
-from django.contrib.gis.measure import Distance, D
+from django.contrib.gis.measure import D
 from django.core.validators import MaxValueValidator
 from django.core.cache import cache
 from django.db import connections
@@ -302,7 +302,6 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
     iaff = models.CharField(max_length=25, blank=True, null=True)
     twitter_handle = models.CharField(max_length=255, blank=True, null=True)
 
-
     class Meta:
         ordering = ('name',)
         index_together = [
@@ -389,7 +388,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
         row = self.population_metrics_row
 
         from .managers import Ntile
-        from django.db.models import When, Case, Q
+        from django.db.models import When, Case
         qs = self.population_metrics_table.objects.filter(risk_model_fires_quartile=row.risk_model_fires_quartile)
         qs = qs.annotate(**{'dist_quartile': Case(When(**{'dist_model_score__isnull': False, 'then': Ntile(4, output_field=models.IntegerField(), order_by='dist_model_score')}), output_field=models.IntegerField(), default=None)})
         qs = qs.annotate(**{'size2_plus_quartile': Case(When(**{'risk_model_size1_percent_size2_percent_sum_quartile__isnull': False, 'then': Ntile(4, output_field=models.IntegerField(), order_by='risk_model_size1_percent_size2_percent_sum_quartile')}), output_field=models.IntegerField(), default=None)})
@@ -809,7 +808,6 @@ class FireStation(USGSStructureData, Archivable):
         if match:
             return match.group()
 
-
     @classmethod
     def populate_address(cls):
         us, _ = Country.objects.get_or_create(iso_code='US')
@@ -819,8 +817,7 @@ class FireStation(USGSStructureData, Archivable):
                                                         state_province=obj.state, postal_code=obj.zipcode,
                                                         country=us, defaults=dict(geom=obj.geom))
             except Address.MultipleObjectsReturned:
-                objs = Address.objects.filter(address_line1=obj.address, city=obj.city, state_province=obj.state, postal_code=obj.zipcode,
-                                              country=us)
+                pass
             obj.station_address = addr
             obj.save()
 
@@ -900,7 +897,7 @@ class FireStation(USGSStructureData, Archivable):
         """
         Helper functions
         """
-        def filter_words_from_name(name,words_to_filter):
+        def filter_words_from_name(name, words_to_filter):
             removed_dict = dict((re.escape(k), v) for k, v in words_to_filter.iteritems())
             removed_pattern = re.compile("|".join(removed_dict.keys()))
             name = removed_pattern.sub(lambda m: removed_dict[re.escape(m.group(0))], name)
@@ -917,7 +914,8 @@ class FireStation(USGSStructureData, Archivable):
                 index += 1
             return index
 
-        always_removed_words = {"Station": "",
+        always_removed_words = {
+            "Station": "",
             " Engine": "",
             " Truck": "",
             " Ladder": "",
@@ -941,15 +939,12 @@ class FireStation(USGSStructureData, Archivable):
         lev_filtered_name = filter_words_from_name(filtered_name, lev_removed_words)
 
         nearby_departments = FireDepartment.objects.filter(headquarters_address__geom__distance_lte=(self.geom, D(mi=40)))\
-        .distance(self.geom)\
-        .extra(select={'dis_name': "select levenshtein(firestation_firedepartment.name, %s)", 'dis_sound': "select similarity(firestation_firedepartment.name, %s)"},\
-        select_params=(lev_filtered_name, filtered_name,))\
-        .order_by('distance', 'dis_name')
-
+            .distance(self.geom)\
+            .extra(select={'dis_name': "select levenshtein(firestation_firedepartment.name, %s)", 'dis_sound': "select similarity(firestation_firedepartment.name, %s)"},
+                   select_params=(lev_filtered_name, filtered_name,))\
+            .order_by('distance', 'dis_name')
 
         best_department_score = 0
-        best_department_id = 0
-        best_department_name = ''
         max_suggested_departments = 10
         suggested_departments = list()
 
@@ -979,7 +974,7 @@ class FireStation(USGSStructureData, Archivable):
             #  lower bound of levenshtein is at least difference of strings
             #  to create zero to one ratio must subtract minimum distances
 
-            fireDepartment.dis_name = max(fireDepartment.dis_name - minimum_lev_distance,0)
+            fireDepartment.dis_name = max(fireDepartment.dis_name - minimum_lev_distance, 0)
 
             department_score = ((1 - department_distance / 40) * 55) + (1 - fireDepartment.dis_name / longest_name_length) * 80 + (fireDepartment.dis_sound * 30)
 
@@ -988,12 +983,10 @@ class FireStation(USGSStructureData, Archivable):
 
             if department_score > best_department_score:
                 best_department_score = department_score
-                best_department_id = fireDepartment.id
-                best_department_name = fireDepartment.name
                 suggested_departments.insert(0, fireDepartment)
             else:
                 num_departments = len(suggested_departments)
-                if num_departments < max_suggested_departments or (num_departments >= max_suggested_departments and department_score > suggested_departments[max_suggested_departments-1].department_score):
+                if num_departments < max_suggested_departments or (num_departments >= max_suggested_departments and department_score > suggested_departments[max_suggested_departments - 1].department_score):
                     department_index = determine_insertion_index(suggested_departments, num_departments, department_score)
                     suggested_departments.insert(department_index, fireDepartment)
 
@@ -1005,8 +998,6 @@ class FireStation(USGSStructureData, Archivable):
             num_departments -= 1
 
         return suggested_departments
-
-
 
     @cached_property
     def slug(self):

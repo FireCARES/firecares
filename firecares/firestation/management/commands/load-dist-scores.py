@@ -16,4 +16,3 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for fd in FireDepartment.objects.filter(archived=False):
             update_performance_score.delay(fd.id, options.get('dry_run'))
-

@@ -2,6 +2,7 @@ from firecares.celery import app
 import os
 import shutil
 
+
 @app.task(queue='cleanup')
 def remove_file(path):
     """

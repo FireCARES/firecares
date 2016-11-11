@@ -8,6 +8,7 @@ from django.utils import timezone
 from reversion import revisions as reversion
 from django.conf import settings
 
+
 class RecentlyUpdatedMixin(models.Model):
     """
     A mixin which adds a property that returns a boolean which represents if object was recently updated.
@@ -86,7 +87,7 @@ class Address(models.Model):
 
         if results and results.latitude and results.longitude:
             params = dict(geom=Point(results.longitude, results.latitude))
-            filter_components = lambda n: [c for c in results.raw['address_components'] if n in c['types']]
+            filter_components = lambda n: [c for c in results.raw['address_components'] if n in c['types']]  # noqa
             postal_codes = filter_components('postal_code')
             countries = filter_components('country')
             states = filter_components('administrative_area_level_1')
