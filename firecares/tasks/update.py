@@ -128,6 +128,7 @@ def create_quartile_views_task():
     """
     return create_quartile_views(None)
 
+
 @app.task(queue='update')
 def update_heatmap_file(state, fd_id, id):
     cursor = connections['nfirs'].cursor()
