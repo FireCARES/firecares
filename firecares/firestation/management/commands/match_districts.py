@@ -33,7 +33,7 @@ class Command(BaseCommand):
                 match_stations = list()
 
                 for station in filter_stations:
-                    if geom.intersects(station.geom) == True:
+                    if geom.intersects(station.geom) is True:
                         match_stations.append(station)
 
                 matched_station = None
@@ -43,20 +43,20 @@ class Command(BaseCommand):
                 elif num_match_stations > 1:
                     geom.set_srid(4326)
                     meter_geom = geom.centroid.transform(3857, clone=True)
-                    shortest_dist = meter_geom.distance(match_stations[0].geom.centroid.transform(3857,clone=True))
+                    shortest_dist = meter_geom.distance(match_stations[0].geom.centroid.transform(3857, clone=True))
                     matched_station = match_stations[0]
                     for station in match_stations:
-                       station_dist = meter_geom.distance(station.geom.centroid.transform(3857,clone=True))
-                       if station_dist < shortest_dist:
-                           shortest_dist = station_dist
-                           matched_station = station
+                        station_dist = meter_geom.distance(station.geom.centroid.transform(3857, clone=True))
+                        if station_dist < shortest_dist:
+                            shortest_dist = station_dist
+                            matched_station = station
 
                 if matched_station is not None and matched_station.district is None:
                     if verbose:
                         print 'Updated district for {0}'.format(matched_station.name)
-                    if isinstance(geom,MultiPolygon):
+                    if isinstance(geom, MultiPolygon):
                         matched_station.district = geom
-                    elif isinstance(geom,Polygon):
+                    elif isinstance(geom, Polygon):
                         matched_station.district = MultiPolygon(geom)
                     matched_station.save()
                     num_updated += 1
@@ -64,8 +64,4 @@ class Command(BaseCommand):
                     if verbose:
                         print 'District already set: No Update'
 
-        print 'Successfully Updated {0}/{1} Stations'.format(num_updated,num_geoms)
-
-
-
-
+        print 'Successfully Updated {0}/{1} Stations'.format(num_updated, num_geoms)

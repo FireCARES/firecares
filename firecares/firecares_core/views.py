@@ -4,11 +4,9 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.template import loader
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View, CreateView, TemplateView
 from firecares.firecares_core.forms import ContactForm
 from firecares.tasks.email import send_mail

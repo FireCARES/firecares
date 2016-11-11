@@ -32,7 +32,7 @@ class CoreTests(TestCase):
         self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content, 'xml')
         sitemap_list = soup.find_all('url')
-        self.assertEqual(len(sitemap_list), 3+6)  # 3 test departments and 6 set navigation pages
+        self.assertEqual(len(sitemap_list), 3 + 6)  # 3 test departments and 6 set navigation pages
         # find the three elements
         for testy in sitemap_list:
             if 'testy2' in testy.loc.get_text():
@@ -293,4 +293,3 @@ class CoreTests(TestCase):
             # Make sure admin email is triggered.
             self.assertEqual(len(mail.outbox), 1)
             print mail.outbox[0].message()
-

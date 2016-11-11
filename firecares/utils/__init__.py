@@ -1,6 +1,5 @@
 from django.core.files.storage import get_storage_class
 from storages.backends.s3boto import S3BotoStorage
-from PIL import Image
 
 
 class CachedS3BotoStorage(S3BotoStorage):

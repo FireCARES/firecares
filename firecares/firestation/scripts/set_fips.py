@@ -1,8 +1,8 @@
 import os
+import csv
 os.environ['DJANGO_SETTINGS_MODULE'] = 'firecares.settings'
 
-from firecares.firestation.models import FireStation
-import csv
+from firecares.firestation.models import FireStation  # noqa
 
 
 x = 0
@@ -22,4 +22,3 @@ with open('usfa-census-national.csv', 'r') as csvfile:
             continue
         except FireStation.MultipleObjectsReturned:
             print 'Multiple objects returned for: ', row['Fire Dept Name'], row['HQ State']
-

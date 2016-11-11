@@ -1,7 +1,7 @@
 from firecares.celery import app
-from firecares.firestation.models import FireDepartment
 from django.db import connection
 from django.core.mail import mail_admins
+
 
 @app.task(queue='email')
 def send_mail(email):

@@ -7,6 +7,7 @@ from django.db.models import Aggregate
 from django.db.models import FloatField
 from django.contrib.gis.db.models.query import GeoQuerySet
 
+
 class PriorityDepartmentsManager(models.Manager):
 
     def get_queryset(self):
@@ -39,25 +40,24 @@ class FilteredAvg(Aggregate):
             return value
         return float(value)
 
+
 class CalculationsQuerySet(GeoQuerySet):
 
     def as_quartiles(self):
         qs = self
-
 
         fields = 'dist_model_score risk_model_deaths risk_model_injuries risk_model_fires_size0 \
                       risk_model_fires_size1 risk_model_fires_size2 risk_model_fires'.split()
 
         # dynamically add sum fields
         for field1, field2, fieldname in [('risk_model_fires_size1_percentage', 'risk_model_fires_size2_percentage', 'risk_model_size1_percent_size2_percent_sum'),
-                               ('risk_model_deaths', 'risk_model_injuries', 'risk_model_deaths_injuries_sum')]:
+                                          ('risk_model_deaths', 'risk_model_injuries', 'risk_model_deaths_injuries_sum')]:
 
             qs = qs.extra(select={fieldname: 'SELECT COALESCE({0},0)+COALESCE({1},0)'.format(field1, field2)})
-            qs = qs.annotate(**{'{0}_quartile'.format(fieldname): Case(When(Q(**{field1+'__isnull': False}) | Q(**{field2+'__isnull': False}), then=SumNtile(4, output_field=models.IntegerField(), field_1=field1, field_2=field2)), output_field=models.IntegerField(), default=None)})
-
+            qs = qs.annotate(**{'{0}_quartile'.format(fieldname): Case(When(Q(**{field1 + '__isnull': False}) | Q(**{field2 + '__isnull': False}), then=SumNtile(4, output_field=models.IntegerField(), field_1=field1, field_2=field2)), output_field=models.IntegerField(), default=None)})
 
         for field in fields:
-            qs = qs.annotate(**{field+'_quartile': Case(When(**{field+'__isnull': False, 'then': Ntile(4, output_field=models.IntegerField(), partition_by=field, order_by=field)}), output_field=models.IntegerField(), default=None)})
+            qs = qs.annotate(**{field + '_quartile': Case(When(**{field + '__isnull': False, 'then': Ntile(4, output_field=models.IntegerField(), partition_by=field, order_by=field)}), output_field=models.IntegerField(), default=None)})
 
         qs = qs.annotate(val=RawSQL("SELECT AVG(count) FROM firestation_nfirsstatistic WHERE fire_department_id=firestation_firedepartment.id and year >= extract(year FROM CURRENT_DATE) - 3", ()))
 

@@ -1,7 +1,7 @@
 from django import template
 from django.conf import settings
 from django.template import defaultfilters
-from django.utils.translation import pgettext, ugettext as _, ungettext
+from django.utils.translation import pgettext, ugettext as _, ungettext  # noqa
 
 register = template.Library()
 
@@ -61,6 +61,7 @@ def abbreviatedintword(value):
             return _check_for_i18n(new_value, *converters(new_value))
     return value
 
+
 @register.simple_tag
 def url_replace(request, field, value):
     """
@@ -90,6 +91,7 @@ def risk_level(value):
     if value == 4:
         return 'high'
 
+
 @register.filter(is_safe=False)
 def grade(value):
     """
@@ -117,5 +119,3 @@ def quartile_text(value):
     """
 
     return dict(zip(range(1, 5), ['lowest', 'second lowest', 'second highest', 'highest'])).get(value)
-
-

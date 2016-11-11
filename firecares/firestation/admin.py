@@ -70,4 +70,3 @@ admin.site.register(FireDepartment, FireDepartmentAdmin)
 admin.site.register(Staffing, ResponseCapabilityAdmin)
 admin.site.register(Document, DocumentAdmin)
 admin.site.register(IntersectingDepartmentLog, IntersectingDepartmentLogAdmin)
-

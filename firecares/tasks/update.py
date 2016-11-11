@@ -102,12 +102,12 @@ def update_nfirs_counts(id, year=None):
 
     queries = (
         ('civilian_casualties', "select extract(year from inc_date) as year, count(*) from civiliancasualty where"
-                               " fdid=%s and state=%s and extract(year from inc_date) in %s group by year order by year desc;", (fd.fdid, fd.state, tuple(years.keys()))),
+            " fdid=%s and state=%s and extract(year from inc_date) in %s group by year order by year desc;", (fd.fdid, fd.state, tuple(years.keys()))),
         ('residential_structure_fires', "select extract(year from inc_date) as year, count(*) from buildingfires"
                                         " where fdid=%s and state=%s and extract(year from inc_date) in %s group by year order by year desc;",
          (fd.fdid, fd.state, tuple(years.keys()))),
         ('firefighter_casualties', "select extract(year from inc_date) as year, count(*) from ffcasualty where"
-                               " fdid=%s and state=%s and extract(year from inc_date) in %s group by year order by year desc;", (fd.fdid, fd.state, tuple(years.keys()))),
+            " fdid=%s and state=%s and extract(year from inc_date) in %s group by year order by year desc;", (fd.fdid, fd.state, tuple(years.keys()))),
     )
 
     for statistic, query, params in queries:
@@ -119,6 +119,7 @@ def update_nfirs_counts(id, year=None):
 
         for year, count in counts.items():
             nfirs.objects.update_or_create(year=year, defaults={'count': count}, fire_department=fd, metric=statistic)
+
 
 @app.task(queue='update')
 def create_quartile_views_task():

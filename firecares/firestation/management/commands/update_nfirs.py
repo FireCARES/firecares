@@ -11,5 +11,3 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for department in options.get('firedepartment_id'):
             update_nfirs_counts.delay(department)
-
-

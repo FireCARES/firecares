@@ -1,8 +1,8 @@
-from firecares.settings.base import *
+from firecares.settings.base import *  # noqa
 
-INSTALLED_APPS += ('debug_toolbar', 'fixture_magic')
+INSTALLED_APPS += ('debug_toolbar', 'fixture_magic')  # noqa
 
-MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware', )
+MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware', )  # noqa
 
 # The Django Debug Toolbar will only be shown to these client IPs.
 INTERNAL_IPS = (
@@ -22,7 +22,7 @@ CACHES = {
     }
 }
 
-LOGGING['loggers'] = {
+LOGGING['loggers'] = {  # noqa
     'django.request': {
         'handlers': ['mail_admins'],
         'level': 'ERROR',
@@ -40,10 +40,10 @@ def show_toolbar(request):
     return False
 
 DEBUG_TOOLBAR_CONFIG = {
-    "SHOW_TOOLBAR_CALLBACK" : show_toolbar,
+    "SHOW_TOOLBAR_CALLBACK": show_toolbar,
 }
 
-#EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 CELERY_ALWAYS_EAGER = True

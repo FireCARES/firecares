@@ -52,20 +52,20 @@ class FireCARESSlack(View):
     def update_nfirs_counts(self, request, *args, **kwargs):
         for department in self.command_args:
             update_nfirs_counts.apply_async((department,),
-                                        link=send_slack_message.s(self.response_url, {'text': 'NFIRS counts updated for department: {}'.format(department)}),
-                                        link_error=send_slack_message.s(self.response_url, {'text': 'Error updating NFIRS counts for department: {}'.format(department)}))
+                                            link=send_slack_message.s(self.response_url, {'text': 'NFIRS counts updated for department: {}'.format(department)}),
+                                            link_error=send_slack_message.s(self.response_url, {'text': 'Error updating NFIRS counts for department: {}'.format(department)}))
         return HttpResponse()
 
     def update_performance_scores(self, request, *args, **kwargs):
         for department in self.command_args:
             update_performance_score.apply_async((department,),
-                                        link=send_slack_message.s(self.response_url, {'text': 'Performance score updated for department: {}'.format(department)}),
-                                        link_error=send_slack_message.s(self.response_url, {'text': 'Error updating performance score for department: {}'.format(department)}))
+                                                 link=send_slack_message.s(self.response_url, {'text': 'Performance score updated for department: {}'.format(department)}),
+                                                 link_error=send_slack_message.s(self.response_url, {'text': 'Error updating performance score for department: {}'.format(department)}))
         return HttpResponse()
 
     def q(self, request, *args, **kwargs):
         departments = FireDepartment.objects.filter(archived=False).full_text_search(' '.join(self.command_args))
-        msg = ['{index}. <https://firecares.org{url}|{name}>, {state}'.format(index=n+1, name=department.name, url=department.get_absolute_url(), state=department.state) for n, department in enumerate(departments)]
+        msg = ['{index}. <https://firecares.org{url}|{name}>, {state}'.format(index=n + 1, name=department.name, url=department.get_absolute_url(), state=department.state) for n, department in enumerate(departments)]
         return JsonResponse({'text': '\n'.join(msg)})
 
     def archive_department(self, request, *args, **kwargs):
@@ -75,7 +75,7 @@ class FireCARESSlack(View):
 
         departments = FireDepartment.objects.filter(id__in=self.command_args)
         departments.update(archived=True)
-        msg = ['{index}. <https://firecares.org{url}|{name}> has been archived.'.format(index=n+1, name=department.name, url=department.get_absolute_url()) for n, department in enumerate(departments)]
+        msg = ['{index}. <https://firecares.org{url}|{name}> has been archived.'.format(index=n + 1, name=department.name, url=department.get_absolute_url()) for n, department in enumerate(departments)]
         return JsonResponse({'text': '\n'.join(msg)})
 
     def parse_message(self):
@@ -116,8 +116,7 @@ class FireCARESSlack(View):
 
     def command_not_allowed(self, request, *args, **kwargs):
         logger.warning('Command Not Allowed (%s): %s', self.command, request.path,
-            extra={'status_code': 403, 'request': request}
-        )
+                       extra={'status_code': 403, 'request': request})
         return HttpResponseForbidden(self._allowed_commands())
 
     @property
@@ -137,4 +136,3 @@ class FireCARESSlack(View):
 
         self.parse_message()
         return self.command_dispatch(request)
-

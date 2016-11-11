@@ -4,13 +4,13 @@ import sys
 
 sys.path.append(os.pardir)
 
-from firecares.firestation.management.commands.match_districts import Command
-from firecares.firestation.models import FireDepartment, FireStation
-from django.contrib.gis.geos import GeometryCollection as GC
-import django
+from firecares.firestation.management.commands.match_districts import Command  # noqa
+from firecares.firestation.models import FireDepartment  # noqa
+from django.contrib.gis.geos import GeometryCollection as GC  # noqa
+import django  # noqa
 
 django.setup()
-files = glob.glob(sys.argv[1]+'*districts*.geojson')
+files = glob.glob(sys.argv[1] + '*districts*.geojson')
 
 parsed_files = [(n.split('-')[1].upper(), n.split('-')[2], n) for n in files]
 
@@ -21,7 +21,7 @@ for state, name, path in parsed_files:
         department = FireDepartment.priority_departments.get(state=state, name__icontains=name.replace('_', ' '))
     except FireDepartment.DoesNotExist:
         if name == 'los_angeles_city':
-             department = FireDepartment.objects.get(id=87256)
+            department = FireDepartment.objects.get(id=87256)
 
     c = Command()
     c.handle(geojson_file=path, queryset=department.firestation_set.all())

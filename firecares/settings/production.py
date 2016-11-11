@@ -1,10 +1,10 @@
 import os
-from firecares.settings.base import *
+from firecares.settings.base import *  # noqa
 from celery.schedules import crontab
 
 INSTALLED_APPS = (
     'django_statsd',
-) + INSTALLED_APPS
+) + INSTALLED_APPS  # noqa
 
 STATSD_HOST = 'stats.garnertb.com'
 STATSD_PREFIX = 'firecares'
@@ -19,11 +19,11 @@ MIDDLEWARE_CLASSES = (
     'django_statsd.middleware.GraphiteRequestTimingMiddleware',
     'django_statsd.middleware.GraphiteMiddleware',
     'django_statsd.middleware.TastyPieRequestTimingMiddleware'
-) + MIDDLEWARE_CLASSES
+) + MIDDLEWARE_CLASSES  # noqa
 
 STATSD_PATCHES = [
-        'django_statsd.patches.db',
-        'django_statsd.patches.cache',
+    'django_statsd.patches.db',
+    'django_statsd.patches.cache',
 ]
 
 CACHES = {
@@ -42,7 +42,6 @@ STATIC_URL = COMPRESS_URL
 DEBUG = False
 AWS_QUERYSTRING_AUTH = False
 EMAIL_USE_TLS = True
-
 
 
 CELERYBEAT_SCHEDULE = {

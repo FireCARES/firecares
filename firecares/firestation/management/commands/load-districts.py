@@ -37,9 +37,9 @@ class Command(BaseCommand):
 
             for station in stations:
                 matches = districts.find({
-                "feature.geometry": {
-                    "$geoIntersects": {
-                    "$geometry": json.loads(station.geom.json)
+                    "feature.geometry": {
+                        "$geoIntersects": {
+                            "$geometry": json.loads(station.geom.json)
                         }
                     },
                 })
@@ -60,5 +60,3 @@ class Command(BaseCommand):
 
                 elif matches.count() == 0:
                     self.stdout.write('No matches!')
-
-

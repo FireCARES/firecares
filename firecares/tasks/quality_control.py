@@ -36,7 +36,6 @@ def test_department_url(id):
         return 'TimeLimitExceeded', id
 
 
-
 @app.task(queue='quality-control')
 @override_settings(ADMINS=(
     ('Mr. Ninja', 'my@email.com'),
@@ -75,5 +74,5 @@ def test_all_departments_urls():
     """
     callback = test_all_departments_urls_callback.s()
     header = [test_department_url.si(fd.id) for fd in FireDepartment.objects.filter(archived=False, website__isnull=False)
-                                                          .exclude(website__exact='')]
+              .exclude(website__exact='')]
     return chord(header)(callback)

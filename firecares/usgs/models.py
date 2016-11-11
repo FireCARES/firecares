@@ -5,9 +5,6 @@ import sys
 import us
 
 from django.contrib.gis.db import models
-from django.contrib.gis.geos import Point
-from django.core.validators import MaxValueValidator
-from django.core.urlresolvers import reverse
 from django.db.transaction import rollback
 from django.db.utils import IntegrityError
 
@@ -89,7 +86,6 @@ class USGSBase(models.Model):
                 print 'The local model {1} has: {0} features.'.format(local_count, cls.__name__)
                 return local_count - upstream_count
 
-
     @classmethod
     def load_data(cls):
         # Still need to load from jurisdictions
@@ -124,7 +120,7 @@ class USGSBase(models.Model):
                     poly = map(LinearRing, obj['feature']['geometry']['rings'])
                     data['geom'] = Polygon(*poly)
 
-                data['loaddate'] = datetime.datetime.fromtimestamp(data['loaddate']/1000.0)
+                data['loaddate'] = datetime.datetime.fromtimestamp(data['loaddate'] / 1000.0)
                 feat = cls.objects.create(**data)
                 feat.save()
                 print 'Saved object: {0}'.format(data.get('name'))
@@ -148,7 +144,6 @@ class USGSBase(models.Model):
                 print '{0} failed.'.format(object)
                 print url.format(object, endpoint)
                 print sys.exc_info()
-
 
 
 class Reserve(USGSBase):
@@ -207,7 +202,6 @@ class CountyorEquivalent(USGSBase):
 
     def __unicode__(self):
         return u'{name}, {state}'.format(name=self.county_name, state=self.state_name)
-
 
 
 class IncorporatedPlace(USGSBase):
@@ -302,6 +296,7 @@ class StateorTerritoryHigh(USGSBase):
     @property
     def name(self):
         return self.state_name
+
 
 class CongressionalDistrict(USGSBase):
     service_id = 19
@@ -434,7 +429,6 @@ class GovUnits(models.Model):
 
                     obj = requests.get(url.format(object, endpoint))
                     obj = json.loads(obj.content)
-                    #import ipdb; ipdb.set_trace()
                     data = dict((k.lower(), v) for k, v in obj['feature']['attributes'].iteritems())
 
                     for key in data.keys():
@@ -445,7 +439,7 @@ class GovUnits(models.Model):
                         poly = map(LinearRing, obj['feature']['geometry']['rings'])
                         data['geom'] = Polygon(*poly)
 
-                    data['loaddate'] = datetime.datetime.fromtimestamp(data['loaddate']/1000.0)
+                    data['loaddate'] = datetime.datetime.fromtimestamp(data['loaddate'] / 1000.0)
                     feat = cls.objects.create(**data)
                     feat.save()
                     print 'Saved object: {0}'.format(data.get('name'))

@@ -47,7 +47,6 @@ class Command(BaseCommand):
             print 'Row: ', res
             state, fdid, num_mile, street_pre, streetname, streettype, streetsuf, city, state_id, zip5, zip4, state_abbreviation, geom, count = res
 
-
             update = '''
             update incidentaddress
             set geom=ST_GeomFromText('POINT({results.longitude} {results.latitude})', 4326)
@@ -56,8 +55,8 @@ class Command(BaseCommand):
 
             where_clause = cursor.mogrify('''WHERE state=%s and fdid=%s and num_mile=%s and street_pre=%s and streetsuf=%s and city=%s
              and state_id=%s and zip4=%s and zip5=%s and streetname=%s''', (state, fdid, num_mile, street_pre,
-                                                                           streetsuf, city, state_id, zip4, zip5,
-                                                                           streetname))
+                                                                            streetsuf, city, state_id, zip4, zip5,
+                                                                            streetname))
 
             if state_id == 'OO':
                 state_id = ''
@@ -90,7 +89,7 @@ class Command(BaseCommand):
                     geom = GEOSGeometry(geom)
 
                     if department_geom:
-                        distance_improvement = department_geom.centroid.distance(geom)-department_geom.centroid.distance(results_point)
+                        distance_improvement = department_geom.centroid.distance(geom) - department_geom.centroid.distance(results_point)
 
                         if distance_improvement <= -1:
                             self.stdout.write('Not updating since {} is a negative distance improvement'.format(distance_improvement))
