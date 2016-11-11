@@ -126,3 +126,17 @@ def create_quartile_views_task():
     Updates the Quartile Materialized Views.
     """
     return create_quartile_views(None)
+
+@app.task(queue='update')
+def update_heatmap_file(state, fd_id, id):
+    cursor = connections['nfirs'].cursor()
+
+    sql = """
+       \COPY (select alarm, a.inc_type, alarms,ff_death, oth_death, ST_X(geom) as x, st_y(geom) as y
+       from buildingfires a
+       left join incidentaddress b using (state, inc_date, exp_no, fdid, inc_no)
+       where state=%s and fdid=%s)
+       to PROGRAM 'aws s3 cp - s3://firecares-pipeline/heatmaps/%s-building-fires.csv --acl=\"public-read\"' DELIMITER ',' CSV HEADER;
+    """
+    cmd = cursor.mogrify(sql, (state, fd_id, id))
+    cursor.execute(cmd)
