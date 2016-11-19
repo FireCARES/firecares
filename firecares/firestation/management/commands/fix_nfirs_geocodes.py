@@ -1,3 +1,4 @@
+import sys
 from django.core.management.base import BaseCommand
 from firecares.firestation.models import FireDepartment
 from geopy.geocoders import GoogleV3
@@ -55,7 +56,7 @@ class Command(BaseCommand):
 
         for res in cursor.fetchall():
             if over_quota_exceptions >= 10:
-                raise GeocoderQuotaExceeded('Too many consecutive timeouts.')
+                sys.exit('Too many consecutive timeouts.')
 
             print 'Row: ', res
             state, fdid, num_mile, street_pre, streetname, streettype, streetsuf, city, state_id, zip5, zip4, state_abbreviation, geom, count = res
@@ -113,5 +114,8 @@ class Command(BaseCommand):
 
             over_quota_exceptions = 0
             print '\n'
+
+        if over_quota_exceptions == cursor.rowcount:
+            sys.exit('Too many consecutive timeouts.')
 
         cursor.execute('SET transform_null_equals TO OFF;')
