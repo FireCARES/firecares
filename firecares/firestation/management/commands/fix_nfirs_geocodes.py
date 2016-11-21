@@ -52,7 +52,9 @@ class Command(BaseCommand):
         cmd = cursor.mogrify(select, (fd.state, fd.fdid, fd.geom.centroid.wkt, options['distance']))
         print cmd
         cursor.execute(cmd)
+
         over_quota_exceptions = 0
+        row_count = cursor.rowcount
 
         for res in cursor.fetchall():
             if over_quota_exceptions >= 10:
@@ -115,7 +117,7 @@ class Command(BaseCommand):
             over_quota_exceptions = 0
             print '\n'
 
-        if over_quota_exceptions and over_quota_exceptions == cursor.rowcount:
+        if over_quota_exceptions and over_quota_exceptions == row_count:
             sys.exit('Too many consecutive timeouts.')
 
         cursor.execute('SET transform_null_equals TO OFF;')
