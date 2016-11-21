@@ -115,7 +115,7 @@ class Command(BaseCommand):
             over_quota_exceptions = 0
             print '\n'
 
-        if over_quota_exceptions == cursor.rowcount:
+        if over_quota_exceptions and over_quota_exceptions == cursor.rowcount:
             sys.exit('Too many consecutive timeouts.')
 
         cursor.execute('SET transform_null_equals TO OFF;')
