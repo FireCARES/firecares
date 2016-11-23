@@ -1072,7 +1072,7 @@ class PopulationClassQuartile(models.Model):
     Population Quartile Views
     """
 
-    id = models.ForeignKey(FireDepartment, db_column='id', primary_key=True)
+    id = models.OneToOneField(FireDepartment, db_column='id', primary_key=True)
     created = models.DateTimeField(editable=False)
     modified = models.DateTimeField(editable=False)
     fdid = models.CharField(max_length=10, editable=False)
