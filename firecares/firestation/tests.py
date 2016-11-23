@@ -94,6 +94,8 @@ class FireStationTests(TestCase):
         self.username = 'admin'
         self.password = 'admin'
         self.user, created = User.objects.get_or_create(username=self.username, is_superuser=True)
+        self.user.userprofile.has_accepted_terms = True
+        self.user.userprofile.save()
 
         if created:
             self.user.set_password(self.password)
@@ -102,16 +104,34 @@ class FireStationTests(TestCase):
         self.non_admin = 'non_admin'
         self.non_admin_password = 'non_admin'
         self.non_admin_user, created = User.objects.get_or_create(username=self.non_admin)
+        self.non_admin_user.userprofile.has_accepted_terms = True
+        self.non_admin_user.userprofile.save()
 
         if created:
             self.non_admin_user.set_password(self.non_admin_password)
             self.non_admin_user.save()
+
+        self.non_accepted = 'non_accepted'
+        self.non_accepted_password = 'non_accepted'
+        self.non_accepted_user, created = User.objects.get_or_create(username=self.non_accepted)
+        self.non_accepted_user.userprofile.save()
+
+        if created:
+            self.non_accepted_user.set_password(self.non_accepted_password)
+            self.non_accepted_user.save()
 
     def assert_redirect_to_login(self, response):
         self.assertEqual(response.status_code, 302)
         split = urlsplit(response.url)
         shimmed = urlsplit(urlunsplit((split.scheme, split.netloc, split.path + '/', split.query, split.fragment)))
         self.assertEqual(resolve(shimmed.path).url_name, 'login')
+
+    def assert_redirect_to(self, response, route_name):
+        self.assertEqual(response.status_code, 302)
+        split = urlsplit(response.url)
+        path = split.path if split.path.endswith('/') else split.path + '/'
+        shimmed = urlsplit(urlunsplit((split.scheme, split.netloc, path, split.query, split.fragment)))
+        self.assertEqual(resolve(shimmed.path).url_name, route_name)
 
     def create_firestation(self, **kwargs):
         return FireStation.objects.create(station_number=25, name='Test Station', geom=Point(35, -77),
@@ -1240,3 +1260,19 @@ class FireStationTests(TestCase):
         data['text'] = 'test'
         response = c.post(reverse('slack'), data)
         self.assertEqual(response.status_code, 403)
+
+    def test_disclaimer(self):
+        c = Client()
+
+        response = c.get(reverse('disclaimer'))
+        self.assert_redirect_to_login(response)
+
+        c.login(**{'username': self.non_accepted, 'password': self.non_accepted_password})
+        response = c.get(reverse('firedepartment_list'))
+        self.assert_redirect_to(response, 'disclaimer')
+
+        response = c.post(reverse('disclaimer') + '?next=/departments/')
+        self.assert_redirect_to(response, 'firedepartment_list')
+
+        response = c.post(reverse('disclaimer'))
+        self.assert_redirect_to(response, 'firestation_home')

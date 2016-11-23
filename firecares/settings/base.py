@@ -232,6 +232,8 @@ LOGGING = {
     }
 }
 
+SILENCED_SYSTEM_CHECKS = ['fields.W342']
+
 TASTYPIE_DEFAULT_FORMATS = ['json', 'xml']
 
 # Celery settings.
@@ -289,3 +291,5 @@ SLACK_ICON_EMOJI = os.getenv('SLACK_ICON_EMOJI', ':goberserk:')
 SLACK_USERNAME = os.getenv('SLACK_USERNAME', 'edgebot')
 SLACK_FIRECARES_COMMAND_TOKEN = os.getenv('SLACK_FIRECARES_COMMAND_TOKEN', 'edgebot')
 DOCUMENT_UPLOAD_BUCKET = os.getenv('DOCUMENT_UPLOAD_BUCKET', 'firecares-uploads')
+
+IS_PUBLIC = False

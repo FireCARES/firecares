@@ -1,0 +1,50 @@
+{% extends "firestation/_conservative_base.html" %}
+
+{% block page_title %}
+FireCARES · FireCARES Disclaimer and Terms of Use
+{% endblock %}
+
+{% block meta_description %}
+Disclaimer and terms of use for the FireCARES project.
+{% endblock %}
+
+{% block title %}
+FireCARES Disclaimer and Terms of Use
+{% endblock %}
+
+{% block scrollspy %}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'firestation_home' %}">Home</a>
+    <a href="#">Disclaimer</a>
+{% endblock %}
+
+{% block section %}
+<header class="ct-mediaSection" data-stellar-background-ratio="0.3" data-type="parallax" data-bg-image="{{STATIC_URL}}images/firefighter-header.jpg" data-bg-image-mobile="assets/images/content/registration-parallax.jpg">
+    <div class="ct-mediaSection-inner">
+        <div class="container">
+            <div class="col-md-12">
+                <div class="row">
+                    Bacon ipsum dolor amet pancetta shank cupim kevin. Drumstick picanha ribeye meatball shank short ribs. Rump kevin burgdoggen pork belly cow. Ham shank porchetta pork short ribs, pork chop capicola shankle jerky sausage boudin sirloin strip steak filet mignon beef. Shank prosciutto pork loin chicken, ribeye brisket cupim frankfurter doner short ribs rump cow capicola. Chuck flank pancetta frankfurter pork chop meatloaf brisket t-bone.
+
+Shankle turkey beef ribs, jowl cow filet mignon brisket doner picanha. Frankfurter flank pork spare ribs turkey brisket bresaola picanha tri-tip. Flank rump shankle, tongue shank beef beef ribs filet mignon bresaola hamburger landjaeger brisket boudin pork chop prosciutto. Boudin sirloin short ribs pork.
+
+Kevin jowl bresaola rump corned beef boudin short loin beef ribs bacon shankle short ribs leberkas meatloaf. Landjaeger short loin kevin turkey, flank corned beef filet mignon boudin rump beef pork loin. Ham boudin shankle leberkas short loin. T-bone pork strip steak, cupim burgdoggen flank ground round porchetta tenderloin. Frankfurter ball tip beef ribs strip steak turkey cow. Salami bacon shankle meatloaf ball tip pastrami boudin brisket meatball burgdoggen.
+
+Pastrami cupim tri-tip doner. Chuck ham frankfurter hamburger turkey filet mignon. Meatball chicken turducken hamburger shoulder leberkas cupim capicola salami ball tip tail tongue drumstick prosciutto pig. Bresaola hamburger tenderloin leberkas kielbasa chicken beef ribs porchetta chuck. Capicola jerky pork, doner ground round beef short ribs rump spare ribs ham tri-tip alcatra burgdoggen hamburger. Pastrami corned beef tenderloin, brisket porchetta tongue doner frankfurter burgdoggen shankle bresaola salami.
+
+Sirloin sausage cow, beef ribs jerky fatback pancetta ribeye hamburger pastrami kevin ham hock tri-tip tenderloin alcatra. Boudin rump beef ribs shank pancetta chuck tongue tenderloin salami. Bacon ham picanha kielbasa meatball tenderloin turkey short loin brisket, beef ribs andouille. Brisket t-bone bacon landjaeger cow beef alcatra, kevin pork chop. Filet mignon ham rump, spare ribs meatloaf cow turkey jowl swine andouille.
+                </div>
+                <div class="row ct-u-marginTop50">
+                    <form class="accept-terms" method="POST" action="">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-primary" value="I accept these terms"/>
+                        <a href="{% url 'firestation_home' %}" class="btn btn-default">I do not accept these terms</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+{% endblock %}

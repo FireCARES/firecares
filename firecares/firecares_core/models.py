@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from geopy.geocoders import GoogleV3
@@ -7,6 +8,7 @@ from time import sleep
 from django.utils import timezone
 from reversion import revisions as reversion
 from django.conf import settings
+from annoying.fields import AutoOneToOneField
 
 
 class RecentlyUpdatedMixin(models.Model):
@@ -173,5 +175,14 @@ class AccountRequest(models.Model):
 
     def __unicode__(self):
         return "%s (%s)" % (self.email, self.created_at)
+
+
+class UserProfile(models.Model):
+    """
+    Model to store additional user information.
+    """
+    user = AutoOneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    has_accepted_terms = models.BooleanField(default=False)
+
 
 reversion.register(Address)

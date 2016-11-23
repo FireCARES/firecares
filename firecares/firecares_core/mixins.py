@@ -1,6 +1,7 @@
 import hashlib
 import logging
-from django.contrib.auth.decorators import login_required
+from django.conf import settings
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.cache import cache_page
 
 logger = logging.getLogger(__name__)
@@ -43,4 +44,8 @@ class LoginRequiredMixin(object):
     @classmethod
     def as_view(cls, **initkwargs):
         view = super(LoginRequiredMixin, cls).as_view(**initkwargs)
-        return login_required(view)
+        if settings.IS_PUBLIC:
+            # also require disclaimer to be accepted
+            return login_required(user_passes_test(lambda u: u.is_authenticated() and u.userprofile.has_accepted_terms, login_url='/disclaimer/')(view))
+        else:
+            return login_required(view)

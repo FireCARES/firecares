@@ -1,6 +1,11 @@
 from .models import Address, ContactRequest, AccountRequest
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.gis import admin
+from firecares.firecares_core.models import UserProfile
+
+User = get_user_model()
 
 
 class LocalOpenLayersAdmin(admin.OSMGeoAdmin):
@@ -23,6 +28,17 @@ class AccountRequestAdmin(LocalOpenLayersAdmin):
     search_fields = ['email']
 
 
+class ProfileInline(admin.StackedInline):
+    model = UserProfile
+    can_delete = False
+
+
+class UserAdmin(BaseUserAdmin):
+    inlines = [ProfileInline]
+
+
 admin.site.register(Address, AddressAdmin)
 admin.site.register(ContactRequest, ContactRequestAdmin)
 admin.site.register(AccountRequest, AccountRequestAdmin)
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)

@@ -11711,6 +11711,12 @@ form[name='boundaryUpload'] a.commit:hover {
   color: #F29A00;
   border-bottom: 1px dotted;
 }
+.accept-terms {
+  text-align: center;
+}
+.accept-terms input {
+  width: auto;
+}
 .ct-pageWrapper {
   background-color: #ffffff;
   overflow: hidden;

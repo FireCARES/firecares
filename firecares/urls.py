@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.views.defaults import page_not_found
 from django.views.generic import TemplateView
 from .firecares_core.forms import FirecaresPasswordResetForm
-from .firecares_core.views import ForgotUsername, ContactUs, AccountRequestView, ShowMessage
+from .firecares_core.views import ForgotUsername, ContactUs, AccountRequestView, ShowMessage, Disclaimer
 from .firestation.api import StaffingResource, FireStationResource, FireDepartmentResource
 from tastypie.api import Api
 from firestation.views import Home
@@ -69,6 +69,8 @@ urlpatterns = patterns('',
     url(r'', include(importer_api.urls)),
 )
 
+if settings.IS_PUBLIC:
+    urlpatterns += patterns('', url(r'^disclaimer/$', Disclaimer.as_view(), name='disclaimer'),)
 
 # urlpatterns += importer_urlpatterns
 
