@@ -30,6 +30,7 @@ class MinorCivilDivisionAdmin(LocalOpenLayersAdmin):
     list_filter = ['state_name', 'fcode']
     search_fields = ['minorcivildivision_name', 'state_name']
 
+
 admin.site.register(Reserve, ReserveAdmin)
 admin.site.register(IncorporatedPlace, IncorporatedPlaceAdmin)
 admin.site.register(UnincorporatedPlace, IncorporatedPlaceAdmin)

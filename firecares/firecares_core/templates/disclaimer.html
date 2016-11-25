@@ -40,7 +40,7 @@ Sirloin sausage cow, beef ribs jerky fatback pancetta ribeye hamburger pastrami 
                     <form class="accept-terms" method="POST" action="">
                         {% csrf_token %}
                         <input type="submit" class="btn btn-primary" value="I accept these terms"/>
-                        <a href="{% url 'firestation_home' %}" class="btn btn-default">I do not accept these terms</a>
+                        <a href="{% url 'logout' %}?next=/" class="btn btn-default">I do not accept these terms</a>
                     </form>
                 </div>
             </div>

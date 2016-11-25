@@ -1,21 +1,21 @@
-from .models import RecentlyUpdatedMixin, AccountRequest
-from firecares.firestation.models import FireDepartment
-
+from .base import BaseFirecaresTestcase
 from datetime import timedelta
-from urlparse import urlsplit, urlunsplit
+from urlparse import urlsplit
 from django.contrib.auth import get_user_model, authenticate
 from django.conf import settings
 from django.core import mail
 from django.core.management import call_command
 from django.core.urlresolvers import reverse, resolve
-from django.test import Client, TestCase
+from django.test import Client
 from django.utils import timezone
 from bs4 import BeautifulSoup
+from firecares.firecares_core.models import RecentlyUpdatedMixin, AccountRequest
+from firecares.firestation.models import FireDepartment
 
 User = get_user_model()
 
 
-class CoreTests(TestCase):
+class CoreTests(BaseFirecaresTestcase):
     fixtures = ['test_forgot.json']
 
     def test_sitemap(self):
@@ -54,17 +54,6 @@ class CoreTests(TestCase):
         c = Client()
         response = c.get('/')
         self.assertEqual(response.status_code, 200)
-
-    def test_departments_requires_login(self):
-        """
-        Ensures the home page requires login.
-        Note: This is just until we are out of closed beta.
-        """
-
-        c = Client()
-        response = c.get('/departments')
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue('login' in response.url)
 
     def test_recently_updated(self):
         """
@@ -220,17 +209,11 @@ class CoreTests(TestCase):
         c = Client()
         resp = c.get(reverse('password_change'))
         # Should redirect to login view since password_change requires a logged-in user
-        self.assertEqual(resp.status_code, 302)
-
-        # Weird behavior on this 302 to /login, it *should* have a trailing slash, but doesn't
-        split = urlsplit(resp.url)
-        shimmed = urlsplit(urlunsplit((split.scheme, split.netloc, split.path + '/', split.query, split.fragment)))
-        self.assertEquals(resolve(shimmed.path).url_name, 'login')
+        self.assert_redirect_to_login(resp)
 
         # Should redirect to the password_change page after login
-        resp = c.post(shimmed.path + '?' + shimmed.query, {'username': 'tester_mcgee', 'password': 'test'})
-        self.assertEqual(resp.status_code, 302)
-        self.assertEqual(resolve(urlsplit(resp.url).path).url_name, 'password_change')
+        resp = c.post(reverse('login') + '?next=' + reverse('password_change'), {'username': 'tester_mcgee', 'password': 'test'})
+        self.assert_redirect_to(resp, 'password_change')
 
         # Fill out the change password form w/ invalid old password_change
         resp = c.post(reverse('password_change'), {'old_password': 'badpassword'})

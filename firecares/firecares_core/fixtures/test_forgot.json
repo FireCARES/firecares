@@ -15,5 +15,14 @@
         "date_joined": "2015-08-28T02:17:55Z"
     },
     "model": "auth.user"
+},
+{
+    "fields": {
+        "user": [
+            "tester_mcgee"
+        ],
+        "has_accepted_terms": true
+    },
+    "model": "firecares_core.userprofile"
 }
 ]

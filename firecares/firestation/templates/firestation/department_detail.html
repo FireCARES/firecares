@@ -19,12 +19,12 @@
     {% include 'firestation/_favicon.html' %}
     {% include "firestation/_firecares_style.html" %}
 
-
     <script type="text/javascript">
     var config = {
       geom: {{ object.geom.json|safe|default:"null" }},
       centroid: [{{ object.headquarters_address.geom.centroid.y }}, {{ object.headquarters_address.geom.centroid.x }}],
-      id: {{object.id}}
+      id: {{object.id}},
+      showParcels: {{ can_change|yesno:"true,false"}}
     }
     </script>
     {% include 'google_analytics.html' %}
@@ -118,7 +118,7 @@
 
                         <div class="ct-u-displayTableCell text-right">
                             <a href="" class="usgs-update-link" ng-click="toggleFullScreenMap()"><i class="fa fa-arrows-alt"></i> View Fullscreen Map</a>
-                            {% if perms.firestation.change_firedepartment %}
+                            {% if user_can_change %}
                             <div class="dropdown pull-right">
                               <a href="" class="usgs-update-link dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                 <i class="fa fa-cog"></i>
@@ -161,7 +161,7 @@
                             {% endif %}
                         </div>
                     </div>
-                    {% if perms.firestation.change_firedepartment %}
+                    {% if user_can_change %}
                     <div class="ng-cloak">
                         <div ng-show="shp">
                             <form name="boundaryUpload">
@@ -426,10 +426,11 @@
                                     </tbody>
                                 </table>
                             </div>
+
                             <a name = "stations"></a>
                             {% if not firestations %}
                             <div class="ct-heading ct-u-marginBottom20">
-                            <h3>No stations linked to this department </h3>
+                                <h3>No stations linked to this department </h3>
                             </div>
                             {% else %}
 
@@ -458,16 +459,20 @@
                 <div class="col-md-4 col-lg-3">
                     <div class="ct-js-sidebar">
                         <div class="row">
+                            {% if user.is_authenticated %}
                             <div class="col-sm-6 col-md-12 ct-u-marginBottom30">
                                 <gauge description="This department is {{ object.dist_model_score|floatformat }} seconds over the industry standard."
                                        metric-title="Performance Score" min="{{ population_stats.dist_model_score__min|floatformat }}"
                                        max="{{ population_stats.dist_model_score__max|floatformat }}" value="{{ object.dist_model_score|floatformat }}" inverse learn-more="{% url 'models_performance_score' %}"></gauge>
+
                             </div>
+                            {% endif %}
                             <div class="col-sm-6 col-md-12 ct-u-marginBottom10">
                                 <!-- Safe Grade Cards -->
                                 <div class="metric-cards-title">
                                     <h4>Safe Grades</h4>
                                 </div>
+                                {% if user.is_authenticated %}
                                 <div class="metric-card">
                                     <div class="main-content">
                                         <div class="main-text">
@@ -490,14 +495,14 @@
                                 </div>
 
                                 <div class="metric-card">
-                                    <label class="control-label {{ dist_model_residential_fires_quartile|risk_level|default_if_none:"unavailable"  }}">{{ dist_model_residential_fires_quartile|grade|default_if_none:"not available"  }}</label>
+                                    <label class="control-label {{ dist_model_residential_fires_quartile|risk_level|default_if_none:"unavailable" }}">{{ dist_model_residential_fires_quartile|grade|default_if_none:"not available"  }}</label>
                                     <div class="main-content">
                                         <div class="main-text">
                                             <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
                                                 Assessment of performance score based on the number of fires.
                                             </div>
                                             <div class="description">
-                                                This department's performance score is {{ dist_model_residential_fires_quartile|grade|default_if_none:"not available"  }} when compared to other fire departments with communities of the same size classification and in the {{ object.population_metrics_row.risk_model_fires_quartile|risk_level|default:'unknown' }} risk category for the number of fires.
+                                                This department's performance score is {{ dist_model_residential_fires_quartile|grade|default_if_none:"not available" }} when compared to other fire departments with communities of the same size classification and in the {{ object.population_metrics_row.risk_model_fires_quartile|risk_level|default:'unknown' }} risk category for the number of fires.
                                             </div>
 
                                             <!-- Dist Score compared against departments in the same population class with a similar fire risk -->
@@ -688,8 +693,23 @@
                                       value="{{ object.risk_model_fires }}"
                                       color="#F5C97E"></div>
                                  {% endcomment %}
-                            </div>
 
+                                {% else %}
+                                    <div class="metric-card">
+                                        <div class="main-content">
+                                            <div class="main-text">
+                                                <div class="community-risk-legend safe-grade-legend text-center">
+                                                    <div>
+                                                        <span class="help-text">
+                                                            <a href="{% url 'login' %}?next={% url 'firedepartment_detail' object.id %}">Please login to see this information</a>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
 
                         </div>
                     </div>

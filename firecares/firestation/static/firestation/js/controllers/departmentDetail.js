@@ -208,48 +208,50 @@
           },
 
           onClick: function(evt) {
-            var message = 'No parcel data found at this location.';
-            if (evt.feature != null) {
-                message = '';
+            if (config.showParcels) {
+              var message = 'No parcel data found at this location.';
+              if (evt.feature != null) {
+                  message = '';
 
-                var items = {
-                    'Address': 'addr',
-                    'City': 'city',
-                    'State': 'state',
-                    'Zip': 'zip',
-                    'Building Sq Footage': 'bld_sq_ft',
-                    'Stories': 'story_nbr',
-                    'Units': 'units_nbr',
-                    'Condition': 'condition',
-                    'Year Built': 'yr_blt',
-                    'Rooms': 'rooms',
-                    'Bed Rooms': 'bed_rooms',
-                    'Total Value': 'tot_val',
-                    'Land Value': 'lan_val',
-                    'Improvements Value': 'imp_val'
-                };
+                  var items = {
+                      'Address': 'addr',
+                      'City': 'city',
+                      'State': 'state',
+                      'Zip': 'zip',
+                      'Building Sq Footage': 'bld_sq_ft',
+                      'Stories': 'story_nbr',
+                      'Units': 'units_nbr',
+                      'Condition': 'condition',
+                      'Year Built': 'yr_blt',
+                      'Rooms': 'rooms',
+                      'Bed Rooms': 'bed_rooms',
+                      'Total Value': 'tot_val',
+                      'Land Value': 'lan_val',
+                      'Improvements Value': 'imp_val'
+                  };
 
-                _.each(_.pairs(items), function(pair){
-                    var key = pair[0];
-                    var value = evt.feature.properties[pair[1]];
+                  _.each(_.pairs(items), function(pair){
+                      var key = pair[0];
+                      var value = evt.feature.properties[pair[1]];
 
-                    if (key.indexOf('Value') !== -1 && value != null) {
-                        value = $filter('currency')(value, '$', 0);
-                    }
+                      if (key.indexOf('Value') !== -1 && value != null) {
+                          value = $filter('currency')(value, '$', 0);
+                      }
 
-                    if ((key === 'Building Sq Footage' || key === 'Units') && value != null) {
-                        value = $filter('number')(value, 0);
-                    }
+                      if ((key === 'Building Sq Footage' || key === 'Units') && value != null) {
+                          value = $filter('number')(value, 0);
+                      }
 
-                    value = value ? value : 'Unknown';
-                    message += '<b>' + key + ':</b> ' + value + '</br>';
-                });
+                      value = value ? value : 'Unknown';
+                      message += '<b>' + key + ':</b> ' + value + '</br>';
+                  });
 
-                L.popup()
-                    .setLatLng(evt.latlng)
-                    .setContent(message)
-                    .openOn(departmentMap);
+                  L.popup()
+                      .setLatLng(evt.latlng)
+                      .setContent(message)
+                      .openOn(departmentMap);
 
+              }
             }
           }
         });

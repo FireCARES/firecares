@@ -2,82 +2,31 @@ import json
 import os
 import requests
 import string
-from .forms import StaffingForm
-from .models import FireDepartment, FireStation, Staffing, PopulationClass9Quartile, IntersectingDepartmentLog
 from django.db import connections
-from django.test import TestCase, override_settings
 from django.test.client import Client
 from django.conf import settings
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
-from django.core.urlresolvers import reverse, resolve
+from django.core.urlresolvers import reverse
 from django.contrib.gis.geos import Point, Polygon, MultiPolygon
 from django.contrib.auth import get_user_model
 from firecares.usgs.models import UnincorporatedPlace, MinorCivilDivision
 from firecares.firecares_core.models import Address, Country
-from firecares.firestation.models import Document
+from firecares.firestation.forms import StaffingForm
+from firecares.firestation.models import Document, FireDepartment, FireStation, Staffing, PopulationClass9Quartile, IntersectingDepartmentLog
 from firecares.firestation.templatetags.firecares import quartile_text, risk_level
 from firecares.firestation.managers import CalculationsQuerySet
-from urlparse import urlsplit, urlunsplit
 from reversion.models import Revision
 from reversion import revisions as reversion
+from firecares.firecares_core.tests.base import BaseFirecaresTestcase
 from firecares.importers import GeoDjangoImport
 from firecares.tasks.quality_control import test_all_departments_urls
-from favit.models import Favorite
 
 User = get_user_model()
 
 
-class FireStationTests(TestCase):
-
-    def test_favorite_stations_list_view(self):
-        """
-        Tests the favorite stations list view.
-        """
-        fd = FireDepartment.objects.create(name='Fire Department 1')
-        fs1 = FireStation.create_station(department=fd, address_string='1', name='Fire Station 1')
-        fs2 = FireStation.create_station(department=fd, address_string='1', name='Fire Station 2')
-        fs3 = FireStation.create_station(department=fd, address_string='1', name='Fire Station 3')
-        # add these stations as favorites and remove the last one
-        user = User.objects.get(username='admin')
-        Favorite.objects.create(user, fs1)
-        Favorite.objects.create(user, fs2)
-        fav = Favorite.objects.create(user, fs3)
-        fav.delete()
-
-        c = Client()
-        c.login(**{'username': 'admin', 'password': 'admin'})
-
-        response = c.get(reverse('firestation_favorite_list'))
-        self.assertTrue(fs1 in response.context['object_list'])
-        self.assertTrue(fs2 in response.context['object_list'])
-        self.assertTrue(fs3 not in response.context['object_list'])
-        self.assertEqual(response.status_code, 200)
-
-    def test_favorite_departments_list_view(self):
-        """
-        Tests the favorite departments list view.
-        """
-        fd1 = FireDepartment.objects.create(name='Fire Department 1')
-        fd2 = FireDepartment.objects.create(name='Fire Department 2')
-        fd3 = FireDepartment.objects.create(name='Fire Department 3')
-        # add these departments as favorites and remove the last one
-        user = User.objects.get(username='admin')
-        Favorite.objects.create(user, fd1)
-        Favorite.objects.create(user, fd2)
-        fav = Favorite.objects.create(user, fd3)
-        fav.delete()
-
-        c = Client()
-        c.login(**{'username': 'admin', 'password': 'admin'})
-
-        response = c.get(reverse('firedepartment_list') + '?favorites=true')
-        self.assertTrue(fd1 in response.context['object_list'])
-        self.assertTrue(fd2 in response.context['object_list'])
-        self.assertTrue(fd3 not in response.context['object_list'])
-        self.assertEqual(response.status_code, 200)
-
+class FireStationTests(BaseFirecaresTestcase):
     def test_firestation_website_links(self):
         FireDepartment.objects.create(name='Good', website='http://www.google.com')
         test_all_departments_urls()
@@ -86,84 +35,7 @@ class FireStationTests(TestCase):
         test_all_departments_urls()
         self.assertTrue(len(mail.outbox) == 1, "email not sent to admin with errors")
 
-    def setUp(self):
-        self.response_capability_enabled = True
-        self.current_api_version = 'v1'
-        self.fire_station = self.create_firestation()
-
-        self.username = 'admin'
-        self.password = 'admin'
-        self.user, created = User.objects.get_or_create(username=self.username, is_superuser=True)
-        self.user.userprofile.has_accepted_terms = True
-        self.user.userprofile.save()
-
-        if created:
-            self.user.set_password(self.password)
-            self.user.save()
-
-        self.non_admin = 'non_admin'
-        self.non_admin_password = 'non_admin'
-        self.non_admin_user, created = User.objects.get_or_create(username=self.non_admin)
-        self.non_admin_user.userprofile.has_accepted_terms = True
-        self.non_admin_user.userprofile.save()
-
-        if created:
-            self.non_admin_user.set_password(self.non_admin_password)
-            self.non_admin_user.save()
-
-        self.non_accepted = 'non_accepted'
-        self.non_accepted_password = 'non_accepted'
-        self.non_accepted_user, created = User.objects.get_or_create(username=self.non_accepted)
-        self.non_accepted_user.userprofile.save()
-
-        if created:
-            self.non_accepted_user.set_password(self.non_accepted_password)
-            self.non_accepted_user.save()
-
-    def assert_redirect_to_login(self, response):
-        self.assertEqual(response.status_code, 302)
-        split = urlsplit(response.url)
-        shimmed = urlsplit(urlunsplit((split.scheme, split.netloc, split.path + '/', split.query, split.fragment)))
-        self.assertEqual(resolve(shimmed.path).url_name, 'login')
-
-    def assert_redirect_to(self, response, route_name):
-        self.assertEqual(response.status_code, 302)
-        split = urlsplit(response.url)
-        path = split.path if split.path.endswith('/') else split.path + '/'
-        shimmed = urlsplit(urlunsplit((split.scheme, split.netloc, path, split.query, split.fragment)))
-        self.assertEqual(resolve(shimmed.path).url_name, route_name)
-
-    def create_firestation(self, **kwargs):
-        return FireStation.objects.create(station_number=25, name='Test Station', geom=Point(35, -77),
-                                          **kwargs)
-
-    def test_firestation_detail_page_requires_login(self):
-        """
-        Ensures that the firestation detail page redirects to login for unauthoized users
-        """
-
-        call_command('loaddata', 'firecares/firestation/fixtures/test_firestation_detail.json')
-
-        c = Client()
-
-        fs = FireStation.objects.filter(id=46971).first()
-
-        # Make sure that we're redirected to login since we're not yet authenticated
-        response = c.get(reverse('firestation_detail', args=[fs.pk]))
-        self.assert_redirect_to_login(response)
-        response = c.get(reverse('firestation_detail_slug', args=[fs.pk, fs.slug]))
-        self.assert_redirect_to_login(response)
-
-        c.login(**{'username': 'admin', 'password': 'admin'})
-
-        # Make sure that we get back a valid page for both the regular route + slug route
-        response = c.get(reverse('firestation_detail', args=[fs.pk]))
-        self.assertEqual(response.status_code, 200)
-        # Ensure that the slug works as well
-        response = c.get(reverse('firestation_detail_slug', args=[fs.pk, fs.slug]))
-        self.assertEqual(response.status_code, 200)
-
-    def test_authentication(self):
+    def test_api_authentication(self):
         """
         Tests users have to be authenticated to GET resources.
         """
@@ -175,7 +47,7 @@ class FireStationTests(TestCase):
             response = c.get(url)
             self.assertEqual(response.status_code, 401)
 
-            c.login(**{'username': 'admin', 'password': 'admin'})
+            c.login(**self.admin_creds)
             response = c.get(url)
             self.assertEqual(response.status_code, 200)
             c.logout()
@@ -189,7 +61,7 @@ class FireStationTests(TestCase):
         station_uri = '{0}{1}/'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'firestations']),
                                        self.fire_station.id)
         c = Client()
-        c.login(**{'username': 'admin', 'password': 'admin'})
+        c.login(**self.admin_creds)
 
         capability = dict(id=2,  # shouldn't have to put the id here
                           firestation=station_uri,
@@ -216,7 +88,7 @@ class FireStationTests(TestCase):
                                                    args=[self.current_api_version, 'staffing']), capability.id)
 
         c = Client()
-        c.login(**{'username': 'admin', 'password': 'admin'})
+        c.login(**self.admin_creds)
 
         params = dict(personnel=4, apparatus='Engine')
 
@@ -239,7 +111,7 @@ class FireStationTests(TestCase):
                                                    args=[self.current_api_version, 'staffing']), capability.id)
 
         c = Client()
-        c.login(**{'username': 'admin', 'password': 'admin'})
+        c.login(**self.admin_creds)
 
         response = c.delete(url)
         self.assertEqual(response.status_code, 204)
@@ -272,7 +144,7 @@ class FireStationTests(TestCase):
         station_uri = '{0}{1}/'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'firestations']),
                                        self.fire_station.id)
         c = Client()
-        c.login(**{'username': 'admin', 'password': 'admin'})
+        c.login(**self.admin_creds)
 
         capability = dict(id=2,  # shouldn't have to put the id here
                           firestation=station_uri,
@@ -298,7 +170,7 @@ class FireStationTests(TestCase):
                                                        self.fire_station.id
                                                        )
         c = Client()
-        c.login(**{'username': 'admin', 'password': 'admin'})
+        c.login(**self.admin_creds)
         response = c.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -310,7 +182,7 @@ class FireStationTests(TestCase):
         url = '{0}{1}/'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'firestations']),
                                self.fire_station.id)
         c = Client()
-        c.login(**{'username': 'admin', 'password': 'admin'})
+        c.login(**self.admin_creds)
 
         response = c.delete(url)
         self.assertEqual(response.status_code, 405)
@@ -322,7 +194,7 @@ class FireStationTests(TestCase):
 
         count = FireStation.objects.all().count()
         c = Client()
-        c.login(**{'username': 'admin', 'password': 'admin'})
+        c.login(**self.admin_creds)
 
         response = c.get(url)
         js = json.loads(response.content)
@@ -335,7 +207,7 @@ class FireStationTests(TestCase):
         self.assertTrue(FireStation.objects.get(id=self.fire_station.id).archived)
 
         # test as non_admin
-        c.login(**{'username': 'non_admin', 'password': 'non_admin'})
+        c.login(**self.non_admin_creds)
         response = c.get(url)
         js = json.loads(response.content)
 
@@ -354,7 +226,7 @@ class FireStationTests(TestCase):
                                self.fire_station.id)
 
         c = Client()
-        c.login(**{'username': 'non_admin', 'password': 'non_admin'})
+        c.login(**self.non_admin_creds)
 
         response = c.get(url)
         self.assertEqual(response.status_code, 200)
@@ -410,28 +282,6 @@ class FireStationTests(TestCase):
         fd.population_class = 11
         self.assertIsNone(fd.population_metrics_table)
 
-    def test_department_detail_view_requires_login(self):
-        """
-        Ensures the department pages require login.
-        Note: This is just until we are out of closed beta.
-        """
-
-        fd = FireDepartment.objects.create(name='Test db', population=0)
-        c = Client()
-        response = c.get(fd.get_absolute_url())
-        self.assert_redirect_to_login(response)
-
-    def test_department_list_view_requires_login(self):
-        """
-        Ensures the department list view requires login.
-        Note: This is just until we are out of closed beta.
-        """
-
-        FireDepartment.objects.create(name='Test db', population=0)
-        c = Client()
-        response = c.get('/departments')
-        self.assert_redirect_to_login(response)
-
     def test_convenience_methods(self):
         """
         Make sure the size2_and_greater_percentile_sum and deaths_and_injuries_sum methods do not throw errors.
@@ -485,7 +335,7 @@ class FireStationTests(TestCase):
 
         # make sure the department page does not return an error
         c = Client()
-        c.login(**{'username': 'admin', 'password': 'admin'})
+        c.login(**self.admin_creds)
         response = c.get(fd.get_absolute_url())
         self.assertEqual(response.status_code, 200)
 
@@ -634,7 +484,7 @@ class FireStationTests(TestCase):
         rfd = FireDepartment.objects.create(name='Richmond', population=0, population_class=9, state='VA')
 
         c = Client()
-        c.login(**{'username': 'admin', 'password': 'admin'})
+        c.login(**self.admin_creds)
         response = c.get(reverse('firedepartment_list'), {'q': 'Ca'})
         self.assertTrue(lafd in response.context['object_list'])
         self.assertFalse(rfd in response.context['object_list'])
@@ -675,7 +525,7 @@ class FireStationTests(TestCase):
 
         fd = FireDepartment.objects.create(name='Adak Volunteer Fire Department', population=None)
         c = Client()
-        c.login(**{'username': 'admin', 'password': 'admin'})
+        c.login(**self.admin_creds)
 
         # regression test default params do not filter out the object
         response = c.get('/departments?name=adak&state=&region=&fdid=&sortBy=&limit=')
@@ -702,7 +552,7 @@ class FireStationTests(TestCase):
         unrelated = FireDepartment.objects.create(name='Unrelated Fire Department', population=15000000)
 
         c = Client()
-        c.login(**{'username': 'admin', 'password': 'admin'})
+        c.login(**self.admin_creds)
 
         response = c.get(reverse('similar_departments_slug', args=[fd.id, fd.slug]))
         self.assertTrue(blueFD in response.context['object_list'])
@@ -731,7 +581,7 @@ class FireStationTests(TestCase):
         self.assert_redirect_to_login(response)
 
         # Login and make sure that we get a 200 back from the govt unit association update page
-        c.login(**{'username': 'admin', 'password': 'admin'})
+        c.login(**self.admin_creds)
         response = c.get(reverse('firedepartment_update_government_units', args=[fd.pk]))
         self.assertEqual(response.status_code, 200)
 
@@ -826,7 +676,7 @@ class FireStationTests(TestCase):
         """
 
         c = Client()
-        c.login(**{'username': 'admin', 'password': 'admin'})
+        c.login(**self.admin_creds)
 
         for route in ['fire-departments', 'staffing', 'firestations']:
             # Test to ensure that the default route returns JSON vs XML
@@ -963,7 +813,7 @@ class FireStationTests(TestCase):
         self.assertEqual(response.status_code, 302)
         sfu.seek(0)
 
-        c.login(**{'username': 'admin', 'password': 'admin'})
+        c.login(**self.admin_creds)
         response = c.post(reverse('uploads-new-json'), data={'file': sfu})
         self.assertEqual(response.status_code, 200)
         js = json.loads(response.content)
@@ -999,7 +849,7 @@ class FireStationTests(TestCase):
 
     def test_download_shapefile(self):
         c = Client()
-        c.login(**{'username': 'admin', 'password': 'admin'})
+        c.login(**self.admin_creds)
         us = Country.objects.create(iso_code='US', name='United States')
         add = Address.objects.create(address_line1='123 Test Drive', country=us)
 
@@ -1057,7 +907,7 @@ class FireStationTests(TestCase):
 
     def test_documents(self):
         c = Client()
-        c.login(**{'username': 'admin', 'password': 'admin'})
+        c.login(**self.admin_creds)
         try:
             fd = FireDepartment.objects.get(id=0)
         except FireDepartment.DoesNotExist:
@@ -1079,7 +929,7 @@ class FireStationTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
         # Ensure that the document is owned by the uploaded user
-        self.assertEqual(Document.objects.all().first().uploaded_by, self.user)
+        self.assertEqual(Document.objects.all().first().uploaded_by, self.admin_user)
 
         # Download document
         response = c.get(reverse('documents_file', args=[fd.id, filename]))
@@ -1091,7 +941,7 @@ class FireStationTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
         c.logout()
-        c.login(username=self.non_admin_user, password=self.non_admin_password)
+        c.login(**self.non_admin_creds)
 
         response = c.get(reverse('documents', args=[fd.id]))
         self.assertEqual(response.status_code, 200)
@@ -1136,7 +986,7 @@ class FireStationTests(TestCase):
                                                       geom=geom2)
 
         c = Client()
-        c.login(username=self.non_admin_user, password=self.non_admin_password)
+        c.login(**self.non_admin_creds)
         response = c.get(reverse('remove_intersecting_departments', args=[fd2.id]))
         self.assertEqual(response.status_code, 302)
 
@@ -1144,7 +994,7 @@ class FireStationTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
         c.logout()
-        c.login(username='admin', password='admin')
+        c.login(**self.admin_creds)
 
         response = c.get(reverse('remove_intersecting_departments', args=[fd2.id]))
         self.assertEqual(response.status_code, 200)
@@ -1166,7 +1016,7 @@ class FireStationTests(TestCase):
         self.assertEqual(log.parent, fd2)
         self.assertEqual(log.removed_department, fd)
 
-    def test_update_firedeparment_boundaries(self):
+    def test_update_firedepartment_boundaries(self):
         us = Country.objects.create(iso_code='US', name='United States')
         address = Address.objects.create(address_line1='Test', country=us, geom=Point(-118.42170426600454, 34.09700463377199))
         geom = MultiPolygon([Polygon([(-118.62170426600454, 33.897004633771985),
@@ -1210,7 +1060,7 @@ class FireStationTests(TestCase):
 }
 """
         c = Client()
-        c.login(username=self.non_admin_user, password=self.non_admin_password)
+        c.login(**self.non_admin_creds)
         url = '{root}{fd}/'.format(root=reverse('api_dispatch_list', args=[self.current_api_version, 'fire-departments']),
                                    fd=fd.id)
         # Ensure that a non-admin user can't update the department geom
@@ -1218,61 +1068,9 @@ class FireStationTests(TestCase):
         self.assertEqual(response.status_code, 401)
         c.logout()
 
-        c.login(**{'username': 'admin', 'password': 'admin'})
+        c.login(**self.admin_creds)
         response = c.put(url, data=new_geom, content_type='application/json')
         self.assertEqual(response.status_code, 204)
         response = c.get(url)
         # Verify new geometry
         self.assertDictEqual(json.loads(response.content).get('geom'), json.loads(new_geom).get('geom'))
-
-    @override_settings(SLACK_FIRECARES_COMMAND_TOKEN='test')
-    def test_clear_cache(self):
-        c = Client()
-        c.login(username=self.non_admin_user, password=self.non_admin_password)
-        response = c.get(reverse('slack'))
-        self.assertEqual(response.status_code, 405)
-
-        data = dict(token='fail',
-                    team_id='T0001',
-                    team_domain='example',
-                    channel_id='C2147483705',
-                    channel_name='test',
-                    user_id='U2147483697',
-                    user_name='Steve',
-                    command='/firecares',
-                    text='clear_cache',
-                    response_url='https://hooks.slack.com/commands/1234/5678')
-
-        response = c.post(reverse('slack'), data)
-        self.assertEqual(response.status_code, 403)
-
-        data['token'] = 'test'
-        response = c.post(reverse('slack'), data)
-        self.assertEqual(response.status_code, 200)
-
-        # sending an empty command should return help text
-        data['text'] = ''
-        response = c.post(reverse('slack'), data)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.get('Content-Type'), 'application/json')
-
-        # "text" holds the command which must be whitelisted in the view.
-        data['text'] = 'test'
-        response = c.post(reverse('slack'), data)
-        self.assertEqual(response.status_code, 403)
-
-    def test_disclaimer(self):
-        c = Client()
-
-        response = c.get(reverse('disclaimer'))
-        self.assert_redirect_to_login(response)
-
-        c.login(**{'username': self.non_accepted, 'password': self.non_accepted_password})
-        response = c.get(reverse('firedepartment_list'))
-        self.assert_redirect_to(response, 'disclaimer')
-
-        response = c.post(reverse('disclaimer') + '?next=/departments/')
-        self.assert_redirect_to(response, 'firedepartment_list')
-
-        response = c.post(reverse('disclaimer'))
-        self.assert_redirect_to(response, 'firestation_home')

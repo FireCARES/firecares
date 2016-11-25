@@ -4,6 +4,7 @@ from firecares.firecares_core.admin import LocalOpenLayersAdmin
 from django.contrib.gis import admin
 from autocomplete_light import ModelForm as AutocompleteModelForm
 from reversion.admin import VersionAdmin
+from guardian.admin import GuardedModelAdmin
 
 
 class FireStationAdminForm(AutocompleteModelForm):
@@ -41,7 +42,7 @@ class FireDepartmentAdminForm(AutocompleteModelForm):
         autocomplete_exclude = ('government_unit',)
 
 
-class FireDepartmentAdmin(VersionAdmin, LocalOpenLayersAdmin):
+class FireDepartmentAdmin(GuardedModelAdmin, VersionAdmin, LocalOpenLayersAdmin):
     form = FireDepartmentAdminForm
     search_fields = ['name']
     list_display = ['name', 'state', 'created', 'modified', 'archived']
@@ -64,6 +65,7 @@ class DocumentAdmin(admin.ModelAdmin):
 
 class IntersectingDepartmentLogAdmin(admin.ModelAdmin):
     pass
+
 
 admin.site.register(FireStation, FireStationAdmin)
 admin.site.register(FireDepartment, FireDepartmentAdmin)

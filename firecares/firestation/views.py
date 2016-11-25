@@ -64,13 +64,16 @@ class PaginationMixin(object):
         return context
 
 
-class DepartmentDetailView(LoginRequiredMixin, DetailView):
+class DepartmentDetailView(DetailView):
     model = FireDepartment
     template_name = 'firestation/department_detail.html'
     objects_per_page = 10
 
     def get_context_data(self, **kwargs):
         context = super(DepartmentDetailView, self).get_context_data(**kwargs)
+
+        context['user_can_change'] = self.request.user.is_authenticated() and self.request.user.has_perm('change_firedepartment', context['object'])
+        context['user_can_admin'] = self.request.user.is_authenticated() and self.request.user.has_perm('admin_firedepartment', context['object'])
 
         page = self.request.GET.get('page')
         paginator = Paginator(context['firedepartment'].firestation_set.filter(archived=False).order_by('station_number'), self.objects_per_page)
@@ -412,7 +415,7 @@ class LimitMixin(object):
         return context
 
 
-class FireDepartmentListView(LoginRequiredMixin, PaginationMixin, ListView, SafeSortMixin, LimitMixin,
+class FireDepartmentListView(PaginationMixin, ListView, SafeSortMixin, LimitMixin,
                              FeaturedDepartmentsMixin):
     model = FireDepartment
     paginate_by = 30
@@ -548,6 +551,12 @@ class FireStationFavoriteListView(LoginRequiredMixin, PaginationMixin, ListView,
 
 class FireStationDetailView(LoginRequiredMixin, DetailView):
     model = FireStation
+
+    def get_context_data(self, **kwargs):
+        context = super(FireStationDetailView, self).get_context_data(**kwargs)
+        context['user_can_change'] = self.request.user.is_authenticated() and self.request.user.has_perm('change_firedepartment', context['object'])
+        context['user_can_admin'] = self.request.user.is_authenticated() and self.request.user.has_perm('admin_firedepartment', context['object'])
+        return context
 
 
 class SpatialIntersectView(ListView):

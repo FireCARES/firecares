@@ -98,6 +98,11 @@ SECRET_KEY = '$keb7sv^%c+_7+94u6_!lc3%a-3ima9eh!xyj%$xa8yibv&ogr'
 # Leave as empty to prevent captcha verification
 RECAPTCHA_SECRET = ''
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'guardian.backends.ObjectPermissionBackend',
+)
+
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
@@ -125,6 +130,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'reversion.middleware.RevisionMiddleware',
+    'firecares.firecares_core.middleware.DisclaimerAcceptedMiddleware'
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -168,6 +174,7 @@ INSTALLED_APPS = (
     'djcelery',
     'reversion',
     'favit',
+    'guardian',
 )
 
 OSGEO_IMPORTER = 'firecares.importers.GeoDjangoImport'
@@ -291,5 +298,3 @@ SLACK_ICON_EMOJI = os.getenv('SLACK_ICON_EMOJI', ':goberserk:')
 SLACK_USERNAME = os.getenv('SLACK_USERNAME', 'edgebot')
 SLACK_FIRECARES_COMMAND_TOKEN = os.getenv('SLACK_FIRECARES_COMMAND_TOKEN', 'edgebot')
 DOCUMENT_UPLOAD_BUCKET = os.getenv('DOCUMENT_UPLOAD_BUCKET', 'firecares-uploads')
-
-IS_PUBLIC = False

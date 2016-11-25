@@ -308,6 +308,10 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
             ['population', 'id', 'region'],
             ['population', 'region']
         ]
+        # Department curation will be done via the built-in "change_firedepartment" permission
+        permissions = (
+            ('admin_firedepartment', 'Can administer department users'),
+        )
 
     @property
     def headquarters_geom(self):
@@ -1269,6 +1273,7 @@ class DocumentS3Storage(S3BotoStorage):
 
 def document_upload_to(instance, filename):
     return 'departments/' + str(instance.department.pk) + '/' + filename
+
 
 document_storage = DocumentS3Storage(bucket=settings.DOCUMENT_UPLOAD_BUCKET)
 # Use the default storage backend in testing mode when the AWS key and token are not provided.

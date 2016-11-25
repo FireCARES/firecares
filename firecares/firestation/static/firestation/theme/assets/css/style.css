@@ -11407,6 +11407,9 @@ table.residential-fires {
   font-weight: bold;
   padding-left: 3px;
 }
+.community-risk-legend.text-center .help-text {
+  padding-right: 0;
+}
 .circle {
   border-radius: 50%;
 }

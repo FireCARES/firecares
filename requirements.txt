@@ -35,3 +35,4 @@ django-tastypie==0.13.1
 beautifulsoup4==4.4.1
 -e git+https://github.com/ProminentEdge/django-favit.git#egg=favit
 django-annoying==0.10.3
+django-guardian==1.4.6
