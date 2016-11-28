@@ -6,6 +6,7 @@
       'fireStation.factories',
       'fireStation.homeController',
       'fireStation.departmentDetailController',
+      'fireStation.departmentDetailController.userAdmin',
       'fireStation.firestationDetailController',
       'fireStation.performanceScoreController',
       'fireStation.mapService',

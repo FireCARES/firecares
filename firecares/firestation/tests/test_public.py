@@ -1,6 +1,7 @@
-from django.test.client import Client
+from django.db import connections
 from django.core.management import call_command
 from django.core.urlresolvers import reverse
+from django.test.client import Client
 from firecares.firecares_core.tests.base import BaseFirecaresTestcase
 from firecares.firestation.models import FireDepartment, FireStation
 
@@ -69,3 +70,19 @@ class TestPublic(BaseFirecaresTestcase):
 
         response = c.post(reverse('disclaimer'))
         self.assert_redirect_to(response, 'firestation_home')
+
+    def test_public_does_not_see_safe_grades(self):
+        c = Client()
+
+        call_command('loaddata', 'firecares/firestation/fixtures/test_firestation_detail.json')
+        fd = FireDepartment.objects.filter(id=73842).first()
+
+        # Can't render the page refreshing the quartiles...
+        cursor = connections['default'].cursor()
+        cursor.execute("REFRESH MATERIALIZED VIEW population_class_6_quartiles;")
+
+        # Anonymous users shouldn't see anything in the "Safe grades" area (besides a prompt to login)
+        response = c.get(reverse('firedepartment_detail', args=[fd.pk]))
+        self.assertNotContains(response, 'seconds over the industry standard.')
+        self.assertNotContains(response, 'less than 25% of departments have an equal or better performance score.')
+        self.assertContains(response, 'Please login to see this information')

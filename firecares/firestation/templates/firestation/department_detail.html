@@ -118,45 +118,55 @@
 
                         <div class="ct-u-displayTableCell text-right">
                             <a href="" class="usgs-update-link" ng-click="toggleFullScreenMap()"><i class="fa fa-arrows-alt"></i> View Fullscreen Map</a>
-                            {% if user_can_change %}
+                            {% if user_can_change or user_can_admin%}
                             <div class="dropdown pull-right">
-                              <a href="" class="usgs-update-link dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                <i class="fa fa-cog"></i>
-                                Tools
-                              </a>
-                              <ul class="dropdown-menu in-front" aria-labelledby="dropdownMenu1">
-                                <li>
-                                    <a href="{% url 'department_boundary_shapefile' object.id object.slug %}">
-                                        <i class="fa fa-download"></i>
-                                        Download District Boundary
-                                        <span class="format">(shp)</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{% url 'firedepartment_update_government_units' object.id %}">
-                                        <i class="fa fa-edit"></i>
-                                        Update government units
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="" ng-click="toggleBoundary()" ng-class="{active: shp !== null}">
-                                        <i class="fa fa-cloud-upload"></i>
-                                        Upload Boundary
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="" ng-controller="ImportController" ng-click="open(null, '{{ STATIC_URL }}osgeo_importer/partials/uploadWizard.html', '{{ STATIC_URL }}mapstory/img/mapstory-icon.png', '{{STATIC_URL}}')">
-                                        <i class="fa fa-cloud-upload"></i>
-                                        Update Data
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{% url 'remove_intersecting_departments' object.id %}">
-                                        <i class="fa fa-scissors"></i>
-                                        Remove Intersections
-                                    </a>
-                                </li>
-                              </ul>
+                                <a href="" class="usgs-update-link dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                    <i class="fa fa-cog"></i>
+                                    Tools
+                                </a>
+                                <ul class="dropdown-menu in-front" aria-labelledby="dropdownMenu1">
+                                    {% if user_can_change %}
+                                    <li>
+                                        <a href="{% url 'department_boundary_shapefile' object.id object.slug %}">
+                                            <i class="fa fa-download"></i>
+                                            Download District Boundary
+                                            <span class="format">(shp)</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'firedepartment_update_government_units' object.id %}">
+                                            <i class="fa fa-edit"></i>
+                                            Update government units
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="" ng-click="toggleBoundary()" ng-class="{active: shp !== null}">
+                                            <i class="fa fa-cloud-upload"></i>
+                                            Upload Boundary
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="" ng-controller="ImportController" ng-click="open(null, '{{ STATIC_URL }}osgeo_importer/partials/uploadWizard.html', '{{ STATIC_URL }}mapstory/img/mapstory-icon.png', '{{STATIC_URL}}')">
+                                            <i class="fa fa-cloud-upload"></i>
+                                            Update Data
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'remove_intersecting_departments' object.id %}">
+                                            <i class="fa fa-scissors"></i>
+                                            Remove Intersections
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                    {% if user_can_admin %}
+                                    <li>
+                                        <a href="{% url 'admin_department_users' object.id %}">
+                                            <i class="fa fa-user"></i>
+                                            Manage department users
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
                             </div>
                             {% endif %}
                         </div>

@@ -1,0 +1,270 @@
+{% load humanize %}
+{% load firecares %}
+{% load widget_tweaks %}
+{% load favit_tags %}
+<!DOCTYPE html>
+<!--[if IE 8 ]>
+<html class="no-js ie8" lang="en"> <![endif]-->
+<!--[if IE 9 ]>
+<html class="no-js ie9" lang="en"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="description" content="{{ object.description }} Administer users for {{ object.name }}.">
+    <meta name="author" content="Prominent Edge LLC">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <title>Update user associations for fire department: {{ object.name }}</title>
+    {% include 'firestation/_favicon.html' %}
+    {% include "firestation/_firecares_style.html" %}
+
+
+    <script type="text/javascript">
+    var config = {
+      geom: {{ object.geom.json|safe|default:"null" }},
+      centroid: [{{ object.headquarters_address.geom.centroid.y }}, {{ object.headquarters_address.geom.centroid.x }}],
+      headquarters: {{ object.headquarters_address.geom.json|safe|default:"null" }},
+      headquartersName: "{{ object.name }} Headquarters",
+      id: {{ object.id }}
+    };
+    var users = [
+      {% for u in user_perms %}
+      {
+        id: {{ u.user.id }},
+        username: "{{ u.user.username }}",
+        can_change: {{ u.can_change|yesno:"true,false" }},
+        can_admin: {{ u.can_admin|yesno:"true,false" }}
+      },
+      {% endfor %}
+    ];
+    </script>
+    {% include 'google_analytics.html' %}
+</head>
+
+<body class="ct-headroom--fixedTopBar cssAnimate" ng-controller="jurisdictionController" ng-app="fireStation">
+
+{% include 'firestation/_mobile_navbar.html' %}
+{% include 'firestation/_mobile_search.html' %}
+
+<div id="ct-js-wrapper" class="ct-pageWrapper">
+
+<div class="ct-navbarMobile">
+    <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand logo" href="{% url 'firestation_home' %}"><h1>FireCARES</h1></a>
+    <button type="button" class="searchForm-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span><i class="fa fa-search"></i></span>
+    </button>
+</div>
+
+{% include "firestation/_navbar.html" %}
+
+<div class="ct-site--map">
+    <div class="container">
+        <a href="{% url 'firestation_home' %}">Home</a>
+        <a href="{% url 'firedepartment_list' %}">Departments</a>
+        <a href="{% url 'firedepartment_detail_slug' object.id object.slug %}">{{ object.name }}</a>
+        <a href="{% url 'admin_department_users' object.id %}">Manage department users</a>
+    </div>
+</div>
+<header class="ct-mediaSection">
+    <div class="ct-mediaSection-inner">
+        <div class="container">
+            <div class="ct-u-displayTableVertical">
+                <div class="ct-textBox ct-u-text--white ct-u-displayTableCell text-left">
+                    <h2>{{ object.name }}</h2>
+                    <h4>{{ object.headquarters_address.get_row_display }}</h4>
+                    <span class="ct-productID ct-fw-300">
+                        FDID: <span>{{ object.fdid }}</span>
+                    </span>
+                </div>
+                <div class="ct-u-displayTableCell text-right">
+                    {% favorite_button object %}
+                    <a href="javascript:window.print()" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-printer fa-2x"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<section class="ct-u-paddingBottom60">
+    <div class="container">
+        <div class="ct-section--products">
+            <div class="row">
+                <div class="col-md-12 col-lg-12">
+                    <div class="ct-heading ct-u-marginBottom20 ct-u-marginTop30">
+                        <h3>{{ object.name }}</h3>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="ct-u-displayTableVertical ct-productDetails">
+                                <div class="ct-u-displayTableRow">
+                                    <div class="ct-u-displayTableCell">
+                                        <span class="ct-fw-600">Department Type</span>
+                                    </div>
+                                    <div class="ct-u-displayTableCell text-right">
+                                        <span>{{ object.department_type }}</span>
+                                    </div>
+                                </div>
+                                <div class="ct-u-displayTableRow">
+                                    <div class="ct-u-displayTableCell">
+                                        <span class="ct-fw-600">NFPA Region</span>
+                                    </div>
+                                    <div class="ct-u-displayTableCell text-right">
+                                        <span>{{ object.region }}</span>
+                                    </div>
+                                </div>
+                                <div class="ct-u-displayTableRow">
+                                    <div class="ct-u-displayTableCell">
+                                        <span class="ct-fw-600">FDID</span>
+                                    </div>
+                                    <div class="ct-u-displayTableCell text-right">
+                                        <span>{{ object.fdid }}</span>
+                                    </div>
+                                </div>
+                                <div class="ct-u-displayTableRow">
+                                    <div class="ct-u-displayTableCell">
+                                        <span class="ct-fw-600">State</span>
+                                    </div>
+                                    <div class="ct-u-displayTableCell text-right">
+                                        <span>{{ object.state }}</span>
+                                    </div>
+                                </div>
+                                <div class="ct-u-displayTableRow">
+                                    <div class="ct-u-displayTableCell">
+                                        <span class="ct-fw-600">Phone</span>
+                                    </div>
+                                    <div class="ct-u-displayTableCell text-right">
+                                        <span>{{ object.headquarters_phone|default:"Unknown" }}</span>
+                                    </div>
+                                </div>
+                                <div class="ct-u-displayTableRow">
+                                    <div class="ct-u-displayTableCell">
+                                        <span class="ct-fw-600">Fax</span>
+                                    </div>
+                                    <div class="ct-u-displayTableCell text-right">
+                                        <span>{{ object.headquarters_fax|default:"Unknown" }}</span>
+                                    </div>
+                                </div>
+                                <div class="ct-u-displayTableRow">
+                                    <div class="ct-u-displayTableCell">
+                                        <span class="ct-fw-600">Protected population</span>
+                                    </div>
+                                    <div class="ct-u-displayTableCell text-right">
+                                        {% if object.population %}
+                                        <span>{{ object.population|intcomma }}</span>
+                                        {% else %}
+                                        <span>Unknown</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="ct-u-displayTableRow">
+                                    <div class="ct-u-displayTableCell">
+                                        <span class="ct-fw-600">Community size</span>
+                                    </div>
+                                    <div class="ct-u-displayTableCell text-right">
+                                        <span>{{ object.geom_area|floatformat:"2"|intcomma}} <span>mi&sup2;</span></span>
+                                    </div>
+                                </div>
+                                {% if object.twitter_handle %}
+                                <div class="ct-u-displayTableRow">
+                                    <div class="ct-u-displayTableCell">
+                                        <span class="ct-fw-600">Twitter</span>
+                                    </div>
+                                    <div class="ct-u-displayTableCell text-right">
+                                        <span><a href="https://twitter.com/{{ object.twitter_handle }}" target="_blank">@{{object.twitter_handle}} <i class="fa fa-external-link ct-fw-600"></i></a></span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if object.website %}
+                                <div class="ct-u-displayTableRow">
+                                    <div class="ct-u-displayTableCell">
+                                        <span class="ct-fw-600"><a href="{{ object.website }}">Official Website <i class="fa fa-external-link ct-fw-600"></i></a></span>
+                                    </div>
+                                    <div class="ct-u-displayTableCell text-right">
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div id="map"></div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 col-lg-12 ct-u-marginTop10">
+                            <div class="ct-u-displayTableVertical">
+                                <div class="ct-u-displayTableCell text-left">
+                                    <i class="fa fa-clock-o pull-left"></i><h6>Last Updated: {{ object.modified }}</h6>
+                                </div>
+                                <div class="ct-u-displayTableCell text-right">
+                                    <a href="" ng-click="toggleFullScreenMap()"><i class="fa fa-arrows-alt"></i> View Fullscreen Map</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr/>
+                    <div class="col-sm-6 col-md-12 ct-u-marginBottom30">
+                        <h3>Manage {{ object }} Users</h3>
+                    </div>
+                    <form role="form" method="post" action="" ng-controller="userAdminController">
+                        {% csrf_token %}
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Can change this department's data?</th>
+                                    <th>Can administer this department's associated users?</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% verbatim %}
+                                <tr ng-repeat="u in users" class="ng-cloak">
+                                    <td><strong>{{ u.username }}</strong></td>
+                                    <td><input type="checkbox" name="can_change" value="{{ u.username }}" ng-model="u.can_change"/></td>
+                                    <td><input type="checkbox" name="can_admin" value="{{ u.username }}" ng-model="u.can_admin"/></td>
+                                    <td><a href="" ng-click="deletePerms(u)" title="Remove this user's permissions for this department completely" class="btn btn-default btn-xs"><i class="fa fa-minus-circle"></i></a></td>
+                                </tr>
+                                <tr ng-show="toadd">
+                                    <td><input type="text" autocomplete="off" name="username" ng-model="toadd.username" placeholder="Type a username" typeahead="suggestion for suggestion in autocompleteUsers($viewValue)"/></td>
+                                    <td><input type="checkbox" name="can_change" ng-model="toadd.can_change"/></td>
+                                    <td><input type="checkbox" name="can_admin" ng-model="toadd.can_admin"/></td>
+                                    <td>
+                                        <button type="button" ng-click="addComplete()" class="btn btn-default">Add</button>
+                                        <button type="button" ng-click="cancelAdd()" class="btn btn-default">Cancel</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4">
+                                        <button type="button" ng-disabled="toadd !== null" ng-click="addUser()" class="btn btn-default"><i class="fa fa-plus"></i> Add User</button>
+                                    </td>
+                                </tr>
+                                {% endverbatim %}
+                            </tbody>
+                        </table>
+                        <div class="col-sm-12 col-md-12 ct-u-marginBottom10">
+                            <div class="submission">
+                                <button ng-disabled="toadd !== null" class="btn btn-primary btn-xlarge pull-left ct-u-marginTop20" type="submit">Save</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% include 'firestation/_footer.html' %}
+</div>
+{% include "firestation/_firecares_scripts.html" %}
+</script>
+</body>
+</html>

@@ -1,6 +1,10 @@
 import autocomplete_light.shortcuts as al
 from .models import Address
+from django.contrib.auth import get_user_model
 from firecares.firestation.models import FireDepartment
+
+User = get_user_model()
+
 
 al.register(Address,
             # Just like in ModelAdmin.search_fields
@@ -41,3 +45,10 @@ al.register(FireDepartment,
                 # Enable modern-style widget !
                 'class': 'modern-style',
             },)
+
+
+al.register(User,
+            search_fields=['username'],
+            attrs={
+                'data-autocomplete-minimum-characters': 1,
+            })

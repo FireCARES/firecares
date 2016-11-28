@@ -11720,6 +11720,9 @@ form[name='boundaryUpload'] a.commit:hover {
 .accept-terms input {
   width: auto;
 }
+.delete-perms {
+  color: red;
+}
 .ct-pageWrapper {
   background-color: #ffffff;
   overflow: hidden;

@@ -19,6 +19,15 @@
     },
     {
         "fields": {
+            "user": [
+                "tester_mcgee"
+            ],
+            "has_accepted_terms": true
+        },
+        "model": "firecares_core.userprofile"
+    },
+    {
+        "fields": {
             "created": "2015-02-28T21:02:50.365Z",
             "data_security": 5,
             "distribution_policy": "E4",

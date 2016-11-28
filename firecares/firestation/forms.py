@@ -1,4 +1,5 @@
 import os
+import autocomplete_light
 from django import forms
 from .models import Staffing, Document, FireDepartment
 

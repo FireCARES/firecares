@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse, resolve
 
 
 class DisclaimerAcceptedMiddleware(object):
-    # Allow for login, logout and disclaimer views...
+    # Allow for login, logout and disclaimer views, all others redirect to disclaimer
     WHITELISTED_VIEWS = ['login', 'disclaimer', 'logout']
 
     def process_request(self, request):

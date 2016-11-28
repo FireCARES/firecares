@@ -1,6 +1,8 @@
+from autocomplete_light.views import RegistryView, AutocompleteView
 from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
+from django.contrib.auth.decorators import login_required
 from django.views.defaults import page_not_found
 from django.views.generic import TemplateView
 from .firecares_core.forms import FirecaresPasswordResetForm
@@ -55,7 +57,8 @@ urlpatterns = patterns('',
     url(r'^forgot-username/done/$', TemplateView.as_view(template_name='registration/username_sent.html'), name='username_sent'),
     url(r'^logout/$', 'django.contrib.auth.views.logout_then_login', name='logout'),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^autocomplete/', include('autocomplete_light.urls')),
+    url(r'^autocomplete/$', RegistryView.as_view(), name='autocomplete_light_registry'),
+    url(r'^autocomplete/(?P<autocomplete>[-\w]+)/$', login_required(AutocompleteView.as_view()), name='autocomplete_light_autocomplete'),
     url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain'), name='robots.txt'),
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 
@@ -67,10 +70,8 @@ urlpatterns = patterns('',
 
     # url(r'^uploads/?$', permission_required('change_firestation' UploadListView.as_view()), name='uploads-list'),
     url(r'', include(importer_api.urls)),
+    url(r'^disclaimer/$', Disclaimer.as_view(), name='disclaimer'),
 )
-
-if settings.IS_PUBLIC:
-    urlpatterns += patterns('', url(r'^disclaimer/$', Disclaimer.as_view(), name='disclaimer'),)
 
 # urlpatterns += importer_urlpatterns
 
