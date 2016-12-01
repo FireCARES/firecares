@@ -11,6 +11,7 @@ from django.core.management import call_command
 from django.core.urlresolvers import reverse
 from django.contrib.gis.geos import Point, Polygon, MultiPolygon
 from django.contrib.auth import get_user_model
+from StringIO import StringIO
 from firecares.usgs.models import UnincorporatedPlace, MinorCivilDivision
 from firecares.firecares_core.models import Address, Country
 from firecares.firestation.forms import StaffingForm
@@ -42,7 +43,7 @@ class FireStationTests(BaseFirecaresTestcase):
 
         c = Client()
 
-        for resource in ['staffing', 'firestations']:
+        for resource in ['staffing', 'firestations', 'fire-departments']:
             url = '{0}?format=json'.format(reverse('api_dispatch_list', args=[self.current_api_version, resource]),)
             response = c.get(url)
             self.assertEqual(response.status_code, 401)
@@ -57,7 +58,7 @@ class FireStationTests(BaseFirecaresTestcase):
         Tests adding a capability via the API.
         """
 
-        url = '{0}?format=json'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'staffing']),)
+        url = reverse('api_dispatch_list', args=[self.current_api_version, 'staffing'])
         station_uri = '{0}{1}/'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'firestations']),
                                        self.fire_station.id)
         c = Client()
@@ -77,6 +78,11 @@ class FireStationTests(BaseFirecaresTestcase):
         self.assertEqual(unit.personnel, 4)
         self.assertEqual(unit.apparatus, 'Boat')
 
+        c.login(**self.non_admin_creds)
+
+        response = c.post(url, data=json.dumps(capability), content_type='application/json')
+        self.assertEqual(response.status_code, 401)
+
     def test_update_capability(self):
         """
         Tests updating the capability through the API.
@@ -84,8 +90,8 @@ class FireStationTests(BaseFirecaresTestcase):
 
         capability = Staffing.objects.create(firestation=self.fire_station, personnel=4, apparatus='Boat')
 
-        url = '{0}{1}/?format=json'.format(reverse('api_dispatch_list',
-                                                   args=[self.current_api_version, 'staffing']), capability.id)
+        url = '{0}{1}/'.format(reverse('api_dispatch_list',
+                                       args=[self.current_api_version, 'staffing']), capability.id)
 
         c = Client()
         c.login(**self.admin_creds)
@@ -107,8 +113,8 @@ class FireStationTests(BaseFirecaresTestcase):
 
         capability = Staffing.objects.create(firestation=self.fire_station, personnel=4)
 
-        url = '{0}{1}/?format=json'.format(reverse('api_dispatch_list',
-                                                   args=[self.current_api_version, 'staffing']), capability.id)
+        url = '{0}{1}/'.format(reverse('api_dispatch_list',
+                                       args=[self.current_api_version, 'staffing']), capability.id)
 
         c = Client()
         c.login(**self.admin_creds)
@@ -140,7 +146,7 @@ class FireStationTests(BaseFirecaresTestcase):
         Tests capability validation via the API.
         """
 
-        url = '{0}?format=json'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'staffing']),)
+        url = reverse('api_dispatch_list', args=[self.current_api_version, 'staffing'])
         station_uri = '{0}{1}/'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'firestations']),
                                        self.fire_station.id)
         c = Client()
@@ -165,10 +171,9 @@ class FireStationTests(BaseFirecaresTestcase):
         Tests filtering response capabilities by the fire station.
         """
 
-        url = '{0}?format=json&firestation={1}'.format(reverse('api_dispatch_list',
-                                                               args=[self.current_api_version, 'staffing']),
-                                                       self.fire_station.id
-                                                       )
+        url = '{0}?firestation={1}'.format(reverse('api_dispatch_list',
+                                           args=[self.current_api_version, 'staffing']),
+                                           self.fire_station.id)
         c = Client()
         c.login(**self.admin_creds)
         response = c.get(url)
@@ -188,9 +193,56 @@ class FireStationTests(BaseFirecaresTestcase):
         self.assertEqual(response.status_code, 405)
         self.assertTrue(FireStation.objects.get(id=self.fire_station.id))
 
+    def test_deleting_a_fire_department(self):
+        """
+        Tests that DELETE requests through the API return a 405 (not supported).
+        """
+
+        fd = self.load_la_department()
+        url = '{0}{1}/'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'fire-departments']),
+                               fd.id)
+        c = Client()
+        c.login(**self.admin_creds)
+
+        response = c.delete(url)
+        self.assertEqual(response.status_code, 405)
+        self.assertTrue(FireDepartment.objects.get(id=fd.id))
+
+    def test_creating_a_fire_department(self):
+        """
+        Tests that POST requests through the API return a 405 (not supported).
+        """
+
+        fd = self.load_la_department()
+        url = reverse('api_dispatch_list', args=[self.current_api_version, 'fire-departments'])
+
+        c = Client()
+        c.login(**self.admin_creds)
+
+        response = c.post(url)
+        self.assertEqual(response.status_code, 405)
+        self.assertTrue(FireDepartment.objects.get(id=fd.id))
+
+    def test_creating_a_fire_station(self):
+        """
+        Tests that POST requests through the API return a 405 (not supported).
+        """
+
+        fd = self.load_la_department()
+        url = reverse('api_dispatch_list', args=[self.current_api_version, 'firestations'])
+
+        c = Client()
+        c.login(**self.admin_creds)
+
+        response = c.post(url)
+        self.assertEqual(response.status_code, 405)
+        self.assertTrue(FireDepartment.objects.get(id=fd.id))
+
     def test_update_station_from_api(self):
+        fd = self.load_la_department()
+        fs = fd.firestation_set.first()
         url = '{0}{1}/'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'firestations']),
-                               self.fire_station.id)
+                               fs.id)
 
         count = FireStation.objects.all().count()
         c = Client()
@@ -204,7 +256,7 @@ class FireStationTests(BaseFirecaresTestcase):
         response = c.put(url, data=json.dumps(js), content_type='application/json')
         self.assertEqual(response.status_code, 204)
         self.assertEqual(count, FireStation.objects.all().count())
-        self.assertTrue(FireStation.objects.get(id=self.fire_station.id).archived)
+        self.assertTrue(FireStation.objects.get(id=fs.id).archived)
 
         # test as non_admin
         c.login(**self.non_admin_creds)
@@ -215,17 +267,44 @@ class FireStationTests(BaseFirecaresTestcase):
         response = c.put(url, data=json.dumps(js), content_type='application/json')
         self.assertEqual(response.status_code, 401)
 
-        from django.contrib.auth.models import Permission
-        self.non_admin_user.user_permissions.add(Permission.objects.get(name='Can change Fire Station'))
+        # Assign change_firedepartment permissions on another department to verify object-level auth
+        fd2 = self.load_arlington_department()
 
+        self.non_admin_user.add_obj_perm('change_firedepartment', fd2)
+        response = c.put(url, data=json.dumps(js), content_type='application/json')
+        self.assertEqual(response.status_code, 401)
+
+        self.non_admin_user.add_obj_perm('change_firedepartment', fd)
         response = c.put(url, data=json.dumps(js), content_type='application/json')
         self.assertEqual(response.status_code, 204)
+        self.assertFalse(FireStation.objects.get(id=fs.id).archived)
 
     def test_read_firestation(self):
         url = '{0}{1}/'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'firestations']),
                                self.fire_station.id)
 
         c = Client()
+
+        # MUST be logged in to use the FireStation API
+        response = c.get(url)
+        self.assertEqual(response.status_code, 401)
+
+        c.login(**self.non_admin_creds)
+
+        response = c.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_read_firedepartment(self):
+        fd = self.load_la_department()
+        url = '{0}{1}/'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'fire-departments']),
+                               fd.id)
+
+        c = Client()
+
+        # MUST be logged in to use FireDepartment API
+        response = c.get(url)
+        self.assertEqual(response.status_code, 401)
+
         c.login(**self.non_admin_creds)
 
         response = c.get(url)
@@ -568,7 +647,7 @@ class FireStationTests(BaseFirecaresTestcase):
         Tests functionality associated with updating a FireDepartment's associated government units
         """
 
-        call_command('loaddata', 'firecares/firestation/fixtures/test_government_unit_association.json')
+        call_command('loaddata', 'firecares/firestation/fixtures/test_government_unit_association.json', stdout=StringIO())
 
         fd = FireDepartment.objects.get(pk=86610)
         place = UnincorporatedPlace.objects.get(pk=9254)
@@ -1066,11 +1145,14 @@ class FireStationTests(BaseFirecaresTestcase):
         # Ensure that a non-admin user can't update the department geom
         response = c.put(url, data=new_geom, content_type='application/json')
         self.assertEqual(response.status_code, 401)
-        c.logout()
+
+        self.non_admin_user.add_obj_perm('change_firedepartment', fd)
+
+        response = c.put(url, data=new_geom, content_type='application/json')
+        self.assertEqual(response.status_code, 204)
+        response = c.get(url)
+        self.assertDictEqual(json.loads(response.content).get('geom'), json.loads(new_geom).get('geom'))
 
         c.login(**self.admin_creds)
         response = c.put(url, data=new_geom, content_type='application/json')
         self.assertEqual(response.status_code, 204)
-        response = c.get(url)
-        # Verify new geometry
-        self.assertDictEqual(json.loads(response.content).get('geom'), json.loads(new_geom).get('geom'))

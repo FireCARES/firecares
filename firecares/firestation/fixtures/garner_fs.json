@@ -1,0 +1,104 @@
+[
+{
+    "fields": {
+        "name": "United States of America"
+    },
+    "model": "firecares_core.country",
+    "pk": "US"
+},
+{
+    "fields": {
+        "address_line2": "",
+        "city": "Weatherford",
+        "address_line1": "2290 Garner School Road",
+        "state_province": "TX",
+        "postal_code": "76088-7044",
+        "country": "US",
+        "geom": "SRID=4326;POINT (-97.9849726989999112 32.8340966650000610)",
+        "geocode_results": null
+    },
+    "model": "firecares_core.address",
+    "pk": 90415
+},
+{
+    "fields": {
+        "source_originator": "TechniGraphics, Inc.",
+        "objectid": 4176,
+        "source_featureid": "10415306",
+        "loaddate": "2009-07-06T13:45:55Z",
+        "admintype": 0,
+        "city": "Weatherford",
+        "gnis_id": "2551429",
+        "zipcode": "76088-7044",
+        "fcode": 74026,
+        "state": "TX",
+        "ftype": "Emergency Response and Law Enforcement",
+        "geom": "SRID=4326;POINT (-97.9849726989999112 32.8340966650000610)",
+        "pointlocationtype": 1,
+        "foot_id": null,
+        "data_security": 5,
+        "globalid": "{310E0F3C-FAB0-4C8B-9552-177A7B528010}",
+        "addressbuildingname": null,
+        "complex_id": null,
+        "address": "2290 Garner School Road",
+        "source_datasetid": "{460100BF-133E-4D6D-897A-0D6AC6608CD2}",
+        "distribution_policy": "E4",
+        "name": "Cool - Garner Fire Rescue Station 1",
+        "created": "2015-02-27T06:00:00Z",
+        "source_datadesc": "TGS Tesas Fire Stations, Fort Worth area, processed by NGTOC, July 2009 (15 counties)",
+        "permanent_identifier": "9567ac23-d3aa-4b2a-a029-f0a83d5c294f",
+        "modified": "2015-03-10T01:38:45.865Z",
+        "islandmark": 0
+    },
+    "model": "firestation.usgsstructuredata",
+    "pk": 5
+},
+{
+    "fields": {
+        "fdid": null,
+        "archived": false,
+        "district": null,
+        "station_number": 1,
+        "station_address": 90415,
+        "department": null
+    },
+    "model": "firestation.firestation",
+    "pk": 5
+},
+{
+    "fields": {
+        "firestation": 5,
+        "apparatus": "Engine",
+        "created": "2016-11-30T22:22:19.094Z",
+        "personnel": 20,
+        "modified": "2016-11-30T22:22:19.094Z",
+        "als": true
+    },
+    "model": "firestation.staffing",
+    "pk": 84
+},
+{
+    "fields": {
+        "firestation": 5,
+        "apparatus": "Boat",
+        "created": "2016-11-30T22:22:11.848Z",
+        "personnel": 2,
+        "modified": "2016-11-30T22:22:13.588Z",
+        "als": true
+    },
+    "model": "firestation.staffing",
+    "pk": 83
+},
+{
+    "fields": {
+        "firestation": 5,
+        "apparatus": "Engine",
+        "created": "2016-11-30T22:22:05.023Z",
+        "personnel": 5,
+        "modified": "2016-11-30T22:22:05.023Z",
+        "als": false
+    },
+    "model": "firestation.staffing",
+    "pk": 82
+}
+]

@@ -1,9 +1,12 @@
+from StringIO import StringIO
 from urlparse import urlsplit, urlunsplit
 from django.contrib.auth import get_user_model
 from django.contrib.gis.geos import Point
 from django.core.urlresolvers import resolve
+from django.core.management import call_command
+from django.db import connections
 from django.test import TestCase
-from firecares.firestation.models import FireStation
+from firecares.firestation.models import FireStation, FireDepartment
 
 User = get_user_model()
 
@@ -43,3 +46,19 @@ class BaseFirecaresTestcase(TestCase):
     def create_firestation(self, **kwargs):
         return FireStation.objects.create(station_number=25, name='Test Station', geom=Point(35, -77),
                                           **kwargs)
+
+    def load_la_department(self):
+        call_command('loaddata', 'firecares/firestation/fixtures/la_fd.json', stdout=StringIO())
+
+        cursor = connections['default'].cursor()
+        cursor.execute("REFRESH MATERIALIZED VIEW population_class_9_quartiles;")
+
+        return FireDepartment.objects.filter(id=87256).first()
+
+    def load_arlington_department(self):
+        call_command('loaddata', 'firecares/firestation/fixtures/arlington_fd.json', stdout=StringIO())
+
+        cursor = connections['default'].cursor()
+        cursor.execute("REFRESH MATERIALIZED VIEW population_class_6_quartiles;")
+
+        return FireDepartment.objects.filter(id=73842).first()

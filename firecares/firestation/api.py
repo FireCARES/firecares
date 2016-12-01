@@ -9,7 +9,7 @@ from tastypie.authorization import DjangoAuthorization
 from tastypie.cache import SimpleCache
 from tastypie.constants import ALL
 from tastypie.contrib.gis.resources import ModelResource
-from tastypie.exceptions import Unauthorized
+from tastypie.exceptions import Unauthorized, TastypieError
 from tastypie.serializers import Serializer
 from tastypie.validation import FormValidation
 from guardian.core import ObjectPermissionChecker
@@ -55,7 +55,13 @@ class JSONDefaultModelResourceMixin(object):
         return 'application/json' if not request.GET.get('format') else super(JSONDefaultModelResourceMixin, self).determine_format(request)
 
 
-# Pulled from https://gist.github.com/7wonders/6557760
+class PropertyResolutionFailedException(TastypieError):
+    def __init__(self, property_path, class_name, *args, **kwargs):
+        msg = '"{}" does not resolve for class type {}'.format(property_path, class_name)
+        super(PropertyResolutionFailedException, self).__init__(msg, *args, **kwargs)
+
+
+# Pulled/modified from https://gist.github.com/7wonders/6557760
 class GuardianAuthorization(DjangoAuthorization):
     """
     :create_permission_code:
@@ -74,7 +80,8 @@ class GuardianAuthorization(DjangoAuthorization):
             class Meta:
                 queryset = Something.objects.all()
                 authorization = GuardianAuthorization(
-                    view_permission_code = 'can_view',
+                    delegate_to_property = None,  # property path (dot notation) to delegate authorization to
+                    view_permission_code = 'can_view',  # empty view_permission_code allows anonymous users to view
                     create_permission_code = 'can_create',
                     update_permission_code = 'can_update',
                     delete_permission_code = 'can_delete'
@@ -83,13 +90,22 @@ class GuardianAuthorization(DjangoAuthorization):
 
     def __init__(self, *args, **kwargs):
         # Allow for authorization to be delegated through a property on the object
-        if 'parent_property' in kwargs:
-            self.parent_property = kwargs.pop('parent_property')
+        self.parent_property = kwargs.pop('delegate_to_property', None)
         self.view_permission_code = kwargs.pop("view_permission_code", 'can_view')
         self.create_permission_code = kwargs.pop("create_permission_code", 'can_create')
         self.update_permission_code = kwargs.pop("update_permission_code", 'can_update')
         self.delete_permission_code = kwargs.pop("delete_permission_code", 'can_delete')
         super(GuardianAuthorization, self).__init__(**kwargs)
+
+    def resolve_property(self, obj, property_path):
+        path = property_path.split('.')
+        ret = obj
+        for p in path:
+            if hasattr(ret, p):
+                ret = getattr(ret, p)
+            else:
+                raise PropertyResolutionFailedException(property_path, obj.__class__)
+        return ret
 
     def generic_base_check(self, object_list, bundle):
         """
@@ -97,19 +113,26 @@ class GuardianAuthorization(DjangoAuthorization):
                 a) if the `object_list.model` doesn't have a `_meta` attribute
                 b) the `bundle.request` object doesn have a `user` attribute
         """
-        #TODO: Override w/ class of parent property
         klass = self.base_checks(bundle.request, object_list.model)
         if klass is False:
             raise Unauthorized("You are not allowed to access that resource.")
         return True
 
     def generic_item_check(self, object_list, bundle, permission):
+        if bundle.request.user.is_superuser:
+            return True
+
         if not self.generic_base_check(object_list, bundle):
             raise Unauthorized("You are not allowed to access that resource.")
 
         checker = ObjectPermissionChecker(bundle.request.user)
-        #TODO: Override w/ parent property
-        if not checker.has_perm(permission, bundle.obj):
+        if self.parent_property:
+            obj = self.resolve_property(bundle.obj, self.parent_property)
+        else:
+            obj = bundle.obj
+
+        # When the property resolves to None, prevent access by default
+        if obj is None or not checker.has_perm(permission, obj):
             raise Unauthorized("You are not allowed to access that resource.")
 
         return True
@@ -118,7 +141,7 @@ class GuardianAuthorization(DjangoAuthorization):
         if not self.generic_base_check(object_list, bundle):
             raise Unauthorized("You are not allowed to access that resource.")
         user = bundle.request.user
-        return [i for i in object_list if user.has_perm(permission, i)]
+        return [i for i in object_list if permission is None or user.has_perm(permission, i) or user.is_superuser]
 
     def generic_post_check(self, object_list, bundle, permission):
         if not self.generic_base_check(object_list, bundle):
@@ -135,6 +158,9 @@ class GuardianAuthorization(DjangoAuthorization):
                                        self.create_permission_code)
 
     def read_list(self, object_list, bundle):
+        if not self.view_permission_code:
+            return object_list
+
         return self.generic_list_check(object_list, bundle,
                                        self.view_permission_code)
 
@@ -148,10 +174,12 @@ class GuardianAuthorization(DjangoAuthorization):
 
     # Item Checks
     def create_detail(self, object_list, bundle):
-        return self.generic_post_check(object_list, bundle,
+        return self.generic_item_check(object_list, bundle,
                                        self.create_permission_code)
 
     def read_detail(self, object_list, bundle):
+        if not self.view_permission_code:
+            return True
         return self.generic_item_check(object_list, bundle,
                                        self.view_permission_code)
 
@@ -172,7 +200,10 @@ class FireDepartmentResource(ModelResource):
     class Meta:
         resource_name = 'fire-departments'
         queryset = FireDepartment.objects.filter(archived=False)
-        authorization = DjangoAuthorization()
+        authorization = GuardianAuthorization(view_permission_code=None,
+                                              update_permission_code='change_firedepartment',
+                                              create_permission_code='admin_firedepartment',
+                                              delete_permission_code='admin_firedepartment')
         authentication = MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
         cache = SimpleCache()
         list_allowed_methods = ['get']
@@ -192,7 +223,11 @@ class FireStationResource(JSONDefaultModelResourceMixin, ModelResource):
     class Meta:
         resource_name = 'firestations'
         queryset = FireStation.objects.all()
-        authorization = DjangoAuthorization()
+        authorization = GuardianAuthorization(delegate_to_property='department',
+                                              view_permission_code=None,
+                                              update_permission_code='change_firedepartment',
+                                              create_permission_code='admin_firedepartment',
+                                              delete_permission_code='admin_firedepartment')
         authentication = MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
         list_allowed_methods = ['get']
         detail_allowed_methods = ['get', 'put']
@@ -216,7 +251,11 @@ class StaffingResource(JSONDefaultModelResourceMixin, ModelResource):
     class Meta:
         resource_name = 'staffing'
         queryset = Staffing.objects.all()
-        authorization = DjangoAuthorization()
+        authorization = GuardianAuthorization(delegate_to_property='firestation.department',
+                                              view_permission_code=None,
+                                              update_permission_code='change_firedepartment',
+                                              create_permission_code='change_firedepartment',
+                                              delete_permission_code='change_firedepartment')
         authentication = MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
         filtering = {'firestation': ALL}
         validation = FormValidation(form_class=StaffingForm)

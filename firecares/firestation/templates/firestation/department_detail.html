@@ -24,7 +24,7 @@
       geom: {{ object.geom.json|safe|default:"null" }},
       centroid: [{{ object.headquarters_address.geom.centroid.y }}, {{ object.headquarters_address.geom.centroid.x }}],
       id: {{object.id}},
-      showParcels: {{ can_change|yesno:"true,false"}}
+      showParcels: {{ user.is_authenticated|yesno:"true,false"}}
     }
     </script>
     {% include 'google_analytics.html' %}

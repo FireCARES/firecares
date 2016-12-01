@@ -1,0 +1,10 @@
+-   repo: git://github.com/pre-commit/pre-commit-hooks
+    sha: v0.6.1
+    hooks:
+    -   id: detect-aws-credentials
+    -   id: detect-private-key
+    -   id: debug-statements
+    -   id: flake8
+    -   id: check-merge-conflict
+    -   id: check-json
+    -   id: check-ast

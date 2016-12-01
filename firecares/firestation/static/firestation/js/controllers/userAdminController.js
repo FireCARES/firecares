@@ -4,9 +4,9 @@
   angular.module('fireStation.departmentDetailController.userAdmin', [])
     .controller('userAdminController', UserAdminController);
 
-  UserAdminController.$inject = ['$scope', 'limitToFilter', '$http'];
+  UserAdminController.$inject = ['$scope', 'limitToFilter', '$http', '$timeout'];
 
-  function UserAdminController($scope, limitToFilter, $http) {
+  function UserAdminController($scope, limitToFilter, $http, $timeout) {
     $scope.users = users;
     $scope.toadd = null;
 
@@ -38,6 +38,9 @@
           can_change: false,
           can_admin: false
         };
+        $timeout(function() {
+          angular.element('input[name="username"]').focus();
+        });
       }
     };
 

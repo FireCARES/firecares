@@ -78,8 +78,10 @@ class DepartmentDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(DepartmentDetailView, self).get_context_data(**kwargs)
 
-        context['user_can_change'] = self.request.user.is_authenticated() and self.request.user.has_perm('change_firedepartment', context['object'])
-        context['user_can_admin'] = self.request.user.is_authenticated() and self.request.user.has_perm('admin_firedepartment', context['object'])
+        context['user_can_change'] = self.request.user.is_authenticated() and\
+            self.request.user.has_perm('change_firedepartment', context['object'])
+        context['user_can_admin'] = self.request.user.is_authenticated() and\
+            self.request.user.has_perm('admin_firedepartment', context['object'])
 
         page = self.request.GET.get('page')
         paginator = Paginator(context['firedepartment'].firestation_set.filter(archived=False).order_by('station_number'), self.objects_per_page)
@@ -212,7 +214,7 @@ class DepartmentDetailView(DetailView):
 class AdminDepartmentUsers(PermissionRequiredMixin, LoginRequiredMixin, DetailView):
     model = FireDepartment
     template_name = 'firestation/department_admin_users.html'
-    permission_required = 'firestation.admin_firedepartment'
+    permission_required = 'admin_firedepartment'
 
     def get_context_data(self, **kwargs):
         context = super(AdminDepartmentUsers, self).get_context_data(**kwargs)
@@ -220,8 +222,8 @@ class AdminDepartmentUsers(PermissionRequiredMixin, LoginRequiredMixin, DetailVi
         user_perms = []
         for u in users:
             user_perms.append(dict(user=u,
-                                   can_change=u.has_perm('firestation.change_firedepartment', self.object),
-                                   can_admin=u.has_perm('firestation.admin_firedepartment', self.object)))
+                                   can_change=u.has_perm('change_firedepartment', self.object),
+                                   can_admin=u.has_perm('admin_firedepartment', self.object)))
         context['user_perms'] = user_perms
         return context
 
@@ -232,17 +234,17 @@ class AdminDepartmentUsers(PermissionRequiredMixin, LoginRequiredMixin, DetailVi
         can_change_users = request.POST.getlist('can_change')
         for user in can_admin_users:
             cur = User.objects.get(username=user)
-            assign_perm('firestation.admin_firedepartment', cur, self.object)
+            assign_perm('admin_firedepartment', cur, self.object)
         for user in users:
             if user.username not in can_admin_users:
-                remove_perm('firestation.admin_firedepartment', user, self.object)
+                remove_perm('admin_firedepartment', user, self.object)
 
         for user in can_change_users:
             cur = User.objects.get(username=user)
-            assign_perm('firestation.change_firedepartment', cur, self.object)
+            assign_perm('change_firedepartment', cur, self.object)
         for user in users:
             if user.username not in can_change_users:
-                remove_perm('firestation.change_firedepartment', user, self.object)
+                remove_perm('change_firedepartment', user, self.object)
 
         messages.add_message(request, messages.SUCCESS, 'Updated department\'s authorized users.')
         return redirect(self.object)
@@ -254,7 +256,7 @@ class DepartmentUpdateGovernmentUnits(PermissionRequiredMixin, LoginRequiredMixi
     """
     model = FireDepartment
     template_name = 'firestation/department_update_government_units.html'
-    permission_required = 'firestation.change_firedepartment'
+    permission_required = 'change_firedepartment'
 
     def _associated_government_unit_ids(self, model_type):
         return self.object.government_unit.filter(object_type=ContentType.objects.get_for_model(model_type)).values_list('object_id', flat=True)
@@ -323,7 +325,7 @@ class RemoveIntersectingDepartments(PermissionRequiredMixin, LoginRequiredMixin,
     """
     model = FireDepartment
     template_name = 'firestation/department_remove_intersecting_departments.html'
-    permission_required = 'firestation.change_firedepartment'
+    permission_required = 'change_firedepartment'
 
     def get_context_data(self, **kwargs):
         context = super(RemoveIntersectingDepartments, self).get_context_data(**kwargs)
@@ -601,8 +603,13 @@ class FireStationDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(FireStationDetailView, self).get_context_data(**kwargs)
-        context['user_can_change'] = self.request.user.is_authenticated() and self.request.user.has_perm('change_firedepartment', context['object'].department)
-        context['user_can_admin'] = self.request.user.is_authenticated() and self.request.user.has_perm('admin_firedepartment', context['object'].department)
+        user = self.request.user
+        can_change = user.is_authenticated() and\
+            (user.has_perm('change_firedepartment', context['object'].department) or user.is_superuser)
+        can_admin = user.is_authenticated() and\
+            (user.has_perm('admin_firedepartment', context['object'].department) or user.is_superuser)
+        context['user_can_change'] = can_change
+        context['user_can_admin'] = can_admin
         return context
 
 

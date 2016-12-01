@@ -178,7 +178,7 @@
                             </div>
                             <div class="ct-u-displayTableCell text-right">
                                 <span style="line-height: 10px;">
-                                    {% if perms.firestation.can_change_firestation %}
+                                    {% if user_can_change %}
                                         {% verbatim %}
                                           <div class="popover-wrapper" style="line-height: 1;">
                                             <a href="#" onaftersave="updateStation()" editable-text="station.name">
@@ -198,7 +198,7 @@
                             </div>
                             <div class="ct-u-displayTableCell text-right">
                                 <span style="line-height: 10px;">
-                                    {% if perms.firestation.can_change_firestation %}
+                                    {% if user_can_change %}
                                         {% verbatim %}
                                           <div class="popover-wrapper" style="line-height: 1;">
                                             <a href="#" onaftersave="updateStation()" editable-text="station.station_number">
@@ -219,7 +219,7 @@
                             </div>
                             <div class="ct-u-displayTableCell text-right">
                                 <span style="line-height: 10px;">
-                                    {% if perms.firestation.can_change_firestation %}
+                                    {% if user_can_change %}
                                         {% verbatim %}
                                           <div class="popover-wrapper" style="line-height: 1;">
                                             <a href="#" onaftersave="updateStation()" editable-text="station.address" e-title="Address?">
@@ -239,7 +239,7 @@
                             </div>
                             <div class="ct-u-displayTableCell text-right">
                                 <span style="line-height: 10px;">
-                                    {% if perms.firestation.can_change_firestation %}
+                                    {% if user_can_change %}
                                         {% verbatim %}
                                           <div class="popover-wrapper" style="line-height: 1;">
                                             <a href="#" onaftersave="updateStation()" editable-text="station.city">
@@ -259,7 +259,7 @@
                             </div>
                             <div class="ct-u-displayTableCell text-right">
                                 <span style="line-height: 10px;">
-                                    {% if perms.firestation.can_change_firestation %}
+                                    {% if user_can_change %}
                                         {% verbatim %}
                                           <div class="popover-wrapper" style="line-height: 1;">
                                             <a href="#" onaftersave="updateStation()" editable-text="station.zipcode">
@@ -279,7 +279,7 @@
                             </div>
                             <div class="ct-u-displayTableCell text-right">
                                 <span style="line-height: 10px;">
-                                    {% if perms.firestation.can_change_firestation %}
+                                    {% if user_can_change %}
                                         {% verbatim %}
                                           <div class="popover-wrapper" style="line-height: 1;">
                                             <a href="#" onaftersave="updateStation()" editable-text="station.state">
@@ -299,7 +299,7 @@
                             </div>
                             <div class="ct-u-displayTableCell text-right">
                                 <span style="line-height: 10px;">
-                                    {% if perms.firestation.can_change_firestation %}
+                                    {% if user_can_change %}
                                         {% verbatim %}
                                           <div class="popover-wrapper" style="line-height: 1;">
                                             <a href="#" onaftersave="updateStation()" editable-checkbox="station.archived" e-title="Archive?">

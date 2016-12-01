@@ -1,9 +1,8 @@
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.db.models.signals import pre_delete
-from guardian.models import User
-from guardian.models import UserObjectPermission
-from guardian.models import GroupObjectPermission
+from guardian.models import UserObjectPermission, GroupObjectPermission
 
 
 def remove_obj_perms_connected_with_user(sender, instance, **kwargs):
@@ -13,4 +12,4 @@ def remove_obj_perms_connected_with_user(sender, instance, **kwargs):
     GroupObjectPermission.objects.filter(filters).delete()
 
 
-pre_delete.connect(remove_obj_perms_connected_with_user, sender=User)
+pre_delete.connect(remove_obj_perms_connected_with_user, sender=get_user_model())
