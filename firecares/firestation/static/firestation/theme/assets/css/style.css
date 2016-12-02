@@ -11585,6 +11585,12 @@ form[name='boundaryUpload'] a.commit:hover {
 .apparatus input[disabled] {
   color: #fff;
 }
+.apparatus .tab-content .tab-pane {
+  padding-top: 0;
+}
+.apparatus .apparatus-help {
+  margin: 1em 0;
+}
 .contactForm {
   width: 100%;
 }
@@ -11714,12 +11720,14 @@ form[name='boundaryUpload'] a.commit:hover {
   color: #F29A00;
   border-bottom: 1px dotted;
 }
+/* Disclaimer */
 .accept-terms {
   text-align: center;
 }
 .accept-terms input {
   width: auto;
 }
+/* Department user admin page */
 .delete-perms {
   color: red;
 }

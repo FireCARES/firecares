@@ -27,6 +27,7 @@
     $scope.choices = ['Engine', 'Ladder/Truck/Aerial', 'Quint', 'Ambulance/ALS', 'Ambulance/BLS', 'Heavy Rescue',
       'Boat', 'Hazmat', 'Chief', 'Other'];
 
+    $scope.canModifyApparatuses = config.isCurator;
     $scope.forms = [];
     $scope.stations = [];
     $scope.message = {};
@@ -176,7 +177,7 @@
       form.$update({id:form.id}, function() {
         $scope.showMessage(form.apparatus + ' staffing has been updated.');
       }, function() {
-        $scope.showMessage('There was a problem updating the ' + form.apparatus + ' staffing.', 'error');
+        $scope.showMessage('There was a problem updating the ' + form.apparatus + ' staffing.', 'danger');
       });
     };
 
@@ -197,7 +198,7 @@
         $scope.showMessage(form.apparatus + ' staffing has been deleted.');
         $scope.showLastTab();
       }, function(){
-        $scope.showMessage('There was an error deleting the staffing for ' + form.apparatus + '.', 'error');
+        $scope.showMessage('There was an error deleting the staffing for ' + form.apparatus + '.', 'danger');
       });
     };
 

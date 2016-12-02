@@ -910,5 +910,29 @@
     },
     "model": "firestation.firestation",
     "pk": 53534
+},
+{
+    "fields": {
+        "firestation": 53534,
+        "apparatus": "Engine",
+        "created": "2015-04-23T16:13:33.760Z",
+        "personnel": 2,
+        "modified": "2016-11-30T19:31:34.022Z",
+        "als": false
+    },
+    "model": "firestation.staffing",
+    "pk": 69
+},
+{
+    "fields": {
+        "firestation": 53534,
+        "apparatus": "Ladder/Truck/Aerial",
+        "created": "2015-04-23T17:25:58.080Z",
+        "personnel": 4,
+        "modified": "2015-06-19T21:30:53.745Z",
+        "als": false
+    },
+    "model": "firestation.staffing",
+    "pk": 71
 }
 ]

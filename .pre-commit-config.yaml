@@ -8,3 +8,12 @@
     -   id: check-merge-conflict
     -   id: check-json
     -   id: check-ast
+
+# NOTE: lessc must be in your system path
+-   repo: local
+    hooks:
+    -   id: compile-less-to-css
+        name: compile-less-to-css
+        entry: scripts/compile_less.sh
+        language: system
+        files: \.less$

@@ -202,7 +202,7 @@ class FireDepartmentResource(ModelResource):
         queryset = FireDepartment.objects.filter(archived=False)
         authorization = GuardianAuthorization(view_permission_code=None,
                                               update_permission_code='change_firedepartment',
-                                              create_permission_code='admin_firedepartment',
+                                              create_permission_code='change_firedepartment',
                                               delete_permission_code='admin_firedepartment')
         authentication = MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
         cache = SimpleCache()
@@ -226,7 +226,7 @@ class FireStationResource(JSONDefaultModelResourceMixin, ModelResource):
         authorization = GuardianAuthorization(delegate_to_property='department',
                                               view_permission_code=None,
                                               update_permission_code='change_firedepartment',
-                                              create_permission_code='admin_firedepartment',
+                                              create_permission_code='change_firedepartment',
                                               delete_permission_code='admin_firedepartment')
         authentication = MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
         list_allowed_methods = ['get']

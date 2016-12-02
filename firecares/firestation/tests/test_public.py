@@ -223,5 +223,32 @@ class TestPublic(BaseFirecaresTestcase):
         perm = UserObjectPermission.objects.filter(user=self.non_admin_user).first()
         self.assertIsNone(perm)
 
+    def test_ensure_correct_apparatus_component_renders(self):
+        fd = self.load_arlington_department()
+        station = fd.firestation_set.get(id=53534)
+
+        c = Client()
+        c.login(**self.non_admin_creds)
+
+        # No change_firedepartment yields no ability to update station data
+        response = c.get(reverse('firestation_detail', args=[station.pk]))
+        self.assertContains(response, 'draggable: false')
+        self.assertContains(response, 'staffed with <strong>{{ form.personnel }}</strong> personnel')
+        self.assertNotContains(response, 'onaftersave="updateStation()"')
+        response = c.get(reverse('firestation_detail_slug', args=[station.pk, station.slug]))
+        self.assertContains(response, 'draggable: false')
+        self.assertContains(response, 'staffed with <strong>{{ form.personnel }}</strong> personnel')
+        self.assertNotContains(response, 'onaftersave="updateStation()"')
+
+        # Add the correct perm and ensure that the user would be able to change station detail
+        self.non_admin_user.add_obj_perm('change_firedepartment', fd)
+
+        response = c.get(reverse('firestation_detail', args=[station.pk]))
+        self.assertContains(response, 'draggable: true')
+        self.assertContains(response, 'onaftersave="updateStation()"')
+        response = c.get(reverse('firestation_detail_slug', args=[station.pk, station.slug]))
+        self.assertContains(response, 'draggable: true')
+        self.assertContains(response, 'onaftersave="updateStation()"')
+
     def test_registration_whitelist(self):
         pass
