@@ -15,7 +15,7 @@ from django.core.cache import cache
 from django.db import connections
 from django.db.models import Avg, Max, Min, Q
 from django.db.models.loading import get_model
-from django.db.models.signals import post_migrate
+from django.db.models.signals import post_migrate, post_save
 from django.utils.text import slugify
 from firecares.firecares_core.models import RecentlyUpdatedMixin, Archivable
 from django.core.urlresolvers import reverse
@@ -1194,6 +1194,20 @@ class PopulationClass9Quartile(PopulationClassQuartile):
     class Meta(PopulationClassQuartile.Meta):
         db_table = 'population_class_9_quartiles'
 
+def set_department_region(sender, instance, **kwargs):
+    """
+    Sets a department's region when it is instantiated with a state.
+    """
+    # Get the json data containing state to region mappings and store it in a dict.
+    regionFile = open(os.path.join(os.path.dirname(__file__), 'data/nfpa-regions.json'))
+    regionDict = json.loads(regionFile.read())
+    # Get a list of available states for checking.
+    states = list(regionDict.keys())
+
+    if instance.state in states:
+        instance.region = regionDict[instance.state]
+    else:
+        instance.region = ""
 
 def create_quartile_views(sender, **kwargs):
     """
@@ -1291,6 +1305,7 @@ class Document(models.Model):
         return '{0} uploaded by: {1} at {2}'.format(self.filename or '', self.uploaded_by or 'Unknown', self.created)
 
 
+post_save.connect(set_department_region, sender=FireDepartment)
 post_migrate.connect(create_quartile_views)
 reversion.register(FireStation)
 reversion.register(FireDepartment)
