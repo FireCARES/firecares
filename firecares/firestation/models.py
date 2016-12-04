@@ -1209,6 +1209,16 @@ def set_department_region(sender, instance, **kwargs):
     else:
         instance.region = ""
 
+def update_department(sender, instance, **kwargs):
+    """
+    Updates a department's performance score and NFIRS counts when it is instantiated.
+    """
+    if not kwargs.get('created'):
+        return
+    from firecares.tasks import update
+    update.update_performance_score.delay(instance.id, dry_run=False)
+    update.update_nfirs_counts.delay(instance.id)
+
 def create_quartile_views(sender, **kwargs):
     """
     Creates DB views based on quartile queries.
@@ -1306,6 +1316,7 @@ class Document(models.Model):
 
 
 post_save.connect(set_department_region, sender=FireDepartment)
+post_save.connect(update_department, sender=FireDepartment)
 post_migrate.connect(create_quartile_views)
 reversion.register(FireStation)
 reversion.register(FireDepartment)
