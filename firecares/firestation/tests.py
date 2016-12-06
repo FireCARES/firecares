@@ -31,6 +31,14 @@ User = get_user_model()
 
 class FireStationTests(TestCase):
 
+    def test_fd_thumbnails(self):
+        """
+        Tests that thumbnails are automatically created for new departments.
+        """
+        fd = FireDepartment.objects.create(name="Thumbnail Test Department", state='VA')
+        fd.save()
+        self.assertTrue(os.path.exists("/home/firecares/department-thumbnails/us-va-thumbnail-test-department.jpg"))
+
     def test_auto_region_setting(self):
         """
         Tests that regions are automatically set on new departments.
