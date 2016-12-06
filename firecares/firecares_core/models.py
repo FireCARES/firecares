@@ -1,3 +1,4 @@
+import re
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from geopy.geocoders import GoogleV3
@@ -182,6 +183,27 @@ class UserProfile(models.Model):
     """
     user = AutoOneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     has_accepted_terms = models.BooleanField(default=False)
+
+
+class RegistrationWhitelist(models.Model):
+    """
+    Model to store a list of whitelisted domains/email addresses that can complete registration without intervention.
+    """
+    email_or_domain = models.CharField(unique=True, max_length=200)
+
+    def __unicode__(self):
+        return unicode(self.email_or_domain)
+
+    @classmethod
+    def is_whitelisted(cls, email):
+        whitelists = cls.objects.values_list('email_or_domain', flat=True)
+        email_whitelists = filter(lambda x: '@' in x, whitelists)
+        domain_whitelists = set(whitelists) ^ set(email_whitelists)
+        domain = re.match(r'(^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)$)', email).groups()[1]
+        if email in whitelists or domain in domain_whitelists:
+            return True
+        else:
+            return False
 
 
 reversion.register(Address)

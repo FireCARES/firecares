@@ -10,15 +10,16 @@ Create an account on FireCARES to learn how fire department resources are deploy
 {% endblock %}
 
 {% block content %}
-<div class="col-md-6 hidden-xs hidden-sm">
+<div class="col-md-6">
     <div class="ct-headerText--normal">
         <h2 class="text-uppercase ct-fw-600 ct-u-marginBottom20">
-            <span class="ct-u-text--motive">FireCARES</span> Registration
+            <span class="ct-u-text--motive">FireCARES</span> registration
         </h2>
-        <p>Congratulations!  Your email address allows you to be able to register automatically.  Please complete the registration form to create your account.</p>
+        Currently, FireCARES allows for anyone to request an account; however, only specific email addresses allow for
+        automatic registration.  If your email address or email address domain is not whitelisted, an account
+        request for you will be created and we contact you for further verification.
     </div>
 </div>
-
 <div class="col-md-6">
     <form role="form" class="ct-formRegister pull-right-md" method="post">
         {% csrf_token %}
@@ -39,34 +40,9 @@ Create an account on FireCARES to learn how fire department resources are deploy
             </div>
             {% with WIDGET_ERROR_CLASS='form-error' %}
             <div class="ct-form--item ct-u-marginBottom20 form-group">
-                <label>Your Username</label>
-                {% render_field form.username type="text" class+="form-control input-lg" %}
-                {{ form.username.errors }}
-            </div>
-            <div class="ct-form--item ct-u-marginBottom20 form-group">
-                <label>Your First Name</label>
-                {% render_field form.first_name type="text" class+="form-control input-lg" %}
-                {{ form.first_name.errors }}
-            </div>
-            <div class="ct-form--item ct-u-marginBottom20 form-group">
-                <label>Your Last Name</label>
-                {% render_field form.last_name type="text" class+="form-control input-lg" %}
-                {{ form.last_name.errors }}
-            </div>
-            <div class="ct-form--item ct-u-marginBottom20 form-group">
                 <label>Your Email</label>
-                {% render_field form.email type="text" class+="form-control input-lg" disabled="disabled" %}
+                {% render_field form.email type="text" class+="form-control input-lg" %}
                 {{ form.email.errors }}
-            </div>
-            <div class="ct-form--item ct-u-marginBottom20 form-group">
-                <label>Password</label>
-                {% render_field form.password1 type="password" class+="form-control input-lg" %}
-                {{ form.password1.errors }}
-            </div>
-            <div class="ct-form--item ct-u-marginBottom20 form-group">
-                <label>Password Confirmation</label>
-                {% render_field form.password2 type="password" class+="form-control input-lg" %}
-                {{ form.password2.errors }}
             </div>
             {{ form.non_field_errors }}
             {% endwith %}

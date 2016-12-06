@@ -282,6 +282,7 @@ CELERY_QUEUES = [
 
 ACCOUNT_ACTIVATION_DAYS = 7
 REGISTRATION_OPEN = False
+REGISTRATION_FORM = 'firecares.firecares_core.registration.forms.LimitedRegistrationForm'
 
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'localhost')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')

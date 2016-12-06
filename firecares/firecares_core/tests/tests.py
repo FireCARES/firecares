@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse, resolve
 from django.test import Client
 from django.utils import timezone
 from bs4 import BeautifulSoup
-from firecares.firecares_core.models import RecentlyUpdatedMixin, AccountRequest
+from firecares.firecares_core.models import RecentlyUpdatedMixin, AccountRequest, RegistrationWhitelist
 from firecares.firestation.models import FireDepartment
 
 User = get_user_model()
@@ -109,27 +109,42 @@ class CoreTests(BaseFirecaresTestcase):
 
         with self.settings(REGISTRATION_OPEN=True):
             response = c.get(reverse('registration_register'))
-            self.assertTrue(response.status_code, 200)
+            # Must validate email before going through registration
+            self.assert_redirect_to(response, 'registration_preregister')
 
-            c.post(reverse('registration_register'), data={'username': 'test',
-                                                           'password1': 'test',
-                                                           'password2': 'test',
-                                                           'email': 'test@example.com'
-                                                           })
+            # Whitelist this address for optimal path testing
+            RegistrationWhitelist.objects.create(email_or_domain='test_registration@example.com')
 
-            self.assertTrue(len(mail.outbox), 1)
-            user = User.objects.get(username='test')
+            # Ensure that email addresses that are NOT whitelisted create an account request
+            resp = c.post(reverse('registration_preregister'), data={'email': 'badtest@example.com'})
+            self.assert_redirect_to(resp, 'show_message')
+
+            # For emails that are whitelisted, redirect to the registration form
+            resp = c.post(reverse('registration_preregister'), data={'email': 'test_registration@example.com'})
+            self.assert_redirect_to(resp, 'registration_register')
+            self.assertTrue('email_whitelisted' in c.session)
+            # Email address is pulled from session versus form
+            response = c.post(reverse('registration_register'), data={'username': 'test_registration',
+                                                                      'first_name': 'fname',
+                                                                      'last_name': 'lname',
+                                                                      'password1': 'test',
+                                                                      'password2': 'test'
+                                                                      })
+
+            user = User.objects.get(username='test_registration')
             self.assertFalse(user.is_active)
             self.assertFalse(user.is_superuser)
             self.assertFalse(user.is_staff)
+            self.assertEqual(user.email, 'test_registration@example.com')
             self.assertFalse(user.registrationprofile.activation_key_expired())
+            self.assertTrue(len(mail.outbox), 1)
 
             response = c.get(reverse('registration_activate', kwargs={'activation_key':
                                                                       user.registrationprofile.activation_key}))
             # A 302 here means the activation succeeded
             self.assertEqual(response.status_code, 302)
 
-            user = User.objects.get(username='test')
+            user = User.objects.get(username='test_registration')
             self.assertTrue(user.is_active)
             self.assertTrue(user.registrationprofile.activation_key_expired())
             self.assertFalse(user.is_superuser)
@@ -265,14 +280,39 @@ class CoreTests(BaseFirecaresTestcase):
         c = Client()
 
         with self.settings(ADMINS=(('Test Admin', 'admin@example.com'),)):
-            resp = c.post(reverse(view), {'email': 'test@example.com'}, follow=True)
+            resp = c.post(reverse(view), {'email': 'test_request_login@example.com'}, follow=True)
             self.assertEqual(resp.status_code, 200)
             self.assertEqual(1, AccountRequest.objects.count())
 
             # Ensure duplicates are handled gracefully.
-            resp = c.post(reverse(view), {'email': 'test@example.com'}, follow=True)
+            resp = c.post(reverse(view), {'email': 'test_request_login@example.com'}, follow=True)
             self.assertEqual(resp.status_code, 200)
 
             # Make sure admin email is triggered.
             self.assertEqual(len(mail.outbox), 1)
             print mail.outbox[0].message()
+
+    def test_signup_when_account_exists(self):
+        """
+        Test that an account request for an email that already exists redirects to login.
+        """
+        with self.settings(ADMINS=(('Test Admin', 'admin@example.com'),)):
+            c = Client()
+
+            user, creds = self.create_test_user('signup_tester', 'password', email='tester@example.com')
+            resp = c.post(reverse('account_request'), dict(email='tester@example.com'))
+            self.assert_redirect_to_login(resp)
+
+    def test_email_whitelisting(self):
+        """
+        Ensure that email addresses are correctly whitelisted.
+        """
+        RegistrationWhitelist.objects.create(email_or_domain='gmail.com')
+        RegistrationWhitelist.objects.create(email_or_domain='test@example.com')
+
+        self.assertTrue(RegistrationWhitelist.is_whitelisted('joe@gmail.com'))
+        self.assertTrue(RegistrationWhitelist.is_whitelisted('test@example.com'))
+        self.assertFalse(RegistrationWhitelist.is_whitelisted('badtest@example.com'))
+        self.assertFalse(RegistrationWhitelist.is_whitelisted('testbad@example.com'))
+        self.assertFalse(RegistrationWhitelist.is_whitelisted('test@example.com.uk'))
+        self.assertFalse(RegistrationWhitelist.is_whitelisted('test@gmail.com.uk'))

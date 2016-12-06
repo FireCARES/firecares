@@ -1,0 +1,1 @@
+\copy (select name, fd.id as firecares_id, fdid, iaff, ad.state_province, ad.city, fd.department_type from firestation_firedepartment fd inner join firecares_core_address ad on fd.headquarters_address_id = ad.id where department_type != 'Volunteer') TO '/tmp/outf.csv' CSV HEADER;

@@ -11731,6 +11731,10 @@ form[name='boundaryUpload'] a.commit:hover {
 .delete-perms {
   color: red;
 }
+/* Registration tweaks */
+.ct-formRegister input[disabled] {
+  background-color: #333333;
+}
 .ct-pageWrapper {
   background-color: #ffffff;
   overflow: hidden;

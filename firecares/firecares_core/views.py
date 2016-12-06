@@ -11,6 +11,7 @@ from django.template import loader
 from django.utils.decorators import method_decorator
 from django.views.generic import View, CreateView, TemplateView
 from firecares.firecares_core.forms import ContactForm
+from firecares.firecares_core.models import RegistrationWhitelist
 from firecares.tasks.email import send_mail
 
 
@@ -100,17 +101,25 @@ class AccountRequestView(CreateView):
     template_name = 'firestation/home.html'
     form_class = AccountRequestForm
     http_method_names = ['post']
-    success_message = 'We will be in touch with you when FireCARES is ready. Please stay tuned to our partner websites'\
+    success_message = 'We will be in touch with you to verify your account. Please stay tuned to our partner websites'\
                       ' and major fire service conferences for updates.'
 
     def form_valid(self, form):
         """
-        If the form is valid, save the associated model.
+        If the form is valid AND the email is whitelisted, then send to registration; otherwise capture email address.
         """
-        self.object = form.save()
-        self.send_email()
-        self.request.session['message'] = self.success_message
-        return HttpResponseRedirect(reverse('show_message'))
+        email = form.data.get('email')
+        if User.objects.filter(email=email).first():
+            # Redirect to login if a user w/ that email has already been found
+            return redirect('login')
+        if RegistrationWhitelist.is_whitelisted(email):
+            self.request.session['email_whitelisted'] = email
+            return redirect('registration_register')
+        else:
+            self.object = form.save()
+            self.send_email()
+            self.request.session['message'] = self.success_message
+            return redirect('show_message')
 
     def form_invalid(self, form):
         """
@@ -121,7 +130,7 @@ class AccountRequestView(CreateView):
             self.request.session['message'] = form.errors['email'][0]
         else:
             self.request.session['message'] = 'Error processing request.'
-        return HttpResponseRedirect(reverse('show_message'))
+        return redirect('show_message')
 
     def send_email(self):
         """

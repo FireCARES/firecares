@@ -1,4 +1,4 @@
-from .models import Address, ContactRequest, AccountRequest
+from .models import Address, ContactRequest, AccountRequest, RegistrationWhitelist
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -40,5 +40,6 @@ class UserAdmin(BaseUserAdmin):
 admin.site.register(Address, AddressAdmin)
 admin.site.register(ContactRequest, ContactRequestAdmin)
 admin.site.register(AccountRequest, AccountRequestAdmin)
+admin.site.register(RegistrationWhitelist)
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
