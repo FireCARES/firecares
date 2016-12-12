@@ -49,6 +49,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 CELERY_ALWAYS_EAGER = True
 
+REGISTRATION_OPEN = True
+
 try:
     from local_settings import *  # noqa
 except ImportError:
