@@ -19,7 +19,7 @@ class BaseFirecaresTestcase(TestCase):
         self.fire_station = self.create_firestation()
 
         self.admin_user, self.admin_creds = self.create_test_user('admin', 'admin', is_superuser=True)
-        self.non_admin_user, self.non_admin_creds = self.create_test_user('non_admin', 'non_admin')
+        self.non_admin_user, self.non_admin_creds = self.create_test_user('non_admin', 'non_admin', email='non_admin@example.com')
         self.non_accepted_user, self.non_accepted_creds = self.create_test_user('non_accepted', 'non_accepted', has_accepted_terms=False)
 
     def assert_redirect_to_login(self, response):

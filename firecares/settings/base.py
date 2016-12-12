@@ -260,6 +260,8 @@ GOOGLE_ANALYTICS_TRACKING_ID = os.getenv('GOOGLE_ANALYTICS_TRACKING_ID', None)
 
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login'
+SSO_LOGIN_URL = 'https://staging.iaff.org/Web/Contacts/SignIn_withoutCreateNewAccount.aspx?doRedirect={}'
+SSO_SERVICE_URL = 'http://member.iaff.org/iaff_sso_staging/sso.asmx'
 
 CELERY_DEFAULT_QUEUE = "default"
 CELERY_DEFAULT_EXCHANGE = "default"

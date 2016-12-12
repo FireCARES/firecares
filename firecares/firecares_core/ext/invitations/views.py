@@ -1,13 +1,55 @@
 import json
+from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.http import HttpResponse
+from django.template.context import RequestContext
+from django.utils import timezone
+from invitations import signals
+from invitations.adapters import get_invitations_adapter
 from invitations.exceptions import AlreadyInvited, AlreadyAccepted, UserRegisteredEmail
 from invitations.forms import CleanEmailMixin
 from invitations.models import Invitation
 from invitations.views import SendJSONInvite, AcceptInvite
 from firecares.firecares_core.ext.registration.views import SESSION_EMAIL_WHITELISTED
 from firecares.firestation.models import FireDepartment
+
+
+def send_invitation(self, request, **kwargs):
+    current_site = (kwargs['site'] if 'site' in kwargs
+                    else Site.objects.get_current())
+    invite_url = reverse('invitations:accept-invite',
+                         args=[self.key])
+    invite_url = request.build_absolute_uri(invite_url)
+
+    ctx = RequestContext(request, {
+        'invite_url': invite_url,
+        'site_name': current_site.name,
+        'email': self.email,
+        'key': self.key,
+        'inviter': self.inviter.email or 'a FireCARES department administrator',
+        'department': self.departmentinvitation.department
+    })
+
+    email_template = 'invitations/email/email_invite'
+
+    get_invitations_adapter().send_mail(
+        email_template,
+        self.email,
+        ctx)
+    self.sent = timezone.now()
+    self.save()
+
+    signals.invite_url_sent.send(
+        sender=self.__class__,
+        instance=self,
+        invite_url_sent=invite_url,
+        inviter=self.inviter)
+
+
+# Monkey-patch the invitation model to inject additional email context
+Invitation.send_invitation = send_invitation
 
 
 class SendJSONDepartmentInvite(SendJSONInvite):

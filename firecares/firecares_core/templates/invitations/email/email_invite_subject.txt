@@ -1,0 +1,5 @@
+
+{% load i18n %}
+{% autoescape off %}
+{% blocktrans %}FireCARES - Invitation to join {{ site_name }} as a data curator for the {{ department }}{% endblocktrans %}
+{% endautoescape %}

@@ -5,9 +5,13 @@
 
 Hello,
 
-You ({{ email }}) have been invited to join {{ site_name }}
+You ({{ email }}) have been invited by {{ inviter }} to join {{ site_name }} as a data curator for the {{ department }}.
 
-If you'd like to join, please go to {{ invite_url }}
+If you'd like to join, please go to {{ invite_url }} to accept the invite.
+
+Thank you,
+
+The FireCARES team
 
 {% endblocktrans %}
 {% endautoescape %}

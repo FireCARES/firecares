@@ -211,6 +211,7 @@ class DepartmentInvitation(models.Model):
     invitation = AutoOneToOneField(Invitation, on_delete=models.CASCADE)
     # If this foreign key doesn't allow for null, weird things can happen for AutoOneToOneFields
     department = models.ForeignKey('firestation.FireDepartment', on_delete=models.CASCADE, null=True)
+    # Populated by the user account that accepts the invite AFTER the invite has been accepted AND user has registered
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
 
 

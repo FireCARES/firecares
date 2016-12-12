@@ -13,3 +13,11 @@ class DisclaimerAcceptedMiddleware(object):
             return None
         if request.user.is_authenticated() and not request.user.userprofile.has_accepted_terms:
             return HttpResponseRedirect(reverse('disclaimer') + '?next=' + request.path)
+
+
+class IWISSingleSignOn(object):
+    def process_request(self, request):
+        pass
+
+    def process_response(self, request, response):
+        pass

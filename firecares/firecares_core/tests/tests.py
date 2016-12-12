@@ -354,6 +354,8 @@ class CoreTests(BaseFirecaresTestcase):
         # Extract invite link from outbound email and start registration
         self.assertEqual(len(mail.outbox), 1)
         msg = mail.outbox[0]
+        print mail.outbox[0].message()
+        self.assertIn('non_admin@example.com', msg.body)
         self.assertIn('/invitations/accept-invite/', msg.body)
         url = re.findall('(https?://\S+)', msg.body)[0]
         path = urlparse(url).path
@@ -368,6 +370,7 @@ class CoreTests(BaseFirecaresTestcase):
         self.assertFalse(User.objects.get(username='inviteuser').is_active)
         msg = mail.outbox[1]
         url = re.findall('(https?://\S+)', msg.body)[0]
+        print mail.outbox[1].message()
 
         # Activate account
         anon_user.get(url)
