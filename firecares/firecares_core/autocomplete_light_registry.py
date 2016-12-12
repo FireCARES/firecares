@@ -51,4 +51,5 @@ al.register(User,
             search_fields=['username'],
             attrs={
                 'data-autocomplete-minimum-characters': 1,
-            })
+            },
+            choices=User.objects.filter(is_active=True)),

@@ -175,6 +175,8 @@ INSTALLED_APPS = (
     'reversion',
     'favit',
     'guardian',
+    'django_nose',
+    'invitations',
 )
 
 OSGEO_IMPORTER = 'firecares.importers.GeoDjangoImport'
@@ -239,9 +241,13 @@ LOGGING = {
     }
 }
 
-SILENCED_SYSTEM_CHECKS = ['fields.W342']
-
 TASTYPIE_DEFAULT_FORMATS = ['json', 'xml']
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+NOSE_ARGS = [
+    '--verbosity=2'
+]
 
 # Celery settings.
 BROKER_URL = os.getenv('BROKER_URL', 'amqp://guest:guest@127.0.0.1//')
@@ -282,7 +288,11 @@ CELERY_QUEUES = [
 
 ACCOUNT_ACTIVATION_DAYS = 7
 REGISTRATION_OPEN = False
-REGISTRATION_FORM = 'firecares.firecares_core.registration.forms.LimitedRegistrationForm'
+REGISTRATION_FORM = 'firecares.firecares_core.ext.registration.forms.LimitedRegistrationForm'
+INVITATIONS_SIGNUP_REDIRECT = 'registration_register'
+INVITATIONS_ALLOW_JSON_INVITES = True
+INVITATIONS_ACCEPT_INVITE_AFTER_SIGNUP = True
+INVITATIONS_ADAPTER = 'firecares.firecares_core.ext.invitations.adapters.DepartmentInvitationsAdapter'
 
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'localhost')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')

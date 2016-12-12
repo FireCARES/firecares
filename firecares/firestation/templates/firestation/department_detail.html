@@ -78,8 +78,11 @@
                 </div>
                 <div class="ct-u-displayTableCell text-right">
                     {% favorite_button object %}
-                    <a href="javascript:window.print()" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-printer fa-2x"></i></a>
-                    <a href="{% url 'documents' object.id %}" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-docs fa-2x"></i></a>
+                    <a href="javascript:window.print()" title="Print this page" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-printer fa-2x"></i></a>
+                    <a href="{% url 'documents' object.id %}" title="View this department's documents" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-docs fa-2x"></i></a>
+                    {% if user_can_admin %}
+                        <a href="{% url 'admin_department_users' object.id %}" title="Manage department users" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-people fa-2x"></i></a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -155,14 +158,6 @@
                                         <a href="{% url 'remove_intersecting_departments' object.id %}">
                                             <i class="fa fa-scissors"></i>
                                             Remove Intersections
-                                        </a>
-                                    </li>
-                                    {% endif %}
-                                    {% if user_can_admin %}
-                                    <li>
-                                        <a href="{% url 'admin_department_users' object.id %}">
-                                            <i class="fa fa-user"></i>
-                                            Manage department users
                                         </a>
                                     </li>
                                     {% endif %}
@@ -437,7 +432,7 @@
                                 </table>
                             </div>
 
-                            <a name = "stations"></a>
+                            <a name="stations"></a>
                             {% if not firestations %}
                             <div class="ct-heading ct-u-marginBottom20">
                                 <h3>No stations linked to this department </h3>

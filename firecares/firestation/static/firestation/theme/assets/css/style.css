@@ -11728,12 +11728,25 @@ form[name='boundaryUpload'] a.commit:hover {
   width: auto;
 }
 /* Department user admin page */
-.delete-perms {
+.user-admin .delete-perms {
   color: red;
+}
+.user-admin td {
+  min-width: 15em;
 }
 /* Registration tweaks */
 .ct-formRegister input[disabled] {
   background-color: #333333;
+}
+.invitations .form-inline .form-control {
+  width: 100%;
+}
+.invitations .panel-group {
+  margin-bottom: 1em;
+}
+.invitations .alert {
+  margin-bottom: 0;
+  margin-top: -5px;
 }
 .ct-pageWrapper {
   background-color: #ffffff;

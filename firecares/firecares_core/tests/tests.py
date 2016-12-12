@@ -1,4 +1,6 @@
-from .base import BaseFirecaresTestcase
+import json
+import re
+from urlparse import urlparse
 from datetime import timedelta
 from urlparse import urlsplit
 from django.contrib.auth import get_user_model, authenticate
@@ -11,6 +13,7 @@ from django.utils import timezone
 from bs4 import BeautifulSoup
 from firecares.firecares_core.models import RecentlyUpdatedMixin, AccountRequest, RegistrationWhitelist
 from firecares.firestation.models import FireDepartment
+from .base import BaseFirecaresTestcase
 
 User = get_user_model()
 
@@ -316,3 +319,59 @@ class CoreTests(BaseFirecaresTestcase):
         self.assertFalse(RegistrationWhitelist.is_whitelisted('testbad@example.com'))
         self.assertFalse(RegistrationWhitelist.is_whitelisted('test@example.com.uk'))
         self.assertFalse(RegistrationWhitelist.is_whitelisted('test@gmail.com.uk'))
+
+    def test_permission_assignment(self):
+        """
+        Ensure that permission assignment is working as expected.
+        """
+
+        fd = self.load_la_department()
+        self.non_admin_user.add_obj_perm('change_firedepartment', fd)
+        self.assertTrue(self.non_admin_user.has_perm('change_firedepartment', fd))
+
+        self.non_admin_user.is_active = False
+        self.non_admin_user.save()
+
+        # Non-activated users have no object-level permissions
+        self.assertFalse(self.non_admin_user.has_perm('change_firedepartment', fd))
+
+    def test_invite_workflow(self):
+        fd = self.load_la_department()
+        fd2 = self.load_arlington_department()
+
+        dept_user = Client()
+        anon_user = Client()
+        self.non_admin_user.add_obj_perm('admin_firedepartment', fd)
+        dept_user.login(**self.non_admin_creds)
+
+        # If the inviting user isn't an admin on the department that the invitation for, then 401
+        resp = dept_user.post(reverse('invitations:send-json-invite'), data=json.dumps([dict(department_id=fd2.id, email='joe@test.com')]), content_type='application/json')
+        self.assertEqual(resp.status_code, 401)
+
+        resp = dept_user.post(reverse('invitations:send-json-invite'), data=json.dumps([dict(department_id=fd.id, email='joe@test.com')]), content_type='application/json')
+        self.assertEqual(resp.status_code, 201)
+
+        # Extract invite link from outbound email and start registration
+        self.assertEqual(len(mail.outbox), 1)
+        msg = mail.outbox[0]
+        self.assertIn('/invitations/accept-invite/', msg.body)
+        url = re.findall('(https?://\S+)', msg.body)[0]
+        path = urlparse(url).path
+        resp = anon_user.get(path)
+        self.assert_redirect_to(resp, 'registration_register')
+
+        # Fill out registration form and activate account
+        form = dict(username='inviteuser', first_name='Invite', last_name='User', password1='secret1', password2='secret1')
+        resp = anon_user.post(reverse('registration_register'), data=form)
+        self.assert_redirect_to(resp, 'registration_complete')
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertFalse(User.objects.get(username='inviteuser').is_active)
+        msg = mail.outbox[1]
+        url = re.findall('(https?://\S+)', msg.body)[0]
+
+        # Activate account
+        anon_user.get(url)
+        user = User.objects.get(username='inviteuser')
+        self.assertTrue(user.is_active)
+        self.assertTrue(user.has_perm('change_firedepartment', fd))
+        self.assertFalse(user.has_perm('admin_firedepartment', fd))

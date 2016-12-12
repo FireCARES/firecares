@@ -9,6 +9,7 @@ from django.utils import timezone
 from reversion import revisions as reversion
 from django.conf import settings
 from annoying.fields import AutoOneToOneField
+from invitations.models import Invitation
 
 
 class RecentlyUpdatedMixin(models.Model):
@@ -204,6 +205,13 @@ class RegistrationWhitelist(models.Model):
             return True
         else:
             return False
+
+
+class DepartmentInvitation(models.Model):
+    invitation = AutoOneToOneField(Invitation, on_delete=models.CASCADE)
+    # If this foreign key doesn't allow for null, weird things can happen for AutoOneToOneFields
+    department = models.ForeignKey('firestation.FireDepartment', on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
 
 
 reversion.register(Address)

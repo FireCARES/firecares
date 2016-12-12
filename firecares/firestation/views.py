@@ -35,6 +35,7 @@ from .forms import DocumentUploadForm
 from django.views.generic.edit import FormView
 from .models import Document, FireStation, FireDepartment, Staffing, create_quartile_views
 from favit.models import Favorite
+from invitations.models import Invitation
 
 
 User = get_user_model()
@@ -225,11 +226,13 @@ class AdminDepartmentUsers(PermissionRequiredMixin, LoginRequiredMixin, DetailVi
                                    can_change=u.has_perm('change_firedepartment', self.object),
                                    can_admin=u.has_perm('admin_firedepartment', self.object)))
         context['user_perms'] = user_perms
+        context['invites'] = Invitation.objects.filter(departmentinvitation__department=self.object).order_by('-sent')
         return context
 
     def post(self, request, **kwargs):
         self.object = self.get_object()
         users = get_users_with_perms(self.object)
+
         can_admin_users = request.POST.getlist('can_admin')
         can_change_users = request.POST.getlist('can_change')
         for user in can_admin_users:

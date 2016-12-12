@@ -1,6 +1,6 @@
 from firecares.settings.base import *  # noqa
 
-INSTALLED_APPS += ('debug_toolbar', 'fixture_magic')  # noqa
+INSTALLED_APPS += ('debug_toolbar', 'fixture_magic', 'django_extensions')  # noqa
 
 MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware', )  # noqa
 

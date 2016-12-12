@@ -29,6 +29,7 @@
       headquartersName: "{{ object.name }} Headquarters",
       id: {{ object.id }}
     };
+
     var users = [
       {% for u in user_perms %}
       {
@@ -36,7 +37,19 @@
         username: "{{ u.user.username }}",
         can_change: {{ u.can_change|yesno:"true,false" }},
         can_admin: {{ u.can_admin|yesno:"true,false" }}
-      },
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ];
+
+    var invites = [
+      {% for i in invites %}
+      {
+        accepted: {{ i.accepted|yesno:"true,false" }},
+        email: "{{ i.email }}",
+        inviter: "{{ i.inviter.username }}",
+        sent: "{{ i.sent|naturaltime }}",
+        username: "{{ i.departmentinvitation.user.username }}"
+      }{% if not forloop.last %},{% endif %}
       {% endfor %}
     ];
     </script>
@@ -212,12 +225,55 @@
                         </div>
                     </div>
                     <hr/>
-                    <div class="col-sm-6 col-md-12 ct-u-marginBottom30">
+                    <div class="ct-u-marginBottom30">
                         <h3>Manage {{ object }} Users</h3>
                     </div>
-                    <form role="form" method="post" action="" ng-controller="userAdminController">
+                    <h5 class="ct-u-marginBottom10">Invite a user to update {{ object }}'s data
+                        <i data-toggle="tooltip" data-placement="top" title="To invite a person to edit {{ object }}'s data, enter their email address and click 'Invite to FireCARES'.  After accepting the invite, the user will automatically be granted edit capabilities for the {{ object }} and any associated fire stations." class="fa fa-info-circle" aria-hidden="true"></i>
+                    </h5>
+                    <div class="invitations" ng-controller="userInviteController">
+                        <form id="invite-form" class="form-inline row">
+                            {% csrf_token %}
+                            {% verbatim %}
+                            <div class="col-md-6 form-group">
+                                <input type="text" name="email" id="id_email" ng-model="toInvite" class="form-control validate-email" placeholder="Email address"/>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-primary pull-left" ng-click="invite(toInvite)" ng-disabled="!toInvite">Invite to FireCARES</button>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="ng-cloak fade alert" ng-class="{in: error || success, 'alert-danger': error, 'alert-success': success}">{{ error || success || '&nbsp;'}}</div>
+                            </div>
+                            {% endverbatim %}
+                        </form>
+                        <div class="panel-group" id="accordion">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse1" class="collapsed">View invitations for {{ object }}</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse1" class="panel-collapse collapse">
+                                    <ul class="list-group list-unstyled">
+                                        {% verbatim %}
+                                        <li ng-repeat="i in invitations" class="ng-cloak list-group-item">
+                                            <span class="pull-right label label-success" ng-if="i.accepted">Invite accepted, username is &quot;{{ i.username }}&quot;</span>
+                                            <strong>{{ i.email }}</strong> - sent {{ i.sent }}
+                                        </li>
+                                        {% endverbatim %}
+                                        <li class="ng-cloak list-group-item" ng-if="!invitations.length">
+                                            No invitations have been sent for {{ object }}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr/>
+                    <h4 class="ct-u-marginBottom20">Manage user access</h4>
+                    <form role="form" method="post" action="" ng-controller="userAdminController" class="user-admin">
                         {% csrf_token %}
-                        <table class="table table-striped">
+                        <table class="table table-striped well">
                             <thead>
                                 <tr>
                                     <th>Username</th>
@@ -232,29 +288,27 @@
                                     <td><strong>{{ u.username }}</strong></td>
                                     <td><input type="checkbox" name="can_change" value="{{ u.username }}" ng-model="u.can_change"/></td>
                                     <td><input type="checkbox" name="can_admin" value="{{ u.username }}" ng-model="u.can_admin"/></td>
-                                    <td><a href="" ng-click="deletePerms(u)" title="Remove this user's permissions for this department completely" class="btn btn-default btn-xs"><i class="fa fa-minus-circle"></i></a></td>
+                                    <td><a href="" ng-click="deletePerms(u)" title="Remove this user's permissions for this department completely" class="btn btn-default btn-xs pull-right delete-perms"><i class="fa fa-minus-circle"></i></a></td>
                                 </tr>
-                                <tr ng-show="toadd">
-                                    <td><input type="text" autocomplete="off" name="username" ng-model="toadd.username" placeholder="Type a username" typeahead="suggestion for suggestion in autocompleteUsers($viewValue)"/></td>
+                                <tr ng-show="toadd" class="ng-cloak">
+                                    <td><input type="text" autocomplete="off" name="username" ng-model="toadd.username" placeholder="Type an existing username" uib-typeahead="suggestion for suggestion in autocompleteUsers($viewValue)"/></td>
                                     <td><input type="checkbox" name="can_change" ng-model="toadd.can_change"/></td>
                                     <td><input type="checkbox" name="can_admin" ng-model="toadd.can_admin"/></td>
                                     <td>
-                                        <button type="button" ng-click="addComplete()" class="btn btn-default">Add</button>
-                                        <button type="button" ng-click="cancelAdd()" class="btn btn-default">Cancel</button>
+                                        <button type="button" ng-click="cancelAdd()" class="btn btn-default pull-right">Cancel</button>
+                                        <button type="button" ng-click="addComplete()" ng-disabled="(!toadd.can_change && !toadd.can_admin) || !toadd.username" class="btn btn-primary pull-right">Add</button>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td colspan="4">
-                                        <button type="button" ng-disabled="toadd !== null" ng-click="addUser()" class="btn btn-default"><i class="fa fa-plus"></i> Add User</button>
+                                        <button type="button" ng-disabled="toadd !== null" ng-click="addUser()" class="btn btn-primary btn-xs"><i class="fa fa-plus"></i> Add User</button>
                                     </td>
                                 </tr>
                                 {% endverbatim %}
                             </tbody>
                         </table>
-                        <div class="col-sm-12 col-md-12 ct-u-marginBottom10">
-                            <div class="submission">
-                                <button ng-disabled="toadd !== null" class="btn btn-primary btn-xlarge pull-left ct-u-marginTop20" type="submit">Save</button>
-                            </div>
+                        <div class="submission">
+                            <button ng-disabled="toadd !== null" class="btn btn-primary pull-left ct-u-marginTop20" type="submit">Save</button>
                         </div>
                     </form>
                 </div>
@@ -265,6 +319,10 @@
 {% include 'firestation/_footer.html' %}
 </div>
 {% include "firestation/_firecares_scripts.html" %}
+<script type="text/javascript">
+$(function() {
+  $('[data-toggle="tooltip"]').tooltip();
+});
 </script>
 </body>
 </html>

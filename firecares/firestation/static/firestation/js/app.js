@@ -7,6 +7,7 @@
       'fireStation.homeController',
       'fireStation.departmentDetailController',
       'fireStation.departmentDetailController.userAdmin',
+      'fireStation.departmentDetailController.userInvite',
       'fireStation.firestationDetailController',
       'fireStation.performanceScoreController',
       'fireStation.mapService',

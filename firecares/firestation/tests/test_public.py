@@ -250,5 +250,17 @@ class TestPublic(BaseFirecaresTestcase):
         self.assertContains(response, 'draggable: true')
         self.assertContains(response, 'onaftersave="updateStation()"')
 
-    def test_registration_whitelist(self):
-        pass
+    def test_department_user_admin(self):
+        fd = self.load_la_department()
+        user, creds = self.create_test_user('user2', 'user2')
+
+        c = Client()
+        c.login(**self.admin_creds)
+        perms = {'can_change': ['non_admin', 'user2'], 'can_admin': 'non_admin'}
+
+        resp = c.post(reverse('admin_department_users', args=[fd.id]), data=perms)
+        self.assert_redirect_to(resp, 'firedepartment_detail_slug')
+        self.assertTrue(user.has_perm('change_firedepartment', fd))
+        self.assertFalse(user.has_perm('admin_firedepartment', fd))
+        self.assertTrue(self.non_admin_user.has_perm('change_firedepartment', fd))
+        self.assertTrue(self.non_admin_user.has_perm('admin_firedepartment', fd))

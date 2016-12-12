@@ -33,7 +33,6 @@
     $scope.addUser = function() {
       if (!$scope.toadd) {
         $scope.toadd = {
-          id: null,
           username: '',
           can_change: false,
           can_admin: false

@@ -32,8 +32,9 @@ class BaseFirecaresTestcase(TestCase):
         shimmed = urlsplit(urlunsplit((split.scheme, split.netloc, path, split.query, split.fragment)))
         self.assertEqual(resolve(shimmed.path).url_name, route_name)
 
-    def create_test_user(self, username, password, has_accepted_terms=True, is_superuser=False, **kwargs):
-        user, created = User.objects.get_or_create(username=username, is_superuser=is_superuser, **kwargs)
+    def create_test_user(self, username, password, **kwargs):
+        has_accepted_terms = kwargs.pop('has_accepted_terms', True)
+        user, created = User.objects.get_or_create(username=username, **kwargs)
         user.userprofile.has_accepted_terms = has_accepted_terms
         user.userprofile.save()
 
