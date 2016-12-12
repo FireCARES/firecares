@@ -2,6 +2,7 @@ from django import template
 from django.conf import settings
 from django.template import defaultfilters
 from django.utils.translation import pgettext, ugettext as _, ungettext  # noqa
+import phonenumbers
 
 register = template.Library()
 
@@ -119,3 +120,17 @@ def quartile_text(value):
     """
 
     return dict(zip(range(1, 5), ['lowest', 'second lowest', 'second highest', 'highest'])).get(value)
+
+@register.filter(name='phonenumber')
+def phonenumber(value, country='US', format=phonenumbers.PhoneNumberFormat.NATIONAL):
+    """
+    Converts raw phone numbers from the DB to national format.
+    If the phone number does not exist do nothing.
+    The template defaults to "Unknown" for nonexistent phone numbers.
+    """
+    if value:
+        try:
+            parsed = phonenumbers.parse(value.raw_input, country)
+            return phonenumbers.format_number(parsed, format)
+        except phonenumbers.NumberParseException as e:
+            return value
