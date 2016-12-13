@@ -35,7 +35,7 @@ class FireStationTests(TestCase):
         """
         Tests that thumbnails are automatically created for new departments.
         """
-        fd = FireDepartment.objects.create(name="Thumbnail Test Department", state='VA')
+        fd = FireDepartment.objects.create(name="Thumbnail Test Department", state='VA', geom=MultiPolygon([Point(0, 0).buffer(.1)]))
         fd.save()
         self.assertTrue(os.path.exists("/home/firecares/department-thumbnails/us-va-thumbnail-test-department.jpg"))
 
