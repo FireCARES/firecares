@@ -46,7 +46,7 @@ class SSOTests(BaseFirecaresTestcase):
                   text=self.session_callback)
         mock.post(self.service_root,
                   request_headers={'SOAPAction': '"http://ibc.sso/FetchUserInfo"'},
-                  text=self.load_mock('user_info.xml'))
+                  text=self.user_info_callback)
         mock.post(self.service_root,
                   request_headers={'SOAPAction': '"http://ibc.sso/DisposeSessionByUserToken"'},
                   text=self.disposed_callback)
@@ -97,6 +97,6 @@ class SSOTests(BaseFirecaresTestcase):
 
         c.logout()
         self.user_info_updated = True
-        c.get('/?ibcToken{}'.format(uuid))
+        c.get('/?ibcToken={}'.format(uuid))
         user.refresh_from_db()
         self.assertEqual(user.email, 'testing@prominentedge.com')
