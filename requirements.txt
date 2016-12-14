@@ -38,3 +38,5 @@ django-annoying==0.10.3
 django-guardian==1.4.6
 django-nose==1.4.4
 django-invitations==1.8
+zeep==0.23.0
+requests-mock==1.2.0

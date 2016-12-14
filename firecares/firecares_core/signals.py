@@ -1,11 +1,14 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.sessions.models import Session
 from django.db.models import Q
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from guardian.models import UserObjectPermission, GroupObjectPermission
 from invitations.signals import invite_accepted
 from invitations.models import Invitation
+from zeep import Client
 
 
 @receiver(pre_delete, sender=get_user_model())
@@ -27,3 +30,14 @@ def accepted(sender, *args, **kwargs):
     user.add_obj_perm('change_firedepartment', department)
     invite.departmentinvitation.user = user
     invite.departmentinvitation.save()
+
+
+@receiver(pre_delete, sender=Session)
+def sessionend_handler(sender, **kwargs):
+    # Ensure that if user logs out of FireCARES, then then his/her IMIS session
+    # token is destroyed
+    inst = kwargs.get('instance').get_decoded()
+    if 'ibcToken' in inst:
+        token = inst.get('ibcToken')
+        imis = Client(settings.SSO_SERVICE_URL)
+        imis.service.DisposeSessionByUserToken(applicationInstance=1, userToken=token)

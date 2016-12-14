@@ -1,7 +1,9 @@
 from django import template
 from django.conf import settings
 from django.template import defaultfilters
+from django.template.defaulttags import URLNode, url
 from django.utils.translation import pgettext, ugettext as _, ungettext  # noqa
+import phonenumbers
 
 register = template.Library()
 
@@ -119,3 +121,51 @@ def quartile_text(value):
     """
 
     return dict(zip(range(1, 5), ['lowest', 'second lowest', 'second highest', 'highest'])).get(value)
+
+
+@register.filter(name='phonenumber')
+def phonenumber(value, country='US', format=phonenumbers.PhoneNumberFormat.NATIONAL):
+    """
+    Converts raw phone numbers from the DB to national format.
+    If the phone number does not exist do nothing.
+    The template defaults to "Unknown" for nonexistent phone numbers.
+    """
+    if value:
+        try:
+            parsed = phonenumbers.parse(value.raw_input, country)
+            return phonenumbers.format_number(parsed, format)
+        except phonenumbers.NumberParseException:
+            return value
+
+
+# Snagged from https://gist.github.com/kulturlupenguen/69aec1259131b5619fb7
+class AbsoluteURL(str):
+    pass
+
+
+class AbsoluteURLNode(URLNode):
+    def render(self, context):
+        asvar, self.asvar = self.asvar, None
+        path = super(AbsoluteURLNode, self).render(context)
+        request_obj = context['request']
+        abs_url = AbsoluteURL(request_obj.build_absolute_uri(path))
+
+        if not asvar:
+            return str(abs_url)
+        else:
+            if path == request_obj.path:
+                abs_url.active = 'active'
+            else:
+                abs_url.active = ''
+            context[asvar] = abs_url
+            return ''
+
+
+@register.tag
+def absurl(parser, token):
+    node = url(parser, token)
+    return AbsoluteURLNode(
+        view_name=node.view_name,
+        args=node.args,
+        kwargs=node.kwargs,
+        asvar=node.asvar)

@@ -3,13 +3,15 @@ from django.core.cache import cache
 from firecares.firestation.models import FireDepartment, Max, Min
 
 
-def third_party_tracking_ids(request):
+def global_settings(request):
     """
-    Retrieve 3rd-party tracking IDs from the settings file and add them to the
-    request context.
+    Expose various settings
     """
     return {
-        'google_analytics_tracking_id': settings.GOOGLE_ANALYTICS_TRACKING_ID,
+        'global_settings': {
+            'google_analytics_tracking_id': settings.GOOGLE_ANALYTICS_TRACKING_ID,
+            'SSO_LOGIN_URL': settings.SSO_LOGIN_URL
+        }
     }
 
 

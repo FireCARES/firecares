@@ -11738,6 +11738,35 @@ form[name='boundaryUpload'] a.commit:hover {
 .ct-formRegister input[disabled] {
   background-color: #333333;
 }
+.ct-formRegister *[type="submit"] {
+  width: 100%;
+}
+.ct-formRegister h4 {
+  color: #eeeeee;
+}
+.ct-formRegister p {
+  color: #777777;
+  font-size: 80%;
+  line-height: 115%;
+}
+.ct-formRegister a {
+  color: inherit;
+}
+.ct-formRegister .add-on .row div:first-child {
+  border-right: 1px solid #555555;
+}
+.ct-formRegister .add-on a {
+  width: 100%;
+}
+.ct-formRegister .recovery {
+  color: #a6a6a6;
+}
+.ct-formRegister .recovery a {
+  color: #F29A00;
+}
+.ct-formRegister .recovery a:hover {
+  color: #f0ad4e;
+}
 .invitations .form-inline .form-control {
   width: 100%;
 }

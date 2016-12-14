@@ -3,16 +3,15 @@ from .forms import ForgotUsernameForm, AccountRequestForm
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.template import loader
-from django.utils.decorators import method_decorator
 from django.views.generic import View, CreateView, TemplateView
-from firecares.firecares_core.forms import ContactForm
-from firecares.firecares_core.models import RegistrationWhitelist
 from firecares.tasks.email import send_mail
+from .forms import ContactForm
+from .models import RegistrationWhitelist
+from .mixins import LoginRequiredMixin
 
 
 class ForgotUsername(View):
@@ -144,7 +143,7 @@ class AccountRequestView(CreateView):
         send_mail.delay(email_message)
 
 
-class Disclaimer(TemplateView):
+class Disclaimer(LoginRequiredMixin, TemplateView):
     template_name = 'disclaimer.html'
 
     def post(self, request, *args, **kwargs):
@@ -152,7 +151,3 @@ class Disclaimer(TemplateView):
         profile.has_accepted_terms = True
         profile.save()
         return redirect(request.GET.get('next') or reverse('firestation_home'))
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(Disclaimer, self).dispatch(*args, **kwargs)

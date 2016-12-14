@@ -1,5 +1,5 @@
 [run]
-omit = */migrations/*,firecares/settings/*
+omit = */migrations/*,/firecares/settings/*
 
 [report]
 show_missing = True

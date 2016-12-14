@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <FetchUserInfoResponse xmlns="http://ibc.sso/">
+            <FetchUserInfoResult>
+                <Prefix>Mr.</Prefix>
+                <Suffix />
+                <FirstName>Tester</FirstName>
+                <LastName>McTest</LastName>
+                <FullName>Tester A. McTest</FullName>
+                <WorkPhone>(314) 555-1234</WorkPhone>
+                <CompanyName>Pittsburgh</CompanyName>
+                <EmailAddress>testing@prominentedge.com</EmailAddress>
+                <MemberType>MEM</MemberType>
+                <ImisId>0559211</ImisId>
+                <ExtensionData xmlns="http://ibc.ssoprovider/">
+                    <ID xmlns="">0559211</ID>
+                    <STATUS xmlns="">A</STATUS>
+                    <MEMBER_TYPE xmlns="">MEM</MEMBER_TYPE>
+                    <MAJOR_KEY xmlns="">L0001</MAJOR_KEY>
+                    <COMPANY xmlns="">Pittsburgh</COMPANY>
+                    <CHAPTER xmlns="">04</CHAPTER>
+                    <PREFIX xmlns="">Mr.</PREFIX>
+                    <FIRST_NAME xmlns="">Tester</FIRST_NAME>
+                    <INFORMAL xmlns="">Tester</INFORMAL>
+                    <MIDDLE_NAME xmlns="">A.</MIDDLE_NAME>
+                    <LAST_NAME xmlns="">McTest</LAST_NAME>
+                    <SUFFIX xmlns=""></SUFFIX>
+                    <GENDER xmlns="">M</GENDER>
+                    <WORK_PHONE xmlns="">(314) 555-1234</WORK_PHONE>
+                    <HOME_PHONE xmlns="">(314) 555-4321</HOME_PHONE>
+                    <MOBILE_PHONE xmlns="">(314) 555-1221</MOBILE_PHONE>
+                    <EMAIL xmlns="">joe@prominentedge.com</EMAIL>
+                    <ADDRESS_1 xmlns="">1234 Dunder Mifflin Rd</ADDRESS_1>
+                    <ADDRESS_2 xmlns=""></ADDRESS_2>
+                    <CITY xmlns="">Pittsburgh</CITY>
+                    <STATE_PROVINCE xmlns="">PA</STATE_PROVINCE>
+                    <ZIP xmlns="">15208-4432</ZIP>
+                    <COUNTRY xmlns="">USA</COUNTRY>
+                    <UserId xmlns="">JOE@PROMINENTEDGE.COM</UserId>
+                    <MOTOGROUP_MEM_NUM xmlns=""></MOTOGROUP_MEM_NUM>
+                    <security_role xmlns="">FIREPAC_USA,Local_CompanyAdmin,Local_Officer,Member</security_role>
+                </ExtensionData>
+                <WebLogin>JOE@PROMINENTEDGE.COM</WebLogin>
+            </FetchUserInfoResult>
+        </FetchUserInfoResponse>
+    </soap:Body>
+</soap:Envelope>

@@ -2,9 +2,6 @@ import os
 from firecares.settings.base import *  # noqa
 from celery.schedules import crontab
 
-SSO_LOGIN_URL = 'https://my.iaff.org/Web/Contacts/SignIn_withoutCreateNewAccount.aspx?doRedirect={}'
-SSO_SERVICE_URL = 'http://member.iaff.org/iaff_sso_prod/sso.asmx'
-
 INSTALLED_APPS = (
     'django_statsd',
 ) + INSTALLED_APPS  # noqa
@@ -45,6 +42,9 @@ STATIC_URL = COMPRESS_URL
 DEBUG = False
 AWS_QUERYSTRING_AUTH = False
 EMAIL_USE_TLS = True
+
+SSO_LOGIN_URL = 'https://my.iaff.org/Web/Contacts/SignIn_withoutCreateNewAccount.aspx?doRedirect='
+SSO_SERVICE_URL = 'https://member.iaff.org/iaff_sso_prod/sso.asmx?WSDL'
 
 
 CELERYBEAT_SCHEDULE = {

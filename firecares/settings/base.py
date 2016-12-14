@@ -101,6 +101,7 @@ RECAPTCHA_SECRET = ''
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'guardian.backends.ObjectPermissionBackend',
+    'django.contrib.auth.backends.RemoteUserBackend'
 )
 
 # List of callables that know how to import templates from various sources.
@@ -119,7 +120,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.template.context_processors.static",
     "django.template.context_processors.tz",
     "django.contrib.messages.context_processors.messages",
-    "firecares.firecares_core.context_processors.third_party_tracking_ids",
+    "firecares.firecares_core.context_processors.global_settings",
     "firecares.firecares_core.context_processors.fire_department_search",
 )
 
@@ -129,6 +130,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'firecares.firecares_core.middleware.IMISSingleSignOnMiddleware',
     'reversion.middleware.RevisionMiddleware',
     'firecares.firecares_core.middleware.DisclaimerAcceptedMiddleware'
     # Uncomment the next line for simple clickjacking protection:
@@ -246,7 +248,8 @@ TASTYPIE_DEFAULT_FORMATS = ['json', 'xml']
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 NOSE_ARGS = [
-    '--verbosity=2'
+    '--verbosity=2',
+    '--nologcapture'
 ]
 
 # Celery settings.
@@ -260,8 +263,8 @@ GOOGLE_ANALYTICS_TRACKING_ID = os.getenv('GOOGLE_ANALYTICS_TRACKING_ID', None)
 
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login'
-SSO_LOGIN_URL = 'https://staging.iaff.org/Web/Contacts/SignIn_withoutCreateNewAccount.aspx?doRedirect={}'
-SSO_SERVICE_URL = 'http://member.iaff.org/iaff_sso_staging/sso.asmx'
+SSO_LOGIN_URL = 'https://staging.iaff.org/Web/Contacts/SignIn_withoutCreateNewAccount.aspx?doRedirect='
+SSO_SERVICE_URL = 'https://member.iaff.org/iaff_sso_staging/sso.asmx?WSDL'
 
 CELERY_DEFAULT_QUEUE = "default"
 CELERY_DEFAULT_EXCHANGE = "default"

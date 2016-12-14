@@ -1072,6 +1072,44 @@ form[name='boundaryUpload'] {
   input[disabled] {
     background-color: @gray-dark;
   }
+
+  *[type="submit"] {
+    width: 100%;
+  }
+
+  h4 {
+    color: @gray-lightest;
+  }
+
+  p {
+    color: @gray-light;
+    font-size: 80%;
+    line-height: 115%;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  .add-on {
+    & .row div:first-child {
+      border-right: 1px solid @gray;
+    }
+
+    a {
+      width: 100%;
+    }
+  }
+
+  .recovery {
+    color: @gray-lighter;
+    a {
+      color: @brand-primary;
+      &:hover {
+        color: @brand-warning;
+      }
+    }
+  }
 }
 
 .invitations {

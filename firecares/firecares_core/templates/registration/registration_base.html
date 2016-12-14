@@ -1,5 +1,6 @@
 {% load humanize %}
 {% load widget_tweaks %}
+{% load firecares %}
 
 <!DOCTYPE html>
 <!--[if IE 8 ]>
@@ -59,6 +60,18 @@
         <div class="container">
             <div class="col-md-12">
                 {% block content %}
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+                        <ul>
+                            {% for message in messages %}
+                            <div class="alert {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}alert-success{% else %}alert-danger{% endif %}" role="alert">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
                 <div class="col-md-6 hidden-xs hidden-sm">
                     {% include 'firestation/_safegrade.html' %}
                 </div>
@@ -83,7 +96,7 @@
                         <div class="form-group">
                             {% with WIDGET_ERROR_CLASS='form-error' %}
                             <div class="ct-form--item ct-u-marginBottom20 form-group">
-                                <label>Your Username</label>
+                                <label>Username</label>
                                 {% render_field form.username type="text" class+="form-control input-lg" %}
                                 {{ form.username.errors }}
                             </div>
@@ -94,13 +107,27 @@
                             </div>
                             {{ form.non_field_errors }}
                             {% endwith %}
-                            <div class="ct-form--item ct-u-marginBottom20 text-center">
-                                <a href="{% url 'password_reset' %}">Forgot Password</a> <a href="{% url 'forgot_username' %}">or Username?</a><br/>
-                                <a href="{% url 'registration_register' %}" >Sign Up</a>
+                            <div class="ct-form--item ct-u-marginBottom20 text-center recovery">
+                                <a href="{% url 'password_reset' %}">Forgot Password</a> or
+                                <a href="{% url 'forgot_username' %}">Username?</a><br/>
                             </div>
 
                             <div class="ct-form--item">
                                 <button type="submit" class="btn btn-warning center-block">Login</button>
+                            </div>
+                            <hr/>
+                            <div class="ct-form--item text-center add-on">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4 class="ct-u-marginBottom20 ct-u-marginTop10">IAFF member?</h4>
+                                        <a href="{{ global_settings.SSO_LOGIN_URL }}{% absurl 'firestation_home' %}" class="btn btn-sm btn-default center-block ct-u-marginBottom10">Login using IMIS</a>
+                                        <p><em>Note: you will be redirected to IAFF's login portal</em></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h4 class="ct-u-marginBottom20 ct-u-marginTop10">Not a member?</h4>
+                                        <a class="btn btn-sm btn-default" href="{% url 'registration_register' %}" >Sign Up</a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         {% endblock %}
