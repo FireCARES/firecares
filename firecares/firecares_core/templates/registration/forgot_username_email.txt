@@ -1,3 +1,11 @@
+{% load i18n %}
+{% load url from future %}
+
+{% blocktrans %}Greetings{% endblocktrans %} {% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user }}{% endif %},
+
 Your username is: {{ username }}
 
 You can login with your username at: {{ login }}
+
+{% blocktrans %}Best regards{% endblocktrans %},
+{{ site_name }} {% blocktrans %}Management{% endblocktrans %}

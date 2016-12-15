@@ -1,7 +1,6 @@
 
 {% load i18n %}
 {% autoescape off %}
-{% blocktrans %}
 
 Hello,
 
@@ -9,9 +8,7 @@ You ({{ email }}) have been invited by {{ inviter }} to join {{ site_name }} as 
 
 If you'd like to join, please go to {{ invite_url }} to accept the invite.
 
-Thank you,
+{% blocktrans %}Best regards{% endblocktrans %},
+{{ site_name }} {% blocktrans %}Management{% endblocktrans %}
 
-The FireCARES team
-
-{% endblocktrans %}
 {% endautoescape %}

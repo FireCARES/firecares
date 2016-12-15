@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.template import loader
@@ -136,7 +137,7 @@ class AccountRequestView(CreateView):
         Email admins when new account requests are received.
         """
         body = loader.render_to_string('contact/account_request_email.txt', dict(contact=self.object))
-        email_message = EmailMultiAlternatives('New account request received.',
+        email_message = EmailMultiAlternatives('{} - New account request received.'.format(Site.objects.get_current().name),
                                                body,
                                                settings.DEFAULT_FROM_EMAIL,
                                                [x[1] for x in settings.ADMINS])

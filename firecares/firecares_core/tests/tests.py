@@ -141,6 +141,7 @@ class CoreTests(BaseFirecaresTestcase):
             self.assertEqual(user.email, 'test_registration@example.com')
             self.assertFalse(user.registrationprofile.activation_key_expired())
             self.assertTrue(len(mail.outbox), 1)
+            print mail.outbox[0].message()
 
             response = c.get(reverse('registration_activate', kwargs={'activation_key':
                                                                       user.registrationprofile.activation_key}))
