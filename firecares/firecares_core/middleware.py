@@ -1,4 +1,3 @@
-import re
 from logging import getLogger
 from django.conf import settings
 from django.contrib import auth, messages
@@ -35,7 +34,7 @@ class IMISSingleSignOnMiddleware(object):
         return ret
 
     def _create_username(self, user_info):
-        return re.sub('[^a-zA-Z ]+', '', user_info.get('FullName').lower()).replace(' ', '.')
+        return user_info.get('ImisId')
 
     def process_request(self, request):
         if not hasattr(request, 'user'):

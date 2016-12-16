@@ -377,5 +377,8 @@ class CoreTests(BaseFirecaresTestcase):
         anon_user.get(url)
         user = User.objects.get(username='inviteuser')
         self.assertTrue(user.is_active)
-        self.assertTrue(user.has_perm('change_firedepartment', fd))
+        self.assertFalse(user.is_superuser)
+        self.assertEqual(user.get_all_permissions(), set())
+        # User will NOT have any department object-level permissions for the inviting department
+        self.assertFalse(user.has_perm('change_firedepartment', fd))
         self.assertFalse(user.has_perm('admin_firedepartment', fd))

@@ -228,8 +228,8 @@
                     <div class="ct-u-marginBottom30">
                         <h3>Manage {{ object }} Users</h3>
                     </div>
-                    <h5 class="ct-u-marginBottom10">Invite a user to update {{ object }}'s data
-                        <i data-toggle="tooltip" data-placement="top" title="To invite a person to edit {{ object }}'s data, enter their email address and click 'Invite to FireCARES'.  After accepting the invite, the user will automatically be granted edit capabilities for the {{ object }} and any associated fire stations." class="fa fa-info-circle" aria-hidden="true"></i>
+                    <h5 class="ct-u-marginBottom10">Invite a user to FireCARES
+                        <i data-toggle="tooltip" data-placement="top" title="To invite a person to FireCARES, enter their email address and click 'Invite to FireCARES'.  After accepting the invite, the user's permissions for this department and associated fire stations can be specified in the 'Manage User Access' section." class="fa fa-info-circle" aria-hidden="true"></i>
                     </h5>
                     <div class="invitations" ng-controller="userInviteController">
                         <form id="invite-form" class="form-inline row">
@@ -258,7 +258,7 @@
                                         {% verbatim %}
                                         <li ng-repeat="i in invitations" class="ng-cloak list-group-item">
                                             <span class="pull-right label label-success" ng-if="i.accepted">Invite accepted, username is &quot;{{ i.username }}&quot;</span>
-                                            <strong>{{ i.email }}</strong> - sent {{ i.sent }}
+                                            <strong>{{ i.email }}</strong> - sent {{ i.sent }} by {{ i.inviter }}
                                         </li>
                                         {% endverbatim %}
                                         <li class="ng-cloak list-group-item" ng-if="!invitations.length">

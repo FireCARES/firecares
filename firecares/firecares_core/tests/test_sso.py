@@ -70,8 +70,8 @@ class SSOTests(BaseFirecaresTestcase):
         self.valid_session = True
         resp = c.get('/?ibcToken={}'.format(uuid))
         self.assertTrue('ibcToken' in c.session)
-        # A user should be created in the format fname.mi.lname
-        user = User.objects.filter(username='tester.a.mctest').first()
+        # A user should be created with username = ImisId
+        user = User.objects.filter(username='0559211').first()
         self.assertIsNotNone(user)
         self.assertTrue(user.is_active)
         self.assertFalse(user.is_staff)
@@ -92,7 +92,7 @@ class SSOTests(BaseFirecaresTestcase):
         c = Client()
         uuid = uuid4()
         c.get('/?ibcToken={}'.format(uuid))
-        user = User.objects.filter(username='tester.a.mctest').first()
+        user = User.objects.filter(username='0559211').first()
         self.assertEqual(user.email, 'tester@prominentedge.com')
 
         c.logout()

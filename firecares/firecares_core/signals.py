@@ -22,12 +22,10 @@ def remove_obj_perms_connected_with_user(sender, instance, **kwargs):
 @receiver(invite_accepted)
 def accepted(sender, *args, **kwargs):
     # User has registered for an account through the invitation, invitation is
-    # officially "accepted", assign correct department curator permissions now
+    # officially "accepted"
     email = kwargs.pop('email')
     invite = Invitation.objects.get(email=email)
-    department = invite.departmentinvitation.department
     user = get_user_model().objects.get(email=email)
-    user.add_obj_perm('change_firedepartment', department)
     invite.departmentinvitation.user = user
     invite.departmentinvitation.save()
 

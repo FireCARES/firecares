@@ -4,7 +4,7 @@
 
 Hello,
 
-You ({{ email }}) have been invited by {{ inviter }} to join {{ site_name }} as a data curator for the {{ department }}.
+You ({{ email }}) have been invited by {{ inviter }} to join {{ site_name }}.
 
 If you'd like to join, please go to {{ invite_url }} to accept the invite.
 
