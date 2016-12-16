@@ -11,16 +11,12 @@ from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point, MultiPolygon
 from django.contrib.gis.measure import D
 from django.core.validators import MaxValueValidator
-from django.core.cache import cache
 from django.db import connections
-from django.db.models import Avg, Max, Min, Q
-from django.db.models.loading import get_model
-from django.db.models.signals import post_migrate
 from django.utils.text import slugify
 from firecares.firecares_core.models import RecentlyUpdatedMixin, Archivable
 from django.core.urlresolvers import reverse
 from django.db.transaction import rollback
-from django.db.utils import IntegrityError, ProgrammingError
+from django.db.utils import IntegrityError
 from django.utils.functional import cached_property
 from django.utils.deconstruct import deconstructible
 from firecares.firecares_core.models import Address
@@ -31,6 +27,12 @@ from firecares.firecares_core.models import Country
 from genericm2m.models import RelatedObjectsDescriptor
 from reversion import revisions as reversion
 from storages.backends.s3boto import S3BotoStorage
+from .metrics import FireDepartmentMetrics
+
+
+LEVEL_CHOICES = [(1, 'Low'),
+                 (2, 'Medium'),
+                 (4, 'High')]
 
 
 class USGSStructureData(models.Model):
@@ -250,6 +252,10 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
         (9, 'Population greater than 1,000,000.'),
     ]
 
+    def __init__(self, *args, **kwargs):
+        self.metrics = FireDepartmentMetrics(self, PopulationClassQuartile)
+        super(FireDepartment, self).__init__(*args, **kwargs)
+
     created = models.DateTimeField(auto_now=True)
     modified = models.DateTimeField(auto_now=True)
     fdid = models.CharField(max_length=10)
@@ -266,35 +272,6 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
     geom = models.MultiPolygonField(null=True, blank=True)
     objects = CalculationManager()
     priority_departments = PriorityDepartmentsManager()
-    dist_model_score = models.FloatField(null=True, blank=True, editable=False, db_index=True)
-
-    risk_model_deaths = models.FloatField(null=True, blank=True, db_index=True,
-                                          verbose_name='Predicted deaths per year.')
-
-    risk_model_injuries = models.FloatField(null=True, blank=True, db_index=True,
-                                            verbose_name='Predicted injuries per year.')
-
-    risk_model_fires = models.FloatField(null=True, blank=True, db_index=True,
-                                         verbose_name='Predicted number of fires per year.')
-
-    risk_model_fires_size0 = models.FloatField(null=True, blank=True, db_index=True,
-                                               verbose_name='Predicted number of size 0 fires.')
-
-    risk_model_fires_size0_percentage = models.FloatField(null=True, blank=True,
-                                                          verbose_name='Percentage of size 0 fires.')
-
-    risk_model_fires_size1 = models.FloatField(null=True, blank=True, db_index=True,
-                                               verbose_name='Predicted number of size 1 fires.')
-
-    risk_model_fires_size1_percentage = models.FloatField(null=True, blank=True,
-                                                          verbose_name='Percentage of size 1 fires.')
-
-    risk_model_fires_size2 = models.FloatField(null=True, blank=True, db_index=True,
-                                               verbose_name='Predicted number of size 2 firese.')
-
-    risk_model_fires_size2_percentage = models.FloatField(null=True, blank=True,
-                                                          verbose_name='Percentage of size 2 fires.')
-
     government_unit = RelatedObjectsDescriptor()
     population = models.IntegerField(null=True, blank=True)
     population_class = models.IntegerField(null=True, blank=True, choices=POPULATION_CLASSES)
@@ -316,115 +293,6 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
     @property
     def headquarters_geom(self):
         return getattr(self.headquarters_address, 'geom', None)
-
-    @property
-    def predicted_fires_sum(self):
-        """
-        Convenience method to sum
-        """
-        if self.risk_model_fires_size0 is None and self.risk_model_fires_size1 is None \
-                and self.risk_model_fires_size2 is None:
-            return
-
-        return (self.risk_model_fires_size0 or 0) + (self.risk_model_fires_size1 or 0) + \
-               (self.risk_model_fires_size2 or 0)
-
-    @property
-    def size2_and_greater_sum(self):
-        """
-        Convenience method to sum
-        """
-        if self.risk_model_fires_size1 is None and self.risk_model_fires_size2 is None:
-            return
-
-        return (self.risk_model_fires_size1 or 0) + (self.risk_model_fires_size2 or 0)
-
-    @property
-    def size2_and_greater_percentile_sum(self):
-        """
-        Convenience method to sum
-        """
-        if self.risk_model_fires_size1_percentage is None and self.risk_model_fires_size2_percentage is None:
-            return
-
-        return (self.risk_model_fires_size1_percentage or 0) + (self.risk_model_fires_size2_percentage or 0)
-
-    @property
-    def deaths_and_injuries_sum(self):
-
-        if self.risk_model_deaths is None and self.risk_model_injuries is None:
-            return
-
-        return (self.risk_model_deaths or 0) + (self.risk_model_injuries or 0)
-
-    @cached_property
-    def population_class_stats(self):
-        """
-        Returns summary statistics for calculation fields in the same population class.
-        """
-
-        if not self.population_class or self.archived:
-            return []
-
-        cache_key = 'population_class_{0}_stats'.format(self.population_class)
-        cached = cache.get(cache_key)
-
-        if cached:
-            return cached
-
-        fields = ['dist_model_score', 'risk_model_fires', 'risk_model_deaths_injuries_sum',
-                  'risk_model_size1_percent_size2_percent_sum', 'residential_fires_avg_3_years']
-        aggs = []
-
-        for field in fields:
-            aggs.append(Min(field))
-            aggs.append(Max(field))
-            aggs.append(Avg(field))
-
-        results = self.population_metrics_table.objects.filter(population_class=self.population_class).aggregate(*aggs)
-        cache.set(cache_key, results, timeout=60 * 60 * 24)
-        return results
-
-    def report_card_scores(self):
-        if not self.population_metrics_table:
-            return
-
-        row = self.population_metrics_row
-
-        from .managers import Ntile
-        from django.db.models import When, Case
-        qs = self.population_metrics_table.objects.filter(risk_model_fires_quartile=row.risk_model_fires_quartile)
-        qs = qs.annotate(**{'dist_quartile': Case(When(**{'dist_model_score__isnull': False, 'then': Ntile(4, output_field=models.IntegerField(), order_by='dist_model_score')}), output_field=models.IntegerField(), default=None)})
-        qs = qs.annotate(**{'size2_plus_quartile': Case(When(**{'risk_model_size1_percent_size2_percent_sum_quartile__isnull': False, 'then': Ntile(4, output_field=models.IntegerField(), order_by='risk_model_size1_percent_size2_percent_sum_quartile')}), output_field=models.IntegerField(), default=None)})
-        qs = qs.annotate(**{'deaths_injuries_quartile': Case(When(**{'risk_model_deaths_injuries_sum_quartile__isnull': False, 'then': Ntile(4, output_field=models.IntegerField(), order_by='risk_model_deaths_injuries_sum_quartile')}), output_field=models.IntegerField(), default=None)})
-        qs = qs.filter(id=self.id)
-        return qs
-
-    @property
-    def population_metrics_table(self):
-        """
-        Returns the appropriate population metrics table for this object.
-        """
-        if self.archived:
-            return
-
-        try:
-            return get_model('firestation.PopulationClass{0}Quartile'.format(self.population_class))
-        except LookupError:
-            return None
-
-    @cached_property
-    def population_metrics_row(self):
-        """
-        Returns the matching row from the population metrics table.
-        """
-
-        population_table = self.population_metrics_table
-
-        if not population_table:
-            return
-
-        return population_table.objects.get(id=self.id)
 
     @property
     def government_unit_objects(self):
@@ -456,22 +324,6 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
                 return (self.geom.transform(2163, clone=True).area / 1000000) * 0.386102
             except:
                 return
-
-    @cached_property
-    def nfirs_deaths_and_injuries_sum(self):
-        return self.nfirsstatistic_set.filter(Q(metric='civilian_casualties') | Q(metric='firefighter_casualties'),
-                                              fire_department=self,
-                                              year__gte=2010).aggregate(Avg('count'))
-
-    @cached_property
-    def residential_fires_3_year_avg(self):
-
-        if self.population_metrics_row:
-            return self.population_metrics_row.residential_fires_avg_3_years
-
-        return self.nfirsstatistic_set.filter(fire_department=self,
-                                              metric='residential_structure_fires',
-                                              year__gte=2010).aggregate(Avg('count'))
 
     def get_population_class(self):
         """
@@ -656,15 +508,6 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
         except:
             return 'No description for Fire Department'
 
-    def residential_structure_fire_counts(self):
-        return self.nfirsstatistic_set.filter(metric='residential_structure_fires')\
-            .extra(select={
-                   'year_max': 'SELECT MAX(COUNT) FROM firestation_nfirsstatistic b WHERE b.year = firestation_nfirsstatistic.year and b.metric=firestation_nfirsstatistic.metric'
-                   })\
-            .extra(select={
-                   'year_min': 'SELECT MIN(COUNT) FROM firestation_nfirsstatistic b WHERE b.year = firestation_nfirsstatistic.year and b.metric=firestation_nfirsstatistic.metric'
-                   })
-
     @classmethod
     def load_from_usfa_csv(cls):
         """
@@ -757,6 +600,39 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
 
         IntersectingDepartmentLog.objects.create(parent=self, removed_department=department)
         self.save()
+
+
+class FireDepartmentRiskModels(models.Model):
+    level = models.IntegerField(choices=LEVEL_CHOICES, default=1)
+    department = models.ForeignKey(FireDepartment)
+    dist_model_score = models.FloatField(null=True, blank=True, editable=False, db_index=True)
+
+    risk_model_deaths = models.FloatField(null=True, blank=True, db_index=True,
+                                          verbose_name='Predicted deaths per year.')
+
+    risk_model_injuries = models.FloatField(null=True, blank=True, db_index=True,
+                                            verbose_name='Predicted injuries per year.')
+
+    risk_model_fires = models.FloatField(null=True, blank=True, db_index=True,
+                                         verbose_name='Predicted number of fires per year.')
+
+    risk_model_fires_size0 = models.FloatField(null=True, blank=True, db_index=True,
+                                               verbose_name='Predicted number of size 0 fires.')
+
+    risk_model_fires_size0_percentage = models.FloatField(null=True, blank=True,
+                                                          verbose_name='Percentage of size 0 fires.')
+
+    risk_model_fires_size1 = models.FloatField(null=True, blank=True, db_index=True,
+                                               verbose_name='Predicted number of size 1 fires.')
+
+    risk_model_fires_size1_percentage = models.FloatField(null=True, blank=True,
+                                                          verbose_name='Percentage of size 1 fires.')
+
+    risk_model_fires_size2 = models.FloatField(null=True, blank=True, db_index=True,
+                                               verbose_name='Predicted number of size 2 firese.')
+
+    risk_model_fires_size2_percentage = models.FloatField(null=True, blank=True,
+                                                          verbose_name='Percentage of size 2 fires.')
 
 
 class FireStation(USGSStructureData, Archivable):
@@ -1059,12 +935,14 @@ class NFIRSStatistic(models.Model):
     """
     Caches NFIRS stats.
     """
+
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     fire_department = models.ForeignKey(FireDepartment)
     metric = models.CharField(max_length=50, db_index=True)
     year = models.PositiveSmallIntegerField(db_index=True)
     count = models.PositiveSmallIntegerField(db_index=True, null=True)
+    level = models.IntegerField(choices=LEVEL_CHOICES, default=1, db_index=True)
 
     class Meta:
         unique_together = ['fire_department', 'year', 'metric']
@@ -1092,6 +970,7 @@ class PopulationClassQuartile(models.Model):
     region = models.CharField(max_length=20, null=True, blank=True, editable=False)
     geom = models.MultiPolygonField(null=True, blank=True, editable=False)
     objects = CalculationManager()
+    level = models.IntegerField(choices=LEVEL_CHOICES, default=1)
     dist_model_score = models.FloatField(null=True, blank=True, editable=False)
 
     risk_model_deaths = models.FloatField(null=True, blank=True, editable=False,
@@ -1136,134 +1015,76 @@ class PopulationClassQuartile(models.Model):
 
     class Meta:
         managed = False
-        abstract = True
-
-
-class PopulationClass0Quartile(PopulationClassQuartile):
-
-    class Meta(PopulationClassQuartile.Meta):
-        db_table = 'population_class_0_quartiles'
-
-
-class PopulationClass1Quartile(PopulationClassQuartile):
-
-    class Meta(PopulationClassQuartile.Meta):
-        db_table = 'population_class_1_quartiles'
-
-
-class PopulationClass2Quartile(PopulationClassQuartile):
-
-    class Meta(PopulationClassQuartile.Meta):
-        db_table = 'population_class_2_quartiles'
-
-
-class PopulationClass3Quartile(PopulationClassQuartile):
-
-    class Meta(PopulationClassQuartile.Meta):
-        db_table = 'population_class_3_quartiles'
-
-
-class PopulationClass4Quartile(PopulationClassQuartile):
-
-    class Meta(PopulationClassQuartile.Meta):
-        db_table = 'population_class_4_quartiles'
-
-
-class PopulationClass5Quartile(PopulationClassQuartile):
-
-    class Meta(PopulationClassQuartile.Meta):
-        db_table = 'population_class_5_quartiles'
-
-
-class PopulationClass6Quartile(PopulationClassQuartile):
-
-    class Meta(PopulationClassQuartile.Meta):
-        db_table = 'population_class_6_quartiles'
-
-
-class PopulationClass7Quartile(PopulationClassQuartile):
-
-    class Meta(PopulationClassQuartile.Meta):
-        db_table = 'population_class_7_quartiles'
-
-
-class PopulationClass8Quartile(PopulationClassQuartile):
-
-    class Meta(PopulationClassQuartile.Meta):
-        db_table = 'population_class_8_quartiles'
-
-
-class PopulationClass9Quartile(PopulationClassQuartile):
-
-    class Meta(PopulationClassQuartile.Meta):
-        db_table = 'population_class_9_quartiles'
+        db_table = 'population_quartiles'
 
 
 def create_quartile_views(sender, **kwargs):
     """
     Creates DB views based on quartile queries.
     """
-    for population_class in [choice[0] for choice in FireDepartment.POPULATION_CLASSES]:
-        query = """
-            SELECT
-                (SELECT COALESCE(risk_model_fires_size1_percentage,0)+COALESCE(risk_model_fires_size2_percentage,0)) AS "risk_model_size1_percent_size2_percent_sum",
-                (SELECT COALESCE(risk_model_deaths,0)+COALESCE(risk_model_injuries,0)) AS "risk_model_deaths_injuries_sum",
-                "firestation_firedepartment"."id",
-                "firestation_firedepartment"."created",
-                "firestation_firedepartment"."modified",
-                "firestation_firedepartment"."fdid",
-                "firestation_firedepartment"."name",
-                "firestation_firedepartment"."headquarters_address_id",
-                "firestation_firedepartment"."mail_address_id",
-                "firestation_firedepartment"."headquarters_phone",
-                "firestation_firedepartment"."headquarters_fax",
-                "firestation_firedepartment"."department_type",
-                "firestation_firedepartment"."organization_type",
-                "firestation_firedepartment"."website",
-                "firestation_firedepartment"."state",
-                "firestation_firedepartment"."region",
-                "firestation_firedepartment"."geom",
-                "firestation_firedepartment"."dist_model_score",
-                "firestation_firedepartment"."risk_model_deaths",
-                "firestation_firedepartment"."risk_model_injuries",
-                "firestation_firedepartment"."risk_model_fires",
-                "firestation_firedepartment"."risk_model_fires_size0",
-                "firestation_firedepartment"."risk_model_fires_size0_percentage",
-                "firestation_firedepartment"."risk_model_fires_size1",
-                "firestation_firedepartment"."risk_model_fires_size1_percentage",
-                "firestation_firedepartment"."risk_model_fires_size2",
-                "firestation_firedepartment"."risk_model_fires_size2_percentage",
-                "firestation_firedepartment"."population",
-                "firestation_firedepartment"."population_class",
-                "firestation_firedepartment"."featured",
-                nfirs.avg_fires as "residential_fires_avg_3_years",
-                CASE WHEN ("firestation_firedepartment"."risk_model_fires_size1_percentage" IS NOT NULL OR "firestation_firedepartment"."risk_model_fires_size2_percentage" IS NOT NULL) THEN ntile(4) over (partition by COALESCE(risk_model_fires_size1_percentage,0)+COALESCE(risk_model_fires_size2_percentage,0) != 0 order by COALESCE(risk_model_fires_size1_percentage,0)+COALESCE(risk_model_fires_size2_percentage,0)) ELSE NULL END AS "risk_model_size1_percent_size2_percent_sum_quartile",
-                CASE WHEN ("firestation_firedepartment"."risk_model_deaths" IS NOT NULL OR "firestation_firedepartment"."risk_model_injuries" IS NOT NULL) THEN ntile(4) over (partition by COALESCE(risk_model_deaths,0)+COALESCE(risk_model_injuries,0) != 0 order by COALESCE(risk_model_deaths,0)+COALESCE(risk_model_injuries,0)) ELSE NULL END AS "risk_model_deaths_injuries_sum_quartile",
-                CASE WHEN "firestation_firedepartment"."dist_model_score" IS NOT NULL THEN ntile(4) over (partition by dist_model_score is not null order by dist_model_score) ELSE NULL END AS "dist_model_score_quartile",
-                CASE WHEN "firestation_firedepartment"."risk_model_deaths" IS NOT NULL THEN ntile(4) over (partition by risk_model_deaths is not null order by risk_model_deaths) ELSE NULL END AS "risk_model_deaths_quartile",
-                CASE WHEN "firestation_firedepartment"."risk_model_injuries" IS NOT NULL THEN ntile(4) over (partition by risk_model_injuries is not null order by risk_model_injuries) ELSE NULL END AS "risk_model_injuries_quartile",
-                CASE WHEN "firestation_firedepartment"."risk_model_fires_size0" IS NOT NULL THEN ntile(4) over (partition by risk_model_fires_size0 is not null order by risk_model_fires_size0) ELSE NULL END AS "risk_model_fires_size0_quartile",
-                CASE WHEN "firestation_firedepartment"."risk_model_fires_size1" IS NOT NULL THEN ntile(4) over (partition by risk_model_fires_size1 is not null order by risk_model_fires_size1) ELSE NULL END AS "risk_model_fires_size1_quartile",
-                CASE WHEN "firestation_firedepartment"."risk_model_fires_size2" IS NOT NULL THEN ntile(4) over (partition by risk_model_fires_size2 is not null order by risk_model_fires_size2) ELSE NULL END AS "risk_model_fires_size2_quartile",
-                CASE WHEN "firestation_firedepartment"."risk_model_fires" IS NOT NULL THEN ntile(4) over (partition by risk_model_fires is not null order by risk_model_fires) ELSE NULL END AS "risk_model_fires_quartile",
-                CASE WHEN "nfirs"."avg_fires" IS NOT NULL THEN ntile(4) over (partition by avg_fires is not null order by avg_fires) ELSE NULL END AS "residential_fires_avg_3_years_quartile"
 
-                FROM "firestation_firedepartment"
-                LEFT JOIN (
-                    SELECT fire_department_id, AVG(count) as avg_fires
-                    from firestation_nfirsstatistic
-                    WHERE year >= 2010 and metric='residential_structure_fires'
-                    GROUP BY fire_department_id) nfirs
-                on ("firestation_firedepartment".id=nfirs.fire_department_id)
-                WHERE population_class={0} and archived=False
-            """.format(population_class)
-        cursor = connections['default'].cursor()
+    query = """
+        SELECT
+            (SELECT COALESCE(rm.risk_model_fires_size1_percentage,0)+COALESCE(rm.risk_model_fires_size2_percentage,0)) AS "risk_model_size1_percent_size2_percent_sum",
+            (SELECT COALESCE(rm.risk_model_deaths,0)+COALESCE(rm.risk_model_injuries,0)) AS "risk_model_deaths_injuries_sum",
+            fd."id",
+            fd."created",
+            fd."modified",
+            fd."fdid",
+            fd."name",
+            fd."headquarters_address_id",
+            fd."mail_address_id",
+            fd."headquarters_phone",
+            fd."headquarters_fax",
+            fd."department_type",
+            fd."organization_type",
+            fd."website",
+            fd."state",
+            fd."region",
+            fd."geom",
+            rm."dist_model_score",
+            rm."risk_model_deaths",
+            rm."risk_model_injuries",
+            rm."risk_model_fires",
+            rm."risk_model_fires_size0",
+            rm."risk_model_fires_size0_percentage",
+            rm."risk_model_fires_size1",
+            rm."risk_model_fires_size1_percentage",
+            rm."risk_model_fires_size2",
+            rm."risk_model_fires_size2_percentage",
+            fd."population",
+            fd."population_class",
+            fd."featured",
+            nfirs.avg_fires as "residential_fires_avg_3_years",
+            rm."level",
+            CASE WHEN (rm."risk_model_fires_size1_percentage" IS NOT NULL OR rm."risk_model_fires_size2_percentage" IS NOT NULL) THEN ntile(4) over (partition by COALESCE(rm.risk_model_fires_size1_percentage,0)+COALESCE(rm.risk_model_fires_size2_percentage,0) != 0, fd.population_class, rm.level order by COALESCE(rm.risk_model_fires_size1_percentage,0)+COALESCE(rm.risk_model_fires_size2_percentage,0)) ELSE NULL END AS "risk_model_size1_percent_size2_percent_sum_quartile",
+            CASE WHEN (rm."risk_model_deaths" IS NOT NULL OR rm."risk_model_injuries" IS NOT NULL) THEN ntile(4) over (partition by COALESCE(rm.risk_model_deaths,0)+COALESCE(rm.risk_model_injuries,0) != 0, fd.population_class, rm.level order by COALESCE(rm.risk_model_deaths,0)+COALESCE(rm.risk_model_injuries,0)) ELSE NULL END AS "risk_model_deaths_injuries_sum_quartile",
+            CASE WHEN rm."dist_model_score" IS NOT NULL THEN ntile(4) over (partition by rm.dist_model_score is not null, fd.population_class, rm.level order by rm.dist_model_score) ELSE NULL END AS "dist_model_score_quartile",
+            CASE WHEN rm."risk_model_deaths" IS NOT NULL THEN ntile(4) over (partition by rm.risk_model_deaths is not null, fd.population_class, rm.level order by rm.risk_model_deaths) ELSE NULL END AS "risk_model_deaths_quartile",
+            CASE WHEN rm."risk_model_injuries" IS NOT NULL THEN ntile(4) over (partition by rm.risk_model_injuries is not null, fd.population_class, rm.level order by rm.risk_model_injuries) ELSE NULL END AS "risk_model_injuries_quartile",
+            CASE WHEN rm."risk_model_fires_size0" IS NOT NULL THEN ntile(4) over (partition by rm.risk_model_fires_size0 is not null, fd.population_class, rm.level order by rm.risk_model_fires_size0) ELSE NULL END AS "risk_model_fires_size0_quartile",
+            CASE WHEN rm."risk_model_fires_size1" IS NOT NULL THEN ntile(4) over (partition by rm.risk_model_fires_size1 is not null, fd.population_class, rm.level order by rm.risk_model_fires_size1) ELSE NULL END AS "risk_model_fires_size1_quartile",
+            CASE WHEN rm."risk_model_fires_size2" IS NOT NULL THEN ntile(4) over (partition by rm.risk_model_fires_size2 is not null, fd.population_class, rm.level order by rm.risk_model_fires_size2) ELSE NULL END AS "risk_model_fires_size2_quartile",
+            CASE WHEN rm."risk_model_fires" IS NOT NULL THEN ntile(4) over (partition by rm.risk_model_fires is not null, fd.population_class, rm.level order by rm.risk_model_fires) ELSE NULL END AS "risk_model_fires_quartile",
+            CASE WHEN "nfirs"."avg_fires" IS NOT NULL THEN ntile(4) over (partition by avg_fires is not null, fd.population_class, rm.level order by avg_fires) ELSE NULL END AS "residential_fires_avg_3_years_quartile"
 
-        # CREATE OR REPLACE does not
-        try:
-            cursor.execute("REFRESH MATERIALIZED VIEW population_class_%s_quartiles;", [population_class])
-        except ProgrammingError:
-            cursor.execute("CREATE MATERIALIZED VIEW population_class_%s_quartiles AS ({0});".format(query), [population_class])
+        FROM "firestation_firedepartment" fd
+        INNER JOIN "firestation_firedepartmentriskmodels" rm ON
+            rm.department_id = fd.id
+        LEFT JOIN (
+            SELECT fire_department_id, AVG(count) as avg_fires, level
+            from firestation_nfirsstatistic
+            WHERE year >= 2010 and metric='residential_structure_fires'
+            GROUP BY fire_department_id, level) nfirs
+        ON (fd.id=nfirs.fire_department_id and nfirs.level = rm.level)
+        WHERE archived=False
+        """
+    cursor = connections['default'].cursor()
+
+    # Force materialied view recreation in case there are changes in the query
+    print '(re)creating materialized view for "population_quartiles"'
+    cursor.execute("DROP MATERIALIZED VIEW IF EXISTS population_quartiles;")
+    cursor.execute("CREATE MATERIALIZED VIEW population_quartiles AS ({query});".format(query=query))
 
 
 @deconstructible
@@ -1296,7 +1117,6 @@ class Document(models.Model):
         return '{0} uploaded by: {1} at {2}'.format(self.filename or '', self.uploaded_by or 'Unknown', self.created)
 
 
-post_migrate.connect(create_quartile_views)
 reversion.register(FireStation)
 reversion.register(FireDepartment)
 reversion.register(Staffing)

@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.cache import cache
-from firecares.firestation.models import FireDepartment, Max, Min
+from django.db.models import Max, Min
+from firecares.firestation.models import FireDepartment
 
 
 def global_settings(request):
@@ -24,15 +25,15 @@ def fire_department_search(request):
         return context
 
     score_metrics = FireDepartment.objects.filter(archived=False).aggregate(
-        Max('dist_model_score'),
-        Min('dist_model_score'),
+        Max('firedepartmentriskmodels__dist_model_score'),
+        Min('firedepartmentriskmodels__dist_model_score'),
         Max('population'),
         Min('population'),
     )
 
     context = {
-        'dist_max': score_metrics['dist_model_score__max'],
-        'dist_min': score_metrics['dist_model_score__min'],
+        'dist_max': score_metrics['firedepartmentriskmodels__dist_model_score__max'],
+        'dist_min': score_metrics['firedepartmentriskmodels__dist_model_score__min'],
         'population_max': score_metrics['population__max'] or 0,
         'population_min': score_metrics['population__min'] or 0,
     }

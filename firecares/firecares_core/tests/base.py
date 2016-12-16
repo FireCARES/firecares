@@ -52,7 +52,7 @@ class BaseFirecaresTestcase(TestCase):
         call_command('loaddata', 'firecares/firestation/fixtures/la_fd.json', stdout=StringIO())
 
         cursor = connections['default'].cursor()
-        cursor.execute("REFRESH MATERIALIZED VIEW population_class_9_quartiles;")
+        cursor.execute("REFRESH MATERIALIZED VIEW population_quartiles;")
 
         return FireDepartment.objects.filter(id=87256).first()
 
@@ -60,6 +60,6 @@ class BaseFirecaresTestcase(TestCase):
         call_command('loaddata', 'firecares/firestation/fixtures/arlington_fd.json', stdout=StringIO())
 
         cursor = connections['default'].cursor()
-        cursor.execute("REFRESH MATERIALIZED VIEW population_class_6_quartiles;")
+        cursor.execute("REFRESH MATERIALIZED VIEW population_quartiles;")
 
         return FireDepartment.objects.filter(id=73842).first()

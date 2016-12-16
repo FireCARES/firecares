@@ -1,7 +1,12 @@
+import json
 from django import template
 from django.conf import settings
+from django.core.serializers import serialize
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models.query import QuerySet
 from django.template import defaultfilters
 from django.template.defaulttags import URLNode, url
+from django.utils.safestring import mark_safe
 from django.utils.translation import pgettext, ugettext as _, ungettext  # noqa
 import phonenumbers
 
@@ -98,7 +103,7 @@ def risk_level(value):
 def grade(value):
     """
     Returns a string based grade from a number.
-    1: God
+    1: Good
     2: Fair
     3: Fair
     4: Poor
@@ -136,6 +141,13 @@ def phonenumber(value, country='US', format=phonenumbers.PhoneNumberFormat.NATIO
             return phonenumbers.format_number(parsed, format)
         except phonenumbers.NumberParseException:
             return value
+
+
+@register.filter
+def jsonify(obj):
+    if isinstance(obj, QuerySet):
+        return mark_safe(serialize('json', obj))
+    return mark_safe(json.dumps(obj, cls=DjangoJSONEncoder, indent=4))
 
 
 # Snagged from https://gist.github.com/kulturlupenguen/69aec1259131b5619fb7

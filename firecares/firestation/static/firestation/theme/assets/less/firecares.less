@@ -224,14 +224,25 @@ filter: e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endC
 }
 
 .gauge {
-.tri-gradient(@start-color: #F6542F; @mid-color: #FEBE00; @color-stop: 50%; @end-color: #74AC49);
-width:200px;
-height:100px;
-margin: 0 auto 30px;
-border-radius:250px 250px 0 0;
-border:1px solid silver;
-position:relative;
-border:1px solid white;
+  &.invalid {
+    background: @gray-lightest;
+
+    .dial {
+      background: @gray-lightest !important;
+    }
+
+    .needle {
+      border-bottom-color: @gray-lightest !important;
+    }
+  }
+  .tri-gradient(@start-color: #F6542F; @mid-color: #FEBE00; @color-stop: 50%; @end-color: #74AC49);
+  width:200px;
+  height:100px;
+  margin: 0 auto 30px;
+  border-radius:250px 250px 0 0;
+  border:1px solid silver;
+  position:relative;
+  border:1px solid white;
 }
 
 .gauge-inverse {
@@ -1133,5 +1144,29 @@ form[name='boundaryUpload'] {
 
   input {
     background-color: @body-bg;
+  }
+}
+
+.loading-container {
+  position: relative;
+
+  .loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: @body-bg;
+    z-index: 10000;
+  }
+}
+
+.risk-filter {
+  .ct-u-displayTableVertical {
+    line-height: 50px;
+    button {
+      width: 100%;
+      border-color: @gray-lightest;
+    }
   }
 }

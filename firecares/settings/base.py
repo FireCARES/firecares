@@ -27,6 +27,9 @@ DATABASES = {
         'PASSWORD': os.getenv('NFIRS_DATABASE_PASSWORD', 'password'),
         'PORT': os.getenv('NFIRS_DATABASE_PORT', '5432'),
         'HOST': os.getenv('NFIRS_DATABASE_HOST', 'localhost'),
+        'TEST': {
+            'MIRROR': 'default'
+        }
     }
 }
 

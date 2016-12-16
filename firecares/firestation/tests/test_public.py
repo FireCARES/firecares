@@ -93,13 +93,13 @@ class TestPublic(BaseFirecaresTestcase):
         # Anonymous users shouldn't see anything in the "Safe grades" area (besides a prompt to login)
         response = c.get(reverse('firedepartment_detail', args=[fd.pk]))
         self.assertNotContains(response, 'seconds over the industry standard.')
-        self.assertNotContains(response, 'less than 25% of departments have an equal or better performance score.')
+        self.assertNotContains(response, 'This department\'s performance score is')
         self.assertContains(response, 'Please login to see this information')
 
         # Test the slug route as well...
         response = c.get(reverse('firedepartment_detail_slug', args=[fd.pk, fd.slug]))
         self.assertNotContains(response, 'seconds over the industry standard.')
-        self.assertNotContains(response, 'less than 25% of departments have an equal or better performance score.')
+        self.assertNotContains(response, 'This department\'s performance score is')
         self.assertContains(response, 'Please login to see this information')
 
     def test_department_admin_page_access(self):

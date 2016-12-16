@@ -59,8 +59,9 @@
 
             scope.$watch('value', function() {
                var color;
+               scope.invalid = isNaN(parseFloat(scope.value));
                var location = scope.value / (scope.max - scope.min);
-               var needleRotation = (180 * location) - 90;
+               var needleRotation = scope.invalid ? 0 : (180 * location) - 90;
 
                // the setTimeout helps with the transition effect.
                setTimeout(function() {

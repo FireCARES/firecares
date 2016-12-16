@@ -3,6 +3,38 @@
 (function() {
     angular.module('fireStation.departmentDetailController', [])
         .controller('jurisdictionController', JurisdictionController)
+        .filter('riskLevel', function() {
+          return function(input, default_value) {
+            input = input || '';
+            switch (input) {
+              case 1:
+                return 'low';
+              case 2:
+              case 3:
+                return 'medium';
+              case 4:
+                return 'high';
+              default:
+                return default_value || '';
+            }
+          };
+        })
+        .filter('grade', function() {
+          return function(input, default_value) {
+            input = input || '';
+            switch (input) {
+              case 1:
+                return 'good';
+              case 2:
+              case 3:
+                return 'fair';
+              case 4:
+                return 'poor';
+              default:
+                return default_value || '';
+            }
+          }
+        })
     ;
 
     JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', '$filter', 'FireDepartment'];
@@ -14,8 +46,11 @@
         var headquartersIcon = L.FireCARESMarkers.headquartersmarker();
         var fitBoundsOptions = {};
         var countyBoundary = null;
+        $scope.metrics = metrics;
+        $scope.level = level;
         $scope.messages = [];
         $scope.stations = [];
+        $scope.residential_structure_fire_counts = metrics.residential_structure_fire_counts;
         $scope.uploadBoundary = false;
         var layersControl = L.control.layers().addTo(departmentMap);
         var fires = L.featureGroup().addTo(departmentMap);
@@ -320,5 +355,13 @@
           $scope.shp = null;
           angular.element("form[name='boundaryUpload']").get(0).reset();
         };
+
+        $scope.setLevel = function(level) {
+          $scope.level = level;
+        };
+
+        $timeout(function() {
+          angular.element(".loading").fadeOut();
+        }, 0);
     }
 })();

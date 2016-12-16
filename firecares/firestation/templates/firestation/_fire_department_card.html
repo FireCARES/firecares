@@ -25,12 +25,12 @@
             <div class="ct-icons">
                 <span tooltip="Predicted number of fires" tooltip-append-to-body="true" tooltip-popup-delay="700">
                     <i class="fa fa-fire"></i>
-                    {{ department.predicted_fires_sum|floatformat:"0"|intcomma|default:"N/A" }}
+                    {{ department.metrics.predicted_fires_sum.low|floatformat:"0"|intcomma|default:"N/A" }}
                 </span>
                 <span tooltip="Performance score" tooltip-append-to-body="true" tooltip-popup-delay="700">
                     <i class="fa fa-clock-o"></i>
-                    {% if department.dist_model_score %}
-                        {{ department.dist_model_score|floatformat:"0" }}s
+                    {% if department.metrics.dist_model_score.low %}
+                        {{ department.metrics.dist_model_score.low|floatformat:"0" }}s
                     {% else %}
                         N/A
                     {% endif %}

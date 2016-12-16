@@ -26,7 +26,7 @@ class IMISSingleSignOnMiddleware(object):
     application_instance = 1
 
     def __init__(self):
-        self.imis = Client(settings.SSO_SERVICE_URL)
+        self.imis = None
 
     def _extract_user_info(self, sso_user_container):
         ret = {i: getattr(sso_user_container, i) for i in sso_user_container if i != 'ExtensionData'}
@@ -46,6 +46,8 @@ class IMISSingleSignOnMiddleware(object):
                 " before the IMISSingleSignOnMiddleware class.")
         # Looking to start a new session
         if 'ibcToken' in request.GET:
+            # Do service reflection on demand vs on middleware init
+            self.imis = Client(settings.SSO_SERVICE_URL) if not self.imis else self.imis
             # Verify token and create user if none exists
             token = request.GET['ibcToken']
             if self.imis.service.ValidateSession(applicationInstance=self.application_instance, userToken=token):

@@ -21,6 +21,26 @@
       'mapstory.uploader'
   ])
 
+  .filter('defaultValue', function() {
+    return function(input, default_value) {
+      return (input !== null && input !== '') ? input : default_value;
+    }
+  })
+  .filter('trimDecimal', function() {
+    // Trims the decimal to a whole number if all decimal places are 0
+    return function(input) {
+      if (isNaN(parseFloat(input))) {
+        return input;
+      }
+      else if (input % 1 === 0) {
+        return Math.round(input);
+      }
+      else {
+        return input;
+      }
+    }
+  })
+
   .config(function($interpolateProvider, $httpProvider, $resourceProvider) {
     $httpProvider.defaults.xsrfCookieName = 'csrftoken';
     $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';

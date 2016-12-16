@@ -134,13 +134,16 @@ class CalculationManager(models.GeoManager):
         """
         return super(CalculationManager, self).get_queryset().filter(population__gte=1000000)
 
-    def get_field_stats(self, field, group_by=None, qs=None):
+    def get_field_stats(self, field, group_by=None, qs=None, **kwargs):
         """
         Provides summary statistics for a field, with an optional group by value.
         """
 
+        args = kwargs.copy()
+        args.update({field + '__isnull': False})
+
         if not qs:
-            qs = super(CalculationManager, self).get_queryset().filter(**{field + '__isnull': False})
+            qs = super(CalculationManager, self).get_queryset().filter(**args)
 
         if group_by:
             qs = qs.values(group_by)

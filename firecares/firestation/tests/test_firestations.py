@@ -15,7 +15,9 @@ from StringIO import StringIO
 from firecares.usgs.models import UnincorporatedPlace, MinorCivilDivision
 from firecares.firecares_core.models import Address, Country
 from firecares.firestation.forms import StaffingForm
-from firecares.firestation.models import Document, FireDepartment, FireStation, Staffing, PopulationClass9Quartile, IntersectingDepartmentLog
+from firecares.firestation.models import (Document, FireDepartment, FireStation,
+                                          Staffing, IntersectingDepartmentLog,
+                                          PopulationClassQuartile, FireDepartmentRiskModels)
 from firecares.firestation.templatetags.firecares import quartile_text, risk_level
 from firecares.firestation.managers import CalculationsQuerySet
 from reversion.models import Revision
@@ -347,20 +349,6 @@ class FireStationTests(BaseFirecaresTestcase):
         fd.population = 1000001
         self.assertEqual(fd.get_population_class(), 9)
 
-    def test_population_metrics_table(self):
-        """
-        Ensure the population_metrics_table method returns expected results.
-        """
-
-        fd = FireDepartment.objects.create(name='Test db', population=0)
-
-        for i in range(0, 10):
-            fd.population_class = i
-            self.assertIsNotNone(fd.population_metrics_table)
-
-        fd.population_class = 11
-        self.assertIsNone(fd.population_metrics_table)
-
     def test_convenience_methods(self):
         """
         Make sure the size2_and_greater_percentile_sum and deaths_and_injuries_sum methods do not throw errors.
@@ -370,20 +358,26 @@ class FireStationTests(BaseFirecaresTestcase):
                                            population_class=1,
                                            department_type='test')
 
-        self.assertIsNone(fd.size2_and_greater_percentile_sum)
-        self.assertIsNone(fd.deaths_and_injuries_sum)
+        FireDepartmentRiskModels.objects.create(department=fd)
+        self.assertDictEqual(fd.metrics.size2_and_greater_percentile_sum, {'low': None, 'medium': None, 'high': None})
+        self.assertDictEqual(fd.metrics.deaths_and_injuries_sum, {'low': None, 'medium': None, 'high': None})
 
-        fd.risk_model_deaths = 1
-        self.assertEqual(fd.deaths_and_injuries_sum, 1)
+        rm = fd.firedepartmentriskmodels_set.first()
+        rm.risk_model_deaths = 1
+        rm.save()
+        self.assertEqual(fd.metrics.deaths_and_injuries_sum.get('low'), 1)
 
-        fd.risk_model_injuries = 1
-        self.assertEqual(fd.deaths_and_injuries_sum, 2)
+        rm.risk_model_injuries = 1
+        rm.save()
+        self.assertEqual(fd.metrics.deaths_and_injuries_sum.get('low'), 2)
 
-        fd.risk_model_fires_size1_percentage = 1
-        self.assertEqual(fd.size2_and_greater_percentile_sum, 1)
+        rm.risk_model_fires_size1_percentage = 1
+        rm.save()
+        self.assertEqual(fd.metrics.size2_and_greater_percentile_sum.get('low'), 1)
 
-        fd.risk_model_fires_size2_percentage = 1
-        self.assertEqual(fd.size2_and_greater_percentile_sum, 2)
+        rm.risk_model_fires_size2_percentage = 1
+        rm.save()
+        self.assertEqual(fd.metrics.size2_and_greater_percentile_sum.get('low'), 2)
 
     def test_population_metric_views(self):
         """
@@ -400,17 +394,20 @@ class FireStationTests(BaseFirecaresTestcase):
                                                     department_type='test',
                                                     archived=True)
 
+        FireDepartmentRiskModels.objects.create(department=fd)
+        FireDepartmentRiskModels.objects.create(department=fd_archived)
+
         # update materialized view manually after adding new record
         cursor = connections['default'].cursor()
-        cursor.execute("REFRESH MATERIALIZED VIEW population_class_9_quartiles;")
+        cursor.execute("REFRESH MATERIALIZED VIEW population_quartiles;")
 
-        self.assertTrue(PopulationClass9Quartile.objects.get(id=fd.id))
+        self.assertTrue(PopulationClassQuartile.objects.filter(id=fd.id).first())
 
         # Ensure archived departments are not included in quartile results.
-        self.assertNotIn(fd_archived.id, PopulationClass9Quartile.objects.all().values_list('id', flat=True))
+        self.assertNotIn(fd_archived.id, PopulationClassQuartile.objects.all().values_list('id', flat=True))
 
         # make sure the population class logic works
-        self.assertTrue(fd.population_class_stats)
+        self.assertTrue(fd.metrics.population_class_stats)
 
         # make sure the department page does not return an error
         c = Client()

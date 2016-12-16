@@ -10993,6 +10993,15 @@ table.residential-fires {
   position: relative;
   border: 1px solid white;
 }
+.gauge.invalid {
+  background: #eeeeee;
+}
+.gauge.invalid .dial {
+  background: #eeeeee !important;
+}
+.gauge.invalid .needle {
+  border-bottom-color: #eeeeee !important;
+}
 .gauge-inverse {
   background: #74AC49;
   background: -webkit-linear-gradient(left, #74AC49, #FEBE00 50%, #F6542F);
@@ -11783,6 +11792,25 @@ form[name='boundaryUpload'] a.commit:hover {
 }
 .invitations input {
   background-color: #fff;
+}
+.loading-container {
+  position: relative;
+}
+.loading-container .loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  z-index: 10000;
+}
+.risk-filter .ct-u-displayTableVertical {
+  line-height: 50px;
+}
+.risk-filter .ct-u-displayTableVertical button {
+  width: 100%;
+  border-color: #eeeeee;
 }
 .ct-pageWrapper {
   background-color: #ffffff;
