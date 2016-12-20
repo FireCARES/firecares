@@ -4,11 +4,11 @@ from django.contrib import admin
 from django.views.defaults import page_not_found
 from django.views.generic import TemplateView
 from .firecares_core.forms import FirecaresPasswordResetForm
-from .firecares_core.views import ForgotUsername, ContactUs, AccountRequestView, ShowMessage
+from .firecares_core.views import ForgotUsername, ContactUs, AccountRequestView, ShowMessage, TruncatedFileAddView
 from .firestation.api import StaffingResource, FireStationResource, FireDepartmentResource
 from tastypie.api import Api
 from firestation.views import Home
-from osgeo_importer.urls import FileAddView, importer_api
+from osgeo_importer.urls import importer_api
 from django.contrib.sitemaps.views import sitemap
 from django.contrib.auth.decorators import permission_required
 from django.views.decorators.csrf import csrf_exempt
@@ -62,8 +62,8 @@ urlpatterns = patterns('',
     url(r'^favit/', include('favit.urls')),
 
     # importer routes
-    url(r'^uploads/new$', permission_required('change_firestation')(FileAddView.as_view()), name='uploads-new'),
-    url(r'^uploads/new/json$', permission_required('change_firestation')(FileAddView.as_view(json=True)), name='uploads-new-json'),
+    url(r'^uploads/new$', permission_required('change_firestation')(TruncatedFileAddView.as_view()), name='uploads-new'),
+    url(r'^uploads/new/json$', permission_required('change_firestation')(TruncatedFileAddView.as_view(json=True)), name='uploads-new-json'),
 
     # url(r'^uploads/?$', permission_required('change_firestation' UploadListView.as_view()), name='uploads-list'),
     url(r'', include(importer_api.urls)),

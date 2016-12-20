@@ -1,3 +1,4 @@
+import os
 import requests
 from .forms import ForgotUsernameForm, AccountRequestForm
 from django.conf import settings
@@ -10,6 +11,7 @@ from django.template import loader
 from django.views.generic import View, CreateView, TemplateView
 from firecares.firecares_core.forms import ContactForm
 from firecares.tasks.email import send_mail
+from osgeo_importer.views import FileAddView
 
 
 class ForgotUsername(View):
@@ -131,3 +133,12 @@ class AccountRequestView(CreateView):
                                                settings.DEFAULT_FROM_EMAIL,
                                                [x[1] for x in settings.ADMINS])
         send_mail.delay(email_message)
+
+
+class TruncatedFileAddView(FileAddView):
+    def form_valid(self, form):
+        fname = form.instance.file.name
+        if len(fname) > 50:
+            _, ext = os.path.splitext(fname)
+            form.instance.file.name = fname[:46] + ext
+        return super(TruncatedFileAddView, self).form_valid(form)
