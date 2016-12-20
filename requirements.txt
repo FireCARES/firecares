@@ -34,3 +34,4 @@ django-celery==3.1.17
 django-tastypie==0.13.1
 beautifulsoup4==4.4.1
 -e git+https://github.com/ProminentEdge/django-favit.git#egg=favit
+django-extensions==1.5.9
