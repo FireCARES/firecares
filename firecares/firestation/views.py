@@ -65,8 +65,8 @@ class PaginationMixin(object):
     @staticmethod
     def populate_context_data(context, paginator, page_number):
         min_page = max(1, page_number - 2)
-        max_page = min(paginator.num_pages, min_page + 5)
-        context['windowed_range'] = range(min_page, max_page)
+        max_page = min(paginator.num_pages, min_page + 4)
+        context['windowed_range'] = range(min_page, max_page + 1)
         if min_page > 1:
             context['first_page'] = 1
         if max_page < paginator.num_pages:
@@ -100,6 +100,8 @@ class DepartmentDetailView(DetailView):
             # If page is out of range (e.g. 9999), deliver last page of results.
             stations = paginator.page(paginator.num_pages)
         context['firestations'] = stations
+        context['page_obj'] = stations
+
         if not page:
             page = 1
         PaginationMixin.populate_context_data(context, paginator, int(page))
