@@ -11016,6 +11016,10 @@ table.residential-fires {
   bottom: -4px;
   right: -30px;
 }
+div.unauthenticated * div.gauge,
+div.unauthenticated * div.gauge-inverse {
+  background: -webkit-linear-gradient(left, #C8C8C8, #787878 50%, #505050);
+}
 .masked {
   position: absolute;
   width: 160px;

@@ -471,6 +471,12 @@
                                        max="{{ population_stats.dist_model_score__max|floatformat }}" value="{{ object.dist_model_score|floatformat }}" inverse learn-more="{% url 'models_performance_score' %}"></gauge>
 
                             </div>
+                            {% else %}
+                            <div class="col-sm-6 col-md-12 ct-u-marginBottom30 unauthenticated">
+                                <gauge description="Please login to see this department's performance score."
+                                       metric-title="" min="" max="" value="" inverse
+                                       learn-more="{% url 'models_performance_score' %}"></gauge>
+                            </div>
                             {% endif %}
                             <div class="col-sm-6 col-md-12 ct-u-marginBottom10">
                                 <!-- Safe Grade Cards -->
@@ -700,6 +706,121 @@
                                  {% endcomment %}
 
                                 {% else %}
+                                <div class="metric-card">
+                                    <div class="main-content">
+                                        <div class="main-text">
+                                            <div class="community-risk-legend safe-grade-legend">
+                                               <div>
+                                                <div class="safe-grade-legend-icon low"></div>
+                                                <span class="help-text"><span class="help-text-category">Good</span><span>: less than 25% of departments have an equal or better performance score.</span></span>
+                                               </div>
+                                               <div>
+                                                <div class="safe-grade-legend-icon medium"></div>
+                                                <span class="help-text"><span class="help-text-category">Fair</span><span>: 25-75% of departments have a better performance score.</span></span>
+                                                </div>
+                                               <div>
+                                                <div class="safe-grade-legend-icon high"></div>
+                                                <span class="help-text"><span class="help-text-category">Poor</span><span>: over 75% of departments have an equal or better performance score.</span></span>
+                                               </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="metric-card">
+                                    <label class="control-label unavailable">not available</label>
+                                    <div class="main-content">
+                                        <div class="main-text">
+                                            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                                                Assessment of performance score based on the number of fires.
+                                            </div>
+                                            <div class="description">
+                                              Please login to see this information.
+                                            </div>
+
+                                            <!-- Dist Score compared against departments in the same population class with a similar fire risk -->
+                                            <!--
+                                            <div class="bullet-chart firecares-graph ct-u-marginBottom10 ct-u-marginTop40" id="dist_model_by_fires" style="height: 100%"
+                                                  ranges="{{dist_model_residential_fires_quartile_breaks }}"
+                                                  measures="[{{ object.dist_model_score}}]"
+                                                  markers="[{{ dist_model_residential_fires_quartile_avg }}]"
+                                                  description="POPULATE THIS DESCRIPTION"
+                                                  metric-title="Performance score comparison against departments in a similar risk category."></div>-->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="metric-card">
+                                    <label class="control-label unavailable">not available</label>
+                                    <div class="main-content">
+                                        <div class="main-text">
+                                            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                                                Assessment of performance score based on fire spread risk.
+                                            </div>
+                                            <div class="description">
+                                              Please login to see this information.
+                                            </div>
+
+                                            <!-- Dist Score compared against departments in the same population class with the fire spread risk -->
+                                            <!--
+                                            <div class="bullet-chart firecares-graph ct-u-marginBottom10 ct-u-marginTop40" id="dist_model_by_fire_spread" style="height: 100%"
+                                                  ranges="{{dist_model_risk_model_greater_than_size_2_quartile_breaks }}"
+                                                  measures="[{{ object.dist_model_score}}]"
+                                                  markers="[{{ dist_model_risk_model_greater_than_size_2_quartile_avg }}]"
+                                                  description="POPULATE THIS DESCRIPTION"
+                                                  metric-title="Performance score comparison against departments with a similar fire-spread risk category."></div>-->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="metric-card">
+                                    <label class="control-label unavailable">not available</label>
+                                    <div class="main-content">
+                                        <div class="main-text">
+                                            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                                                Assessment of performance score based on the risk of death and injury.
+                                            </div>
+                                            <div class="description">
+                                              Please login to see this information.
+                                            </div>
+                                            <!-- Dist Score compared against departments in the same population class with the same death and injury risk -->
+                                            <!--
+                                            <div class="bullet-chart firecares-graph ct-u-marginBottom10 ct-u-marginTop40" id="dist_model_by_death_injury" style="height: 100%"
+                                                  ranges="{{dist_model_risk_model_deaths_injuries_quartile_breaks }}"
+                                                  measures="[{{ object.dist_model_score}}]"
+                                                  markers="[{{ dist_model_risk_model_deaths_injuries_quartile_avg }}]"
+                                                  description="POPULATE THIS DESCRIPTION"
+                                                  metric-title="Performance score comparison against departments with a similar death and injury risk category."></div>-->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="metric-card">
+                                    <label class="control-label unavailable">not available</label>
+                                    <div class="main-content">
+                                        <div class="main-text">
+                                            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                                                National assessment of performance score based on the fire spread.
+                                            </div>
+                                            <div class="description">
+                                              Please login to see this information.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="metric-card">
+                                    <label class="control-label unavailable">not available</label>
+                                    <div class="main-content">
+                                        <div class="main-text">
+                                            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                                                National assessment of performance score based on the death and injury risk.
+                                            </div>
+                                            <div class="description">
+                                              Please login to see this information.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% comment %}
+                                    <!-- Old unathenticated safe grades box -->
                                     <div class="metric-card">
                                         <div class="main-content">
                                             <div class="main-text">
@@ -713,6 +834,7 @@
                                             </div>
                                         </div>
                                     </div>
+                                {% endcomment %}
                                 {% endif %}
                             </div>
 

@@ -44,6 +44,7 @@
             var green = [116, 172, 73];
             var yellow = [254, 190, 0];
             var red = [246, 84, 47];
+            var gray = [75, 75, 75];
 
            function pickHex(color1, color2, weight) {
                 var p = weight;
@@ -70,6 +71,13 @@
                 color = pickHex(yellow, green, location / .5);
                } else {
                 color = pickHex(red, yellow, (location - .5) /.5);
+               }
+
+               if (scope.value === '') {
+                   color = gray;
+                   setTimeout(function() {
+                       needle.css({transform: 'rotate(0deg)'});
+                   }, 1);
                }
 
                var colorString = 'rgb('+color[0] + ',' + color[1] + ',' + color[2] +')';
