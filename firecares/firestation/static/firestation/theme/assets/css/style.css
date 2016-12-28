@@ -11315,6 +11315,13 @@ div.unauthenticated * div.gauge-inverse {
   border: none;
   border-radius: 2px;
 }
+.metric-card a {
+  color: #F29A00;
+  border-bottom: 1px dotted white;
+}
+.metric-card a:hover {
+  border-bottom: 1px dotted;
+}
 .metric-cards-title {
   background-color: #F7F7F7;
   text-align: center;

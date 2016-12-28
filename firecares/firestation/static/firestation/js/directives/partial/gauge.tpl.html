@@ -13,6 +13,6 @@
     </div>
     <div class="gauge-description">
         <h4>{{metricTitle}}</h4>
-        <p>{{description}} <a href="{{learnMore}}" ng-if="learnMore">  Learn more.</a></p>
+        <p><span ng-bind-html="description"></span> <a href="{{learnMore}}" ng-if="learnMore">  Learn more.</a></p>
     </div>
 </div>

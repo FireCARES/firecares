@@ -567,8 +567,8 @@
                                 {% endverbatim %}
                             </div>
                             {% else %}
-                            <div class="col-sm-6 col-md-12 ct-u-marginBottom30 unauthenticated">
-                                <gauge description="Please login to see this department's performance score."
+                            <div class="col-sm-6 col-md-12 ct-u-marginBottom30 ct-u-marginTop20 unauthenticated">
+                                <gauge description="Please <a href='{% url 'login' %}?next={% url 'firedepartment_detail' pk=object.id %}'>login</a> to see this department's performance score."
                                        metric-title="" min="" max="" value="" inverse
                                        learn-more="{% url 'models_performance_score' %}"></gauge>
                             </div>
@@ -835,7 +835,7 @@
                                                 Assessment of performance score based on the number of fires.
                                             </div>
                                             <div class="description">
-                                              Please login to see this information.
+                                              Please <a href="{% url 'login' %}?next={% url 'firedepartment_detail' pk=object.id %}">login</a> to see this information.
                                             </div>
                                         </div>
                                     </div>
@@ -848,7 +848,7 @@
                                                 Assessment of performance score based on fire spread risk.
                                             </div>
                                             <div class="description">
-                                              Please login to see this information.
+                                              Please <a href="{% url 'login' %}?next={% url 'firedepartment_detail' pk=object.id %}">login</a> to see this information.
                                             </div>
                                         </div>
                                     </div>
@@ -861,7 +861,7 @@
                                                 Assessment of performance score based on the risk of death and injury.
                                             </div>
                                             <div class="description">
-                                              Please login to see this information.
+                                              Please <a href="{% url 'login' %}?next={% url 'firedepartment_detail' pk=object.id %}">login</a> to see this information.
                                             </div>
                                         </div>
                                     </div>
@@ -874,7 +874,7 @@
                                                 National assessment of performance score based on the fire spread.
                                             </div>
                                             <div class="description">
-                                              Please login to see this information.
+                                              Please <a href="{% url 'login' %}?next={% url 'firedepartment_detail' pk=object.id %}">login</a> to see this information.
                                             </div>
                                         </div>
                                     </div>
@@ -888,7 +888,7 @@
                                                 National assessment of performance score based on the death and injury risk.
                                             </div>
                                             <div class="description">
-                                              Please login to see this information.
+                                              Please <a href="{% url 'login' %}?next={% url 'firedepartment_detail' pk=object.id %}">login</a> to see this information.
                                             </div>
                                         </div>
                                     </div>
