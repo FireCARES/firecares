@@ -49,3 +49,16 @@ This project uses LESS CSS pre-processor to generate CSS rules.  To make a modif
 
 1. Make the modification in the appropriate LESS file.  For example: [style.less](firecares/firestation/static/firestation/theme/assets/less/style.less)
 2. Use the `lessc` command to compile the CSS from LESS and pipe the output to the appropriate location `lessc style.less > ../css/style.css`.
+
+#### Symlinking Static Files
+
+When developing client-side functionality for FireCARES it is often helpful to symlink client-side assets so they refresh when the browser is refreshed.
+
+```shell
+vagrant ssh
+sudo sed -i '/location \/static/a sendfile off;' /etc/nginx/sites-enabled/firecares
+sudo service nginx restart
+sudo su firecares
+workon firecares
+python manage.py collectstatic --noinput -l --clear
+```
