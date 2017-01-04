@@ -11,7 +11,8 @@ def global_settings(request):
     return {
         'global_settings': {
             'google_analytics_tracking_id': settings.GOOGLE_ANALYTICS_TRACKING_ID,
-            'SSO_LOGIN_URL': settings.SSO_LOGIN_URL
+            'IMIS_SSO_LOGIN_URL': settings.IMIS_SSO_LOGIN_URL,
+            'HELIX_LOGOUT_URL': settings.HELIX_LOGOUT_URL
         }
     }
 

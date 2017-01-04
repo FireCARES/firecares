@@ -10,16 +10,16 @@ User = get_user_model()
 
 
 @Mocker()
-class SSOTests(BaseFirecaresTestcase):
+class IMISSingleSignOnTests(BaseFirecaresTestcase):
     def setUp(self):
-        self.service_wsdl = settings.SSO_SERVICE_URL
+        self.service_wsdl = settings.IMIS_SSO_SERVICE_URL
         self.service_root = self.service_wsdl.split('?')[0]
         self.valid_session = True
         self.user_info_updated = False
         self.disposed = []
 
     def load_mock(self, filename):
-        with open(os.path.join(os.path.dirname(__file__), 'mocks', filename), 'r') as f:
+        with open(os.path.join(os.path.dirname(__file__), 'mocks/imis', filename), 'r') as f:
             return f.read()
 
     def session_callback(self, request, context):
@@ -71,7 +71,7 @@ class SSOTests(BaseFirecaresTestcase):
         resp = c.get('/?ibcToken={}'.format(uuid))
         self.assertTrue('ibcToken' in c.session)
         # A user should be created with username = ImisId
-        user = User.objects.filter(username='0559211').first()
+        user = User.objects.filter(username='iaff-0559211').first()
         self.assertIsNotNone(user)
         self.assertTrue(user.is_active)
         self.assertFalse(user.is_staff)
@@ -92,7 +92,7 @@ class SSOTests(BaseFirecaresTestcase):
         c = Client()
         uuid = uuid4()
         c.get('/?ibcToken={}'.format(uuid))
-        user = User.objects.filter(username='0559211').first()
+        user = User.objects.filter(username='iaff-0559211').first()
         self.assertEqual(user.email, 'tester@prominentedge.com')
 
         c.logout()

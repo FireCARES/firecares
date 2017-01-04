@@ -94,13 +94,13 @@ class TestPublic(BaseFirecaresTestcase):
         response = c.get(reverse('firedepartment_detail', args=[fd.pk]))
         self.assertNotContains(response, 'seconds over the industry standard.')
         self.assertNotContains(response, 'This department\'s performance score is')
-        self.assertContains(response, 'Please login to see this information')
+        self.assertContains(response, 'to see this information')
 
         # Test the slug route as well...
         response = c.get(reverse('firedepartment_detail_slug', args=[fd.pk, fd.slug]))
         self.assertNotContains(response, 'seconds over the industry standard.')
         self.assertNotContains(response, 'This department\'s performance score is')
-        self.assertContains(response, 'Please login to see this information')
+        self.assertContains(response, 'to see this information')
 
     def test_department_admin_page_access(self):
         c = Client()

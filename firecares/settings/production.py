@@ -43,8 +43,16 @@ DEBUG = False
 AWS_QUERYSTRING_AUTH = False
 EMAIL_USE_TLS = True
 
-SSO_LOGIN_URL = 'https://my.iaff.org/Web/Contacts/SignIn_withoutCreateNewAccount.aspx?doRedirect='
-SSO_SERVICE_URL = 'https://member.iaff.org/iaff_sso_prod/sso.asmx?WSDL'
+IMIS_SSO_LOGIN_URL = 'https://my.iaff.org/Web/Contacts/SignIn_withoutCreateNewAccount.aspx?doRedirect='
+IMIS_SSO_SERVICE_URL = 'https://member.iaff.org/iaff_sso_prod/sso.asmx?WSDL'
+
+HELIX_ROOT = 'https://www.myhelix.org'
+HELIX_AUTHORIZE_URL = HELIX_ROOT + '/app/OAuth/Authorize'
+HELIX_TOKEN_URL = HELIX_ROOT + '/App/Token'
+HELIX_CLIENT_ID = '39913518'
+HELIX_REDIRECT = 'https://firecares.org'
+HELIX_LOGOUT_URL = HELIX_ROOT + '/App/logout/' + HELIX_CLIENT_ID
+HELIX_WHOAMI_URL = HELIX_ROOT + '/App/api/v2/Account/WhoAmI'
 
 
 CELERYBEAT_SCHEDULE = {

@@ -134,6 +134,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'firecares.firecares_core.middleware.IMISSingleSignOnMiddleware',
+    'firecares.firecares_core.middleware.OAuth2SingleSignOnMiddleware',
     'reversion.middleware.RevisionMiddleware',
     'firecares.firecares_core.middleware.DisclaimerAcceptedMiddleware'
     # Uncomment the next line for simple clickjacking protection:
@@ -266,8 +267,18 @@ GOOGLE_ANALYTICS_TRACKING_ID = os.getenv('GOOGLE_ANALYTICS_TRACKING_ID', None)
 
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login'
-SSO_LOGIN_URL = 'https://staging.iaff.org/Web/Contacts/SignIn_withoutCreateNewAccount.aspx?doRedirect='
-SSO_SERVICE_URL = 'https://member.iaff.org/iaff_sso_staging/sso.asmx?WSDL'
+IMIS_SSO_LOGIN_URL = 'https://staging.iaff.org/Web/Contacts/SignIn_withoutCreateNewAccount.aspx?doRedirect='
+IMIS_SSO_SERVICE_URL = 'https://member.iaff.org/iaff_sso_staging/sso.asmx?WSDL'
+
+HELIX_ROOT = 'https://test.myhelix.org'
+HELIX_AUTHORIZE_URL = HELIX_ROOT + '/app/OAuth/Authorize'
+HELIX_TOKEN_URL = HELIX_ROOT + '/App/Token'
+HELIX_SCOPE = ['basic']
+HELIX_CLIENT_ID = '39913518'
+HELIX_SECRET = os.environ.get('HELIX_SECRET', None)
+HELIX_REDIRECT = 'https://192.168.33.15:8000'
+HELIX_LOGOUT_URL = HELIX_ROOT + '/App/logout/' + HELIX_CLIENT_ID
+HELIX_WHOAMI_URL = HELIX_ROOT + '/App/api/v2/Account/WhoAmI'
 
 CELERY_DEFAULT_QUEUE = "default"
 CELERY_DEFAULT_EXCHANGE = "default"

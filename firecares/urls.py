@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.defaults import page_not_found
 from django.views.generic import TemplateView
 from .firecares_core.forms import FirecaresPasswordResetForm
-from .firecares_core.views import ForgotUsername, ContactUs, AccountRequestView, ShowMessage, Disclaimer
+from .firecares_core.views import ForgotUsername, ContactUs, AccountRequestView, ShowMessage, Disclaimer, OAuth2Callback, OAuth2Redirect, sso_logout_then_login
 from .firestation.api import StaffingResource, FireStationResource, FireDepartmentResource
 from tastypie.api import Api
 from firestation.views import Home
@@ -55,7 +55,7 @@ urlpatterns = patterns('',
         kwargs={'template_name': 'registration/password/password_change_done.html'}),
     url(r'^forgot-username/$', ForgotUsername.as_view(), name='forgot_username'),
     url(r'^forgot-username/done/$', TemplateView.as_view(template_name='registration/username_sent.html'), name='username_sent'),
-    url(r'^logout/$', 'django.contrib.auth.views.logout_then_login', name='logout'),
+    url(r'^logout/$', sso_logout_then_login, name='logout'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^autocomplete/$', RegistryView.as_view(), name='autocomplete_light_registry'),
     url(r'^autocomplete/(?P<autocomplete>[-\w]+)/$', login_required(AutocompleteView.as_view()), name='autocomplete_light_autocomplete'),
@@ -72,6 +72,8 @@ urlpatterns = patterns('',
     url(r'', include(importer_api.urls)),
     url(r'^disclaimer/$', Disclaimer.as_view(), name='disclaimer'),
     url(r'^invitations/', include('firecares.firecares_core.ext.invitations.urls', namespace='invitations')),
+    url(r'^oauth/$', OAuth2Callback.as_view(), name='oauth_callback'),
+    url(r'^oauthlogin/$', OAuth2Redirect.as_view(), name='oauth_redirect')
 )
 
 # urlpatterns += importer_urlpatterns

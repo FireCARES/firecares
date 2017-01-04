@@ -1,0 +1,23 @@
+{
+    "access_token": "myaccesstoken",
+    "token_type": "bearer",
+    "expires_in": 599,
+    "refresh_token": "myrefreshtoken",
+    "username": "testermctesting",
+    "firstname": "Tester",
+    "lastname": "McTesting",
+    "city": "St. Louis",
+    "state": "MO",
+    "email": "tester-iafc@prominentedge.com",
+    "title": "Software Developer",
+    "contactid": "1162",
+    "avatar": "",
+    "membershipid": "",
+    ".refresh": "True",
+    ".issued": "Tue, 03 Jan 2017 21:34:21 GMT",
+    ".expires": "Tue, 03 Jan 2017 21:44:21 GMT",
+    "client_id": "39913518",
+    "expires": "1/3/2017 9:44:21 PM",
+    "issued": "1/3/2017 9:34:21 PM",
+    "roles": "[]"
+}

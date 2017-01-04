@@ -4,11 +4,13 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
+from django.contrib.auth.views import logout
 from django.contrib.sites.models import Site
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, resolve_url
 from django.template import loader
 from django.views.generic import View, CreateView, TemplateView
+from requests_oauthlib import OAuth2Session
 from firecares.tasks.email import send_mail
 from .forms import ContactForm
 from .models import RegistrationWhitelist
@@ -152,3 +154,36 @@ class Disclaimer(LoginRequiredMixin, TemplateView):
         profile.has_accepted_terms = True
         profile.save()
         return redirect(request.GET.get('next') or reverse('firestation_home'))
+
+
+class OAuth2Redirect(View):
+    def get(self, request):
+        # Start OAuth2 session
+        redirect_uri = getattr(settings, 'HELIX_REDIRECT', request.build_absolute_uri(reverse('oauth_callback')))
+        oauth = OAuth2Session(settings.HELIX_CLIENT_ID,
+                              scope=settings.HELIX_SCOPE,
+                              redirect_uri=redirect_uri)
+        url, state = oauth.authorization_url(settings.HELIX_AUTHORIZE_URL)
+        request.session['oauth_state'] = state
+        return redirect(url)
+
+
+class OAuth2Callback(View):
+    def get(self, request):
+        # TODO: Strip out OAuth2 middlware and inject here...
+        if 'code' in request.GET and 'state' in request.GET:
+            pass
+
+
+def sso_logout_then_login(request, login_url=None, current_app=None, extra_context=None):
+    """
+    Logs out the user if they are logged in. Then redirects to the log-in page OR
+    to the SSO logout page (which redirects to the FireCARES login page).
+    """
+    if not login_url:
+        login_url = settings.LOGIN_URL
+    login_url = resolve_url(login_url)
+
+    if 'oauth_token' in request.session:
+        login_url = settings.HELIX_LOGOUT_URL
+    return logout(request, login_url, current_app=current_app, extra_context=extra_context)

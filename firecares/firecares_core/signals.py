@@ -37,5 +37,5 @@ def sessionend_handler(sender, **kwargs):
     inst = kwargs.get('instance').get_decoded()
     if 'ibcToken' in inst:
         token = inst.get('ibcToken')
-        imis = Client(settings.SSO_SERVICE_URL)
+        imis = Client(settings.IMIS_SSO_SERVICE_URL)
         imis.service.DisposeSessionByUserToken(applicationInstance=1, userToken=token)
