@@ -1153,3 +1153,43 @@ class FireStationTests(BaseFirecaresTestcase):
         c.login(**self.admin_creds)
         response = c.put(url, data=new_geom, content_type='application/json')
         self.assertEqual(response.status_code, 204)
+
+    def test_prediction_import(self):
+        fd = FireDepartment.objects.create(id=92679,
+                                           name='Test import',
+                                           population=0,
+                                           population_class=1,
+                                           department_type='test')
+
+        fd2 = FireDepartment.objects.create(id=79344,
+                                            name='Test import 2',
+                                            population=0,
+                                            population_class=1,
+                                            department_type='test')
+        # Create existing low risk model
+        FireDepartmentRiskModels.objects.create(department=fd, level=1,
+                                                risk_model_deaths=2, risk_model_injuries=3,
+                                                risk_model_fires_size0=5, risk_model_fires_size1=7,
+                                                risk_model_fires_size2=1)
+
+        FireDepartmentRiskModels.objects.create(department=fd2, level=1,
+                                                risk_model_deaths=2)
+
+        call_command('import-predictions', 'firecares/firestation/tests/mock/predictions.csv', stdout=StringIO())
+
+        # Shoud have a total of 31 fires across size0, size1 and size2
+        self.assertEqual(fd.metrics.risk_model_fires.low, 31)
+        self.assertEqual(fd.metrics.risk_model_fires_size0.low, 28)
+
+        # Having an NA value that should be considered 0 in the summation
+        self.assertEqual(fd.metrics.risk_model_fires_size0.medium, 18)
+        self.assertEqual(fd.metrics.risk_model_fires_size2.high, 5)
+
+        # Test to make sure that existing data isn't overwritten in the case of incoming NA values
+        self.assertEqual(fd2.metrics.risk_model_deaths.low, 2)
+
+        # Percentages should add up to 1
+        lr_fire_percent = (fd.metrics.risk_model_fires_size0_percentage.low +
+                           fd.metrics.risk_model_fires_size1_percentage.low +
+                           fd.metrics.risk_model_fires_size2_percentage.low)
+        self.assertAlmostEqual(1, lr_fire_percent)

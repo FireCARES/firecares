@@ -33,6 +33,7 @@ from .metrics import FireDepartmentMetrics
 LEVEL_CHOICES = [(1, 'Low'),
                  (2, 'Medium'),
                  (4, 'High')]
+LEVEL_CHOICES_DICT = {k: v for k, v in LEVEL_CHOICES}
 
 
 class USGSStructureData(models.Model):
@@ -633,6 +634,9 @@ class FireDepartmentRiskModels(models.Model):
 
     risk_model_fires_size2_percentage = models.FloatField(null=True, blank=True,
                                                           verbose_name='Percentage of size 2 fires.')
+
+    def __unicode__(self):
+        return '{level} risk - {department} ({f_id})'.format(level=LEVEL_CHOICES_DICT[self.level], department=self.department, f_id=self.department.id)
 
 
 class FireStation(USGSStructureData, Archivable):

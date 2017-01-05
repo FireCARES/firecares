@@ -49,3 +49,15 @@ This project uses LESS CSS pre-processor to generate CSS rules.  To make a modif
 
 1. Make the modification in the appropriate LESS file.  For example: [style.less](firecares/firestation/static/firestation/theme/assets/less/style.less)
 2. Use the `lessc` command to compile the CSS from LESS and pipe the output to the appropriate location `lessc style.less > ../css/style.css`.
+
+#### Running IPython/Jupyter notebooks
+
+To assist in the transparency of the calculations and data analysis, ipython notebooks in the `/scripts` folder can be run from your vagrant machine via:
+
+```bash
+ssh -L 8888:localhost:8888 vagrant@192.168.33.15
+sudo chmod a+rwx /run/user/1000
+sudo su firecares
+workon firecares
+python manage.py shell_plus --notebook --no-browser  # follow the instructions that follow in your shell regarding logging into ipython with a token
+```

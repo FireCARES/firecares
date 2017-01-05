@@ -63,3 +63,5 @@ firecares/settings/local_settings.py
 
 **/.DS_Store
 celerybeat-schedule
+
+.ipynb_checkpoints

@@ -1,7 +1,7 @@
 from firecares.celery import app
 from django.db import connections
 from django.db.utils import ConnectionDoesNotExist
-from firecares.firestation.models import FireDepartment, create_quartile_views
+from firecares.firestation.models import FireDepartment, create_quartile_views, LEVEL_CHOICES_DICT
 from firecares.firestation.models import NFIRSStatistic as nfirs
 from fire_risk.models import DIST, NotEnoughRecords
 from fire_risk.models.DIST.providers.ahs import ahs_building_areas
@@ -30,48 +30,48 @@ def update_performance_score(id, dry_run=False):
 
     cursor.execute(RESIDENTIAL_FIRES_BY_FDID_STATE, (fd.fdid, fd.state))
     results = dictfetchall(cursor)
-    old_score = fd.dist_model_score
-    counts = dict(object_of_origin=0, room_of_origin=0, floor_of_origin=0, building_of_origin=0, beyond=0)
 
-    for result in results:
-        if result['fire_sprd'] == '1':
-            counts['object_of_origin'] += result['count']
+    for rm in fd.firedepartmentriskmodels_set.all():
+        old_score = rm.dist_model_score
+        counts = dict(object_of_origin=0, room_of_origin=0, floor_of_origin=0, building_of_origin=0, beyond=0)
 
-        if result['fire_sprd'] == '2':
-            counts['room_of_origin'] += result['count']
+        for result in results:
+            if result['fire_sprd'] == '1':
+                counts['object_of_origin'] += result['count']
 
-        if result['fire_sprd'] == '3':
-            counts['floor_of_origin'] += result['count']
+            if result['fire_sprd'] == '2':
+                counts['room_of_origin'] += result['count']
 
-        if result['fire_sprd'] == '4':
-            counts['building_of_origin'] += result['count']
+            if result['fire_sprd'] == '3':
+                counts['floor_of_origin'] += result['count']
 
-        if result['fire_sprd'] == '5':
-            counts['beyond'] += result['count']
+            if result['fire_sprd'] == '4':
+                counts['building_of_origin'] += result['count']
 
-    ahs_building_size = ahs_building_areas(fd.fdid, fd.state)
+            if result['fire_sprd'] == '5':
+                counts['beyond'] += result['count']
 
-    if ahs_building_size is not None:
-        counts['building_area_draw'] = ahs_building_size
+        ahs_building_size = ahs_building_areas(fd.fdid, fd.state)
 
-    response_times = response_time_distributions.get('{0}-{1}'.format(fd.fdid, fd.state))
+        if ahs_building_size is not None:
+            counts['building_area_draw'] = ahs_building_size
 
-    if response_times:
-        counts['arrival_time_draw'] = LogNormalDraw(*response_times, multiplier=60)
+        response_times = response_time_distributions.get('{0}-{1}'.format(fd.fdid, fd.state))
 
-    try:
-        dist = DIST(floor_extent=False, **counts)
-        fd.dist_model_score = dist.gibbs_sample()
+        if response_times:
+            counts['arrival_time_draw'] = LogNormalDraw(*response_times, multiplier=60)
 
-    except (NotEnoughRecords, ZeroDivisionError):
-        fd.dist_model_score = None
+        try:
+            dist = DIST(floor_extent=False, **counts)
+            rm.dist_model_score = dist.gibbs_sample()
 
-    print 'updating fdid: {2} from: {0} to {1}.'.format(old_score, fd.dist_model_score, fd.id)
+        except (NotEnoughRecords, ZeroDivisionError):
+            rm.dist_model_score = None
 
-    if dry_run:
-        return
+        print 'updating fdid: {2} - {3} risk level from: {0} to {1}.'.format(old_score, rm.dist_model_score, fd.id, LEVEL_CHOICES_DICT[rm.level])
 
-    fd.save()
+        if not dry_run:
+            rm.save()
 
 
 @app.task(queue='update')

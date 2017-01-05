@@ -6,6 +6,12 @@ from django.utils.functional import cached_property
 from firecares.firestation.managers import Ntile, Case, When
 
 
+class AttrDict(dict):
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
+
+
 class FireDepartmentMetrics(object):
     def __init__(self, firedepartment, quartile_class):
         self.firedepartment = firedepartment
@@ -19,11 +25,11 @@ class FireDepartmentMetrics(object):
         """
         Returns the matching rows from the population metrics table.
         """
-        return {
+        return AttrDict({
             'low': self.quartile_class.objects.filter(id=self.firedepartment.id, level=1).first(),
             'medium': self.quartile_class.objects.filter(id=self.firedepartment.id, level=2).first(),
             'high': self.quartile_class.objects.filter(id=self.firedepartment.id, level=4).first()
-        }
+        })
 
     @cached_property
     def population_class_stats(self):
@@ -62,11 +68,11 @@ class FireDepartmentMetrics(object):
             low = self.population_metrics_rows.get('low')
             med = self.population_metrics_rows.get('medium')
             high = self.population_metrics_rows.get('high')
-            return {
+            return AttrDict({
                 'low': low.residential_fires_avg_3_years if low else None,
                 'medium': med.residential_fires_avg_3_years if med else None,
                 'high': high.residential_fires_avg_3_years if high else None
-            }
+            })
 
         def get(level):
             return self.firedepartment.nfirsstatistic_set.filter(fire_department=self,
@@ -74,11 +80,11 @@ class FireDepartmentMetrics(object):
                                                                  year__gte=2010,
                                                                  level=level).aggregate(Avg('count')),
 
-        return {
+        return AttrDict({
             'low': get(1),
             'medium': get(2),
             'high': get(4)
-        }
+        })
 
     @property
     def residential_fires_avg_3_years_breaks(self):
@@ -131,11 +137,11 @@ class FireDepartmentMetrics(object):
             if df is not None:
                 return df.dist_model_risk_model_greater_than_size_2_quartile.mean()
 
-        return {
+        return AttrDict({
             'low': get(self.peers.get('low')),
             'medium': get(self.peers.get('medium')),
             'high': get(self.peers.get('high'))
-        }
+        })
 
     @property
     def dist_model_risk_model_deaths_injuries_quartile_avg(self):
@@ -146,11 +152,11 @@ class FireDepartmentMetrics(object):
             if df is not None:
                 return df.dist_model_risk_model_deaths_injuries_quartile_avg.mean()
 
-        return {
+        return AttrDict({
             'low': get(self.peers.get('low')),
             'medium': get(self.peers.get('medium')),
             'high': get(self.peers.get('high'))
-        }
+        })
 
     @property
     def dist_model_residential_fires_quartile_avg(self):
@@ -161,11 +167,11 @@ class FireDepartmentMetrics(object):
             if df is not None:
                 return df.dist_model_residential_fires_quartile_avg.mean()
 
-        return {
+        return AttrDict({
             'low': get(self.peers.get('low')),
             'medium': get(self.peers.get('medium')),
             'high': get(self.peers.get('high'))
-        }
+        })
 
     @property
     def dist_model_risk_model_greater_than_size_2_quartile_breaks(self):
@@ -176,11 +182,11 @@ class FireDepartmentMetrics(object):
             if df is not None:
                 return df.groupby(['dist_model_risk_model_greater_than_size_2_quartile']).max()['dist_model_score'].tolist()
 
-        return {
+        return AttrDict({
             'low': get(self.peers.get('low')),
             'medium': get(self.peers.get('medium')),
             'high': get(self.peers.get('high'))
-        }
+        })
 
     @property
     def dist_model_risk_model_deaths_injuries_quartile_breaks(self):
@@ -191,11 +197,11 @@ class FireDepartmentMetrics(object):
             if df is not None:
                 return df.groupby(['dist_model_risk_model_deaths_injuries_quartile']).max()['dist_model_score'].tolist()
 
-        return {
+        return AttrDict({
             'low': get(self.peers.get('low')),
             'medium': get(self.peers.get('medium')),
             'high': get(self.peers.get('high'))
-        }
+        })
 
     @property
     def dist_model_residential_fires_quartile_breaks(self):
@@ -206,11 +212,11 @@ class FireDepartmentMetrics(object):
             if df is not None:
                 return df.groupby(['dist_model_residential_fires_quartile']).max()['dist_model_score'].tolist()
 
-        return {
+        return AttrDict({
             'low': get(self.peers.get('low')),
             'medium': get(self.peers.get('medium')),
             'high': get(self.peers.get('high'))
-        }
+        })
 
     @property
     def dist_model_residential_fires_quartile(self):
@@ -221,11 +227,11 @@ class FireDepartmentMetrics(object):
             if df is not None:
                 return df.loc[df['id'] == self.firedepartment.id].dist_model_residential_fires_quartile.values[0]
 
-        return {
+        return AttrDict({
             'low': get(self.peers.get('low')),
             'medium': get(self.peers.get('medium')),
             'high': get(self.peers.get('high'))
-        }
+        })
 
     @property
     def dist_model_risk_model_greater_than_size_2_quartile(self):
@@ -236,11 +242,11 @@ class FireDepartmentMetrics(object):
             if df is not None:
                 return df.loc[df['id'] == self.firedepartment.id].dist_model_risk_model_greater_than_size_2_quartile.values[0]
 
-        return {
+        return AttrDict({
             'low': get(self.peers.get('low')),
             'medium': get(self.peers.get('medium')),
             'high': get(self.peers.get('high'))
-        }
+        })
 
     @property
     def dist_model_risk_model_deaths_injuries_quartile(self):
@@ -251,11 +257,11 @@ class FireDepartmentMetrics(object):
             if df is not None:
                 return df.loc[df['id'] == self.firedepartment.id].dist_model_risk_model_deaths_injuries_quartile.values[0]
 
-        return {
+        return AttrDict({
             'low': get(self.peers.get('low')),
             'medium': get(self.peers.get('medium')),
             'high': get(self.peers.get('high'))
-        }
+        })
 
     @property
     def national_risk_model_size1_percent_size2_percent_sum_quartile(self):
@@ -295,11 +301,11 @@ class FireDepartmentMetrics(object):
                                                                  level=level,
                                                                  year__gte=2010).aggregate(Avg('count'))
 
-        return {
+        return AttrDict({
             'low': get(1),
             'medium': get(2),
             'high': get(4)
-        }
+        })
 
     @property
     def dist_model_score(self):
@@ -363,11 +369,11 @@ class FireDepartmentMetrics(object):
             else:
                 return
 
-        return {
+        return AttrDict({
             'low': None if empty_fires(low) else sum_fires(low),
             'medium': None if empty_fires(med) else sum_fires(med),
             'high': None if empty_fires(high) else sum_fires(high)
-        }
+        })
 
     @property
     def size2_and_greater_sum(self):
@@ -389,11 +395,11 @@ class FireDepartmentMetrics(object):
             else:
                 return
 
-        return {
+        return AttrDict({
             'low': None if empty_fires(low) else sum_fires(low),
             'medium': None if empty_fires(med) else sum_fires(med),
             'high': None if empty_fires(high) else sum_fires(high)
-        }
+        })
 
     @property
     def size2_and_greater_percentile_sum(self):
@@ -415,11 +421,11 @@ class FireDepartmentMetrics(object):
             else:
                 return
 
-        return {
+        return AttrDict({
             'low': None if empty_percentages(low) else sum_fires(low),
             'medium': None if empty_percentages(med) else sum_fires(med),
             'high': None if empty_percentages(high) else sum_fires(high)
-        }
+        })
 
     @property
     def deaths_and_injuries_sum(self):
@@ -436,11 +442,11 @@ class FireDepartmentMetrics(object):
             if x:
                 return (x.risk_model_deaths or 0) + (x.risk_model_injuries or 0)
 
-        return {
+        return AttrDict({
             'low': None if empty_deaths(low) else sum_deaths(low),
             'medium': None if empty_deaths(med) else sum_deaths(med),
             'high': None if empty_deaths(high) else sum_deaths(high)
-        }
+        })
 
     @property
     def residential_structure_fire_counts(self):
@@ -467,11 +473,11 @@ class FireDepartmentMetrics(object):
         """
         low, med, high = self._get_risk_model_rows()
 
-        return {
+        return AttrDict({
             'low': getattr(low, field, None),
             'medium': getattr(med, field, None),
             'high': getattr(high, field, None)
-        }
+        })
 
     def _get_peers(self):
         object_values = self.population_metrics_rows
