@@ -134,7 +134,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'firecares.firecares_core.middleware.IMISSingleSignOnMiddleware',
-    'firecares.firecares_core.middleware.OAuth2SingleSignOnMiddleware',
     'reversion.middleware.RevisionMiddleware',
     'firecares.firecares_core.middleware.DisclaimerAcceptedMiddleware'
     # Uncomment the next line for simple clickjacking protection:
@@ -276,7 +275,7 @@ HELIX_TOKEN_URL = HELIX_ROOT + '/App/Token'
 HELIX_SCOPE = ['basic']
 HELIX_CLIENT_ID = '39913518'
 HELIX_SECRET = os.environ.get('HELIX_SECRET', None)
-HELIX_REDIRECT = 'https://192.168.33.15:8000'
+HELIX_REDIRECT = 'https://192.168.33.15:8000/oauth'
 HELIX_LOGOUT_URL = HELIX_ROOT + '/App/logout/' + HELIX_CLIENT_ID
 HELIX_WHOAMI_URL = HELIX_ROOT + '/App/api/v2/Account/WhoAmI'
 

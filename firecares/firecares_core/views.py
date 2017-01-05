@@ -1,16 +1,19 @@
+import json
 import requests
 from .forms import ForgotUsernameForm, AccountRequestForm
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth.views import logout
 from django.contrib.sites.models import Site
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render, redirect, resolve_url
 from django.template import loader
 from django.views.generic import View, CreateView, TemplateView
 from requests_oauthlib import OAuth2Session
+from oauthlib.common import to_unicode
 from firecares.tasks.email import send_mail
 from .forms import ContactForm
 from .models import RegistrationWhitelist
@@ -168,11 +171,53 @@ class OAuth2Redirect(View):
         return redirect(url)
 
 
+def helix_token_compliance_hook(request):
+    # "expires" value in response is causing collisions with "expires_in" w/in OAuthlib
+    # and is of the wrong format for what appears to be backwards compabilitiy w/in OAuthlib
+    # see https://github.com/idan/oauthlib/blob/master/oauthlib/oauth2/rfc6749/parameters.py#L370
+    if request.status_code == 200:
+        j = request.json()
+        if 'expires' in j:
+            j.pop('expires')
+            request._content = to_unicode(json.dumps(j)).encode('UTF-8')
+
+    return request
+
+
 class OAuth2Callback(View):
+    def _whoami(self, token):
+        return requests.get(settings.HELIX_WHOAMI, headers={'Authorization': 'Bearer ' + token.get('access_token')}).json()
+
+    def _create_username(self, token):
+        return 'iafc-{}'.format(token['username'])
+
     def get(self, request):
-        # TODO: Strip out OAuth2 middlware and inject here...
         if 'code' in request.GET and 'state' in request.GET:
-            pass
+            # Respond to oauth2 workflow (grab a token)
+            if request.session.get('oauth_state') != request.GET['state']:
+                return HttpResponseBadRequest()
+
+            redirect_uri = getattr(settings, 'HELIX_REDIRECT', request.build_absolute_uri('/'))
+            oauth = OAuth2Session(settings.HELIX_CLIENT_ID, state=request.session['oauth_state'], redirect_uri=redirect_uri)
+            oauth.register_compliance_hook('access_token_response', helix_token_compliance_hook)
+            token = oauth.fetch_token(settings.HELIX_TOKEN_URL,
+                                      client_secret=settings.HELIX_SECRET,
+                                      code=request.GET['code'])
+            request.session['oauth_token'] = token
+
+            user = authenticate(remote_user=self._create_username(token))
+
+            if user:
+                # TODO: Handle department association
+                user.email = token.get('email')
+                user.first_name = token.get('firstname')
+                user.last_name = token.get('lastname')
+                user.save()
+
+                login(request, user)
+                return redirect(request.GET.get('next') or reverse('firestation_home'))
+        else:
+            return HttpResponseBadRequest()
 
 
 def sso_logout_then_login(request, login_url=None, current_app=None, extra_context=None):
