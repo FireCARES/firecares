@@ -41,3 +41,4 @@ django-invitations==1.8
 zeep==0.23.0
 requests-mock==1.2.0
 django-extensions==1.5.9
+requests-oauthlib==0.7.0
