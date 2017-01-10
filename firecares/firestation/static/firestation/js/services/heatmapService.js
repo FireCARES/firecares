@@ -19,19 +19,22 @@
             dates: null,
             months: null,
             daysOfWeek: null,
-            hours: null
+            hours: null,
+            risk: null
         };
         var _filters = {
             months: [],
             daysOfWeek: [],
             hours: [],
+            risk: [],
             yearsMonths: []
         };
         var _totals = {};
         var _labels = {
             months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
             daysOfWeek: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-            hours: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24']
+            hours: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24'],
+            risk: ['N/A', 'Low', 'Medium', 'High'],
         };
 
         function processData(allText) {
@@ -184,6 +187,7 @@
 
                             // Preprocess dates into individual parts. This is MUCH faster than
                             // doing it for each dimension, and speeds up loading significantly.
+                            var risks = { "":0, "Low":1, "Medium":2, "High":3 };
                             for (var i = 0; i < lines.length; i++) {
                                 var line = lines[i];
                                 var dateTime = line.alarm.split(' ');
@@ -193,12 +197,14 @@
                                 var year = Number(yearMonthDay[0]);
                                 var month = Number(yearMonthDay[1]);
                                 var day = Number(yearMonthDay[2]);
+                                var risk = risks[line.risk_category];
 
                                 line.dateTime = {
                                     year: year,
                                     month: month - 1,
                                     dayOfWeek: dayOfWeek(year, month, day),
-                                    hours: Number(hoursMinutesSeconds[0])
+                                    hours: Number(hoursMinutesSeconds[0]),
+                                    risk: risk
                                 };
                             }
 
@@ -211,6 +217,7 @@
                             _fires.yearsMonths = _crossfilter.dimension(function(d) {
                                 return self.keyForYearsMonths(d.dateTime.year, d.dateTime.month);
                             });
+                            _fires.risk = _crossfilter.dimension(function(d) { return d.dateTime.risk; });
 
                             _totals.months = _fires.months.group().top(Infinity).sort(function(a, b) { return a.key - b.key; });
                             _totals.daysOfWeek = _fires.daysOfWeek.group().top(Infinity).sort(function(a, b) { return a.key - b.key; });
@@ -218,6 +225,7 @@
                             _totals.yearsMonths = _fires.yearsMonths.group().top(Infinity).sort(function(a, b) {
                                 return a.key.localeCompare(b.key);
                             });
+                            _totals.risk = _fires.risk.group().top(Infinity).sort(function(a, b) { return a.key - b.key; });
 
                             self.refresh();
 
