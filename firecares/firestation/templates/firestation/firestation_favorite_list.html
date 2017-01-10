@@ -1,7 +1,7 @@
 {% extends "firestation/firedepartment_list.html" %}
 
 {% load favit_tags %}
-{% load firecares humanize %}
+{% load firecares_tags humanize %}
 {% block sitemap %}
     <a href="{% url 'firestation_favorite_list' %}">Favorite Stations</a>
 {% endblock sitemap %}

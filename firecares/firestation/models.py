@@ -30,7 +30,8 @@ from storages.backends.s3boto import S3BotoStorage
 from .metrics import FireDepartmentMetrics
 
 
-LEVEL_CHOICES = [(1, 'Low'),
+LEVEL_CHOICES = [(0, 'All'),
+                 (1, 'Low'),
                  (2, 'Medium'),
                  (4, 'High')]
 LEVEL_CHOICES_DICT = {k: v for k, v in LEVEL_CHOICES}

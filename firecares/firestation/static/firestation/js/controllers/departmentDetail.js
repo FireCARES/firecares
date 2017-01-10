@@ -47,6 +47,7 @@
         var fitBoundsOptions = {};
         var countyBoundary = null;
         $scope.metrics = metrics;
+        $scope.urls = urls;
         $scope.level = level;
         $scope.messages = [];
         $scope.stations = [];

@@ -1,16 +1,18 @@
 import json
+import phonenumbers
 from django import template
 from django.conf import settings
 from django.core.serializers import serialize
-from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.query import QuerySet
 from django.template import defaultfilters
 from django.template.defaulttags import URLNode, url
 from django.utils.safestring import mark_safe
 from django.utils.translation import pgettext, ugettext as _, ungettext  # noqa
-import phonenumbers
+from ..serializers import FireCARESJSONSerializer
+
 
 register = template.Library()
+
 
 # A tuple of standard large number to their converters
 intword_converters = (
@@ -147,7 +149,7 @@ def phonenumber(value, country='US', format=phonenumbers.PhoneNumberFormat.NATIO
 def jsonify(obj):
     if isinstance(obj, QuerySet):
         return mark_safe(serialize('json', obj))
-    return mark_safe(json.dumps(obj, cls=DjangoJSONEncoder, indent=4))
+    return mark_safe(json.dumps(obj, cls=FireCARESJSONSerializer, indent=4))
 
 
 # Snagged from https://gist.github.com/kulturlupenguen/69aec1259131b5619fb7

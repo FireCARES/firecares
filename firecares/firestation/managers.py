@@ -9,7 +9,6 @@ from django.contrib.gis.db.models.query import GeoQuerySet
 
 
 class PriorityDepartmentsManager(models.Manager):
-
     def get_queryset(self):
         return super(PriorityDepartmentsManager, self).get_queryset().filter(featured=True)
 
