@@ -292,6 +292,9 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
             ('admin_firedepartment', 'Can administer department users'),
         )
 
+    def reload_metrics(self):
+        self.metrics = FireDepartmentMetrics(self, PopulationClassQuartile)
+
     @property
     def headquarters_geom(self):
         return getattr(self.headquarters_address, 'geom', None)

@@ -96,6 +96,7 @@ class ShowMessage(TemplateView):
 
     def get_context_data(self, **kwargs):
         kwargs['message'] = self.request.session.pop('message', 'Your submission has been received.')
+        kwargs['message_title'] = self.request.session.pop('message_title', 'Thanks!')
         return super(ShowMessage, self).get_context_data(**kwargs)
 
 
@@ -134,6 +135,7 @@ class AccountRequestView(CreateView):
         if form.errors.get('email'):
             self.request.session['message'] = form.errors['email'][0]
         else:
+            self.request.session['message_title'] = 'Error'
             self.request.session['message'] = 'Error processing request.'
         return redirect('show_message')
 
@@ -189,7 +191,7 @@ class OAuth2Callback(View):
         return requests.get(settings.HELIX_WHOAMI, headers={'Authorization': 'Bearer ' + token.get('access_token')}).json()
 
     def _create_username(self, token):
-        return 'iafc-{}'.format(token['username'])
+        return 'iafc-{}'.format(token['membershipid'])
 
     def get(self, request):
         if 'code' in request.GET and 'state' in request.GET:
@@ -204,6 +206,11 @@ class OAuth2Callback(View):
                                       client_secret=settings.HELIX_SECRET,
                                       code=request.GET['code'])
             request.session['oauth_token'] = token
+
+            if not token.get('membershipid'):
+                request.session['message_title'] = 'Login error'
+                request.session['message'] = 'Only IAFC members are allowed to login into FireCARES via the Helix authentication system'
+                return redirect('show_message')
 
             user = authenticate(remote_user=self._create_username(token))
 

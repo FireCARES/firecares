@@ -19,25 +19,29 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
                                            department_type='test')
 
         FireDepartmentRiskModels.objects.create(department=fd)
-        self.assertDictEqual(fd.metrics.size2_and_greater_percentile_sum, {'low': None, 'medium': None, 'high': None})
-        self.assertDictEqual(fd.metrics.deaths_and_injuries_sum, {'low': None, 'medium': None, 'high': None})
+        self.assertDictEqual(fd.metrics.size2_and_greater_percentile_sum, {'all': None, 'low': None, 'medium': None, 'high': None})
+        self.assertDictEqual(fd.metrics.deaths_and_injuries_sum, {'all': None, 'low': None, 'medium': None, 'high': None})
 
         rm = fd.firedepartmentriskmodels_set.first()
         rm.risk_model_deaths = 1
         rm.save()
-        self.assertEqual(fd.metrics.deaths_and_injuries_sum.get('low'), 1)
+        fd.reload_metrics()
+        self.assertEqual(fd.metrics.deaths_and_injuries_sum.low, 1)
 
         rm.risk_model_injuries = 1
         rm.save()
-        self.assertEqual(fd.metrics.deaths_and_injuries_sum.get('low'), 2)
+        fd.reload_metrics()
+        self.assertEqual(fd.metrics.deaths_and_injuries_sum.low, 2)
 
         rm.risk_model_fires_size1_percentage = 1
         rm.save()
-        self.assertEqual(fd.metrics.size2_and_greater_percentile_sum.get('low'), 1)
+        fd.reload_metrics()
+        self.assertEqual(fd.metrics.size2_and_greater_percentile_sum.low, 1)
 
         rm.risk_model_fires_size2_percentage = 1
         rm.save()
-        self.assertEqual(fd.metrics.size2_and_greater_percentile_sum.get('low'), 2)
+        fd.reload_metrics()
+        self.assertEqual(fd.metrics.size2_and_greater_percentile_sum.low, 2)
 
     def test_population_metric_views(self):
         """
@@ -161,3 +165,7 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
                            fd.metrics.risk_model_fires_size1_percentage.low +
                            fd.metrics.risk_model_fires_size2_percentage.low)
         self.assertAlmostEqual(1, lr_fire_percent)
+
+        # Ensure that aggregated "ALL" risk level rows are created
+        self.assertEqual(len(fd.firedepartmentriskmodels_set.all()), 4)
+        self.assertEqual(len(fd2.firedepartmentriskmodels_set.all()), 4)
