@@ -1,0 +1,5 @@
+IAFC Number,IAFC Join Date,IAFC Paid Thru,Division,First Name,Last Name,Title,Department,Address,Address 2,City,State,Zip,Country,Work Phone,Alt Ph 1,Alt Ph 2,Email,Section,Section Paid Through,Payment Date,DepartmentID
+1234,6/9/11,5/31/17,SE,Joe,Tester,Fire Chief,Atlanta Fire Rescue Dept,226 Peachtree St SW,,Atlanta,GA,30303-3749,,(404) 555-5555,(404) 555-5555,(404) 555-5555,testing@atlantaga.gov,METRO,5/31/17,5/31/16,77549
+1235,2/27/11,1/31/17,EA,Testing,Tester,Fire Chief,Prince George's County Fire & EMS Dept,9201 Basil Ct Ste 452,,Largo,MD,20774-5343,,(301) 555-5555,(240) 555-5555,(240) 555-5555,testing@co.pg.md.us,METRO,1/31/17,,92723
+1236,8/1/98,3/31/17,MV,Test,McTesting,Fire Chief,Kansas City (MO) Fire Dept,635 Woodland Ave Ste 2100,,Kansas City,MO,64106-1518,,(816) 555-5555,(816) 555-5555,(816) 555-5555,testing@kcmo.org,METRO,3/31/17,4/11/16,85484
+1237,3/1/03,1/31/18,SE,Joseph,McTest,Chief,Fairfax County Fire & Rescue Dept,4100 Chain Bridge Rd Ste A,,Fairfax,VA,22030-7004,,(703) 555-5555,,(240) 555-5555,testing@fairfaxcounty.gov,METRO,1/31/18,12/12/16,81147

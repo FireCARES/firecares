@@ -184,6 +184,7 @@ class UserProfile(models.Model):
     """
     user = AutoOneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     has_accepted_terms = models.BooleanField(default=False)
+    functional_title = models.CharField(max_length=250, null=True, blank=True)
 
 
 class RegistrationWhitelist(models.Model):
@@ -201,7 +202,8 @@ class RegistrationWhitelist(models.Model):
         email_whitelists = filter(lambda x: '@' in x, whitelists)
         domain_whitelists = set(whitelists) ^ set(email_whitelists)
         domain = re.match(r'(^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)$)', email).groups()[1]
-        if email in whitelists or domain in domain_whitelists:
+        pre_users = PredeterminedUser.objects.values_list('email', flat=True)
+        if email in whitelists or domain in domain_whitelists or email in pre_users:
             return True
         else:
             return False
@@ -213,6 +215,22 @@ class DepartmentInvitation(models.Model):
     department = models.ForeignKey('firestation.FireDepartment', on_delete=models.CASCADE, null=True)
     # Populated by the user account that accepts the invite AFTER the invite has been accepted AND user has registered
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
+
+    def __unicode__(self):
+        return u'{} - {}'.format(self.user.username, self.department.name)
+
+
+class PredeterminedUser(models.Model):
+    email = models.EmailField(unique=True)
+    department = models.ForeignKey('firestation.FireDepartment')
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+
+    class Meta:
+        unique_together = ('email', 'department')
+
+    def __unicode__(self):
+        return u'{} - {}'.format(self.email, self.department.name)
 
 
 reversion.register(Address)

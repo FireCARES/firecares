@@ -1,5 +1,6 @@
 import json
 import re
+from StringIO import StringIO
 from urlparse import urlparse
 from datetime import timedelta
 from urlparse import urlsplit
@@ -11,7 +12,7 @@ from django.core.urlresolvers import reverse, resolve
 from django.test import Client
 from django.utils import timezone
 from bs4 import BeautifulSoup
-from firecares.firecares_core.models import RecentlyUpdatedMixin, AccountRequest, RegistrationWhitelist
+from firecares.firecares_core.models import RecentlyUpdatedMixin, AccountRequest, RegistrationWhitelist, PredeterminedUser
 from firecares.firestation.models import FireDepartment
 from .base import BaseFirecaresTestcase
 
@@ -311,8 +312,11 @@ class CoreTests(BaseFirecaresTestcase):
         """
         Ensure that email addresses are correctly whitelisted.
         """
+
+        fd = FireDepartment.objects.create(name='PredeterminedUserTest')
         RegistrationWhitelist.objects.create(email_or_domain='gmail.com')
         RegistrationWhitelist.objects.create(email_or_domain='test@example.com')
+        PredeterminedUser.objects.create(email='predetermined_tester@myfd.org', department=fd)
 
         self.assertTrue(RegistrationWhitelist.is_whitelisted('joe@gmail.com'))
         self.assertTrue(RegistrationWhitelist.is_whitelisted('test@example.com'))
@@ -320,6 +324,8 @@ class CoreTests(BaseFirecaresTestcase):
         self.assertFalse(RegistrationWhitelist.is_whitelisted('testbad@example.com'))
         self.assertFalse(RegistrationWhitelist.is_whitelisted('test@example.com.uk'))
         self.assertFalse(RegistrationWhitelist.is_whitelisted('test@gmail.com.uk'))
+        self.assertTrue(RegistrationWhitelist.is_whitelisted('predetermined_tester@myfd.org'))
+        self.assertFalse(RegistrationWhitelist.is_whitelisted('anothertester@myfd.org'))
 
     def test_permission_assignment(self):
         """
@@ -382,3 +388,59 @@ class CoreTests(BaseFirecaresTestcase):
         # User will NOT have any department object-level permissions for the inviting department
         self.assertFalse(user.has_perm('change_firedepartment', fd))
         self.assertFalse(user.has_perm('admin_firedepartment', fd))
+
+    def test_predetermined_user_import(self):
+        FireDepartment.objects.get_or_create(id=77549, name='FD1')
+        FireDepartment.objects.get_or_create(id=92723, name='FD2')
+        FireDepartment.objects.get_or_create(id=85484, name='FD3')
+        FireDepartment.objects.get_or_create(id=81147, name='FD4')
+
+        call_command('import-predetermined-admins', 'firecares/firecares_core/tests/mocks/predetermined_users.csv', stdout=StringIO())
+        self.assertEqual(PredeterminedUser.objects.count(), 4)
+
+        # Ensure that running the import again doesn't add more records...
+        call_command('import-predetermined-admins', 'firecares/firecares_core/tests/mocks/predetermined_users.csv', stdout=StringIO())
+        self.assertEqual(PredeterminedUser.objects.count(), 4)
+
+    def test_predetermined_internal_registration(self):
+        fd, _ = FireDepartment.objects.get_or_create(id=77549, name='FD1')
+        fd2, _ = FireDepartment.objects.get_or_create(id=92723, name='FD2')
+        FireDepartment.objects.get_or_create(id=85484, name='FD3')
+        FireDepartment.objects.get_or_create(id=81147, name='FD4')
+
+        call_command('import-predetermined-admins', 'firecares/firecares_core/tests/mocks/predetermined_users.csv', stdout=StringIO())
+
+        c = Client()
+
+        # Test association through internal registration system
+        resp = c.post(reverse('account_request'), dict(email='testing@atlantaga.gov'))
+        # This address should be whitelisted since it was loaded into the PredeterminedUser table
+        self.assert_redirect_to(resp, 'registration_register')
+
+        resp = c.post(reverse('registration_register'), data={'username': 'test_predetermined_reg',
+                                                              'first_name': 'Joe',
+                                                              'last_name': 'Tester',
+                                                              'password1': 'test',
+                                                              'password2': 'test'})
+        user = User.objects.get(username='test_predetermined_reg')
+        self.assertIsNotNone(user)
+        self.assertFalse(user.is_active)
+        self.assertFalse(user.is_superuser)
+        with self.settings(ADMINS=(('Test Admin', 'admin@example.com'),)):
+            # Make sure that account activation triggers the department permission association
+            response = c.get(reverse('registration_activate', kwargs={'activation_key':
+                                                                      user.registrationprofile.activation_key}))
+            # A 302 here means the activation succeeded
+            self.assertEqual(response.status_code, 302)
+            # 1 activation email to user, 1 notification to admins that a department admin account was activated
+            self.assertEqual(len(mail.outbox), 2)
+            msg = next(iter(filter(lambda x: 'admin@example.com' in x.recipients(), mail.outbox)), None)
+            self.assertIsNotNone(msg)
+
+        # User should ONLY have admin permissions on the department they were associated with during the import
+        user.refresh_from_db()
+        self.assertTrue(user.has_perm('admin_firedepartment', fd))
+        self.assertFalse(user.has_perm('change_firedepartment', fd))
+        self.assertFalse(user.has_perm('admin_firedepartment', fd2))
+        self.assertFalse(user.is_superuser)
+        self.assertTrue(user.is_active)

@@ -1,4 +1,5 @@
 import os
+from enum import Enum
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
@@ -9,19 +10,32 @@ from .base import BaseFirecaresTestcase
 User = get_user_model()
 
 
+class TokenState(Enum):
+    invalid_membership = 1
+    valid_membership = 2
+    valid_fire_chief = 3
+    valid_predetermined_fire_chief = 4
+
+
 @Mocker()
 class HelixSingleSignOnTests(BaseFirecaresTestcase):
     def setUp(self):
         self.logout_url = settings.HELIX_LOGOUT_URL
         self.token_url = settings.HELIX_TOKEN_URL
         self.whoami_url = settings.HELIX_WHOAMI_URL
-        self.valid_membership = False
+        self.state = TokenState.invalid_membership
 
     def token_callback(self, request, context):
-        if self.valid_membership:
+        if self.state == TokenState.valid_membership:
             return self.load_mock('get_access_token.json')
-        else:
+        elif self.state == TokenState.invalid_membership:
             return self.load_mock('not_a_member_token.json')
+        elif self.state == TokenState.valid_fire_chief:
+            # TODO
+            pass
+        elif self.state == TokenState.valid_predetermined_fire_chief:
+            # TODO
+            pass
 
     def load_mock(self, filename):
         with open(os.path.join(os.path.dirname(__file__), 'mocks/helix', filename), 'r') as f:
@@ -54,7 +68,7 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         resp = c.get(reverse('oauth_callback') + '?code=1231231234&state={}'.format(c.session['oauth_state']))
         self.assert_redirect_to(resp, 'show_message')
 
-        self.valid_membership = True
+        self.state = TokenState.valid_membership
 
         # Ensure that a user has been created
         resp = c.get(reverse('oauth_redirect'))
@@ -77,3 +91,9 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
 
         # Ensure that user is actually logged out in FireCARES
         self.assertFalse(c.session.items())
+
+    def test_fire_chief_registration(self, mock):
+        pass
+
+    def test_predetermined_fire_chief_registration(self, mock):
+        pass

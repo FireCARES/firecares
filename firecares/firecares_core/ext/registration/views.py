@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import redirect
 from django.views.generic.edit import FormView
 from registration.backends.default.views import RegistrationView
-from firecares.firecares_core.models import RegistrationWhitelist
+from firecares.firecares_core.models import RegistrationWhitelist, PredeterminedUser
 from firecares.firecares_core.forms import AccountRequestForm
 
 
@@ -45,5 +45,11 @@ class LimitedRegistrationView(RegistrationView):
 
     def get_initial(self):
         initial = super(LimitedRegistrationView, self).get_initial()
-        initial['email'] = self.request.session.get(SESSION_EMAIL_WHITELISTED)
+        email = self.request.session.get(SESSION_EMAIL_WHITELISTED)
+        initial['email'] = email
+        # Pre-fill first name and last name for users that are from the predetermined admins...
+        if email in PredeterminedUser.objects.values_list('email', flat=True):
+            pdu = PredeterminedUser.objects.get(email=email)
+            initial['first_name'] = pdu.first_name
+            initial['last_name'] = pdu.last_name
         return initial

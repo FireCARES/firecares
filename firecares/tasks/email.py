@@ -12,6 +12,14 @@ def send_mail(email):
 
 
 @app.task(queue='email')
+def email_admins(subject, message):
+    """
+    Asynchronously sends an email.
+    """
+    mail_admins(subject, message=message)
+
+
+@app.task(queue='email')
 def ensure_valid_data():
     """
     Alert admins of bad data.

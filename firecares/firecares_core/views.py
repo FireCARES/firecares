@@ -15,6 +15,7 @@ from django.views.generic import View, CreateView, TemplateView
 from requests_oauthlib import OAuth2Session
 from oauthlib.common import to_unicode
 from firecares.tasks.email import send_mail
+from firecares.firecares_core.models import PredeterminedUser
 from .forms import ContactForm
 from .models import RegistrationWhitelist
 from .mixins import LoginRequiredMixin
@@ -215,13 +216,24 @@ class OAuth2Callback(View):
             user = authenticate(remote_user=self._create_username(token))
 
             if user:
-                # TODO: Handle department association
                 user.email = token.get('email')
                 user.first_name = token.get('firstname')
                 user.last_name = token.get('lastname')
                 user.save()
+                # TODO: Lookup functional title from Helix's WhoAmI
+                user.userprofile.functional_title = ''
+                user.userprofile.save()
 
                 login(request, user)
+
+                # If the user logs in through Helix AND they are in the perdetermined user list, then assign admin perms
+                if user.email in PredeterminedUser.objects.values_list('email', flat=True):
+                    pdu = PredeterminedUser.objects.get(email=user.email)
+                    user.add_obj_perm('admin_firedepartment', pdu.department)
+                elif user.userprofile.functional_title in settings.HELIX_ACCEPTED_CHIEF_ADMIN_TITLES:
+                    # TODO: redirect to "my department chooser page"
+                    pass
+
                 return redirect(request.GET.get('next') or reverse('firestation_home'))
         else:
             return HttpResponseBadRequest()
