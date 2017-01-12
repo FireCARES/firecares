@@ -1,3 +1,4 @@
+import autocomplete_light
 from .models import Address, ContactRequest, AccountRequest, RegistrationWhitelist
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -31,6 +32,7 @@ class AccountRequestAdmin(LocalOpenLayersAdmin):
 class ProfileInline(admin.StackedInline):
     model = UserProfile
     can_delete = False
+    form = autocomplete_light.modelform_factory(UserProfile, fields=('department',))
 
 
 class UserAdmin(BaseUserAdmin):
