@@ -14,7 +14,7 @@ from django.template import loader
 from django.views.generic import View, CreateView, TemplateView
 from requests_oauthlib import OAuth2Session
 from oauthlib.common import to_unicode
-from firecares.tasks.email import send_mail
+from firecares.tasks.email import send_mail, email_admins
 from firecares.firecares_core.models import PredeterminedUser
 from .forms import ContactForm
 from .models import RegistrationWhitelist
@@ -220,7 +220,7 @@ class OAuth2Callback(View):
                 user.first_name = token.get('firstname')
                 user.last_name = token.get('lastname')
                 user.save()
-                # TODO: Lookup functional title from Helix's WhoAmI
+                # TODO: Lookup functional title from Helix's API
                 user.userprofile.functional_title = ''
                 user.userprofile.save()
 
@@ -230,6 +230,8 @@ class OAuth2Callback(View):
                 if user.email in PredeterminedUser.objects.values_list('email', flat=True):
                     pdu = PredeterminedUser.objects.get(email=user.email)
                     user.add_obj_perm('admin_firedepartment', pdu.department)
+                    email_admins('Department admin user activated: {}'.format(user.username),
+                                 'Admin permissions automatically granted for {} ({}) on {} ({})'.format(user.username, user.email, pdu.department.name, pdu.department.id))
                 elif user.userprofile.functional_title in settings.HELIX_ACCEPTED_CHIEF_ADMIN_TITLES:
                     # TODO: redirect to "my department chooser page"
                     pass

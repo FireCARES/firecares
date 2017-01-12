@@ -14,7 +14,7 @@ def send_mail(email):
 @app.task(queue='email')
 def email_admins(subject, message):
     """
-    Asynchronously sends an email.
+    Asynchronously sends an email to ADMINS.
     """
     mail_admins(subject, message=message)
 

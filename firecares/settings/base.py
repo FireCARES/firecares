@@ -7,6 +7,9 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
+DEPARTMENT_ADMIN_VERIFIERS = (
+    # ('Your Name', 'your_email@example.com'),
+)
 
 MANAGERS = ADMINS
 TESTING = sys.argv[1:2] == ['test']
@@ -274,7 +277,7 @@ HELIX_AUTHORIZE_URL = HELIX_ROOT + '/app/OAuth/Authorize'
 HELIX_TOKEN_URL = HELIX_ROOT + '/App/Token'
 HELIX_SCOPE = ['basic']
 HELIX_CLIENT_ID = '39913518'
-HELIX_SECRET = os.environ.get('HELIX_SECRET', None)
+HELIX_SECRET = os.getenv('HELIX_SECRET', None)
 HELIX_REDIRECT = 'https://192.168.33.15:8000/oauth'
 HELIX_LOGOUT_URL = HELIX_ROOT + '/App/logout/' + HELIX_CLIENT_ID
 HELIX_WHOAMI_URL = HELIX_ROOT + '/App/api/v2/Account/WhoAmI'

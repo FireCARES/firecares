@@ -185,6 +185,7 @@ class UserProfile(models.Model):
     user = AutoOneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     has_accepted_terms = models.BooleanField(default=False)
     functional_title = models.CharField(max_length=250, null=True, blank=True)
+    department = models.ForeignKey('firestation.FireDepartment', null=True, blank=True)
 
 
 class RegistrationWhitelist(models.Model):
