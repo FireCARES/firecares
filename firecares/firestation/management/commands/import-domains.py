@@ -1,5 +1,6 @@
 import argparse
 import pandas as pd
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 from firecares.firestation.models import FireDepartment
 
@@ -28,9 +29,12 @@ class Command(BaseCommand):
             fdid = data[0][0]
             domain = data[0][1].split('@')[1]
             self.stdout.write(str(fdid) + ' - ' + domain)
+            try:
+                fd = FireDepartment.objects.get(id=fdid)
+                fd.domain_name = domain
+                if not dry_run:
+                    fd.save()
+            except ObjectDoesNotExist:
+                self.stdout.write('WARNING: FireDepartment not found: ' + str(fdid))
 
-            fd = FireDepartment.objects.get(id=fdid)
-            fd.domain_name = domain
-            if not dry_run:
-                fd.save()
         self.stdout.write('...done')
