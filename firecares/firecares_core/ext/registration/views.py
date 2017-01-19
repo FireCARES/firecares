@@ -97,7 +97,7 @@ def serialize_association_request(req):
                 department=dict(name=req.department.name, state=req.department.state),
                 approved_by=dict(name=req.approved_by.username, email=req.approved_by.email) if req.approved_by else None,
                 denied_by=dict(name=req.denied_by.username, email=req.denied_by.email) if req.denied_by else None,
-                permission=req.permission.name,
+                permission=req.permission,
                 approved_at=humanize.naturaltime(req.approved_at),
                 denied_at=humanize.naturaltime(req.denied_at),
                 is_approved=req.is_approved,

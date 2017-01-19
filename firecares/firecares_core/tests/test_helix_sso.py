@@ -1,5 +1,5 @@
 import os
-from enum import Enum
+import re
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
@@ -12,32 +12,27 @@ from firecares.firestation.models import FireDepartment
 User = get_user_model()
 
 
-class TokenState(Enum):
-    invalid_membership = 1
-    valid_membership = 2
-    valid_fire_chief = 3
-    valid_predetermined_fire_chief = 4
-
-
 @Mocker()
 class HelixSingleSignOnTests(BaseFirecaresTestcase):
     def setUp(self):
         self.logout_url = settings.HELIX_LOGOUT_URL
         self.token_url = settings.HELIX_TOKEN_URL
         self.whoami_url = settings.HELIX_WHOAMI_URL
-        self.state = TokenState.invalid_membership
+        self.functional_title_matcher = re.compile(settings.HELIX_FUNCTIONAL_TITLE_URL + '\d+')
+        self.valid_membership = False
+        self.is_a_chief = False
 
     def token_callback(self, request, context):
-        if self.state == TokenState.valid_membership:
+        if self.valid_membership:
             return self.load_mock('get_access_token.json')
-        elif self.state == TokenState.invalid_membership:
+        else:
             return self.load_mock('not_a_member_token.json')
-        elif self.state == TokenState.valid_fire_chief:
-            # TODO
-            pass
-        elif self.state == TokenState.valid_predetermined_fire_chief:
-            # TODO
-            pass
+
+    def functional_title_callback(self, request, context):
+        if self.is_a_chief:
+            return '"FIRE_CHIEF"'
+        else:
+            return '"OTHER"'
 
     def load_mock(self, filename):
         with open(os.path.join(os.path.dirname(__file__), 'mocks/helix', filename), 'r') as f:
@@ -46,6 +41,7 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
     def setup_mocks(self, mock):
         mock.post(self.token_url, text=self.token_callback)
         mock.get(self.whoami_url, text=self.load_mock('whoami.json'))
+        mock.get(self.functional_title_matcher, text=self.functional_title_callback)
 
     def test_sso_login(self, mock):
         """
@@ -70,7 +66,7 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         resp = c.get(reverse('oauth_callback') + '?code=1231231234&state={}'.format(c.session['oauth_state']))
         self.assert_redirect_to(resp, 'show_message')
 
-        self.state = TokenState.valid_membership
+        self.valid_membership = True
 
         # Ensure that a user has been created
         resp = c.get(reverse('oauth_redirect'))
@@ -99,7 +95,32 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         Helix logins that have a functional title as FIRE_CHIEF can choose their department.
         """
         self.setup_mocks(mock)
-        pass
+
+        fd = FireDepartment.objects.create(id=1111, name='Chief test')
+
+        c = Client()
+        self.valid_membership = True
+        self.is_a_chief = True
+
+        resp = c.get(reverse('oauth_redirect'))
+        self.assertTrue('oauth_state' in c.session)
+        self.assertEqual(resp.status_code, 302)
+
+        resp = c.get(reverse('oauth_callback') + '?code=1231231234&state={}'.format(c.session['oauth_state']))
+        self.assert_redirect_to(resp, 'registration_choose_department')
+
+        # Fire chief should sent to choose their department, need to simulate disclaimer acceptance
+        user = User.objects.get(username='iafc-1234567')
+        user.userprofile.has_accepted_terms = True
+        user.userprofile.save()
+        resp = c.post(reverse('registration_choose_department'), data={'state': 'MO', 'department': fd.id})
+
+        # The second login for the user should automatically send them to the homepage as they've already submitted an
+        # association request
+        c.logout()
+        c.get(reverse('oauth_redirect'))
+        resp = c.get(reverse('oauth_callback') + '?code=1231231234&state={}'.format(c.session['oauth_state']))
+        self.assert_redirect_to(resp, 'firestation_home')
 
     def test_predetermined_fire_chief_registration(self, mock):
         """
@@ -107,11 +128,11 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         """
         self.setup_mocks(mock)
 
-        fd = FireDepartment.objects.create(name='testy2', population=2, featured=True)
+        fd = FireDepartment.objects.create(id=1234, name='testy2', population=2, featured=True)
         PredeterminedUser.objects.create(email='tester-iafc@prominentedge.com', department=fd)
 
         c = Client()
-        self.state = TokenState.valid_membership
+        self.valid_membership = True
 
         resp = c.get(reverse('oauth_redirect'))
         self.assertTrue('oauth_state' in c.session)
@@ -119,9 +140,9 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         # User is redirected to the FireCARES Helix login portal and then, after authenticating, redirected back to FireCARES
         # w/ the auth code and state
 
-        # Ensure that a user has been created
+        # Ensure that a user has been created and that the user is redirected to his/her associated department
         resp = c.get(reverse('oauth_callback') + '?code=1231231234&state={}'.format(c.session['oauth_state']))
-        self.assertTrue(resp.status_code, 200)
+        self.assertRedirects(resp, '/departments/{}'.format(fd.id), fetch_redirect_response=False)
 
         user = User.objects.filter(username='iafc-1234567').first()
         # Department should be associated w/ user

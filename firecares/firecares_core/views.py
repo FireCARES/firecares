@@ -17,7 +17,7 @@ from oauthlib.common import to_unicode
 from firecares.tasks.email import send_mail, email_admins
 from firecares.firecares_core.models import PredeterminedUser
 from .forms import ContactForm
-from .models import RegistrationWhitelist
+from .models import RegistrationWhitelist, DepartmentAssociationRequest
 from .mixins import LoginRequiredMixin
 
 
@@ -187,6 +187,13 @@ def helix_token_compliance_hook(request):
     return request
 
 
+def get_functional_title(token):
+    membershipid = token.get('membershipid')
+    auth = {'Authorization': 'Bearer ' + token.get('access_token')}
+    resp = requests.get(settings.HELIX_FUNCTIONAL_TITLE_URL + membershipid, headers=auth)
+    return resp.content.strip('"')
+
+
 class OAuth2Callback(View):
     def _whoami(self, token):
         return requests.get(settings.HELIX_WHOAMI, headers={'Authorization': 'Bearer ' + token.get('access_token')}).json()
@@ -220,8 +227,8 @@ class OAuth2Callback(View):
                 user.first_name = token.get('firstname')
                 user.last_name = token.get('lastname')
                 user.save()
-                # TODO: Lookup functional title from Helix's API
-                user.userprofile.functional_title = 'placeholder'
+
+                user.userprofile.functional_title = get_functional_title(token)
                 user.userprofile.save()
 
                 login(request, user)
@@ -235,7 +242,10 @@ class OAuth2Callback(View):
                     user.userprofile.save()
                     email_admins('Department admin user activated: {}'.format(user.username),
                                  'Admin permissions automatically granted for {} ({}) on {} ({})'.format(user.username, user.email, pdu.department.name, pdu.department.id))
-                elif user.userprofile.functional_title in settings.HELIX_ACCEPTED_CHIEF_ADMIN_TITLES:
+                    # Send to associated department on login
+                    return redirect(reverse('firedepartment_detail', args=[user.userprofile.department.id]))
+                elif user.userprofile.functional_title in settings.HELIX_ACCEPTED_CHIEF_ADMIN_TITLES and\
+                        not DepartmentAssociationRequest.user_has_association_request(user):
                     return redirect(reverse('registration_choose_department'))
 
                 return redirect(request.GET.get('next') or reverse('firestation_home'))

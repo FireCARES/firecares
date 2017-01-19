@@ -1,4 +1,3 @@
-from django.contrib.auth.models import Permission
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from django.utils import timezone
@@ -267,13 +266,13 @@ class PredeterminedUser(models.Model):
 
 
 def default_requested_permission():
-    return Permission.objects.get(codename='admin_firedepartment').id
+    return 1
 
 
 class DepartmentAssociationRequest(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     department = models.ForeignKey('firestation.FireDepartment')
-    permission = models.ForeignKey('auth.Permission', default=default_requested_permission)
+    permission = models.CharField(max_length=100, default='admin_firedepartment')
     approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, related_name='approved_association_requests_set')
     approved_at = models.DateTimeField(null=True, blank=True)
     denied_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, related_name='denied_assocation_requests_set')
@@ -314,11 +313,15 @@ class DepartmentAssociationRequest(models.Model):
 
     def _apply(self):
         if self.is_approved:
-            assign_perm(self.permission.codename, self.user, self.department)
+            assign_perm(self.permission, self.user, self.department)
             return True
         else:
-            remove_perm(self.permission.codename, self.user, self.department)
+            remove_perm(self.permission, self.user, self.department)
             return False
+
+    @classmethod
+    def user_has_association_request(cls, user):
+        return cls.objects.filter(user=user).exists()
 
 
 reversion.register(Address)

@@ -50,9 +50,10 @@ HELIX_ROOT = 'https://www.myhelix.org'
 HELIX_AUTHORIZE_URL = HELIX_ROOT + '/app/OAuth/Authorize'
 HELIX_TOKEN_URL = HELIX_ROOT + '/App/Token'
 HELIX_CLIENT_ID = '39913518'
-HELIX_REDIRECT = 'https://firecares.org'
+HELIX_REDIRECT = 'https://firecares.org/oauth'
 HELIX_LOGOUT_URL = HELIX_ROOT + '/App/logout/' + HELIX_CLIENT_ID
 HELIX_WHOAMI_URL = HELIX_ROOT + '/App/api/v2/Account/WhoAmI'
+HELIX_FUNCTIONAL_TITLE_URL = HELIX_ROOT + '/App/api/v2/Membership/FuncTitle/'
 
 
 CELERYBEAT_SCHEDULE = {

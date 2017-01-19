@@ -85,7 +85,7 @@
                         <div class="panel panel-default" style="padding-left: 1em; padding-right: 1em;" ng-repeat="request in requests">
                             <div class="panel-heading">
                                 <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{ $index }}" class="collapsed">
-                                    {{ request.permission }} on {{ request.department.name }} ({{ request.department.state }})
+                                    &quot;{{ request.permission }}&quot; on {{ request.department.name }} ({{ request.department.state }})
                                 </a>
                                 <span class="pull-right label label-success" ng-if="request.is_approved">Approved</span>
                                 <span class="pull-right label label-danger" ng-if="request.is_denied">Denied</span>
