@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.gis import admin
-from firecares.firecares_core.models import UserProfile, PredeterminedUser
+from firecares.firecares_core.models import UserProfile, PredeterminedUser, DepartmentAssociationRequest
 
 User = get_user_model()
 
@@ -32,17 +32,28 @@ class AccountRequestAdmin(LocalOpenLayersAdmin):
 class ProfileInline(admin.StackedInline):
     model = UserProfile
     can_delete = False
-    form = autocomplete_light.modelform_factory(UserProfile, fields=('department',))
+    form = autocomplete_light.modelform_factory(UserProfile, fields='__all__')
 
 
 class UserAdmin(BaseUserAdmin):
     inlines = [ProfileInline]
 
 
+class DepartmentAssociationRequestAdmin(admin.ModelAdmin):
+    model = DepartmentAssociationRequest
+    form = autocomplete_light.modelform_factory(DepartmentAssociationRequest, fields='__all__')
+
+
+class RegistrationWhitelistAdmin(admin.ModelAdmin):
+    model = RegistrationWhitelist
+    form = autocomplete_light.modelform_factory(RegistrationWhitelist, fields='__all__')
+
+
 admin.site.register(Address, AddressAdmin)
 admin.site.register(ContactRequest, ContactRequestAdmin)
 admin.site.register(AccountRequest, AccountRequestAdmin)
-admin.site.register(RegistrationWhitelist)
+admin.site.register(RegistrationWhitelist, RegistrationWhitelistAdmin)
 admin.site.register(PredeterminedUser)
+admin.site.register(DepartmentAssociationRequest, DepartmentAssociationRequestAdmin)
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)

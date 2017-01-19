@@ -12,7 +12,7 @@ from django.core.urlresolvers import reverse, resolve
 from django.test import Client
 from django.utils import timezone
 from bs4 import BeautifulSoup
-from firecares.firecares_core.models import RecentlyUpdatedMixin, AccountRequest, RegistrationWhitelist, PredeterminedUser
+from firecares.firecares_core.models import RecentlyUpdatedMixin, AccountRequest, RegistrationWhitelist, PredeterminedUser, DepartmentAssociationRequest
 from firecares.firestation.models import FireDepartment
 from .base import BaseFirecaresTestcase
 
@@ -317,6 +317,8 @@ class CoreTests(BaseFirecaresTestcase):
         RegistrationWhitelist.objects.create(email_or_domain='gmail.com')
         RegistrationWhitelist.objects.create(email_or_domain='test@example.com')
         PredeterminedUser.objects.create(email='predetermined_tester@myfd.org', department=fd)
+        RegistrationWhitelist.objects.create(email_or_domain='department.gov', department=fd)
+        RegistrationWhitelist.objects.create(email_or_domain='test@myfd.org', department=fd)
 
         self.assertTrue(RegistrationWhitelist.is_whitelisted('joe@gmail.com'))
         self.assertTrue(RegistrationWhitelist.is_whitelisted('test@example.com'))
@@ -326,6 +328,14 @@ class CoreTests(BaseFirecaresTestcase):
         self.assertFalse(RegistrationWhitelist.is_whitelisted('test@gmail.com.uk'))
         self.assertTrue(RegistrationWhitelist.is_whitelisted('predetermined_tester@myfd.org'))
         self.assertFalse(RegistrationWhitelist.is_whitelisted('anothertester@myfd.org'))
+        self.assertTrue(RegistrationWhitelist.is_whitelisted('test@department.gov'))
+        self.assertTrue(RegistrationWhitelist.is_department_whitelisted('test@department.gov'))
+        self.assertTrue(RegistrationWhitelist.is_whitelisted('test@myfd.org'))
+        self.assertFalse(RegistrationWhitelist.is_whitelisted('me@myfd.org'))
+        self.assertFalse(RegistrationWhitelist.is_department_whitelisted('me@myfd.org'))
+        self.assertTrue(RegistrationWhitelist.is_department_whitelisted('test@myfd.org'))
+        self.assertEqual(RegistrationWhitelist.get_department_for_email('test@myfd.org'), fd)
+        self.assertIsNone(RegistrationWhitelist.get_department_for_email('invalid@myfd.org'))
 
     def test_permission_assignment(self):
         """
@@ -333,14 +343,14 @@ class CoreTests(BaseFirecaresTestcase):
         """
 
         fd = self.load_la_department()
-        self.non_admin_user.add_obj_perm('change_firedepartment', fd)
-        self.assertTrue(self.non_admin_user.has_perm('change_firedepartment', fd))
+        fd.add_curator(self.non_admin_user)
+        self.assertTrue(fd.is_curator(self.non_admin_user))
 
         self.non_admin_user.is_active = False
         self.non_admin_user.save()
 
         # Non-activated users have no object-level permissions
-        self.assertFalse(self.non_admin_user.has_perm('change_firedepartment', fd))
+        self.assertFalse(fd.is_curator(self.non_admin_user))
 
     def test_invite_workflow(self):
         fd = self.load_la_department()
@@ -348,7 +358,7 @@ class CoreTests(BaseFirecaresTestcase):
 
         dept_user = Client()
         anon_user = Client()
-        self.non_admin_user.add_obj_perm('admin_firedepartment', fd)
+        fd.add_admin(self.non_admin_user)
         dept_user.login(**self.non_admin_creds)
 
         # If the inviting user isn't an admin on the department that the invitation for, then 401
@@ -386,8 +396,8 @@ class CoreTests(BaseFirecaresTestcase):
         self.assertFalse(user.is_superuser)
         self.assertEqual(user.get_all_permissions(), set())
         # User will NOT have any department object-level permissions for the inviting department
-        self.assertFalse(user.has_perm('change_firedepartment', fd))
-        self.assertFalse(user.has_perm('admin_firedepartment', fd))
+        self.assertFalse(fd.is_curator(user))
+        self.assertFalse(fd.is_admin(user))
 
     def test_predetermined_user_import(self):
         FireDepartment.objects.get_or_create(id=77549, name='FD1')
@@ -422,7 +432,7 @@ class CoreTests(BaseFirecaresTestcase):
                                                               'last_name': 'Tester',
                                                               'password1': 'test',
                                                               'password2': 'test'})
-        user = User.objects.get(username='test_predetermined_reg')
+        user = User.objects.filter(username='test_predetermined_reg').first()
         self.assertIsNotNone(user)
         self.assertFalse(user.is_active)
         self.assertFalse(user.is_superuser)
@@ -439,8 +449,114 @@ class CoreTests(BaseFirecaresTestcase):
 
         # User should ONLY have admin permissions on the department they were associated with during the import
         user.refresh_from_db()
-        self.assertTrue(user.has_perm('admin_firedepartment', fd))
-        self.assertFalse(user.has_perm('change_firedepartment', fd))
-        self.assertFalse(user.has_perm('admin_firedepartment', fd2))
+        # In addition to becoming an admin on the department, the department association is saved to
+        # the user's UserProfile
+        self.assertEqual(user.userprofile.department, fd)
+        self.assertTrue(fd.is_admin(user))
+        self.assertFalse(fd.is_curator(user))
+        self.assertFalse(fd2.is_admin(user))
         self.assertFalse(user.is_superuser)
         self.assertTrue(user.is_active)
+
+    def test_department_whitelisted_registration(self):
+        fd, _ = FireDepartment.objects.get_or_create(name='FD1')
+        fd2, _ = FireDepartment.objects.get_or_create(name='FD2')
+        RegistrationWhitelist.objects.create(email_or_domain='myfd.org', department=fd)
+        RegistrationWhitelist.objects.create(email_or_domain='test@anotherfd.org', department=fd2)
+
+        c = Client()
+
+        resp = c.post(reverse('account_request'), dict(email='person@myfd.org'))
+        self.assert_redirect_to(resp, 'registration_register')
+
+        resp = c.post(reverse('registration_register'), data={'username': 'test_dept_whitelist',
+                                                              'first_name': 'Joe',
+                                                              'last_name': 'Tester',
+                                                              'password1': 'test',
+                                                              'password2': 'test'})
+        user = User.objects.filter(username='test_dept_whitelist').first()
+        self.assertIsNotNone(user)
+        self.assertFalse(user.is_active)
+        self.assertFalse(user.is_superuser)
+        with self.settings(ADMINS=(('Test Admin', 'admin@example.com'),)):
+            # Make sure that account activation triggers the department association
+            response = c.get(reverse('registration_activate', kwargs={'activation_key':
+                                                                      user.registrationprofile.activation_key}))
+            # A 302 here means the activation succeeded
+            self.assertEqual(response.status_code, 302)
+            user.refresh_from_db()
+            self.assertEqual(user.userprofile.department, fd)
+            # Users might be associated with departments, but they will NOT get any department-related permissions
+            # when being added to the department email whitelist
+            self.assertFalse(fd.is_admin(user))
+            self.assertFalse(fd.is_curator(user))
+            # Ensure no permission crosstalk
+            self.assertFalse(fd2.is_admin(user))
+            self.assertFalse(fd2.is_curator(user))
+            self.assertFalse(user.is_superuser)
+
+    def test_department_admin_requests(self):
+        fd, _ = FireDepartment.objects.get_or_create(id=12345, name='FD1')
+        fd2, _ = FireDepartment.objects.get_or_create(id=12346, name='FD2')
+
+        c = Client()
+
+        # Need to at-least be logged in to get to this page...
+        resp = c.get(reverse('registration_choose_department'))
+        self.assert_redirect_to_login(resp)
+
+        c.login(**self.non_admin_creds)
+        resp = c.get(reverse('registration_choose_department'))
+
+        self.assertEqual(resp.status_code, 200)
+
+        with self.settings(DEPARTMENT_ADMIN_VERIFIERS=(('Test Admin', 'admin@example.com'),)):
+            resp = c.post(reverse('registration_choose_department'), data={'state': 'MO', 'department': 12345})
+            self.assert_redirect_to(resp, 'show_message')
+
+            # Email for DEPARTMENT_ADMIN_VERIFIERS
+            self.assertTrue(len(mail.outbox), 1)
+            self.assertEqual(mail.outbox[0].recipients(), ['admin@example.com'])
+            self.assertTrue('/accounts/verify-association-request/?email=non_admin@example.com' in mail.outbox[0].body)
+
+        req = DepartmentAssociationRequest.objects.filter(user=self.non_admin_user, department=fd).first()
+        self.assertIsNotNone(req)
+        self.assertFalse(req.user.is_superuser)
+        self.assertFalse(fd.is_admin(req.user))
+        self.assertFalse(fd.is_curator(req.user))
+        self.assertFalse(fd2.is_admin(req.user))
+        self.assertFalse(req.is_denied)
+        self.assertFalse(req.is_approved)
+
+        c2 = Client()
+        c2.login(**self.non_admin_creds)
+
+        # Must be a superuser to get to the verification page
+        resp = c2.get(reverse('verify-association-request'))
+        self.assert_redirect_to_login(resp)
+
+        c2.login(**self.admin_creds)
+        resp = c2.get(reverse('verify-association-request') + '?email=' + self.non_admin_user.email)
+        self.assertEqual(resp.status_code, 200)
+
+        resp = c2.post(reverse('verify-association-request'), data=json.dumps({'id': req.id, 'approve': False, 'message': 'DENIED!!!'}), content_type='application/json')
+        self.assertEqual(resp.status_code, 200)
+
+        # Test denial
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertEqual(mail.outbox[1].recipients(), [req.user.email])
+        self.assertTrue('DENIED!!!' in mail.outbox[1].body)
+        self.non_admin_user.refresh_from_db()
+        self.assertFalse(fd.is_admin(self.non_admin_user))
+        self.assertFalse(fd.is_curator(self.non_admin_user))
+
+        # Test approval
+        resp = c.post(reverse('registration_choose_department'), data={'state': 'MO', 'department': 12346})
+        req2 = DepartmentAssociationRequest.objects.filter(user=self.non_admin_user, department=fd2).first()
+        self.assert_redirect_to(resp, 'show_message')
+        resp = c2.post(reverse('verify-association-request'), data=json.dumps({'id': req2.id, 'approve': True, 'message': 'You are approved!'}), content_type='application/json')
+
+        # We should have an admin on this department now
+        self.non_admin_user.refresh_from_db()
+        self.assertTrue(fd2.is_admin(self.non_admin_user))
+        self.assertFalse(self.non_admin_user.is_superuser)

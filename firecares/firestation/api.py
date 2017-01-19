@@ -192,7 +192,7 @@ class GuardianAuthorization(DjangoAuthorization):
                                        self.delete_permission_code)
 
 
-class FireDepartmentResource(ModelResource):
+class FireDepartmentResource(JSONDefaultModelResourceMixin, ModelResource):
     """
     The Fire Department API.
     """
@@ -211,6 +211,7 @@ class FireDepartmentResource(ModelResource):
         filtering = {'state': ALL, 'featured': ALL}
         serializer = PrettyJSONSerializer()
         limit = 120
+        max_limit = 2000
 
 
 class FireStationResource(JSONDefaultModelResourceMixin, ModelResource):

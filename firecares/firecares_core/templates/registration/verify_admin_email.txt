@@ -1,0 +1,14 @@
+
+{% load i18n %}
+{% autoescape off %}
+
+Hello,
+
+{{ username }} ({{ email }}) has requested administrative access to the {{ association.department.name }} in {{ association.department.state }}.
+
+To approve or deny this request, please visit http://{{ site.domain }}{% url 'verify-association-request' %}?email={{ email }}
+
+{% blocktrans %}Best regards{% endblocktrans %},
+{{ site.name }} {% blocktrans %}Management{% endblocktrans %}
+
+{% endautoescape %}

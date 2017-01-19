@@ -28,6 +28,7 @@ from genericm2m.models import RelatedObjectsDescriptor
 from reversion import revisions as reversion
 from storages.backends.s3boto import S3BotoStorage
 from .metrics import FireDepartmentMetrics
+from guardian.shortcuts import assign_perm, remove_perm, get_users_with_perms
 
 
 LEVEL_CHOICES = [(0, 'All'),
@@ -605,6 +606,33 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
 
         IntersectingDepartmentLog.objects.create(parent=self, removed_department=department)
         self.save()
+
+    def get_department_admins(self):
+        return filter(lambda x: x.has_perm('admin_firedepartment', self), get_users_with_perms(self))
+
+    def get_department_curators(self):
+        return filter(lambda x: x.has_perm('change_firedepartment', self), get_users_with_perms(self))
+
+    def add_admin(self, user):
+        assign_perm('admin_firedepartment', user, self)
+
+    def remove_admin(self, user):
+        remove_perm('admin_firedepartment', user, self)
+
+    def is_admin(self, user):
+        return user.has_perm('admin_firedepartment', self)
+
+    def add_curator(self, user):
+        assign_perm('change_firedepartment', user, self)
+
+    def remove_curator(self, user):
+        remove_perm('change_firedepartment', user, self)
+
+    def is_curator(self, user):
+        return user.has_perm('change_firedepartment', self)
+
+    def get_users_with_permissions(self):
+        return get_users_with_perms(self)
 
 
 class FireDepartmentRiskModels(models.Model):

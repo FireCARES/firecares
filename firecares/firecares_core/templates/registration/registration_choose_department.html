@@ -1,5 +1,6 @@
 {% load humanize %}
 {% load widget_tweaks %}
+{% load firecares_tags %}
 
 <!DOCTYPE html>
 <!--[if IE 8 ]>
@@ -15,15 +16,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-    <title>{% block meta_title %}Contact Us · FireCARES{% endblock %}</title>
+    <title>{% block meta_title %}Choose your department · FireCARES{% endblock %}</title>
     {% include 'firestation/_favicon.html' %}
 
     {% include "firestation/_firecares_style.html" %}
 
     {% include 'google_analytics.html' %}
+    <script type="text/javascript">
+    var states = {{ states|jsonify }};
+    </script>
 </head>
 
-<body class="ct-headroom--fixedTopBar cssAnimate search" ng-app="fireStation" >
+<body class="ct-headroom--fixedTopBar cssAnimate" ng-controller="departmentSelectionController" ng-app="fireStation">
 
 {% include 'firestation/_mobile_navbar.html' %}
 {% include 'firestation/_mobile_search.html' %}
@@ -50,20 +54,38 @@
     <div class="container">
         {% block breadcrumbs %}
             <a href="{% url 'firestation_home' %}">Home</a>
-            <a href="{% url 'contact_us' %}">Contact Us</a>
+            <a href="{% url 'registration_register' %}">Register</a>
         {% endblock %}
     </div>
 </div>
-<header class="ct-mediaSection" data-stellar-background-ratio="0.3" data-height="630" data-type="parallax" data-bg-image="{{STATIC_URL}}images/firefighter-header.jpg" data-bg-image-mobile="assets/images/content/registration-parallax.jpg">
+<header class="ct-mediaSection" data-stellar-background-ratio="0.3" data-type="parallax" data-bg-image="{{STATIC_URL}}images/firefighter-header.jpg" data-bg-image-mobile="assets/images/content/registration-parallax.jpg">
     <div class="ct-mediaSection-inner">
         <div class="container">
             <div class="col-md-12">
                 {% block content %}
-                <div class="col-md-6 hidden-xs hidden-sm">
-                    {% include 'firestation/_safegrade.html' %}
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+                        <ul>
+                            {% for message in messages %}
+                            <div class="alert {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}alert-success{% else %}alert-danger{% endif %}" role="alert">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
                 <div class="col-md-6">
-                    <form role="form" action="" method="post" class="contactForm validateIt ct-formContact--map ct-form--darkStyle" data-email-subject="Contact Form" data-show-errors="true">
+                    <div class="ct-headerText--normal">
+                        <h2 class="text-uppercase ct-fw-600 ct-u-marginBottom20">
+                            <span class="ct-u-text--motive">FireCARES</span> registration
+                        </h2>
+                        You're almost there!  Simply select your fire department to finish your registration.  After an administrator verifies
+                        your information, you'll be granted administrative access to this department.  [TODO: Review/augment copy]
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <form role="form" class="ct-formRegister pull-right-md" method="post" action="">
                         {% csrf_token %}
                         {% block form %}
                         <div class="ct-form--label--type3">
@@ -71,39 +93,34 @@
                                 <div class="ct-u-displayTableCell">
                                     <div class="ct-input-group-btn">
                                         <button class="btn btn-primary">
-                                            <i class="fa fa-envelope-o"></i>
+                                            <i class="fa fa-user"></i>
                                         </button>
                                     </div>
                                 </div>
                                 <div class="ct-u-displayTableCell text-center">
-                                    <span class="text-uppercase">Send us a message</span>
+                                    <span class="text-uppercase">CHOOSE YOUR DEPARTMENT</span>
                                 </div>
                             </div>
                         </div>
                         <div class="form-group">
                             {% with WIDGET_ERROR_CLASS='form-error' %}
                             <div class="ct-form--item ct-u-marginBottom20 form-group">
-                                <label>Your Name</label>
-                                {% render_field form.name type="text" class+="form-control input-lg" %}
-                                {{ form.name.errors }}
+                                <label>State</label>
+                                <select class="form-control input-lg no-dirty" id="id_state" name="state" ng-model="input.state" ng-options="option for option in department_states track by option"></select>
+                                {{ form.state.errors }}
                             </div>
-                            <div class="ct-form--item ct-u-marginBottom20 form-group">
-                                <label>Email</label>
-                                {% render_field form.email type="email" class+="form-control input-lg" %}
-                                {{ form.email.errors }}
-                            </div>
-                            <div class="ct-form--item ct-u-marginBottom20">
-                                <label>Message</label>
-                                {% render_field form.message type="textarea" class+="form-control input-lg" %}
-                                {{ form.message.errors }}
+                            <div class="ct-form--item ct-u-marginBottom20 form-group ng-cloak has-feedback"
+                                ng-if="loading || departments.length > 0">
+                                <label>Department</label>
+                                <span ng-if="loading" class="ng-cloak glyphicon glyphicon-refresh glyphicon-spin form-control-feedback" aria-hidden="true" style='color: white; right: auto;font-size: 150%;'></span>
+                                <select class="form-control input-lg no-dirty" id="id_department" name="department" ng-model="input.department" ng-options="option.name for option in departments track by option.id"></select>
+                                {{ form.department.errors }}
                             </div>
                             {{ form.non_field_errors }}
                             {% endwith %}
-                            <div class="text-center">
-                                <div class="g-recaptcha" data-theme="dark" data-sitekey="6Le_GBMTAAAAAB3O9rQbkhVnFB9eT3ZwSJmOiMGr"></div>
-                            </div>
+
                             <div class="ct-form--item">
-                                <button type="submit" class="btn btn-warning center-block">Send Message</button>
+                                <button type="submit" ng-disabled="!input.state || !input.department" class="btn btn-warning center-block">Select</button>
                             </div>
                         </div>
                         {% endblock %}
@@ -121,6 +138,6 @@
 </div>
 
 {% include "firestation/_firecares_scripts.html" %}
-<script src='https://www.google.com/recaptcha/api.js'></script>
+
 </body>
 </html>

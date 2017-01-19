@@ -46,12 +46,12 @@
         var headquartersIcon = L.FireCARESMarkers.headquartersmarker();
         var fitBoundsOptions = {};
         var countyBoundary = null;
-        $scope.metrics = metrics;
-        $scope.urls = urls;
-        $scope.level = level;
+        $scope.metrics = window.metrics;
+        $scope.urls = window.urls;
+        $scope.level = window.level;
         $scope.messages = [];
         $scope.stations = [];
-        $scope.residential_structure_fire_counts = metrics.residential_structure_fire_counts;
+        $scope.residential_structure_fire_counts = _.isUndefined(window.metrics) ? '' : window.metrics.residential_structure_fire_counts;
         $scope.uploadBoundary = false;
         var layersControl = L.control.layers().addTo(departmentMap);
         var fires = L.featureGroup().addTo(departmentMap);

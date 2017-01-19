@@ -24,7 +24,6 @@ from firecares.usgs.models import (StateorTerritoryHigh, CountyorEquivalent,
                                    Reserve, NativeAmericanArea, IncorporatedPlace,
                                    UnincorporatedPlace, MinorCivilDivision)
 from guardian.mixins import PermissionRequiredMixin
-from guardian.shortcuts import assign_perm, remove_perm, get_users_with_perms
 from tempfile import mkdtemp
 from firecares.tasks.cleanup import remove_file
 from .forms import DocumentUploadForm
@@ -74,11 +73,12 @@ class DepartmentDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(DepartmentDetailView, self).get_context_data(**kwargs)
+        fd = context['object']
 
         context['user_can_change'] = self.request.user.is_authenticated() and\
-            self.request.user.has_perm('change_firedepartment', context['object'])
+            fd.is_curator(self.request.user)
         context['user_can_admin'] = self.request.user.is_authenticated() and\
-            self.request.user.has_perm('admin_firedepartment', context['object'])
+            fd.is_admin(self.request.user)
 
         page = self.request.GET.get('page')
         paginator = Paginator(context['firedepartment'].firestation_set.filter(archived=False).order_by('station_number'), self.objects_per_page)
@@ -109,35 +109,36 @@ class AdminDepartmentUsers(PermissionRequiredMixin, LoginRequiredMixin, DetailVi
 
     def get_context_data(self, **kwargs):
         context = super(AdminDepartmentUsers, self).get_context_data(**kwargs)
-        users = sorted(get_users_with_perms(self.object), key=lambda x: x.username)
+        users = sorted(self.object.get_users_with_permissions(), key=lambda x: x.username)
         user_perms = []
+        fd = self.object
         for u in users:
             user_perms.append(dict(user=u,
-                                   can_change=u.has_perm('change_firedepartment', self.object),
-                                   can_admin=u.has_perm('admin_firedepartment', self.object)))
+                                   can_change=fd.is_curator(u),
+                                   can_admin=fd.is_admin(u)))
         context['user_perms'] = user_perms
         context['invites'] = Invitation.objects.filter(departmentinvitation__department=self.object).order_by('-sent')
         return context
 
     def post(self, request, **kwargs):
         self.object = self.get_object()
-        users = get_users_with_perms(self.object)
+        users = self.object.get_users_with_permissions()
 
         can_admin_users = request.POST.getlist('can_admin')
         can_change_users = request.POST.getlist('can_change')
         for user in can_admin_users:
             cur = User.objects.get(username=user)
-            assign_perm('admin_firedepartment', cur, self.object)
+            self.object.add_admin(cur)
         for user in users:
             if user.username not in can_admin_users:
-                remove_perm('admin_firedepartment', user, self.object)
+                self.object.remove_admin(user)
 
         for user in can_change_users:
             cur = User.objects.get(username=user)
-            assign_perm('change_firedepartment', cur, self.object)
+            self.object.add_curator(cur)
         for user in users:
             if user.username not in can_change_users:
-                remove_perm('change_firedepartment', user, self.object)
+                self.object.remove_curator(user)
 
         messages.add_message(request, messages.SUCCESS, 'Updated department\'s authorized users.')
         return redirect(self.object)
@@ -497,10 +498,10 @@ class FireStationDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(FireStationDetailView, self).get_context_data(**kwargs)
         user = self.request.user
-        can_change = user.is_authenticated() and\
-            (user.has_perm('change_firedepartment', context['object'].department) or user.is_superuser)
-        can_admin = user.is_authenticated() and\
-            (user.has_perm('admin_firedepartment', context['object'].department) or user.is_superuser)
+        fd = context['object'].department
+        has_fd = bool(fd)
+        can_change = user.is_authenticated() and ((has_fd and fd.is_curator(user)) or user.is_superuser)
+        can_admin = user.is_authenticated() and ((has_fd and fd.is_admin(user)) or user.is_superuser)
         context['user_can_change'] = can_change
         context['user_can_admin'] = can_admin
         return context

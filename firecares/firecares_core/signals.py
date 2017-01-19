@@ -10,7 +10,7 @@ from invitations.signals import invite_accepted
 from invitations.models import Invitation
 from zeep import Client
 from registration.signals import user_activated
-from firecares.firecares_core.models import PredeterminedUser
+from firecares.firecares_core.models import PredeterminedUser, RegistrationWhitelist
 from firecares.tasks.email import email_admins
 
 
@@ -50,6 +50,12 @@ def account_activated(sender, *args, **kwargs):
     user = kwargs.get('user')
     if user.email in PredeterminedUser.objects.values_list('email', flat=True):
         pdu = PredeterminedUser.objects.get(email=user.email)
-        user.add_obj_perm('admin_firedepartment', pdu.department)
+        pdu.department.add_admin(user)
+        user.userprofile.department = pdu.department
+        user.userprofile.save()
         email_admins('Department admin user activated: {}'.format(user.username),
                      'Admin permissions granted for {} ({}) on {} ({})'.format(user.username, user.email, pdu.department.name, pdu.department.id))
+
+    if RegistrationWhitelist.is_department_whitelisted(user.email):
+        user.userprofile.department = RegistrationWhitelist.get_department_for_email(user.email)
+        user.userprofile.save()

@@ -269,11 +269,11 @@ class FireStationTests(BaseFirecaresTestcase):
         # Assign change_firedepartment permissions on another department to verify object-level auth
         fd2 = self.load_arlington_department()
 
-        self.non_admin_user.add_obj_perm('change_firedepartment', fd2)
+        fd2.add_curator(self.non_admin_user)
         response = c.put(url, data=json.dumps(js), content_type='application/json')
         self.assertEqual(response.status_code, 401)
 
-        self.non_admin_user.add_obj_perm('change_firedepartment', fd)
+        fd.add_curator(self.non_admin_user)
         response = c.put(url, data=json.dumps(js), content_type='application/json')
         self.assertEqual(response.status_code, 204)
         self.assertFalse(FireStation.objects.get(id=fs.id).archived)
@@ -1027,7 +1027,7 @@ class FireStationTests(BaseFirecaresTestcase):
         response = c.put(url, data=new_geom, content_type='application/json')
         self.assertEqual(response.status_code, 401)
 
-        self.non_admin_user.add_obj_perm('change_firedepartment', fd)
+        fd.add_curator(self.non_admin_user)
 
         response = c.put(url, data=new_geom, content_type='application/json')
         self.assertEqual(response.status_code, 204)

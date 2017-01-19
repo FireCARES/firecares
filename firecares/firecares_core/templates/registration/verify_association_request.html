@@ -1,0 +1,128 @@
+{% load humanize %}
+{% load widget_tweaks %}
+{% load firecares_tags %}
+
+<!DOCTYPE html>
+<!--[if IE 8 ]>
+<html class="no-js ie8" lang="en"> <![endif]-->
+<!--[if IE 9 ]>
+<html class="no-js ie9" lang="en"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="description" content="{% block meta_description %}Welcome to FireCARES, created by the Fire Fighter Safety and Deployment Study.  Login to learn how fire department resources are deployed to match your community risks."{% endblock %}>
+    <meta name="author" content="Prominent Edge LLC">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <title>{% block meta_title %}Choose your department · FireCARES{% endblock %}</title>
+    {% include 'firestation/_favicon.html' %}
+
+    {% include "firestation/_firecares_style.html" %}
+
+    {% include 'google_analytics.html' %}
+    <script type="text/javascript">
+    var requests = {{ requests|jsonify }};
+    </script>
+</head>
+
+<body class="ct-headroom--fixedTopBar cssAnimate" ng-controller="requestApprovalController" ng-app="fireStation">
+
+{% include 'firestation/_mobile_navbar.html' %}
+{% include 'firestation/_mobile_search.html' %}
+
+<div id="ct-js-wrapper" class="ct-pageWrapper">
+
+<div class="ct-navbarMobile">
+    <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand logo" href="{% url 'firestation_home' %}"><h1>FireCARES</h1></a>
+    <button type="button" class="searchForm-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span><i class="fa fa-search"></i></span>
+    </button>
+</div>
+
+{% include 'firestation/_navbar.html' %}
+
+<div class="ct-site--map">
+    <div class="container">
+        {% block breadcrumbs %}
+            <a href="{% url 'firestation_home' %}">Home</a>
+            <a href="{% url 'registration_register' %}">Register</a>
+        {% endblock %}
+    </div>
+</div>
+<header class="ct-mediaSection" data-stellar-background-ratio="0.3" data-type="parallax" data-bg-image="{{STATIC_URL}}images/firefighter-header.jpg" data-bg-image-mobile="assets/images/content/registration-parallax.jpg">
+    <div class="ct-mediaSection-inner">
+        <div class="container">
+            <div class="col-md-12">
+                {% block content %}
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+                        <ul>
+                            {% for message in messages %}
+                            <div class="alert {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}alert-success{% else %}alert-danger{% endif %}" role="alert">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <h2 class="text-uppercase ct-fw-600 ct-u-marginBottom20">
+                        <span class="ct-u-text--motive">FireCARES</span> account verification
+                    </h2>
+                    <p><strong>{{ user.get_full_name }} ({{ user.email}})</strong> would like the following permissions:</p>
+                    {% verbatim %}
+                    <div class="panel-group association-requests ng-cloak" id="accordion">
+                        <div class="panel panel-default" style="padding-left: 1em; padding-right: 1em;" ng-repeat="request in requests">
+                            <div class="panel-heading">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{ $index }}" class="collapsed">
+                                    {{ request.permission }} on {{ request.department.name }} ({{ request.department.state }})
+                                </a>
+                                <span class="pull-right label label-success" ng-if="request.is_approved">Approved</span>
+                                <span class="pull-right label label-danger" ng-if="request.is_denied">Denied</span>
+                            </div>
+                            <div id="collapse{{ $index }}" class="panel-collapse collapse">
+                                <form ng-if="!request.is_approved && !request.is_denied">
+                                    <div class="form-group">
+                                        <label for="message">Message:</label>
+                                        <input type="text" name="message" class="form-control" ng-model="request.message"></input>
+                                        <p class="help-block"><em>It is strongly-suggested to provide a message with reason if you choose to deny the request.</em></p>
+                                    </div>
+                                    <button class="btn btn-primary" ng-click="update(request, true)">Approve</button>
+                                    <button class="btn btn-primary" ng-click="update(request, false)">Deny</button>
+                                </form>
+                                <p ng-if="request.is_approved" class="results">
+                                    Request was approved by <strong>{{ request.approved_by.name}}</strong> {{ request.approved_at }}
+                                </p>
+                                <p ng-if="request.is_denied" class="results">
+                                    Request was denied by <strong>{{ request.denied_by.name }}</strong> {{ request.denied_at }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endverbatim %}
+                </div>
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+</header>
+
+{% include 'firestation/_partners.html' %}
+{% include 'firestation/_footer.html' %}
+
+</div>
+
+{% include "firestation/_firecares_scripts.html" %}
+
+</body>
+</html>

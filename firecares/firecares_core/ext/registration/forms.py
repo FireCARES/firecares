@@ -13,3 +13,8 @@ class LimitedRegistrationForm(RegistrationFormUniqueEmail):
         if commit:
             user.save()
         return user
+
+
+class ChooseDepartmentForm(forms.Form):
+    department = forms.IntegerField(required=True)
+    state = forms.CharField(max_length=2, required=True)

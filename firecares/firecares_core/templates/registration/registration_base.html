@@ -76,7 +76,7 @@
                     {% include 'firestation/_safegrade.html' %}
                 </div>
                 <div class="col-md-6">
-                    <form role="form" class="ct-formRegister pull-right-md" method="post">
+                    <form role="form" class="ct-formRegister pull-right-md" method="post" action="">
                         {% csrf_token %}
                         {% block form %}
                         <div class="ct-form--label--type3">

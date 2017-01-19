@@ -221,7 +221,7 @@ class OAuth2Callback(View):
                 user.last_name = token.get('lastname')
                 user.save()
                 # TODO: Lookup functional title from Helix's API
-                user.userprofile.functional_title = ''
+                user.userprofile.functional_title = 'placeholder'
                 user.userprofile.save()
 
                 login(request, user)
@@ -229,12 +229,14 @@ class OAuth2Callback(View):
                 # If the user logs in through Helix AND they are in the perdetermined user list, then assign admin perms
                 if user.email in PredeterminedUser.objects.values_list('email', flat=True):
                     pdu = PredeterminedUser.objects.get(email=user.email)
-                    user.add_obj_perm('admin_firedepartment', pdu.department)
+                    pdu.department.add_admin(user)
+                    # Also, associate this department with the user explicitly in the user's profile
+                    user.userprofile.department = pdu.department
+                    user.userprofile.save()
                     email_admins('Department admin user activated: {}'.format(user.username),
                                  'Admin permissions automatically granted for {} ({}) on {} ({})'.format(user.username, user.email, pdu.department.name, pdu.department.id))
                 elif user.userprofile.functional_title in settings.HELIX_ACCEPTED_CHIEF_ADMIN_TITLES:
-                    # TODO: redirect to "my department chooser page"
-                    pass
+                    return redirect(reverse('registration_choose_department'))
 
                 return redirect(request.GET.get('next') or reverse('firestation_home'))
         else:

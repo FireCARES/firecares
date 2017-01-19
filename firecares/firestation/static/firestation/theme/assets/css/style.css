@@ -11819,6 +11819,49 @@ form[name='boundaryUpload'] a.commit:hover {
   width: 100%;
   border-color: #eeeeee;
 }
+.glyphicon-spin {
+  -webkit-animation: spin 1000ms infinite linear;
+  animation: spin 1000ms infinite linear;
+}
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+@keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+input.no-dirty.ng-dirty,
+select.no-dirty.ng-dirty {
+  background-color: inherit;
+}
+.association-requests input {
+  background-color: white;
+}
+.association-requests .panel-collapse {
+  padding-bottom: 1em;
+}
+.association-requests form {
+  margin-left: 1.3em;
+}
+.association-requests p.results {
+  margin-left: 1.2em;
+}
+.association-requests.panel-group .panel + .panel {
+  margin-top: 2px;
+}
 .ct-pageWrapper {
   background-color: #ffffff;
   overflow: hidden;

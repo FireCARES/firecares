@@ -67,7 +67,7 @@ class SendJSONDepartmentInvite(SendJSONInvite):
                     CleanEmailMixin().validate_invitation(invitee)
 
                     dept = FireDepartment.objects.get(id=dept_id)
-                    if not request.user.has_perm('admin_firedepartment', dept):
+                    if not dept.is_admin(request.user):
                         raise PermissionDenied()
 
                     i = Invitation.create(invitee, inviter=request.user)

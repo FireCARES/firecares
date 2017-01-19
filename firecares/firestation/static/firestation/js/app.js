@@ -8,6 +8,8 @@
       'fireStation.departmentDetailController',
       'fireStation.departmentDetailController.userAdmin',
       'fireStation.departmentDetailController.userInvite',
+      'fireStation.departmentSelection',
+      'fireStation.requestApproval',
       'fireStation.firestationDetailController',
       'fireStation.performanceScoreController',
       'fireStation.mapService',

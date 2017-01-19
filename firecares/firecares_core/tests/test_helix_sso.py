@@ -6,6 +6,8 @@ from django.core.urlresolvers import reverse
 from django.test import Client
 from requests_mock import Mocker
 from .base import BaseFirecaresTestcase
+from firecares.firecares_core.models import PredeterminedUser
+from firecares.firestation.models import FireDepartment
 
 User = get_user_model()
 
@@ -93,7 +95,36 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         self.assertFalse(c.session.items())
 
     def test_fire_chief_registration(self, mock):
+        """
+        Helix logins that have a functional title as FIRE_CHIEF can choose their department.
+        """
+        self.setup_mocks(mock)
         pass
 
     def test_predetermined_fire_chief_registration(self, mock):
-        pass
+        """
+        Helix logins considered "PredeterminedUsers" should automatically get department admin permissions.
+        """
+        self.setup_mocks(mock)
+
+        fd = FireDepartment.objects.create(name='testy2', population=2, featured=True)
+        PredeterminedUser.objects.create(email='tester-iafc@prominentedge.com', department=fd)
+
+        c = Client()
+        self.state = TokenState.valid_membership
+
+        resp = c.get(reverse('oauth_redirect'))
+        self.assertTrue('oauth_state' in c.session)
+        self.assertEqual(resp.status_code, 302)
+        # User is redirected to the FireCARES Helix login portal and then, after authenticating, redirected back to FireCARES
+        # w/ the auth code and state
+
+        # Ensure that a user has been created
+        resp = c.get(reverse('oauth_callback') + '?code=1231231234&state={}'.format(c.session['oauth_state']))
+        self.assertTrue(resp.status_code, 200)
+
+        user = User.objects.filter(username='iafc-1234567').first()
+        # Department should be associated w/ user
+        self.assertEqual(user.userprofile.department, fd)
+        self.assertTrue(fd.is_admin(user))
+        self.assertFalse(fd.is_curator(user))

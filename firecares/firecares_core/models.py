@@ -1,15 +1,17 @@
-import re
+from django.contrib.auth.models import Permission
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
+from django.utils import timezone
 from geopy.geocoders import GoogleV3
 from geopy.exc import GeocoderQuotaExceeded
 from jsonfield import JSONField
 from time import sleep
-from django.utils import timezone
 from reversion import revisions as reversion
 from django.conf import settings
 from annoying.fields import AutoOneToOneField
 from invitations.models import Invitation
+from firecares.utils import get_email_domain
+from guardian.shortcuts import assign_perm, remove_perm
 
 
 class RecentlyUpdatedMixin(models.Model):
@@ -190,9 +192,21 @@ class UserProfile(models.Model):
 
 class RegistrationWhitelist(models.Model):
     """
-    Model to store a list of whitelisted domains/email addresses that can complete registration without intervention.
+    Model to store a list of whitelisted domains/email addresses that can complete registration without intervention,
+    may or may not have a department associated with them.  Having an assoicated department means this whitelisted row is specific
+    to a particular department.
     """
+
     email_or_domain = models.CharField(unique=True, max_length=200)
+    # For department-specific whitelists, the "department", "created_by" and "created_at" fields will be populated,
+    # department whitelists are different from global whitelists in that they the incoming user will be tied (in his/her UserProfile)
+    # to the department and support
+    department = models.ForeignKey('firestation.FireDepartment', null=True, blank=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    class Meta:
+        unique_together = ('department', 'email_or_domain')
 
     def __unicode__(self):
         return unicode(self.email_or_domain)
@@ -202,12 +216,30 @@ class RegistrationWhitelist(models.Model):
         whitelists = cls.objects.values_list('email_or_domain', flat=True)
         email_whitelists = filter(lambda x: '@' in x, whitelists)
         domain_whitelists = set(whitelists) ^ set(email_whitelists)
-        domain = re.match(r'(^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)$)', email).groups()[1]
+        domain = get_email_domain(email)
         pre_users = PredeterminedUser.objects.values_list('email', flat=True)
         if email in whitelists or domain in domain_whitelists or email in pre_users:
             return True
         else:
             return False
+
+    @classmethod
+    def is_department_whitelisted(cls, email):
+        domain = get_email_domain(email)
+        email_whitelists = cls.objects.filter(department__isnull=False, email_or_domain__contains='@').values_list('email_or_domain', flat=True)
+        domain_whitelists = cls.objects.filter(department__isnull=False).exclude(email_or_domain__contains='@').values_list('email_or_domain', flat=True)
+        if email in email_whitelists or domain in domain_whitelists:
+            return True
+        else:
+            return False
+
+    @classmethod
+    def get_department_for_email(cls, email):
+        if cls.is_department_whitelisted(email):
+            by_email = cls.objects.filter(department__isnull=False, email_or_domain=email).first()
+            domain = get_email_domain(email)
+            by_domain = cls.objects.filter(department__isnull=False, email_or_domain=domain).first()
+            return by_email.department if by_email else by_domain.department
 
 
 class DepartmentInvitation(models.Model):
@@ -232,6 +264,61 @@ class PredeterminedUser(models.Model):
 
     def __unicode__(self):
         return u'{} - {}'.format(self.email, self.department.name)
+
+
+def default_requested_permission():
+    return Permission.objects.get(codename='admin_firedepartment').id
+
+
+class DepartmentAssociationRequest(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    department = models.ForeignKey('firestation.FireDepartment')
+    permission = models.ForeignKey('auth.Permission', default=default_requested_permission)
+    approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, related_name='approved_association_requests_set')
+    approved_at = models.DateTimeField(null=True, blank=True)
+    denied_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, related_name='denied_assocation_requests_set')
+    denied_at = models.DateTimeField(null=True, blank=True)
+    message = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __unicode__(self):
+        return u'{} - {}'.format(self.user.username, self.department.name)
+
+    @property
+    def is_approved(self):
+        return self.approved_by is not None
+
+    @property
+    def is_denied(self):
+        return self.denied_by is not None
+
+    @classmethod
+    def filter_by_email(cls, email):
+        return cls.objects.filter(user__email=email)
+
+    def approve(self, approving_user):
+        self.denied_by = None
+        self.denied_at = None
+        self.approved_by = approving_user
+        self.approved_at = timezone.now()
+        self.save()
+        return self._apply()
+
+    def deny(self, denying_user):
+        self.approved_by = None
+        self.approved_at = None
+        self.denied_by = denying_user
+        self.denied_at = timezone.now()
+        self.save()
+        return self._apply()
+
+    def _apply(self):
+        if self.is_approved:
+            assign_perm(self.permission.codename, self.user, self.department)
+            return True
+        else:
+            remove_perm(self.permission.codename, self.user, self.department)
+            return False
 
 
 reversion.register(Address)

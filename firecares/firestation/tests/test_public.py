@@ -117,8 +117,7 @@ class TestPublic(BaseFirecaresTestcase):
         response = c.get(reverse('admin_department_users', args=[la_fd.pk]))
         self.assert_redirect_to_login(response)
 
-        # Add "curator" permission to this department
-        self.non_admin_user.add_obj_perm('change_firedepartment', la_fd)
+        la_fd.add_curator(self.non_admin_user)
         c.login(**self.non_admin_creds)
 
         # Curators will be able to access department data admin pages...
@@ -132,9 +131,9 @@ class TestPublic(BaseFirecaresTestcase):
         response = c.get(reverse('admin_department_users', args=[la_fd.pk]))
         self.assert_redirect_to_login(response)
 
-        # Remove curator permissiona and assign user admin permissions
-        self.non_admin_user.del_obj_perm('change_firedepartment', la_fd)
-        self.non_admin_user.add_obj_perm('admin_firedepartment', la_fd)
+        # Remove curator permissions and assign user admin permissions
+        la_fd.remove_curator(self.non_admin_user)
+        la_fd.add_admin(self.non_admin_user)
 
         # User admins can't see data management pages
         response = c.get(reverse('firedepartment_update_government_units', args=[la_fd.pk]))
@@ -154,7 +153,7 @@ class TestPublic(BaseFirecaresTestcase):
 
         fd = self.load_arlington_department()
 
-        self.non_admin_user.add_obj_perm('change_firedepartment', fd)
+        fd.add_curator(self.non_admin_user)
         c.login(**self.non_admin_creds)
 
         # Shouldn't be able to access ANY of the data/user administration pages for the LA department
@@ -165,7 +164,7 @@ class TestPublic(BaseFirecaresTestcase):
         self.assert_redirect_to_login(response)
 
         # Make admin on LA, but NOT on Arlington, shouldn't be able to access Arlington user admin
-        self.non_admin_user.add_obj_perm('admin_firedepartment', la_fd)
+        la_fd.add_admin(self.non_admin_user)
         response = c.get(reverse('admin_department_users', args=[fd.pk]))
         self.assert_redirect_to_login(response)
 
@@ -189,7 +188,7 @@ class TestPublic(BaseFirecaresTestcase):
         self.assertNotContains(response, 'onaftersave="updateStation()"')
 
         # Add the correct perm and ensure that the user would be able to change station detail
-        self.non_admin_user.add_obj_perm('change_firedepartment', la_fd)
+        la_fd.add_curator(self.non_admin_user)
 
         response = c.get(reverse('firestation_detail', args=[station.pk]))
         self.assertContains(response, 'draggable: true')
@@ -213,7 +212,7 @@ class TestPublic(BaseFirecaresTestcase):
     def test_orphaned_permissions_removed(self):
         fd = self.load_arlington_department()
 
-        self.non_admin_user.add_obj_perm('change_firedepartment', fd)
+        fd.add_curator(self.non_admin_user)
         perm = UserObjectPermission.objects.filter(user=self.non_admin_user).first()
         self.assertIsNotNone(perm)
 
@@ -241,7 +240,7 @@ class TestPublic(BaseFirecaresTestcase):
         self.assertNotContains(response, 'onaftersave="updateStation()"')
 
         # Add the correct perm and ensure that the user would be able to change station detail
-        self.non_admin_user.add_obj_perm('change_firedepartment', fd)
+        fd.add_curator(self.non_admin_user)
 
         response = c.get(reverse('firestation_detail', args=[station.pk]))
         self.assertContains(response, 'draggable: true')
@@ -260,7 +259,7 @@ class TestPublic(BaseFirecaresTestcase):
 
         resp = c.post(reverse('admin_department_users', args=[fd.id]), data=perms)
         self.assert_redirect_to(resp, 'firedepartment_detail_slug')
-        self.assertTrue(user.has_perm('change_firedepartment', fd))
-        self.assertFalse(user.has_perm('admin_firedepartment', fd))
-        self.assertTrue(self.non_admin_user.has_perm('change_firedepartment', fd))
-        self.assertTrue(self.non_admin_user.has_perm('admin_firedepartment', fd))
+        self.assertTrue(fd.is_curator(user))
+        self.assertFalse(fd.is_admin(user))
+        self.assertTrue(fd.is_curator(self.non_admin_user))
+        self.assertTrue(fd.is_admin(self.non_admin_user))

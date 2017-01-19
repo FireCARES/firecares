@@ -1,4 +1,5 @@
 import numbers
+import re
 from django.core.files.storage import get_storage_class
 from storages.backends.s3boto import S3BotoStorage
 
@@ -55,3 +56,7 @@ class AttrDict(dict):
     def __init__(self, *args, **kwargs):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
+
+
+def get_email_domain(email):
+    return re.match(r'(^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)$)', email).groups()[1]

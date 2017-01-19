@@ -1,0 +1,29 @@
+
+{% load i18n %}
+{% autoescape off %}
+
+Hello,
+
+{% if association.is_approved %}
+Congratulations!  Your request to administer {{ association.department.name }} in {{ association.department.state }} has been approved!
+
+You may need to log out of FireCARES and log back in to see this change in your account.
+
+The department that you will be able to administer is http://{{ site.domain }}{% url 'firedepartment_detail' association.department.id %}
+
+{% else %}
+We're sorry, but your request to administer {{ association.department.name }} has been denied.
+
+If you believe this is in error, please submit another request at http://{{ site.domain }}{% url 'registration_choose_department' %}.
+{% endif %}
+
+{% if message %}
+Additionally, FireCARES administrators included this message in the response to your request:
+
+{{ message }}
+{% endif %}
+
+{% blocktrans %}Best regards{% endblocktrans %},
+{{ site.name }} {% blocktrans %}Management{% endblocktrans %}
+
+{% endautoescape %}
