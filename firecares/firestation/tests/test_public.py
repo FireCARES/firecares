@@ -9,6 +9,16 @@ from guardian.models import UserObjectPermission
 
 
 class TestPublic(BaseFirecaresTestcase):
+
+    def test_import_domain_names(self):
+        """
+        Ensures the import-domains command can do so by reading a csv roster file.
+        """
+        fd = FireDepartment.objects.create(name='Test', id=11111)
+        call_command('import-domains', 'firecares/firestation/tests/mock/metro-roster.csv', stdout=StringIO())
+        fd.refresh_from_db()
+        self.assertEqual(fd.domain_name, 'fire.gov')
+
     def test_department_detail_view_does_not_require_login(self):
         """
         Ensures the department pages do not require login.
