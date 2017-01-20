@@ -5,7 +5,7 @@ from django.db import connections
 from django.test.client import Client
 from firecares.firecares_core.tests.base import BaseFirecaresTestcase
 from firecares.firestation.models import FireDepartment, FireDepartmentRiskModels, PopulationClassQuartile
-from firecares.firestation.templatetags.firecares import quartile_text, risk_level
+from firecares.firestation.templatetags.firecares_tags import quartile_text, risk_level
 
 
 class FireDepartmentMetricsTests(BaseFirecaresTestcase):
