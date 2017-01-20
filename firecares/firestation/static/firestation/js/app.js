@@ -7,6 +7,7 @@
       'fireStation.homeController',
       'fireStation.departmentDetailController',
       'fireStation.departmentDetailController.userAdmin',
+      'fireStation.departmentDetailController.whitelistAdmin',
       'fireStation.departmentDetailController.userInvite',
       'fireStation.departmentSelection',
       'fireStation.requestApproval',

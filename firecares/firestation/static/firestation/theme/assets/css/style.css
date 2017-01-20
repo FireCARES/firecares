@@ -11754,6 +11754,16 @@ form[name='boundaryUpload'] a.commit:hover {
 .user-admin td {
   min-width: 15em;
 }
+.whitelist-admin .delete-whitelist {
+  color: red;
+}
+.whitelist-admin td {
+  width: 33%;
+}
+.whitelist-admin span.label.label-danger {
+  margin-right: 2em;
+  margin-top: 12px;
+}
 /* Registration tweaks */
 .ct-formRegister input[disabled] {
   background-color: #333333;

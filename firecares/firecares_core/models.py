@@ -196,7 +196,7 @@ class RegistrationWhitelist(models.Model):
     to a particular department.
     """
 
-    email_or_domain = models.CharField(unique=True, max_length=200)
+    email_or_domain = models.CharField(max_length=200)
     # For department-specific whitelists, the "department", "created_by" and "created_at" fields will be populated,
     # department whitelists are different from global whitelists in that they the incoming user will be tied (in his/her UserProfile)
     # to the department and support
@@ -210,34 +210,57 @@ class RegistrationWhitelist(models.Model):
     def __unicode__(self):
         return unicode(self.email_or_domain)
 
+    @property
+    def is_domain_whitelist(self):
+        return '@' not in self.email_or_domain
+
+    @classmethod
+    def _is_domain_only(cls, email):
+        return '@' not in email
+
     @classmethod
     def is_whitelisted(cls, email):
         whitelists = cls.objects.values_list('email_or_domain', flat=True)
         email_whitelists = filter(lambda x: '@' in x, whitelists)
         domain_whitelists = set(whitelists) ^ set(email_whitelists)
+        if cls._is_domain_only(email):
+            return email in domain_whitelists
+
         domain = get_email_domain(email)
         pre_users = PredeterminedUser.objects.values_list('email', flat=True)
-        if email in whitelists or domain in domain_whitelists or email in pre_users:
+        if email in email_whitelists or domain in domain_whitelists or email in pre_users:
             return True
         else:
             return False
 
     @classmethod
     def is_department_whitelisted(cls, email):
+        domain_whitelists = cls.objects.filter(department__isnull=False).exclude(email_or_domain__contains='@').values_list('email_or_domain', flat=True)
+        if cls._is_domain_only(email):
+            return email in domain_whitelists
+
         domain = get_email_domain(email)
         email_whitelists = cls.objects.filter(department__isnull=False, email_or_domain__contains='@').values_list('email_or_domain', flat=True)
-        domain_whitelists = cls.objects.filter(department__isnull=False).exclude(email_or_domain__contains='@').values_list('email_or_domain', flat=True)
+
         if email in email_whitelists or domain in domain_whitelists:
             return True
         else:
             return False
 
     @classmethod
+    def for_department(cls, department):
+        return cls.objects.filter(department=department)
+
+    @classmethod
     def get_department_for_email(cls, email):
         if cls.is_department_whitelisted(email):
-            by_email = cls.objects.filter(department__isnull=False, email_or_domain=email).first()
+            if cls._is_domain_only(email):
+                return cls.objects.filter(department__isnull=False, email_or_domain=email).first().department
+
             domain = get_email_domain(email)
             by_domain = cls.objects.filter(department__isnull=False, email_or_domain=domain).first()
+            by_email = cls.objects.filter(department__isnull=False, email_or_domain=email).first()
+
             return by_email.department if by_email else by_domain.department
 
 

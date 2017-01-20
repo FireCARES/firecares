@@ -2,6 +2,7 @@ from django.core.management import call_command
 from django.core.urlresolvers import reverse
 from django.test.client import Client
 from StringIO import StringIO
+from firecares.firecares_core.models import RegistrationWhitelist
 from firecares.firecares_core.tests.base import BaseFirecaresTestcase
 from firecares.firestation.models import FireDepartment, FireStation
 from guardian.models import UserObjectPermission
@@ -255,7 +256,7 @@ class TestPublic(BaseFirecaresTestcase):
 
         c = Client()
         c.login(**self.admin_creds)
-        perms = {'can_change': ['non_admin', 'user2'], 'can_admin': 'non_admin'}
+        perms = {'can_change': ['non_admin', 'user2'], 'can_admin': 'non_admin', 'form': 'users'}
 
         resp = c.post(reverse('admin_department_users', args=[fd.id]), data=perms)
         self.assert_redirect_to(resp, 'firedepartment_detail_slug')
@@ -263,3 +264,29 @@ class TestPublic(BaseFirecaresTestcase):
         self.assertFalse(fd.is_admin(user))
         self.assertTrue(fd.is_curator(self.non_admin_user))
         self.assertTrue(fd.is_admin(self.non_admin_user))
+
+        # Ensure that permission deletion works as well
+        perms = {'can_change': ['non_admin'], 'can_admin': 'non_admin', 'form': 'users'}
+
+        resp = c.post(reverse('admin_department_users', args=[fd.id]), data=perms)
+        self.assertFalse(fd.is_curator(user))
+
+    def test_department_whitelist_admin(self):
+        fd = self.load_la_department()
+
+        c = Client()
+        c.login(**self.admin_creds)
+
+        whitelists = {'email_or_domain': ['test.com', 'test2@tester.com'], 'id': ['', ''], 'form': 'whitelist'}
+        resp = c.post(reverse('admin_department_users', args=[fd.id]), data=whitelists)
+        self.assert_redirect_to(resp, 'firedepartment_detail_slug')
+
+        self.assertTrue(RegistrationWhitelist.is_department_whitelisted('test.com'))
+        self.assertEqual(RegistrationWhitelist.get_department_for_email('test.com'), fd)
+
+        # Ensure that deletion works as well
+        whitelists = {'email_or_domain': ['test2@tester.com'], 'id': [''], 'form': 'whitelist'}
+        resp = c.post(reverse('admin_department_users', args=[fd.id]), data=whitelists)
+
+        self.assertFalse(RegistrationWhitelist.is_department_whitelisted('test.com'))
+        self.assertIsNone(RegistrationWhitelist.get_department_for_email('test.com'))

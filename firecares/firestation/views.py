@@ -17,9 +17,11 @@ from django.http.response import HttpResponseRedirect, HttpResponse, JsonRespons
 from django.db import connection
 from django.db.models.fields import FieldDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http.response import HttpResponseBadRequest
 from django.utils.decorators import method_decorator
 from django.utils.encoding import smart_str
 from firecares.firecares_core.mixins import LoginRequiredMixin
+from firecares.firecares_core.models import RegistrationWhitelist
 from firecares.usgs.models import (StateorTerritoryHigh, CountyorEquivalent,
                                    Reserve, NativeAmericanArea, IncorporatedPlace,
                                    UnincorporatedPlace, MinorCivilDivision)
@@ -118,29 +120,47 @@ class AdminDepartmentUsers(PermissionRequiredMixin, LoginRequiredMixin, DetailVi
                                    can_admin=fd.is_admin(u)))
         context['user_perms'] = user_perms
         context['invites'] = Invitation.objects.filter(departmentinvitation__department=self.object).order_by('-sent')
+        context['whitelists'] = [dict(id=w.id, email_or_domain=w.email_or_domain, is_domain_whitelist=w.is_domain_whitelist)
+                                 for w in RegistrationWhitelist.objects.filter(department=self.object)]
         return context
 
     def post(self, request, **kwargs):
         self.object = self.get_object()
-        users = self.object.get_users_with_permissions()
+        section = request.POST.get('form')
 
-        can_admin_users = request.POST.getlist('can_admin')
-        can_change_users = request.POST.getlist('can_change')
-        for user in can_admin_users:
-            cur = User.objects.get(username=user)
-            self.object.add_admin(cur)
-        for user in users:
-            if user.username not in can_admin_users:
-                self.object.remove_admin(user)
+        if section == 'whitelist':
+            items = zip(request.POST.getlist('id'), request.POST.getlist('email_or_domain'))
 
-        for user in can_change_users:
-            cur = User.objects.get(username=user)
-            self.object.add_curator(cur)
-        for user in users:
-            if user.username not in can_change_users:
-                self.object.remove_curator(user)
+            # Delete any whitelist items that don't exist anymore
+            RegistrationWhitelist.for_department(self.object).exclude(id__in=[int(i[0]) for i in items if i[0]]).delete()
 
-        messages.add_message(request, messages.SUCCESS, 'Updated department\'s authorized users.')
+            # Create new items
+            for i in filter(lambda x: x[0] == '', items):
+                RegistrationWhitelist.objects.create(department=self.object, email_or_domain=i[1], created_by=request.user)
+
+            messages.add_message(request, messages.SUCCESS, 'Updated whitelisted registration emails addresses/domains for this department in FireCARES.')
+        elif section == 'users':
+            users = self.object.get_users_with_permissions()
+
+            can_admin_users = request.POST.getlist('can_admin')
+            can_change_users = request.POST.getlist('can_change')
+            for user in can_admin_users:
+                cur = User.objects.get(username=user)
+                self.object.add_admin(cur)
+            for user in users:
+                if user.username not in can_admin_users:
+                    self.object.remove_admin(user)
+
+            for user in can_change_users:
+                cur = User.objects.get(username=user)
+                self.object.add_curator(cur)
+            for user in users:
+                if user.username not in can_change_users:
+                    self.object.remove_curator(user)
+
+            messages.add_message(request, messages.SUCCESS, 'Updated department\'s authorized users.')
+        else:
+            return HttpResponseBadRequest()
         return redirect(self.object)
 
 
