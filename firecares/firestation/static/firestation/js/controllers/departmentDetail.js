@@ -88,7 +88,7 @@
                 $scope.heatmap = heatmap;
                 $scope.showHeatmapCharts = false;
 
-                layersControl.addOverlay(heatmap.layer, 'Heatmap of Low Risk Fires');
+                layersControl.addOverlay(heatmap.layer, 'Fires Heatmap');
                 departmentMap.on('overlayadd', function(layer) {
                     if (layer.layer._leaflet_id === heatmap.layer._leaflet_id) {
                         if (heatmap.heat) {
