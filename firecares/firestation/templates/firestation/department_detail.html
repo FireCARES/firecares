@@ -146,7 +146,10 @@
                             <i class="fa fa-clock-o"></i><h6>Last Updated: {{ object.modified }}</h6>
                         </div>
 
-                        <div class="ct-u-displayTableCell text-right">
+                        <div class="ct-u-displayTableCell text-center">
+                            {% if not user.is_authenticated %}
+                            <strong><a class="is-your-department" href="{% url 'registration_preregister' %}?department={{ object.id }}">Is this your department? Request access from your fire chief or local president.</a></strong>
+                            {% endif %}
                         </div>
 
                         <div class="ct-u-displayTableCell text-right">

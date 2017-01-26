@@ -1221,6 +1221,14 @@ input.no-dirty.ng-dirty, select.no-dirty.ng-dirty {
   background-color: inherit;
 }
 
+input.no-invalid.ng-invalid, input.no-invalid.ng-invalid:focus {
+  color: inherit;
+  border-color: inherit;
+  -moz-box-shadow: inherit;
+  -webkit-box-shadow: inherit;
+  box-shadow: inherit;
+}
+
 .association-requests {
   input {
     background-color: white;
@@ -1242,5 +1250,23 @@ input.no-dirty.ng-dirty, select.no-dirty.ng-dirty {
     .panel + .panel {
       margin-top: 2px;
     }
+  }
+}
+
+.ct-productMeta--single a.is-your-department {
+  width: 250px;
+  display: block;
+  margin: 0 auto;
+  line-height: 15px;
+  color: @brand-primary;
+}
+
+.inherit-background {
+  background-color: inherit !important;
+}
+
+.department-user-approval {
+  select {
+    width: 25%;
   }
 }

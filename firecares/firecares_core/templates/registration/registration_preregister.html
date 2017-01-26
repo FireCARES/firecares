@@ -21,7 +21,7 @@ Create an account on FireCARES to learn how fire department resources are deploy
     </div>
 </div>
 <div class="col-md-6">
-    <form role="form" class="ct-formRegister pull-right-md" method="post" action="">
+    <form role="form" name="preForm" class="ct-formRegister pull-right-md" method="post" action="{% url 'account_request' %}" ng-app="fireStation">
         {% csrf_token %}
         <div class="form-group">
             <div class="ct-form--label--type2">
@@ -41,13 +41,14 @@ Create an account on FireCARES to learn how fire department resources are deploy
             {% with WIDGET_ERROR_CLASS='form-error' %}
             <div class="ct-form--item ct-u-marginBottom20 form-group">
                 <label>Your Email</label>
-                {% render_field form.email type="text" class+="form-control input-lg" %}
+                <input type="hidden" name="department" value="{{ request.GET.department }}"/>
+                {% render_field form.email type="email" required="required" class+="form-control input-lg no-invalid" ng-model="input" %}
                 {{ form.email.errors }}
             </div>
             {{ form.non_field_errors }}
             {% endwith %}
             <div class="ct-form--item">
-                <button type="submit" class="btn btn-warning center-block">Register</button>
+                <button type="submit" class="btn btn-warning center-block" ng-disabled="preForm.$invalid || preForm.$pristine">Register</button>
             </div>
         </div>
     </form>

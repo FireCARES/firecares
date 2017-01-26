@@ -120,11 +120,11 @@ class CoreTests(BaseFirecaresTestcase):
             RegistrationWhitelist.objects.create(email_or_domain='test_registration@example.com')
 
             # Ensure that email addresses that are NOT whitelisted create an account request
-            resp = c.post(reverse('registration_preregister'), data={'email': 'badtest@example.com'})
+            resp = c.post(reverse('account_request'), data={'email': 'badtest@example.com'})
             self.assert_redirect_to(resp, 'show_message')
 
             # For emails that are whitelisted, redirect to the registration form
-            resp = c.post(reverse('registration_preregister'), data={'email': 'test_registration@example.com'})
+            resp = c.post(reverse('account_request'), data={'email': 'test_registration@example.com'})
             self.assert_redirect_to(resp, 'registration_register')
             self.assertTrue('email_whitelisted' in c.session)
             # Email address is pulled from session versus form

@@ -1,7 +1,7 @@
 from .views import (DepartmentDetailView, Stats, FireDepartmentListView, FireStationFavoriteListView,
                     SimilarDepartmentsListView, DepartmentUpdateGovernmentUnits, FireStationDetailView,
                     DownloadShapefile, DocumentsView, DocumentsFileView, DocumentsDeleteView,
-                    RemoveIntersectingDepartments, AdminDepartmentUsers)
+                    RemoveIntersectingDepartments, AdminDepartmentUsers, AdminDepartmentAccountRequests)
 from .slack import FireCARESSlack
 from django.views.generic import TemplateView
 from django.conf.urls import patterns, url
@@ -18,6 +18,7 @@ urlpatterns = patterns('',
                        url(r'^departments/(?P<pk>\d+)/settings/government-units/?$', DepartmentUpdateGovernmentUnits.as_view(), name='firedepartment_update_government_units'),
                        url(r'^departments/(?P<pk>\d+)/settings/intersecting-departments/?$', RemoveIntersectingDepartments.as_view(), name='remove_intersecting_departments'),
                        url(r'^departments/(?P<pk>\d+)/settings/users/?$', AdminDepartmentUsers.as_view(), name='admin_department_users'),
+                       url(r'^departments/(?P<pk>\d+)/settings/verify-account-request/?$', AdminDepartmentAccountRequests.as_view(), name='admin_department_account_requests'),
                        url(r'^stations/(?P<pk>\d+)/?$', FireStationDetailView.as_view(template_name='firestation/firestation_detail.html'), name='firestation_detail'),
                        url(r'^stations/(?P<pk>\d+)/(?P<slug>[\w-]+)/?$', FireStationDetailView.as_view(template_name='firestation/firestation_detail.html'), name='firestation_detail_slug'),
                        url(r'^departments/(?P<pk>\d+)/?$', DepartmentDetailView.as_view(template_name='firestation/department_detail.html'), name='firedepartment_detail'),

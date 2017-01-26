@@ -13,7 +13,6 @@ from firestation.views import Home
 from osgeo_importer.urls import FileAddView, importer_api
 from django.contrib.sitemaps.views import sitemap
 from django.contrib.auth.decorators import permission_required
-from django.views.decorators.csrf import csrf_exempt
 from sitemaps import BaseSitemap, DepartmentsSitemap
 
 admin.autodiscover()
@@ -34,7 +33,7 @@ urlpatterns = patterns('',
     url(r'^contact-us/$', ContactUs.as_view(), name='contact_us'),
     url(r'^contact-us/thank-you/$', TemplateView.as_view(template_name='contact/thank_you.html'), name='contact_thank_you'),
     (r'^accounts/', include('firecares.firecares_core.ext.registration.urls')),
-    url(r'^account-request/$', csrf_exempt(AccountRequestView.as_view()), name='account_request'),
+    url(r'^account-request/$', AccountRequestView.as_view(), name='account_request'),
     url(r'^thank-you/$', ShowMessage.as_view(), name='show_message'),
     url(r'^login/$', 'django.contrib.auth.views.login', name='login', kwargs={'template_name': 'accounts/login.html'}),
     url(r'^password-reset/$', 'django.contrib.auth.views.password_reset',

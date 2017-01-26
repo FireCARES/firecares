@@ -4,6 +4,7 @@ from .forms import ForgotUsernameForm, AccountRequestForm
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
+from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth.views import logout
@@ -16,6 +17,7 @@ from requests_oauthlib import OAuth2Session
 from oauthlib.common import to_unicode
 from firecares.tasks.email import send_mail, email_admins
 from firecares.firecares_core.models import PredeterminedUser
+from firecares.firecares_core.ext.registration.views import SESSION_EMAIL_WHITELISTED
 from .forms import ContactForm
 from .models import RegistrationWhitelist, DepartmentAssociationRequest
 from .mixins import LoginRequiredMixin
@@ -116,11 +118,13 @@ class AccountRequestView(CreateView):
         If the form is valid AND the email is whitelisted, then send to registration; otherwise capture email address.
         """
         email = form.data.get('email')
+
         if User.objects.filter(email=email).first():
             # Redirect to login if a user w/ that email has already been found
+            messages.info(self.request, 'You already have an account on FireCARES.  If you\'ve forgotten your password or username, use the "Forgot Password or Username" links below.')
             return redirect('login')
         if RegistrationWhitelist.is_whitelisted(email):
-            self.request.session['email_whitelisted'] = email
+            self.request.session[SESSION_EMAIL_WHITELISTED] = email
             return redirect('registration_register')
         else:
             self.object = form.save()
@@ -144,11 +148,21 @@ class AccountRequestView(CreateView):
         """
         Email admins when new account requests are received.
         """
-        body = loader.render_to_string('contact/account_request_email.txt', dict(contact=self.object))
+
+        # In the case that the account registration request is tied to a department,
+        # we'll prompt the department admin to approve the request, which will send
+        # an invite on the admin's behalf
+
+        if self.object.department:
+            to = [x.email for x in self.object.department.get_department_admins()]
+            body = loader.render_to_string('contact/account_request_department_admin_email.txt', dict(contact=self.object, site=Site.objects.get_current()))
+        else:
+            to = [x[1] for x in settings.ADMINS]
+            body = loader.render_to_string('contact/account_request_email.txt', dict(contact=self.object))
         email_message = EmailMultiAlternatives('{} - New account request received.'.format(Site.objects.get_current().name),
                                                body,
                                                settings.DEFAULT_FROM_EMAIL,
-                                               [x[1] for x in settings.ADMINS])
+                                               to)
         send_mail.delay(email_message)
 
 

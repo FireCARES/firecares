@@ -11,9 +11,9 @@ from django.template import loader
 from django.views.generic import TemplateView
 from django.views.generic.edit import FormView
 from registration.backends.default.views import RegistrationView
-from firecares.firecares_core.forms import AccountRequestForm
 from firecares.firecares_core.mixins import LoginRequiredMixin, SuperUserRequiredMixin
-from firecares.firecares_core.models import RegistrationWhitelist, PredeterminedUser, DepartmentAssociationRequest
+from firecares.firecares_core.models import PredeterminedUser, DepartmentAssociationRequest
+from firecares.firecares_core.forms import AccountRequestForm
 from firecares.firestation.models import FireDepartment
 from firecares.tasks.email import send_mail
 from .forms import ChooseDepartmentForm
@@ -23,22 +23,24 @@ UserModel = get_user_model()
 SESSION_EMAIL_WHITELISTED = 'email_whitelisted'
 
 
-class PreRegistrationCheckView(FormView):
+class RegistrationPreregisterView(FormView):
     template_name = 'registration/registration_preregister.html'
     form_class = AccountRequestForm
 
-    def form_valid(self, form):
-        if RegistrationWhitelist.is_whitelisted(form.data.get('email')):
-            self.request.session[SESSION_EMAIL_WHITELISTED] = form.data.get('email')
-            return redirect('registration_register')
-        else:
-            form.save()
-            return redirect('show_message')
+    def get(self, request):
+        if 'department' in request.GET:
+            fd = FireDepartment.objects.get(id=request.GET['department'])
+            admins = fd.get_department_admins()
+            if not admins:
+                request.session['message'] = 'We\'re sorry, a fire chief or local president needs to enable FireCARES on this department before your account can be approved by the department.'
+                request.session['message_title'] = 'FireCARES not enabled for {}'.format(fd.name)
+                return redirect('show_message')
+        return super(RegistrationPreregisterView, self).get(request)
 
 
 class LimitedRegistrationView(RegistrationView):
     def dispatch(self, request, *args, **kwargs):
-        if 'email_whitelisted' not in request.session:
+        if SESSION_EMAIL_WHITELISTED not in request.session:
             return redirect('registration_preregister')
         else:
             return super(LimitedRegistrationView, self).dispatch(request, *args, **kwargs)

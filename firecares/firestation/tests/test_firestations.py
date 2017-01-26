@@ -19,9 +19,11 @@ from firecares.firestation.models import (Document, FireDepartment, FireStation,
 from firecares.firestation.managers import CalculationsQuerySet
 from reversion.models import Revision
 from reversion import revisions as reversion
+from firecares.firecares_core.models import AccountRequest
 from firecares.firecares_core.tests.base import BaseFirecaresTestcase
 from firecares.importers import GeoDjangoImport
 from firecares.tasks.quality_control import test_all_departments_urls
+from invitations.models import Invitation
 
 User = get_user_model()
 
@@ -1037,3 +1039,100 @@ class FireStationTests(BaseFirecaresTestcase):
         c.login(**self.admin_creds)
         response = c.put(url, data=new_geom, content_type='application/json')
         self.assertEqual(response.status_code, 204)
+
+    def test_department_permissions(self):
+        fd = FireDepartment.objects.create(name='Test')
+
+        fd.add_curator(self.non_admin_user)
+
+        self.assertTrue(fd.is_curator(self.admin_user))
+        self.assertTrue(fd.is_admin(self.admin_user))
+        self.assertTrue(fd.is_curator(self.non_admin_user))
+        self.assertFalse(fd.is_admin(self.non_admin_user))
+
+        self.assertEqual(fd.get_department_admins(), [])
+
+        fd.add_admin(self.non_admin_user)
+        self.assertTrue(fd.is_admin(self.non_admin_user))
+        self.assertEqual(fd.get_department_admins(), [self.non_admin_user])
+
+    def test_request_account_from_department(self):
+        """
+        Test request for account submissions from department detail pages
+        """
+
+        fd = FireDepartment.objects.create(id=321, name='TEST')
+        FireDepartment.objects.create(id=123, name='TEST2')
+
+        fd.add_admin(self.non_admin_user)
+
+        c = Client()
+
+        resp = c.get(reverse('firedepartment_detail', args=[fd.id]))
+        self.assertContains(resp, 'Is this your department?')
+        self.assertContains(resp, '/accounts/registration-check/?department=321')
+
+        # Departments with NO admins will redirect user to message view to inform them that FireCARES isn't enabled on this department
+        resp = c.get(reverse('registration_preregister') + '?department=123')
+        self.assert_redirect_to(resp, 'show_message')
+        resp = c.get(resp['Location'])
+        self.assertContains(resp, 'needs to enable FireCARES on this department')
+
+        resp = c.post(reverse('account_request'), data={'email': 'tester@mytest.com', 'department': fd.id})
+        self.assert_redirect_to(resp, 'show_message')
+        resp = c.get(resp['Location'])
+        self.assertContains(resp, 'We will be in touch with you to verify your account')
+
+        # Email should be sent to this department's admins notifying them that an account request has been submitted...
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].recipients(), ['non_admin@example.com'])
+
+        # Only department admin and superusers can see this page
+        resp = c.get(reverse('admin_department_account_requests', args=[fd.id]) + '?email=tester@mytest.com')
+        self.assert_redirect_to_login(resp)
+
+        admin_client = Client()
+        admin_client.login(**self.non_admin_creds)
+
+        resp = admin_client.get(reverse('admin_department_account_requests', args=[fd.id]))
+        self.assertEqual(resp.status_code, 400)
+
+        # Test denial
+        denied = {'email': 'tester@mytest.com', 'approved': 'False', 'message': 'Need more information, contact me at 314.555.1234'}
+        resp = admin_client.post(reverse('admin_department_account_requests', args=[fd.id]) + '?email=tester@mytest.com', data=denied)
+        self.assert_redirect_to(resp, 'firedepartment_detail_slug')
+
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertEqual(mail.outbox[1].recipients(), ['tester@mytest.com'])
+        self.assertTrue('Need more information' in mail.outbox[1].body)
+
+        ar = AccountRequest.objects.filter(email='tester@mytest.com').first()
+        self.assertIsNotNone(ar)
+        self.assertEqual(ar.denied_by, self.non_admin_user)
+        self.assertIsNone(ar.approved_by)
+        self.assertEqual(ar.department, fd)
+
+        # Test approval
+        resp = c.post(reverse('account_request'), data={'email': 'tester2@mytest.com', 'department': fd.id})
+        approved = {'email': 'tester2@mytest.com', 'approved': 'True'}
+        resp = admin_client.post(reverse('admin_department_account_requests', args=[fd.id]) + '?email=tester2@mytest.com', data=approved)
+        self.assert_redirect_to(resp, 'firedepartment_detail_slug')
+
+        # 1 email for the request to the department admin, 1 for the invite to the end user
+        self.assertEqual(len(mail.outbox), 4)
+        user_email = mail.outbox[3]
+        self.assertEqual(user_email.recipients(), ['tester2@mytest.com'])
+        self.assertTrue('accept the invite' in user_email.body)
+        inv = Invitation.objects.filter(email='tester2@mytest.com').first()
+        self.assertIsNotNone(inv)
+        self.assertEqual(inv.departmentinvitation.department, fd)
+        self.assertEqual(inv.inviter, self.non_admin_user)
+        ar = AccountRequest.objects.filter(email='tester2@mytest.com').first()
+        self.assertIsNotNone(ar)
+        self.assertEqual(ar.department, fd)
+        self.assertEqual(ar.approved_by, self.non_admin_user)
+        self.assertIsNone(ar.denied_by)
+
+        resp = admin_client.get(reverse('admin_department_account_requests', args=[fd.id]) + '?email=tester2@mytest.com')
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'This request has already been approved')

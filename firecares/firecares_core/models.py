@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from django.utils import timezone
@@ -167,13 +168,48 @@ class ContactRequest(models.Model):
         return "%s (%s)" % (self.name, self.email)
 
 
+# TODO: Extract "Approvable" abstract model for AccountRequst + DepartmentAssociationRequest
 class AccountRequest(models.Model):
     """
     Model to store account requests.
     """
+    STALE_DAYS = 5
+
     email = models.EmailField(unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
+    department = models.ForeignKey('firestation.FireDepartment', null=True, blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, related_name='approved_by_set')
+    denied_at = models.DateTimeField(null=True, blank=True)
+    denied_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, related_name='denied_by_set')
+
+    @classmethod
+    def stale_requests(cls):
+        stale_end = timezone.now() - timedelta(days=cls.STALE_DAYS)
+        return cls.objects.filter(approved_at__isnull=True, denied_at__isnull=True, created_at__lt=stale_end)
+
+    @property
+    def is_approved(self):
+        return self.approved_by is not None
+
+    @property
+    def is_denied(self):
+        return self.denied_by is not None
+
+    def approve(self, approving_user):
+        self.denied_by = None
+        self.denied_at = None
+        self.approved_by = approving_user
+        self.approved_at = timezone.now()
+        self.save()
+
+    def deny(self, denying_user):
+        self.approved_by = None
+        self.approved_at = None
+        self.denied_by = denying_user
+        self.denied_at = timezone.now()
+        self.save()
 
     def __unicode__(self):
         return "%s (%s)" % (self.email, self.created_at)
@@ -199,8 +235,9 @@ class RegistrationWhitelist(models.Model):
     email_or_domain = models.CharField(max_length=200)
     # For department-specific whitelists, the "department", "created_by" and "created_at" fields will be populated,
     # department whitelists are different from global whitelists in that they the incoming user will be tied (in his/her UserProfile)
-    # to the department and support
+    # to the department after account activation.
     department = models.ForeignKey('firestation.FireDepartment', null=True, blank=True)
+    # For anonymous-user-submitted whitelist requests, they need to be vetted by a department admin
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 

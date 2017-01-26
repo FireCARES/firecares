@@ -70,13 +70,13 @@
 
 
 <div id="popover_content_wrapper" style="display: none">
-  <form class="form-inline col-lg-12 ct-u-paddingBottom30 sign-up-popover-content" method="post" action="{% url 'account_request' %}">
-            <div class="text-center popup-content">Provide your email address and we will be in touch.</div>
-            <input id="contact_name_small" placeholder='example@domain.com' required name="email"
-                   type="email" class="form-control input-lg">
-            <div class="text-center">
-            <button type="submit" class="btn btn-primary">SIGN UP</button></div>
-        </form>
+    <form class="form-inline col-lg-12 ct-u-paddingBottom30 sign-up-popover-content" method="post" action="{% url 'account_request' %}">
+        {% csrf_token %}
+        <div class="text-center popup-content">Provide your email address and we will be in touch.</div>
+        <input id="contact_name_small" placeholder='example@domain.com' required name="email" type="email" class="form-control input-lg">
+        <div class="text-center">
+        <button type="submit" class="btn btn-primary">SIGN UP</button></div>
+    </form>
 </div>
 
 <div id="header"></div>
@@ -174,6 +174,7 @@
             <h2 class="text-center">Sign up</h2>
         </div>
         <form class="form-inline col-lg-12" method="post" action="{% url 'account_request' %}">
+            {% csrf_token %}
             <div class="ct-u-paddingBottom30 account-request-section-content">Provide your email address and we will be in touch.</div>
             <div class="ct-form--item ct-u-marginBottom20">
                 <input id="contact_name" placeholder='example@domain.com' required size="65" name="email" type="email" class="form-control input-lg">

@@ -52,49 +52,56 @@ def send_invitation(self, request, **kwargs):
 Invitation.send_invitation = send_invitation
 
 
+def send_invites(invites, request):
+    status_code = 400
+    response = {'valid': [], 'invalid': []}
+    if isinstance(invites, list):
+        for invite in invites:
+            try:
+                invitee = invite.get('email')
+                dept_id = int(invite.get('department_id'))
+
+                validate_email(invitee)
+                CleanEmailMixin().validate_invitation(invitee)
+
+                dept = FireDepartment.objects.get(id=dept_id)
+                if not dept.is_admin(request.user):
+                    raise PermissionDenied()
+
+                i = Invitation.create(invitee, inviter=request.user)
+                i.departmentinvitation.department = dept
+                i.departmentinvitation.save()
+            except(ValueError, KeyError):
+                pass
+            except(PermissionDenied):
+                status_code = 401
+            except(ValidationError):
+                response['invalid'].append({
+                    invitee: 'Invalid email address'})
+            except(AlreadyAccepted):
+                response['invalid'].append({
+                    invitee: 'A user with this email has already accepted'})
+            except(AlreadyInvited):
+                response['invalid'].append(
+                    {invitee: 'An invite has already been sent for this user'})
+            except(UserRegisteredEmail):
+                response['invalid'].append(
+                    {invitee: 'A registered user with this email address already exists'})
+            else:
+                i.send_invitation(request)
+                response['valid'].append({invitee: 'invited'})
+
+    if response['valid']:
+        status_code = 201
+
+    return response, status_code
+
+
 class SendJSONDepartmentInvite(SendJSONInvite):
     def post(self, request, *args, **kwargs):
-        status_code = 400
         invites = json.loads(request.body.decode())
-        response = {'valid': [], 'invalid': []}
-        if isinstance(invites, list):
-            for invite in invites:
-                try:
-                    invitee = invite.get('email')
-                    dept_id = int(invite.get('department_id'))
 
-                    validate_email(invitee)
-                    CleanEmailMixin().validate_invitation(invitee)
-
-                    dept = FireDepartment.objects.get(id=dept_id)
-                    if not dept.is_admin(request.user):
-                        raise PermissionDenied()
-
-                    i = Invitation.create(invitee, inviter=request.user)
-                    i.departmentinvitation.department = dept
-                    i.departmentinvitation.save()
-                except(ValueError, KeyError):
-                    pass
-                except(PermissionDenied):
-                    status_code = 401
-                except(ValidationError):
-                    response['invalid'].append({
-                        invitee: 'Invalid email address'})
-                except(AlreadyAccepted):
-                    response['invalid'].append({
-                        invitee: 'A user with this email has already accepted'})
-                except(AlreadyInvited):
-                    response['invalid'].append(
-                        {invitee: 'An invite has already been sent for this user'})
-                except(UserRegisteredEmail):
-                    response['invalid'].append(
-                        {invitee: 'A registered user with this email address already exists'})
-                else:
-                    i.send_invitation(request)
-                    response['valid'].append({invitee: 'invited'})
-
-        if response['valid']:
-            status_code = 201
+        response, status_code = send_invites(invites, request)
 
         return HttpResponse(
             json.dumps(response),

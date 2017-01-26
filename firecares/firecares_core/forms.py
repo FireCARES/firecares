@@ -57,4 +57,4 @@ class ContactForm(forms.ModelForm):
 class AccountRequestForm(forms.ModelForm):
     class Meta:
         model = AccountRequest
-        fields = ('email',)
+        fields = ('email', 'department')

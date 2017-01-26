@@ -41,3 +41,14 @@ class DocumentUploadForm(forms.ModelForm):
                 )
 
         return form_file
+
+
+class DepartmentUserApprovalForm(forms.Form):
+    approved = forms.TypedChoiceField(coerce=lambda x: x == 'True', choices=((False, 'No'), (True, 'Yes')))
+    email = forms.EmailField(widget=forms.HiddenInput)
+    message = forms.CharField(max_length=1024, required=False)
+
+    def __init__(self, *args, **kwargs):
+        super(DepartmentUserApprovalForm, self).__init__(*args, **kwargs)
+        if self.data and not self.data.get('approved'):
+            self.fields['message'].required = True

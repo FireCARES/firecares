@@ -11,24 +11,30 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import permission_required
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.shortcuts import get_current_site
+from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.http.response import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.db import connection
+from django.db.models import Q
 from django.db.models.fields import FieldDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http.response import HttpResponseBadRequest
+from django.template import loader
 from django.utils.decorators import method_decorator
 from django.utils.encoding import smart_str
+from firecares.tasks.email import send_mail
+from firecares.firecares_core.ext.invitations.views import send_invites
 from firecares.firecares_core.mixins import LoginRequiredMixin
-from firecares.firecares_core.models import RegistrationWhitelist
+from firecares.firecares_core.models import RegistrationWhitelist, AccountRequest
 from firecares.usgs.models import (StateorTerritoryHigh, CountyorEquivalent,
                                    Reserve, NativeAmericanArea, IncorporatedPlace,
                                    UnincorporatedPlace, MinorCivilDivision)
 from guardian.mixins import PermissionRequiredMixin
 from tempfile import mkdtemp
 from firecares.tasks.cleanup import remove_file
-from .forms import DocumentUploadForm
+from .forms import DocumentUploadForm, DepartmentUserApprovalForm
 from django.views.generic.edit import FormView
 from .models import Document, FireStation, FireDepartment, Staffing, create_quartile_views
 from favit.models import Favorite
@@ -869,3 +875,48 @@ class DocumentsFileView(LoginRequiredMixin, View):
                                                                         kwargs.get('pk'),
                                                                         kwargs.get('filename'))
         return response
+
+
+class AdminDepartmentAccountRequests(PermissionRequiredMixin, LoginRequiredMixin, DetailView):
+    model = FireDepartment
+    template_name = 'firestation/department_verify_user_account.html'
+    permission_required = 'admin_firedepartment'
+
+    def get_context_data(self, **kwargs):
+        context = super(AdminDepartmentAccountRequests, self).get_context_data(**kwargs)
+        email = self.request.GET['email']
+        context['form'] = DepartmentUserApprovalForm(initial=dict(email=email))
+        context['existing'] = AccountRequest.objects.filter(Q(approved_by__isnull=False) | Q(denied_by__isnull=False), email=email).first()
+        return context
+
+    def get(self, request, **kwargs):
+        if 'email' not in request.GET:
+            return HttpResponseBadRequest('email querystring param required')
+
+        return super(AdminDepartmentAccountRequests, self).get(request, **kwargs)
+
+    def post(self, *args, **kwargs):
+        self.object = self.get_object()
+
+        form = DepartmentUserApprovalForm(self.request.POST)
+
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            req = AccountRequest.objects.get(email=email)
+
+            if form.cleaned_data['approved']:
+                req.approve(self.request.user)
+                messages.add_message(self.request, messages.SUCCESS, 'Invited {} to FireCARES.'.format(email))
+                send_invites([dict(email=email, department_id=self.object.id)], self.request)
+            else:
+                req.deny(self.request.user)
+                messages.add_message(self.request, messages.SUCCESS, 'Denied {}\'s request for an account on FireCARES.'.format(email))
+
+                body = form.cleaned_data['message']
+                context = dict(account_request=req, message=body, site=get_current_site(self.request))
+                body = loader.render_to_string('registration/department_account_request_email.txt', context)
+                subject = 'Your FireCARES account request'
+                email_message = EmailMultiAlternatives(subject, body, settings.DEFAULT_FROM_EMAIL, [req.email])
+                send_mail.delay(email_message)
+
+        return redirect(self.object)

@@ -1,0 +1,132 @@
+{% load humanize %}
+{% load firecares_tags %}
+{% load widget_tweaks %}
+{% load favit_tags %}
+<!DOCTYPE html>
+<!--[if IE 8 ]>
+<html class="no-js ie8" lang="en"> <![endif]-->
+<!--[if IE 9 ]>
+<html class="no-js ie9" lang="en"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="description" content="{{ object.description }} approve FireCARES account requests for {{ object.name }}.">
+    <meta name="author" content="Prominent Edge LLC">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <title>Approve FireCARES account requests</title>
+    {% include 'firestation/_favicon.html' %}
+    {% include "firestation/_firecares_style.html" %}
+
+
+    <script type="text/javascript">
+    var config = {
+      geom: {{ object.geom.json|safe|default:"null" }},
+      centroid: [{{ object.headquarters_address.geom.centroid.y }}, {{ object.headquarters_address.geom.centroid.x }}],
+      headquarters: {{ object.headquarters_address.geom.json|safe|default:"null" }},
+      headquartersName: "{{ object.name }} Headquarters",
+      id: {{ object.id }},
+      email: "{{ request.GET.email }}"
+    };
+    </script>
+    {% include 'google_analytics.html' %}
+</head>
+
+<body class="ct-headroom--fixedTopBar cssAnimate" ng-app="fireStation">
+
+{% include 'firestation/_mobile_navbar.html' %}
+{% include 'firestation/_mobile_search.html' %}
+
+<div id="ct-js-wrapper" class="ct-pageWrapper">
+
+<div class="ct-navbarMobile">
+    <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand logo" href="{% url 'firestation_home' %}"><h1>FireCARES</h1></a>
+    <button type="button" class="searchForm-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span><i class="fa fa-search"></i></span>
+    </button>
+</div>
+
+{% include "firestation/_navbar.html" %}
+
+<div class="ct-site--map">
+    <div class="container">
+        <a href="{% url 'firestation_home' %}">Home</a>
+        <a href="{% url 'firedepartment_list' %}">Departments</a>
+        <a href="{% url 'firedepartment_detail_slug' object.id object.slug %}">{{ object.name }}</a>
+        <a href="{% url 'admin_department_users' object.id %}">Manage department users</a>
+    </div>
+</div>
+<header class="ct-mediaSection">
+    <div class="ct-mediaSection-inner">
+        <div class="container">
+            <div class="ct-u-displayTableVertical">
+                <div class="ct-textBox ct-u-text--white ct-u-displayTableCell text-left">
+                    <h2>{{ object.name }}</h2>
+                    <h4>{{ object.headquarters_address.get_row_display }}</h4>
+                    <span class="ct-productID ct-fw-300">
+                        FDID: <span>{{ object.fdid }}</span>
+                    </span>
+                </div>
+                <div class="ct-u-displayTableCell text-right">
+                    {% favorite_button object %}
+                    <a href="javascript:window.print()" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-printer fa-2x"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<section class="ct-u-paddingBottom60">
+    <div class="container">
+        <div class="ct-section--products">
+            <div class="col-md-12 col-lg-12">
+                <div class="ct-heading ct-u-marginBottom20 ct-u-marginTop30">
+                    <h3>FireCARES user account approval</h3>
+                </div>
+                {% if not existing %}
+                <p>
+                    <strong>{{ request.GET.email }}</strong> would like an account on FireCARES.  If you approve this account request, an invite will be sent to the requesting user on your behalf.
+                    If the user accepts the request, they will be able to login to FireCARES but will not receive any special permissions regarding administrative or data curator access to fire departments.
+                </p>
+                <form action="" method="POST" class="ng-cloak department-user-approval" ng-init="message = ''">
+                    {% csrf_token %}
+                    {{ form.email }}
+                    <div class="ct-form--item form-group">
+                        <label>Approve this user for FireCARES account creation:</label>
+                        {% render_field form.approved ng-model="approved" class+="form-control no-dirty inherit-background" %}
+                        {{ form.approved.errors }}
+                    </div>
+                    <div class="ct-form--item form-group ct-u-marginTop10" ng-show="approved === 'False'">
+                        <label>Add a reason for denial:</label>
+                        {% render_field form.message ng-model="message" class+="form-control inherit-background" %}
+                        {{ form.message.errors }}
+                    </div>
+                    <div class="ct-form--item form-group ct-u-marginTop10">
+                        <input class="col-md-2 ct-u-marginTop20 btn btn-primary" type="submit" ng-disabled="!approved || (approved === 'False' && message.trim() === '')" value="Submit"/>
+                    </div>
+                </form>
+                {% else %}
+                <p>This request has already been {% if existing.approved_by %}approved by {{ existing.approved_by }} on {{ existing.approved_at }}{% else %}denied by {{ existing.denied_by }} on {{ existing.denied_by }}{% endif %}.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% include 'firestation/_footer.html' %}
+</div>
+{% include "firestation/_firecares_scripts.html" %}
+<script type="text/javascript">
+$(function() {
+  $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
+</body>
+</html>
