@@ -265,7 +265,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
     name = models.CharField(max_length=100)
     headquarters_address = models.ForeignKey(Address, null=True, blank=True, related_name='firedepartment_headquarters')
     mail_address = models.ForeignKey(Address, null=True, blank=True)
-    domain_name = models.CharField(max_length=255, blank=True)
+    domain_name = models.CharField(max_length=255, blank=True, null=True)
     headquarters_phone = PhoneNumberField(null=True, blank=True)
     headquarters_fax = PhoneNumberField(null=True, blank=True)
     department_type = models.CharField(max_length=20, choices=DEPARTMENT_TYPE_CHOICES, null=True, blank=True)
