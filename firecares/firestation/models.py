@@ -35,7 +35,9 @@ LEVEL_CHOICES = [(0, 'All'),
                  (1, 'Low'),
                  (2, 'Medium'),
                  (4, 'High')]
+
 LEVEL_CHOICES_DICT = {k: v for k, v in LEVEL_CHOICES}
+LEVEL_CHOICES_REVERSE_DICT = {v: k for k, v in LEVEL_CHOICES}
 
 
 class USGSStructureData(models.Model):

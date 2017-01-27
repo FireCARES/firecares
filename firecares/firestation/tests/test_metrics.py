@@ -1,12 +1,16 @@
+import mock
 import requests
 from StringIO import StringIO
+from django.contrib.gis.geos import Point
 from django.core.management import call_command
 from django.db import connections
 from django.test.client import Client
 from firecares.firecares_core.tests.base import BaseFirecaresTestcase
 from firecares.firestation.models import FireDepartment, FireDepartmentRiskModels, PopulationClassQuartile
 from firecares.firestation.templatetags.firecares_tags import quartile_text, risk_level
-
+from firecares.tasks.update import update_performance_score, dist_model_for_hazard_level
+from firecares.firecares_core.models import Address, Country
+from fire_risk.models import DIST, DISTMediumHazard, DISTHighHazard, NotEnoughRecords
 
 class FireDepartmentMetricsTests(BaseFirecaresTestcase):
     def test_convenience_methods(self):
@@ -169,3 +173,44 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         # Ensure that aggregated "ALL" risk level rows are created
         self.assertEqual(len(fd.firedepartmentriskmodels_set.all()), 4)
         self.assertEqual(len(fd2.firedepartmentriskmodels_set.all()), 4)
+
+
+    @mock.patch("psycopg2.connect")
+    def test_update_nfirs(self, mock_connect):
+
+        us = Country.objects.create(iso_code='US', name='United States')
+
+        address = Address.objects.create(address_line1='Test', country=us,
+                                         geom=Point(-118.42170426600454, 34.09700463377199))
+        lafd = FireDepartment.objects.create(name='Los Angeles', population=0, population_class=9, state='CA',
+                                             headquarters_address=address, featured=0, archived=0)
+
+        # ensure no risk model data before run
+        self.assertFalse(lafd.firedepartmentriskmodels_set.all())
+
+        query_result = [
+            (u'High', 30L, 44L, 16L, 13L, 9L),
+            (u'Low', 179L, 376L, 21L, 139L, 34L),
+            (u'Medium', 51L, 147L, 12L, 41L, 7L),
+            (u'N/A', 1L, 52L, 192L, 18L, 66L)
+        ]
+        mock_con = mock_connect.return_value
+        mock_cur = mock_con.cursor.return_value
+        mock_cur.description = [('risk_category',), ('1',), ('2',), ('3',), ('4',), ('5',)]
+        mock_cur.fetchall.return_value = query_result
+        update_performance_score(lafd.id)
+
+        self.assertEqual(lafd.firedepartmentriskmodels_set.all().count(), 4)
+
+        # ensure risk model data was created and the dist_model_score was populated correctly
+        for i in ['0', '1', '2', '4']:
+            queryset = lafd.firedepartmentriskmodels_set.filter(level=i)
+            self.assertEqual(queryset.count(), 1)
+            self.assertTrue(queryset.filter(dist_model_score__isnull=False))
+
+    def test_dist_model_hazard_level(self):
+
+        self.assertEqual(dist_model_for_hazard_level('High'), DISTHighHazard)
+        self.assertEqual(dist_model_for_hazard_level('Medium'), DISTMediumHazard)
+        self.assertEqual(dist_model_for_hazard_level('All'), DIST)
+        self.assertEqual(dist_model_for_hazard_level('Low'), DIST)

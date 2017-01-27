@@ -1,9 +1,10 @@
+import traceback
 from firecares.celery import app
 from django.db import connections
 from django.db.utils import ConnectionDoesNotExist
-from firecares.firestation.models import FireDepartment, create_quartile_views, LEVEL_CHOICES_DICT
+from firecares.firestation.models import FireDepartment, create_quartile_views, LEVEL_CHOICES_REVERSE_DICT, LEVEL_CHOICES_DICT
 from firecares.firestation.models import NFIRSStatistic as nfirs
-from fire_risk.models import DIST, NotEnoughRecords
+from fire_risk.models import DIST, DISTMediumHazard, DISTHighHazard, NotEnoughRecords
 from fire_risk.models.DIST.providers.ahs import ahs_building_areas
 from fire_risk.models.DIST.providers.iaff import response_time_distributions
 from fire_risk.backends.queries import RESIDENTIAL_FIRES_BY_FDID_STATE
@@ -15,6 +16,20 @@ def update_scores():
     for fd in FireDepartment.objects.filter(archived=False):
         update_performance_score.delay(fd.id)
 
+
+def dist_model_for_hazard_level(hazard_level):
+    """
+    Returns the appropriate DIST model based on the hazard level.
+    """
+    hazard_level = hazard_level.lower()
+
+    if hazard_level == 'high':
+        return DISTHighHazard
+
+    if hazard_level == 'medium':
+        return DISTMediumHazard
+
+    return DIST
 
 @app.task(queue='update')
 def update_performance_score(id, dry_run=False):
@@ -28,28 +43,60 @@ def update_performance_score(id, dry_run=False):
     except (ConnectionDoesNotExist, FireDepartment.DoesNotExist):
         return
 
-    cursor.execute(RESIDENTIAL_FIRES_BY_FDID_STATE, (fd.fdid, fd.state))
+    RESIDENTIAL_FIRES_BY_FDID_STATE = """
+    SELECT *
+    FROM crosstab(
+      'select COALESCE(b.risk_category, ''N/A'') as risk_category, fire_sprd, count(*)
+        FROM buildingfires a left join (SELECT
+          *
+        FROM (
+          SELECT state,
+            fdid,
+            inc_date,
+            inc_no,
+            exp_no,
+            geom,
+            b.parcel_id,
+            b.wkb_geometry,
+            b.risk_category,
+            ROW_NUMBER() OVER (PARTITION BY state, fdid, inc_date, inc_no, exp_no, geom ORDER BY st_distance(st_centroid(b.wkb_geometry), a.geom)) AS r
+          FROM (select * from incidentaddress where state='%(state)s' and fdid='%(fdid)s') a
+             left join parcel_risk_category_local b on a.geom && b.wkb_geometry
+             ) x
+        WHERE
+        x.r = 1) b using (state, inc_date, exp_no, fdid, inc_no)
+    where state='%(state)s' and fdid='%(fdid)s' and prop_use in (''419'',''429'',''439'',''449'',''459'',''460'',''462'',''464'',''400'')
+    group by risk_category, fire_sprd
+    order by risk_category, fire_sprd ASC')
+    AS ct(risk_category text, "1" bigint, "2" bigint, "3" bigint, "4" bigint, "5" bigint);
+    """
+
+
+    cursor.execute(RESIDENTIAL_FIRES_BY_FDID_STATE, {'fdid': fd.fdid, 'state': fd.state})
     results = dictfetchall(cursor)
 
-    for rm in fd.firedepartmentriskmodels_set.all():
-        old_score = rm.dist_model_score
-        counts = dict(object_of_origin=0, room_of_origin=0, floor_of_origin=0, building_of_origin=0, beyond=0)
+    all_counts = dict(object_of_origin=0,
+                      room_of_origin=0,
+                      floor_of_origin=0,
+                      building_of_origin=0,
+                      beyond=0)
 
-        for result in results:
-            if result['fire_sprd'] == '1':
-                counts['object_of_origin'] += result['count']
+    for result in results:
 
-            if result['fire_sprd'] == '2':
-                counts['room_of_origin'] += result['count']
+        if result.get('risk_category') not in LEVEL_CHOICES_REVERSE_DICT:
+            continue
 
-            if result['fire_sprd'] == '3':
-                counts['floor_of_origin'] += result['count']
+        dist_model = dist_model_for_hazard_level(result.get('risk_category'))
 
-            if result['fire_sprd'] == '4':
-                counts['building_of_origin'] += result['count']
+        counts = dict(object_of_origin=result.get('1', 0),
+                      room_of_origin=result.get('2', 0),
+                      floor_of_origin=result.get('3', 0),
+                      building_of_origin=result.get('4', 0),
+                      beyond=result.get('5', 0))
 
-            if result['fire_sprd'] == '5':
-                counts['beyond'] += result['count']
+        # add current risk category to the all risk category
+        for key, value in counts.items():
+            all_counts[key] += value
 
         ahs_building_size = ahs_building_areas(fd.fdid, fd.state)
 
@@ -61,18 +108,36 @@ def update_performance_score(id, dry_run=False):
         if response_times:
             counts['arrival_time_draw'] = LogNormalDraw(*response_times, multiplier=60)
 
+        record, _ = fd.firedepartmentriskmodels_set.get_or_create(level=LEVEL_CHOICES_REVERSE_DICT.get(result['risk_category']))
+        old_score = record.dist_model_score
+
         try:
-            dist = DIST(floor_extent=False, **counts)
-            rm.dist_model_score = dist.gibbs_sample()
+            dist = dist_model(floor_extent=False, **counts)
+            record.dist_model_score = dist.gibbs_sample()
+            print 'updating fdid: {2} - {3} risk level from: {0} to {1}.'.format(old_score, record.dist_model_score, fd.id, LEVEL_CHOICES_DICT[record.level])
 
         except (NotEnoughRecords, ZeroDivisionError):
-            rm.dist_model_score = None
-
-        print 'updating fdid: {2} - {3} risk level from: {0} to {1}.'.format(old_score, rm.dist_model_score, fd.id, LEVEL_CHOICES_DICT[rm.level])
+            print 'Error updating DIST score: {}.'.format(traceback.format_exc())
+            record.dist_model_score = None
 
         if not dry_run:
-            rm.save()
+            record.save()
 
+    record, _ = fd.firedepartmentriskmodels_set.get_or_create(level=LEVEL_CHOICES_REVERSE_DICT.get('All'))
+    old_score = record.dist_model_score
+    dist_model = dist_model_for_hazard_level('All')
+
+    try:
+        dist = dist_model(floor_extent=False, **all_counts)
+        record.dist_model_score = dist.gibbs_sample()
+        print 'updating fdid: {2} - {3} risk level from: {0} to {1}.'.format(old_score, record.dist_model_score, fd.id, LEVEL_CHOICES_DICT[record.level])
+
+    except (NotEnoughRecords, ZeroDivisionError):
+        print 'Error updating DIST score: {}.'.format(traceback.format_exc())
+        record.dist_model_score = None
+
+    if not dry_run:
+        record.save()
 
 @app.task(queue='update')
 def update_nfirs_counts(id, year=None):
