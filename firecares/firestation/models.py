@@ -984,7 +984,7 @@ class NFIRSStatistic(models.Model):
     level = models.IntegerField(choices=LEVEL_CHOICES, default=1, db_index=True)
 
     class Meta:
-        unique_together = ['fire_department', 'year', 'metric']
+        unique_together = ['fire_department', 'year', 'metric', 'level']
         ordering = ['-year', ]
 
 

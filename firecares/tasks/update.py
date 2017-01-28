@@ -1,3 +1,4 @@
+import copy
 import traceback
 from firecares.celery import app
 from django.db import connections
@@ -7,9 +8,8 @@ from firecares.firestation.models import NFIRSStatistic as nfirs
 from fire_risk.models import DIST, DISTMediumHazard, DISTHighHazard, NotEnoughRecords
 from fire_risk.models.DIST.providers.ahs import ahs_building_areas
 from fire_risk.models.DIST.providers.iaff import response_time_distributions
-from fire_risk.backends.queries import RESIDENTIAL_FIRES_BY_FDID_STATE
 from fire_risk.utils import LogNormalDraw
-from firecares.utils import dictfetchall
+from firecares.utils import dictfetchall, lenient_summation
 
 
 def update_scores():
@@ -30,6 +30,7 @@ def dist_model_for_hazard_level(hazard_level):
         return DISTMediumHazard
 
     return DIST
+
 
 @app.task(queue='update')
 def update_performance_score(id, dry_run=False):
@@ -70,7 +71,6 @@ def update_performance_score(id, dry_run=False):
     order by risk_category, fire_sprd ASC')
     AS ct(risk_category text, "1" bigint, "2" bigint, "3" bigint, "4" bigint, "5" bigint);
     """
-
 
     cursor.execute(RESIDENTIAL_FIRES_BY_FDID_STATE, {'fdid': fd.fdid, 'state': fd.state})
     results = dictfetchall(cursor)
@@ -139,6 +139,73 @@ def update_performance_score(id, dry_run=False):
     if not dry_run:
         record.save()
 
+
+CIVILIAN_CASUALTIES = """select count(1), extract(year from inc_date) as year, COALESCE(b.risk_category, 'N/A') as risk_category
+FROM civiliancasualty a left join (SELECT
+  *
+FROM (
+  SELECT state,
+    fdid,
+    inc_date,
+    inc_no,
+    exp_no,
+    geom,
+    b.parcel_id,
+    b.wkb_geometry,
+    b.risk_category,
+    ROW_NUMBER() OVER (PARTITION BY state, fdid, inc_date, inc_no, exp_no, geom ORDER BY st_distance(st_centroid(b.wkb_geometry), a.geom)) AS r
+  FROM (select * from incidentaddress where state=%(state)s and fdid=%(fdid)s) a
+     left join parcel_risk_category_local b on a.geom && b.wkb_geometry
+     ) x
+WHERE x.r = 1) b using (state, inc_date, exp_no, fdid, inc_no) where state=%(state)s and fdid=%(fdid)s and extract(year from inc_date) in %(years)s
+GROUP by extract(year from inc_date), COALESCE(b.risk_category, 'N/A')
+ORDER BY extract(year from inc_date) DESC"""
+
+
+STRUCTURE_FIRES = """select count(1), extract(year from alarm) as year, COALESCE(b.risk_category, 'N/A') as risk_category
+FROM buildingfires a left join (SELECT
+  *
+FROM (
+  SELECT state,
+    fdid,
+    inc_date,
+    inc_no,
+    exp_no,
+    geom,
+    b.parcel_id,
+    b.wkb_geometry,
+    b.risk_category,
+    ROW_NUMBER() OVER (PARTITION BY state, fdid, inc_date, inc_no, exp_no, geom ORDER BY st_distance(st_centroid(b.wkb_geometry), a.geom)) AS r
+  FROM (select * from incidentaddress where state=%(state)s and fdid=%(fdid)s) a
+     left join parcel_risk_category_local b on a.geom && b.wkb_geometry
+     ) x
+WHERE x.r = 1) b using (state, inc_date, exp_no, fdid, inc_no) where state=%(state)s and fdid=%(fdid)s and extract(year from alarm) in %(years)s
+GROUP by extract(year from alarm), COALESCE(b.risk_category, 'N/A')
+ORDER BY extract(year from alarm) DESC"""
+
+
+FIREFIGHTER_CASUALTIES = """select count(1), extract(year from inc_date) as year, COALESCE(b.risk_category, 'N/A') as risk_category
+FROM ffcasualty a left join (SELECT
+  *
+FROM (
+  SELECT state,
+    fdid,
+    inc_date,
+    inc_no,
+    exp_no,
+    geom,
+    b.parcel_id,
+    b.wkb_geometry,
+    b.risk_category,
+    ROW_NUMBER() OVER (PARTITION BY state, fdid, inc_date, inc_no, exp_no, geom ORDER BY st_distance(st_centroid(b.wkb_geometry), a.geom)) AS r
+  FROM (select * from incidentaddress where state=%(state)s and fdid=%(fdid)s) a
+     left join parcel_risk_category_local b on a.geom && b.wkb_geometry
+     ) x
+WHERE x.r = 1) b using (state, inc_date, exp_no, fdid, inc_no) where state=%(state)s and fdid=%(fdid)s and extract(year from inc_date) in %(years)s
+GROUP by extract(year from inc_date), COALESCE(b.risk_category, 'N/A')
+ORDER BY extract(year from inc_date) DESC"""
+
+
 @app.task(queue='update')
 def update_nfirs_counts(id, year=None):
     """
@@ -155,35 +222,39 @@ def update_nfirs_counts(id, year=None):
     except (FireDepartment.DoesNotExist, ConnectionDoesNotExist):
         return
 
+    mapping = {'Low': 1, 'Medium': 2, 'High': 4, 'N/A': 5}
+
     years = {}
     if not year:
         # get a list of years populated in the NFIRS database
         years_query = "select distinct(extract(year from inc_date)) as year from buildingfires;"
         cursor.execute(years_query)
         # default years to None
-        map(years.setdefault, [int(n[0]) for n in cursor.fetchall()])
+        years = {x: {1: None, 2: None, 4: None, 5: None} for x in [int(n[0]) for n in cursor.fetchall()]}
     else:
-        years[year] = None
+        years[year] = {1: None, 2: None, 4: None, 5: None}
+
+    params = dict(fdid=fd.fdid, state=fd.state, years=tuple(years.keys()))
 
     queries = (
-        ('civilian_casualties', "select extract(year from inc_date) as year, count(*) from civiliancasualty where"
-            " fdid=%s and state=%s and extract(year from inc_date) in %s group by year order by year desc;", (fd.fdid, fd.state, tuple(years.keys()))),
-        ('residential_structure_fires', "select extract(year from inc_date) as year, count(*) from buildingfires"
-                                        " where fdid=%s and state=%s and extract(year from inc_date) in %s group by year order by year desc;",
-         (fd.fdid, fd.state, tuple(years.keys()))),
-        ('firefighter_casualties', "select extract(year from inc_date) as year, count(*) from ffcasualty where"
-            " fdid=%s and state=%s and extract(year from inc_date) in %s group by year order by year desc;", (fd.fdid, fd.state, tuple(years.keys()))),
+        ('civilian_casualties', CIVILIAN_CASUALTIES, params),
+        ('residential_structure_fires', STRUCTURE_FIRES, params),
+        ('firefighter_casualties', FIREFIGHTER_CASUALTIES, params)
     )
 
     for statistic, query, params in queries:
-        counts = years.copy()
+        counts = copy.deepcopy(years)
         cursor.execute(query, params)
 
-        for year, count in cursor.fetchall():
-            counts[year] = count
+        for count, year, level in cursor.fetchall():
+            mlevel = mapping[level]
+            counts[year][mlevel] = count
 
-        for year, count in counts.items():
-            nfirs.objects.update_or_create(year=year, defaults={'count': count}, fire_department=fd, metric=statistic)
+        for year, levels in counts.items():
+            for level, count in levels.items():
+                nfirs.objects.update_or_create(year=year, defaults={'count': count}, fire_department=fd, metric=statistic, level=level)
+            total = lenient_summation(*map(lambda x: x[1], levels.items()))
+            nfirs.objects.update_or_create(year=year, defaults={'count': total}, fire_department=fd, metric=statistic, level=0)
 
 
 @app.task(queue='update')
