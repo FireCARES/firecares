@@ -11893,6 +11893,11 @@ input.no-invalid.ng-invalid:focus {
 .department-user-approval select {
   width: 25%;
 }
+div.is-your-department {
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
+  margin-top: 15px;
+}
 .ct-pageWrapper {
   background-color: #ffffff;
   overflow: hidden;

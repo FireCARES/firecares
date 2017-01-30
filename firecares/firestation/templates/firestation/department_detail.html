@@ -147,9 +147,6 @@
                         </div>
 
                         <div class="ct-u-displayTableCell text-center">
-                            {% if not user.is_authenticated %}
-                            <strong><a class="is-your-department" href="{% url 'registration_preregister' %}?department={{ object.id }}">Is this your department? Request access from your fire chief or local president.</a></strong>
-                            {% endif %}
                         </div>
 
                         <div class="ct-u-displayTableCell text-right">
@@ -535,6 +532,11 @@
                                 <gauge description="Please <a href='{% url 'login' %}?next={% url 'firedepartment_detail' pk=object.id %}'>login</a> to see this department's performance score."
                                        metric-title="" min="" max="" value="" inverse
                                        learn-more="{% url 'models_performance_score' %}"></gauge>
+                                <div class="gauge-description is-your-department">
+                                    <p>
+                                        Is this your department? <a class="is-your-department" href="{% url 'registration_preregister' %}?department={{ object.id }}">Request access from your fire chief or local president.</a>
+                                    </p>
+                                </div>
                             </div>
                             {% endif %}
                             <div class="col-sm-6 col-md-12 ct-u-marginBottom10">
