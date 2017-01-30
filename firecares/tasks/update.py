@@ -140,70 +140,49 @@ def update_performance_score(id, dry_run=False):
         record.save()
 
 
-CIVILIAN_CASUALTIES = """select count(1), extract(year from inc_date) as year, COALESCE(b.risk_category, 'N/A') as risk_category
-FROM civiliancasualty a left join (SELECT
-  *
-FROM (
-  SELECT state,
-    fdid,
-    inc_date,
-    inc_no,
-    exp_no,
-    geom,
-    b.parcel_id,
-    b.wkb_geometry,
-    b.risk_category,
-    ROW_NUMBER() OVER (PARTITION BY state, fdid, inc_date, inc_no, exp_no, geom ORDER BY st_distance(st_centroid(b.wkb_geometry), a.geom)) AS r
-  FROM (select * from incidentaddress where state=%(state)s and fdid=%(fdid)s) a
-     left join parcel_risk_category_local b on a.geom && b.wkb_geometry
-     ) x
-WHERE x.r = 1) b using (state, inc_date, exp_no, fdid, inc_no) where state=%(state)s and fdid=%(fdid)s and extract(year from inc_date) in %(years)s
-GROUP by extract(year from inc_date), COALESCE(b.risk_category, 'N/A')
-ORDER BY extract(year from inc_date) DESC"""
+CIVILIAN_CASUALTIES = """SELECT count(1) as count, extract(year from a.inc_date) as year, COALESCE(y.risk_category, 'N/A') as risk_level
+FROM civiliancasualty a
+LEFT JOIN
+    (SELECT state, fdid, inc_date, inc_no, exp_no, x.parcel_id, x.risk_category
+        FROM ( SELECT *
+            FROM incidentaddress a
+            LEFT JOIN parcel_risk_category_local using (parcel_id)
+        ) AS x
+    ) AS y
+USING (state, fdid, inc_date, inc_no, exp_no)
+WHERE a.state = %(state)s AND a.fdid = %(fdid)s AND extract(year FROM a.inc_date) IN %(years)s
+GROUP BY y.risk_category, extract(year from a.inc_date)
+ORDER BY extract(year from a.inc_date) DESC"""
 
 
-STRUCTURE_FIRES = """select count(1), extract(year from alarm) as year, COALESCE(b.risk_category, 'N/A') as risk_category
-FROM buildingfires a left join (SELECT
-  *
-FROM (
-  SELECT state,
-    fdid,
-    inc_date,
-    inc_no,
-    exp_no,
-    geom,
-    b.parcel_id,
-    b.wkb_geometry,
-    b.risk_category,
-    ROW_NUMBER() OVER (PARTITION BY state, fdid, inc_date, inc_no, exp_no, geom ORDER BY st_distance(st_centroid(b.wkb_geometry), a.geom)) AS r
-  FROM (select * from incidentaddress where state=%(state)s and fdid=%(fdid)s) a
-     left join parcel_risk_category_local b on a.geom && b.wkb_geometry
-     ) x
-WHERE x.r = 1) b using (state, inc_date, exp_no, fdid, inc_no) where state=%(state)s and fdid=%(fdid)s and extract(year from alarm) in %(years)s
-GROUP by extract(year from alarm), COALESCE(b.risk_category, 'N/A')
-ORDER BY extract(year from alarm) DESC"""
+STRUCTURE_FIRES = """SELECT count(1) as count, extract(year from a.alarm) as year, COALESCE(y.risk_category, 'N/A') as risk_level
+FROM buildingfires a
+LEFT JOIN
+    (SELECT state, fdid, inc_date, inc_no, exp_no, x.parcel_id, x.risk_category
+        FROM ( SELECT *
+            FROM incidentaddress a
+            LEFT JOIN parcel_risk_category_local using (parcel_id)
+        ) AS x
+    ) AS y
+USING (state, fdid, inc_date, inc_no, exp_no)
+WHERE a.state = %(state)s AND a.fdid = %(fdid)s AND extract(year FROM a.inc_date) IN %(years)s
+GROUP BY y.risk_category, extract(year from a.alarm)
+ORDER BY extract(year from a.alarm) DESC"""
 
 
-FIREFIGHTER_CASUALTIES = """select count(1), extract(year from inc_date) as year, COALESCE(b.risk_category, 'N/A') as risk_category
-FROM ffcasualty a left join (SELECT
-  *
-FROM (
-  SELECT state,
-    fdid,
-    inc_date,
-    inc_no,
-    exp_no,
-    geom,
-    b.parcel_id,
-    b.wkb_geometry,
-    b.risk_category,
-    ROW_NUMBER() OVER (PARTITION BY state, fdid, inc_date, inc_no, exp_no, geom ORDER BY st_distance(st_centroid(b.wkb_geometry), a.geom)) AS r
-  FROM (select * from incidentaddress where state=%(state)s and fdid=%(fdid)s) a
-     left join parcel_risk_category_local b on a.geom && b.wkb_geometry
-     ) x
-WHERE x.r = 1) b using (state, inc_date, exp_no, fdid, inc_no) where state=%(state)s and fdid=%(fdid)s and extract(year from inc_date) in %(years)s
-GROUP by extract(year from inc_date), COALESCE(b.risk_category, 'N/A')
-ORDER BY extract(year from inc_date) DESC"""
+FIREFIGHTER_CASUALTIES = """SELECT count(1) as count, extract(year from a.inc_date) as year, COALESCE(y.risk_category, 'N/A') as risk_level
+FROM ffcasualty a
+LEFT JOIN
+    (SELECT state, fdid, inc_date, inc_no, exp_no, x.parcel_id, x.risk_category
+        FROM ( SELECT *
+            FROM incidentaddress a
+            LEFT JOIN parcel_risk_category_local using (parcel_id)
+        ) AS x
+    ) AS y
+USING (state, fdid, inc_date, inc_no, exp_no)
+WHERE a.state = %(state)s AND a.fdid = %(fdid)s AND extract(year FROM a.inc_date) IN %(years)s
+GROUP BY y.risk_category, extract(year from a.inc_date)
+ORDER BY extract(year from a.inc_date) DESC"""
 
 
 @app.task(queue='update')
