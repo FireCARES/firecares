@@ -1,6 +1,7 @@
 import copy
 import traceback
 from firecares.celery import app
+from django.contrib.gis.geos import GEOSGeometry
 from django.db import connections
 from django.db.utils import ConnectionDoesNotExist
 from firecares.firestation.models import FireDepartment, create_quartile_views, LEVEL_CHOICES_REVERSE_DICT, LEVEL_CHOICES_DICT
@@ -234,6 +235,34 @@ def update_nfirs_counts(id, year=None):
                 nfirs.objects.update_or_create(year=year, defaults={'count': count}, fire_department=fd, metric=statistic, level=level)
             total = lenient_summation(*map(lambda x: x[1], levels.items()))
             nfirs.objects.update_or_create(year=year, defaults={'count': total}, fire_department=fd, metric=statistic, level=0)
+
+
+@app.task(queue='update')
+def calculate_department_census_geom(id):
+    """
+    Calculate and cache the owned census geometry for a specific department
+    """
+
+    try:
+        fd = FireDepartment.objects.get(id=id)
+        cursor = connections['nfirs'].cursor()
+    except (FireDepartment.DoesNotExist, ConnectionDoesNotExist):
+        return
+
+    UNION_CENSUS_TRACTS_FOR_DEPARTMENT = """SELECT ST_Multi(ST_Union(bg.geom))
+    FROM nist.tract_years ty
+    INNER JOIN census_block_groups_2010 bg
+    ON ty.tr10_fid = ('14000US'::text || "substring"((bg.geoid10)::text, 0, 12))
+    WHERE ty.fc_dept_id = %(id)s
+    GROUP BY ty.fc_dept_id
+    """
+
+    cursor.execute(UNION_CENSUS_TRACTS_FOR_DEPARTMENT, {'id': fd.id})
+
+    geom = cursor.fetchone()
+
+    fd.owned_tracts_geom = GEOSGeometry(geom[0])
+    fd.save()
 
 
 @app.task(queue='update')

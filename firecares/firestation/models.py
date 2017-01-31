@@ -284,6 +284,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
     featured = models.BooleanField(default=False, db_index=True)
     iaff = models.CharField(max_length=25, blank=True, null=True)
     twitter_handle = models.CharField(max_length=255, blank=True, null=True)
+    owned_tracts_geom = models.MultiPolygonField(null=True, blank=True)
 
     class Meta:
         ordering = ('name',)

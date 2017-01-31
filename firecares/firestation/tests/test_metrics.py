@@ -8,7 +8,7 @@ from django.test.client import Client
 from firecares.firecares_core.tests.base import BaseFirecaresTestcase
 from firecares.firestation.models import FireDepartment, FireDepartmentRiskModels, PopulationClassQuartile
 from firecares.firestation.templatetags.firecares_tags import quartile_text, risk_level
-from firecares.tasks.update import update_performance_score, dist_model_for_hazard_level, update_nfirs_counts
+from firecares.tasks.update import update_performance_score, dist_model_for_hazard_level, update_nfirs_counts, calculate_department_census_geom
 from firecares.firecares_core.models import Address, Country
 from fire_risk.models import DIST, DISTMediumHazard, DISTHighHazard
 
@@ -312,3 +312,32 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         self.assertIsNone(lafd.nfirsstatistic_set.get(year=2013, level=0, metric='firefighter_casualties').count)
 
         self.assertEqual(lafd.nfirsstatistic_set.get(year=2010, level=1, metric='civilian_casualties').count, 6L)
+
+    @mock.patch("psycopg2.connect")
+    def test_calculate_department_census_geom(self, mock_connect):
+        us = Country.objects.create(iso_code='US', name='United States')
+
+        address = Address.objects.create(address_line1='Test', country=us,
+                                         geom=Point(-118.42170426600454, 34.09700463377199))
+        lafd = FireDepartment.objects.create(name='Los Angeles', population=0, population_class=9, state='CA',
+                                             headquarters_address=address, featured=0, archived=0)
+
+        mock_con = mock_connect.return_value
+        mock_cur = mock_con.cursor.return_value
+        # Test with MultiPolygon
+        mock_cur.fetchone.return_value = ('01060000000200000001030000000200000005000000000000000000F03F000000000000F03F0000000000001440000000000000F03F00000000000014400000000000001440000000000000F03F0000000000001440000000000000F03F000000000000F03F0500000000000000000000400000000000000040000000000000084000000000000000400000000000000840000000000000084000000000000000400000000000000840000000000000004000000000000000400103000000010000000400000000000000000008400000000000000840000000000000184000000000000000400000000000001840000000000000104000000000000008400000000000000840',)
+
+        calculate_department_census_geom.delay(lafd.id)
+
+        lafd.refresh_from_db()
+        self.assertIsNotNone(lafd.owned_tracts_geom)
+        self.assertEqual(lafd.owned_tracts_geom.num_geom, 2)
+
+        # Test w/ Polygon as well
+        mock_cur.fetchone.return_value = ('010600000001000000010300000001000000050000000000000000000000000000000000000000000000000000000000000000004940000000000000494000000000000049400000000000004940000000000000000000000000000000000000000000000000',)
+
+        calculate_department_census_geom.delay(lafd.id)
+        lafd.refresh_from_db()
+
+        self.assertIsNotNone(lafd.owned_tracts_geom)
+        self.assertEqual(lafd.owned_tracts_geom.num_geom, 1)
