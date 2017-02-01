@@ -5,6 +5,7 @@
         <li class="onepage"><a href="{% url 'media' %}">media</a></li>
         <li class="onepage"><a href="{% url 'firestation_home' %}#partners">partners</a></li>
         <li class="onepage"><a href="{% url 'contact_us' %}">contact us</a></li>
+        <li class="onepage"><a href="{% url 'faq.html' %}">FAQs</a></li>
         {% if not user.is_authenticated %}
             <li class="onepage"><a href="{% url 'firestation_home' %}#signup">sign up</a></li>
             <li class="onepage"><a href="{% url 'login' %}?next={% url 'firedepartment_list' %}">login</a></li>
