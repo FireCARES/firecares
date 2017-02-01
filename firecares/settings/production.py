@@ -33,7 +33,7 @@ CACHES = {
     }
 }
 
-AWS_STORAGE_BUCKET_NAME = 'firecares-static'
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', None)
 COMPRESS_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 COMPRESS_URL = "https://static.firecares.org/"
 COMPRESS_STORAGE = "firecares.utils.CachedS3BotoStorage"
