@@ -424,8 +424,8 @@ class FireDepartmentListView(LoginRequiredMixin, PaginationMixin, ListView, Safe
         ('-name', 'Name Descending'),
         ('state', 'State Acscending'),
         ('-state', 'State Descending'),
-        ('dist_model_score', 'Lowest DIST Score'),
-        ('-dist_model_score', 'Highest DIST Score'),
+        ('dist_model_score', 'Lowest Performance Score'),
+        ('-dist_model_score', 'Highest Performance Score'),
         ('population', 'Smallest Population'),
         ('-population', 'Largest Population')
     ]
