@@ -136,7 +136,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'firecares.firecares_core.middleware.IMISSingleSignOnMiddleware',
     'reversion.middleware.RevisionMiddleware',
     'firecares.firecares_core.middleware.DisclaimerAcceptedMiddleware'
     # Uncomment the next line for simple clickjacking protection:

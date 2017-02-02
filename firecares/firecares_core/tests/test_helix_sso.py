@@ -71,24 +71,8 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         # Ensure that a user has been created
         resp = c.get(reverse('oauth_redirect'))
         resp = c.get(reverse('oauth_callback') + '?code=1231231234&state={}'.format(c.session['oauth_state']))
-        self.assertTrue(resp.status_code, 200)
-
-        user = User.objects.filter(username='iafc-1234567').first()
-        self.assertIsNotNone(user)
-        self.assertTrue(user.is_active)
-        self.assertFalse(user.is_staff)
-        self.assertFalse(user.is_superuser)
-        self.assertEqual(user.first_name, 'Tester')
-        self.assertEqual(user.last_name, 'McTesting')
-        self.assertEqual(user.email, 'tester-iafc@prominentedge.com')
-        resp = c.get(reverse('logout'))
-
-        # Make sure that the user is redirected to the Helix logout URL
-        self.assertEqual(resp.status_code, 302)
-        self.assertEqual(resp['Location'], self.logout_url)
-
-        # Ensure that user is actually logged out in FireCARES
-        self.assertFalse(c.session.items())
+        # We're not a chief, so make sure that we're gated
+        self.assert_redirect_to(resp, 'show_message')
 
     def test_fire_chief_registration(self, mock):
         """
@@ -109,8 +93,16 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         resp = c.get(reverse('oauth_callback') + '?code=1231231234&state={}'.format(c.session['oauth_state']))
         self.assert_redirect_to(resp, 'registration_choose_department')
 
+        user = User.objects.filter(username='iafc-1234567').first()
+        self.assertIsNotNone(user)
+        self.assertTrue(user.is_active)
+        self.assertFalse(user.is_staff)
+        self.assertFalse(user.is_superuser)
+        self.assertEqual(user.first_name, 'Tester')
+        self.assertEqual(user.last_name, 'McTesting')
+        self.assertEqual(user.email, 'tester-iafc@prominentedge.com')
+
         # Fire chief should sent to choose their department, need to simulate disclaimer acceptance
-        user = User.objects.get(username='iafc-1234567')
         user.userprofile.has_accepted_terms = True
         user.userprofile.save()
         resp = c.post(reverse('registration_choose_department'), data={'state': 'MO', 'department': fd.id})
@@ -121,6 +113,15 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         c.get(reverse('oauth_redirect'))
         resp = c.get(reverse('oauth_callback') + '?code=1231231234&state={}'.format(c.session['oauth_state']))
         self.assert_redirect_to(resp, 'firestation_home')
+
+        resp = c.get(reverse('logout'))
+
+        # Make sure that the user is redirected to the Helix logout URL
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp['Location'], self.logout_url)
+
+        # Ensure that user is actually logged out in FireCARES
+        self.assertFalse(c.session.items())
 
     def test_predetermined_fire_chief_registration(self, mock):
         """

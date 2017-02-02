@@ -6,7 +6,9 @@ from django.contrib.auth.decorators import login_required
 from django.views.defaults import page_not_found
 from django.views.generic import TemplateView
 from .firecares_core.forms import FirecaresPasswordResetForm
-from .firecares_core.views import ForgotUsername, ContactUs, AccountRequestView, ShowMessage, Disclaimer, OAuth2Callback, OAuth2Redirect, sso_logout_then_login
+from .firecares_core.views import (ForgotUsername, ContactUs, AccountRequestView,
+                                   ShowMessage, Disclaimer, OAuth2Callback,
+                                   OAuth2Redirect, sso_logout_then_login, IMISRedirect)
 from .firestation.api import StaffingResource, FireStationResource, FireDepartmentResource
 from tastypie.api import Api
 from firestation.views import Home
@@ -72,7 +74,8 @@ urlpatterns = patterns('',
     url(r'^disclaimer/$', Disclaimer.as_view(), name='disclaimer'),
     url(r'^invitations/', include('firecares.firecares_core.ext.invitations.urls', namespace='invitations')),
     url(r'^oauth/$', OAuth2Callback.as_view(), name='oauth_callback'),
-    url(r'^oauthlogin/$', OAuth2Redirect.as_view(), name='oauth_redirect')
+    url(r'^oauthlogin/$', OAuth2Redirect.as_view(), name='oauth_redirect'),
+    url(r'^imis/$', IMISRedirect.as_view(), name='imis')
 )
 
 # urlpatterns += importer_urlpatterns

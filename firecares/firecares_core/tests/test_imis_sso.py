@@ -2,6 +2,7 @@ import os
 from uuid import uuid4
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.urlresolvers import reverse
 from django.test import Client
 from requests_mock import Mocker
 from .base import BaseFirecaresTestcase
@@ -62,13 +63,13 @@ class IMISSingleSignOnTests(BaseFirecaresTestcase):
 
         # Mock up a UUID token - redirected back to site from iMIS
         self.valid_session = False
-        resp = c.get('/?ibcToken={}'.format(uuid))
+        resp = c.get(reverse('imis') + '?ibcToken={}'.format(uuid))
         # Invalid session token will redirect the user back to login page
         self.assert_redirect_to(resp, 'login')
         self.assertFalse('ibcToken' in c.session)
 
         self.valid_session = True
-        resp = c.get('/?ibcToken={}'.format(uuid))
+        resp = c.get(reverse('imis') + '?ibcToken={}'.format(uuid))
         self.assertTrue('ibcToken' in c.session)
         # A user should be created with username = ImisId
         user = User.objects.filter(username='iaff-0559211').first()
@@ -91,12 +92,12 @@ class IMISSingleSignOnTests(BaseFirecaresTestcase):
 
         c = Client()
         uuid = uuid4()
-        c.get('/?ibcToken={}'.format(uuid))
+        c.get(reverse('imis') + '?ibcToken={}'.format(uuid))
         user = User.objects.filter(username='iaff-0559211').first()
         self.assertEqual(user.email, 'tester@prominentedge.com')
 
         c.logout()
         self.user_info_updated = True
-        c.get('/?ibcToken={}'.format(uuid))
+        c.get(reverse('imis') + '?ibcToken={}'.format(uuid))
         user.refresh_from_db()
         self.assertEqual(user.email, 'testing@prominentedge.com')

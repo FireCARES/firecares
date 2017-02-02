@@ -4,17 +4,18 @@ from .forms import ForgotUsernameForm, AccountRequestForm
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
-from django.contrib import messages
+from django.contrib import messages, auth
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth.views import logout
 from django.contrib.sites.models import Site
-from django.http import HttpResponseRedirect, HttpResponseBadRequest
+from django.http import HttpResponseBadRequest
 from django.shortcuts import render, redirect, resolve_url
 from django.template import loader
 from django.views.generic import View, CreateView, TemplateView
 from requests_oauthlib import OAuth2Session
 from oauthlib.common import to_unicode
+from zeep import Client
 from firecares.tasks.email import send_mail, email_admins
 from firecares.firecares_core.models import PredeterminedUser
 from firecares.firecares_core.ext.registration.views import SESSION_EMAIL_WHITELISTED
@@ -43,7 +44,7 @@ class ForgotUsername(View):
                                context,
                                settings.DEFAULT_FROM_EMAIL,
                                user.email)
-            return HttpResponseRedirect(reverse('username_sent'))
+            return redirect(reverse('username_sent'))
         return render(request, self.template_name, {'form': form})
 
 
@@ -62,7 +63,7 @@ class ContactUs(View):
     def _save_and_notify(self, form):
         m = form.save()
         self.send_email(m)
-        return HttpResponseRedirect(reverse('contact_thank_you'))
+        return redirect(reverse('contact_thank_you'))
 
     def get(self, request, *args, **kwargs):
         form = ContactForm()
@@ -215,6 +216,24 @@ class OAuth2Callback(View):
     def _create_username(self, token):
         return 'iafc-{}'.format(token['membershipid'])
 
+    def _allowed_in(self, token):
+        return token.get('membershipid') and get_functional_title(token) in settings.HELIX_ACCEPTED_CHIEF_ADMIN_TITLES
+
+    def _auth_user(self, token):
+        user = authenticate(remote_user=self._create_username(token))
+        if user:
+            user.email = token.get('email')
+            user.first_name = token.get('firstname')
+            user.last_name = token.get('lastname')
+            user.save()
+
+        return user
+
+    def _gate(self, request):
+        request.session['message_title'] = 'Login error'
+        request.session['message'] = 'Only IAFC fire chiefs are allowed to login into FireCARES via the Helix authentication system'
+        return redirect('show_message')
+
     def get(self, request):
         if 'code' in request.GET and 'state' in request.GET:
             # Respond to oauth2 workflow (grab a token)
@@ -229,27 +248,14 @@ class OAuth2Callback(View):
                                       code=request.GET['code'])
             request.session['oauth_token'] = token
 
-            if not token.get('membershipid'):
-                request.session['message_title'] = 'Login error'
-                request.session['message'] = 'Only IAFC members are allowed to login into FireCARES via the Helix authentication system'
-                return redirect('show_message')
+            email = token.get('email')
 
-            user = authenticate(remote_user=self._create_username(token))
-
-            if user:
-                user.email = token.get('email')
-                user.first_name = token.get('firstname')
-                user.last_name = token.get('lastname')
-                user.save()
-
-                user.userprofile.functional_title = get_functional_title(token)
-                user.userprofile.save()
-
-                login(request, user)
-
-                # If the user logs in through Helix AND they are in the perdetermined user list, then assign admin perms
-                if user.email in PredeterminedUser.objects.values_list('email', flat=True):
-                    pdu = PredeterminedUser.objects.get(email=user.email)
+            # If the user logs in through Helix AND they are in the perdetermined user list, then assign admin perms
+            if email in PredeterminedUser.objects.values_list('email', flat=True):
+                user = self._auth_user(token)
+                if user:
+                    login(request, user)
+                    pdu = PredeterminedUser.objects.get(email=email)
                     pdu.department.add_admin(user)
                     # Also, associate this department with the user explicitly in the user's profile
                     user.userprofile.department = pdu.department
@@ -258,13 +264,22 @@ class OAuth2Callback(View):
                                  'Admin permissions automatically granted for {} ({}) on {} ({})'.format(user.username, user.email, pdu.department.name, pdu.department.id))
                     # Send to associated department on login
                     return redirect(reverse('firedepartment_detail', args=[user.userprofile.department.id]))
-                elif user.userprofile.functional_title in settings.HELIX_ACCEPTED_CHIEF_ADMIN_TITLES and\
-                        not DepartmentAssociationRequest.user_has_association_request(user):
-                    return redirect(reverse('registration_choose_department'))
+            else:
+                if self._allowed_in(token):
+                    user = self._auth_user(token)
+                    if user:
+                        login(request, user)
+                        user.userprofile.functional_title = get_functional_title(token)
+                        user.userprofile.save()
+                        if not DepartmentAssociationRequest.user_has_association_request(user):
+                            return redirect(reverse('registration_choose_department'))
+                        else:
+                            return redirect(request.GET.get('next') or reverse('firestation_home'))
 
-                return redirect(request.GET.get('next') or reverse('firestation_home'))
-        else:
-            return HttpResponseBadRequest()
+                else:
+                    return self._gate(request)
+
+        return HttpResponseBadRequest()
 
 
 def sso_logout_then_login(request, login_url=None, current_app=None, extra_context=None):
@@ -279,3 +294,42 @@ def sso_logout_then_login(request, login_url=None, current_app=None, extra_conte
     if 'oauth_token' in request.session:
         login_url = settings.HELIX_LOGOUT_URL
     return logout(request, login_url, current_app=current_app, extra_context=extra_context)
+
+
+class IMISRedirect(View):
+    application_instance = 1
+    imis = None
+
+    def _extract_user_info(self, sso_user_container):
+        ret = {i: getattr(sso_user_container, i) for i in sso_user_container if i != 'ExtensionData'}
+        ret['extension_data'] = {x.tag: x.text for x in sso_user_container.ExtensionData._value_1}
+        return ret
+
+    def _create_username(self, user_info):
+        return 'iaff-{}'.format(user_info.get('ImisId'))
+
+    def get(self, request):
+        # Looking to start a new session
+        if 'ibcToken' in request.GET:
+            # Do service reflection on demand vs on middleware init
+            self.imis = Client(settings.IMIS_SSO_SERVICE_URL) if not self.imis else self.imis
+            # Verify token and create user if none exists
+            token = request.GET['ibcToken']
+            if self.imis.service.ValidateSession(applicationInstance=self.application_instance, userToken=token):
+                request.session['ibcToken'] = token
+                info = self.imis.service.FetchUserInfo(applicationInstance=self.application_instance, userToken=token)
+                user_info = self._extract_user_info(info)
+
+                user = auth.authenticate(remote_user=self._create_username(user_info))
+                # Sync user information on every login
+                if user:
+                    user.email = user_info.get('EmailAddress', user.email)
+                    user.first_name = user_info.get('FirstName', user.first_name)
+                    user.last_name = user_info.get('LastName', user.last_name)
+                    user.save()
+                    # TODO: Handle department association if permissions are found
+                    auth.login(request, user)
+                    return redirect(request.GET.get('next') or reverse('firestation_home'))
+
+        messages.add_message(request, messages.ERROR, 'Invalid or missing IMIS session token')
+        return redirect(reverse('login'))
