@@ -48,26 +48,21 @@ def update_performance_score(id, dry_run=False):
     RESIDENTIAL_FIRES_BY_FDID_STATE = """
     SELECT *
     FROM crosstab(
-      'select COALESCE(b.risk_category, ''N/A'') as risk_category, fire_sprd, count(*)
-        FROM buildingfires a left join (SELECT
-          *
-        FROM (
+      'select COALESCE(y.risk_category, ''N/A'') as risk_category, fire_sprd, count(*)
+        FROM buildingfires a left join (
           SELECT state,
             fdid,
             inc_date,
             inc_no,
             exp_no,
             geom,
-            b.parcel_id,
-            b.wkb_geometry,
-            b.risk_category,
-            ROW_NUMBER() OVER (PARTITION BY state, fdid, inc_date, inc_no, exp_no, geom ORDER BY st_distance(st_centroid(b.wkb_geometry), a.geom)) AS r
-          FROM (select * from incidentaddress where state='%(state)s' and fdid='%(fdid)s') a
-             left join parcel_risk_category_local b on a.geom && b.wkb_geometry
-             ) x
-        WHERE
-        x.r = 1) b using (state, inc_date, exp_no, fdid, inc_no)
-    where state='%(state)s' and fdid='%(fdid)s' and prop_use in (''419'',''429'',''439'',''449'',''459'',''460'',''462'',''464'',''400'')
+            x.parcel_id,
+            x.risk_category
+          FROM (select * from incidentaddress a
+             left join parcel_risk_category_local b using (parcel_id)
+             ) AS x
+        ) AS y using (state, inc_date, exp_no, fdid, inc_no)
+    where a.state='%(state)s' and a.fdid='%(fdid)s' and prop_use in (''419'',''429'',''439'',''449'',''459'',''460'',''462'',''464'',''400'')
     group by risk_category, fire_sprd
     order by risk_category, fire_sprd ASC')
     AS ct(risk_category text, "1" bigint, "2" bigint, "3" bigint, "4" bigint, "5" bigint);
@@ -238,13 +233,13 @@ def update_nfirs_counts(id, year=None):
 
 
 @app.task(queue='update')
-def calculate_department_census_geom(id):
+def calculate_department_census_geom(fd_id):
     """
     Calculate and cache the owned census geometry for a specific department
     """
 
     try:
-        fd = FireDepartment.objects.get(id=id)
+        fd = FireDepartment.objects.get(id=fd_id)
         cursor = connections['nfirs'].cursor()
     except (FireDepartment.DoesNotExist, ConnectionDoesNotExist):
         return
@@ -286,3 +281,43 @@ def update_heatmap_file(state, fd_id, id):
     """
     cmd = cursor.mogrify(sql, (state, fd_id, id))
     cursor.execute(cmd)
+
+
+@app.task(queue='update')
+def calculate_structure_counts(fd_id):
+    try:
+        fd = FireDepartment.objects.get(id=fd_id)
+        cursor = connections['nfirs'].cursor()
+    except (FireDepartment.DoesNotExist, ConnectionDoesNotExist):
+        return
+
+    if not fd.owned_tracts_geom:
+        return
+
+    STRUCTURE_COUNTS = """SELECT sum(case when l.risk_category = 'Low' THEN 1 ELSE 0 END) as low,
+        sum(CASE WHEN l.risk_category = 'Medium' THEN 1 ELSE 0 END) as medium,
+        sum(CASE WHEN l.risk_category = 'High' THEN 1 ELSE 0 END) high,
+        sum(CASE WHEN l.risk_category is null THEN 1 ELSE 0 END) as na
+    FROM parcel_risk_category_local l
+    JOIN (SELECT ST_SetSRID(%(owned_geom)s::geometry, 4326) as owned_geom) x
+    ON owned_geom && l.wkb_geometry
+    WHERE ST_Intersects(owned_geom, l.wkb_geometry)
+    """
+
+    cursor.execute(STRUCTURE_COUNTS, {'owned_geom': fd.owned_tracts_geom.wkb})
+
+    mapping = {1: 'low', 2: 'medium', 4: 'high', 5: 'na'}
+
+    tot = 0
+    counts = dictfetchall(cursor)[0]
+
+    for l in set(LEVEL_CHOICES_DICT) - set({0}):
+        rm, _ = fd.firedepartmentriskmodels_set.get_or_create(level=l)
+        count = counts[mapping[l]]
+        rm.structure_count = count
+        rm.save()
+        tot = tot + count
+
+    rm, _ = fd.firedepartmentriskmodels_set.get_or_create(level=0)
+    rm.structure_count = tot
+    rm.save()

@@ -422,6 +422,11 @@
                                 </div>
                                 {% endif %}
                             </div>
+                            <risk-distribution-bar-chart metric-title="STRUCTURE RISK DISTRIUBTION" width="230" height="150"
+                                low="{{ object.metrics.structure_counts_by_risk_category.low }}" medium="{{ object.metrics.structure_counts_by_risk_category.medium }}"
+                                high="{{ object.metrics.structure_counts_by_risk_category.high }}" all="{{ object.metrics.structure_counts_by_risk_category.high }}"
+                                unknown="{{ object.metrics.structure_counts_by_risk_category.unknown }}">
+                            </risk-distribution-bar-chart>
                         </div>
                         <div class="col-md-8">
                             <div class="ct-heading ct-u-marginBottom10">

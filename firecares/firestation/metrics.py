@@ -375,6 +375,10 @@ class FireDepartmentMetrics(object):
         return self._get_risk_model_field('risk_model_fires_size2_percentage')
 
     @cached_property
+    def structure_counts_by_risk_category(self):
+        return self._get_risk_model_field('structure_count')
+
+    @cached_property
     def predicted_fires_sum(self):
         """
         Convenience method to sum

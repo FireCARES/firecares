@@ -6,6 +6,7 @@
         .directive('asterChart', AsterChartDirective)
         .directive('barChart', BarChartDirective)
         .directive('bulletChart', BulletChartDirective)
+        .directive('riskDistributionBarChart', RiskDistributionBarChartDirective)
     ;
 
     function LineChartDirective() {
@@ -458,6 +459,80 @@
         };
     }
 
+    function RiskDistributionBarChartDirective() {
+      return {
+        restrict: 'CE',
+        replace: false,
+        scope: {
+          metricTitle: '@?',
+          width: '@',
+          height: '@',
+          low: '@',
+          medium: '@',
+          high: '@',
+          all: '@',
+          unknown: '@'
+        },
+        template: '<div class="chart-header" style="width: {{width}}px;">' +
+                    '<div class="chart-title">{{metricTitle}}</div>' +
+                  '</div>' +
+                  '<svg class="no-select"></svg>',
+        link: function(scope, element, attrs) {
+          element.find('svg').appear(function() {
+            var width = parseInt(attrs.width);
+            var height = parseInt(attrs.height);
+            var margins = {top: 20, left: 50, right: 20, bottom: 50};
+            var data = {'Low': attrs.low || 0, 'Medium': attrs.medium || 0, 'High': attrs.high || 0, 'Unknown': attrs.unknown || 0};
+
+            var svg = d3.select(element).selectAll('svg')
+              .attr("width", width + margins.left + margins.right)
+              .attr("height", height + margins.top + margins.bottom)
+              .append('g')
+              .attr('transform', 'translate(' + margins.left + ',' + margins.top + ')');
+
+            var svgBarGroup = svg.append('g').attr('class', 'bar-chart-bars');
+
+            var svgLabelGroup = svg.append('g').attr('class', 'bar-chart-labels');
+
+            var x = d3.scale.ordinal().rangeRoundBands([0, width], .5);
+            var y = d3.scale.linear().range([height, 0]);
+
+            x.domain(['Low', 'Medium', 'High', 'Unknown']);
+            y.domain([0, d3.max(d3.values(data))]);
+
+            var idx = 0;
+            for (var d in data) {
+              svgBarGroup.append('rect')
+                .attr('class', 'chart-section-data')
+                .attr('x', x(d) - margins.left / 2.25)
+                .attr('y', height)
+                .attr('width', x.rangeBand())
+                .attr('height', 0)
+                .transition()
+                  .duration(500)
+                  .delay(idx * 200)
+                  .ease('cubic-out')
+                  .attr('height', height - y(data[d]))
+                  .attr('y', y(data[d]));
+              idx++;
+            }
+
+            var xAxis = d3.svg.axis().scale(x).orient('bottom').tickSize(0);
+            var yAxis = d3.svg.axis().scale(y).orient('left').ticks(4);
+
+            svg.append('g')
+                .attr('class', 'x axis')
+                .attr('transform', 'translate(' + -(margins.left / 2.25) + ',' + (height + 5) + ')')
+                .call(xAxis);
+
+            svg.append('g')
+              .attr('class', 'y axis')
+              .call(yAxis);
+
+          });
+        }
+      }
+    }
 
     BarChartDirective.$inject = ['heatmap'];
 
@@ -915,5 +990,3 @@
         return str;
     }
 }());
-
-

@@ -671,6 +671,9 @@ class FireDepartmentRiskModels(models.Model):
     risk_model_fires_size2_percentage = models.FloatField(null=True, blank=True,
                                                           verbose_name='Percentage of size 2 fires.')
 
+    structure_count = models.IntegerField(null=True, blank=True,
+                                          verbose_name='Structure counts for this hazard level over department\'s owned census tracts')
+
     def __unicode__(self):
         return '{level} risk - {department} ({f_id})'.format(level=LEVEL_CHOICES_DICT[self.level], department=self.department, f_id=self.department.id)
 

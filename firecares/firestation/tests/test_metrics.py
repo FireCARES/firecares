@@ -1,14 +1,15 @@
 import mock
 import requests
 from StringIO import StringIO
-from django.contrib.gis.geos import Point
+from django.contrib.gis.geos import Point, GEOSGeometry
 from django.core.management import call_command
 from django.db import connections
 from django.test.client import Client
 from firecares.firecares_core.tests.base import BaseFirecaresTestcase
 from firecares.firestation.models import FireDepartment, FireDepartmentRiskModels, PopulationClassQuartile
 from firecares.firestation.templatetags.firecares_tags import quartile_text, risk_level
-from firecares.tasks.update import update_performance_score, dist_model_for_hazard_level, update_nfirs_counts, calculate_department_census_geom
+from firecares.tasks.update import (update_performance_score, dist_model_for_hazard_level, update_nfirs_counts,
+                                    calculate_department_census_geom, calculate_structure_counts)
 from firecares.firecares_core.models import Address, Country
 from fire_risk.models import DIST, DISTMediumHazard, DISTHighHazard
 
@@ -175,8 +176,8 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         self.assertEqual(len(fd.firedepartmentriskmodels_set.all()), 4)
         self.assertEqual(len(fd2.firedepartmentriskmodels_set.all()), 4)
 
-    @mock.patch("psycopg2.connect")
-    def test_update_nfirs(self, mock_connect):
+    @mock.patch('firecares.tasks.update.connections')
+    def test_update_nfirs(self, mock_connections):
 
         us = Country.objects.create(iso_code='US', name='United States')
 
@@ -194,8 +195,8 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
             (u'Medium', 51L, 147L, 12L, 41L, 7L),
             (u'N/A', 1L, 52L, 192L, 18L, 66L)
         ]
-        mock_con = mock_connect.return_value
-        mock_cur = mock_con.cursor.return_value
+
+        mock_cur = mock_connections['nfirs'].cursor.return_value
         mock_cur.description = [('risk_category',), ('1',), ('2',), ('3',), ('4',), ('5',)]
         mock_cur.fetchall.return_value = query_result
         update_performance_score(lafd.id)
@@ -215,8 +216,8 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         self.assertEqual(dist_model_for_hazard_level('All'), DIST)
         self.assertEqual(dist_model_for_hazard_level('Low'), DIST)
 
-    @mock.patch("psycopg2.connect")
-    def test_pull_nfirs_statistics(self, mock_connect):
+    @mock.patch('firecares.tasks.update.connections')
+    def test_pull_nfirs_statistics(self, mock_connections):
 
         us = Country.objects.create(iso_code='US', name='United States')
 
@@ -225,79 +226,56 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         lafd = FireDepartment.objects.create(name='Los Angeles', population=0, population_class=9, state='CA',
                                              headquarters_address=address, featured=0, archived=0)
 
-        class MockNFIRSCursor(object):
-            def __init__(self):
-                self.responses = [
-                    ((2L, 2014.0, u'N/A'),
-                     (2L, 2012.0, u'Low'),
-                     (4L, 2012.0, u'N/A'),
-                     (11L, 2011.0, u'Low'),
-                     (43L, 2011.0, u'Medium'),
-                     (2L, 2011.0, u'N/A'),
-                     (2L, 2010.0, u'Low'),
-                     (1L, 2010.0, u'Medium'),
-                     (2L, 2010.0, u'N/A')),
-
-                    ((1L, 2014.0, u'High'),
-                     (8L, 2014.0, u'Low'),
-                     (4L, 2014.0, u'Medium'),
-                     (9L, 2014.0, u'N/A'),
-                     (1L, 2013.0, u'High'),
-                     (9L, 2013.0, u'Low'),
-                     (8L, 2013.0, u'Medium'),
-                     (5L, 2013.0, u'N/A'),
-                     (12L, 2012.0, u'Low'),
-                     (7L, 2012.0, u'Medium'),
-                     (11L, 2012.0, u'N/A'),
-                     (1L, 2011.0, u'High'),
-                     (24L, 2011.0, u'Low'),
-                     (6L, 2011.0, u'Medium'),
-                     (6L, 2011.0, u'N/A'),
-                     (17L, 2010.0, u'Low'),
-                     (7L, 2010.0, u'Medium'),
-                     (21L, 2010.0, u'N/A')),
-
-                    ((2L, 2014.0, u'Low'),
-                     (1L, 2014.0, u'Medium'),
-                     (2L, 2014.0, u'N/A'),
-                     (1L, 2013.0, u'Medium'),
-                     (2L, 2012.0, u'Low'),
-                     (4L, 2012.0, u'Medium'),
-                     (4L, 2012.0, u'N/A'),
-                     (7L, 2011.0, u'Low'),
-                     (1L, 2011.0, u'Medium'),
-                     (1L, 2011.0, u'N/A'),
-                     (6L, 2010.0, u'Low'),
-                     (2L, 2010.0, u'Medium'),
-                     (2L, 2010.0, u'N/A')),
-
-                    ((2014L,),
-                     (2013L,),
-                     (2012L,),
-                     (2011L,),
-                     (2010L,))
-                ]
-
-            def execute(self, query, params=None):
-                if 'FROM ffcasualty a' in query:
-                    self.response = self.responses[0]
-                elif 'FROM buildingfires a' in query:
-                    self.response = self.responses[1]
-                elif 'FROM civiliancasualty a' in query:
-                    self.response = self.responses[2]
-                else:
-                    self.response = self.responses[3]
-
-            def fetchall(self):
-                return self.response
-
-            def close(self):
-                pass
+        side_effects = [((2014L,),
+                         (2013L,),
+                         (2012L,),
+                         (2011L,),
+                         (2010L,)),
+                        ((2L, 2014.0, u'Low'),
+                         (1L, 2014.0, u'Medium'),
+                         (2L, 2014.0, u'N/A'),
+                         (1L, 2013.0, u'Medium'),
+                         (2L, 2012.0, u'Low'),
+                         (4L, 2012.0, u'Medium'),
+                         (4L, 2012.0, u'N/A'),
+                         (7L, 2011.0, u'Low'),
+                         (1L, 2011.0, u'Medium'),
+                         (1L, 2011.0, u'N/A'),
+                         (6L, 2010.0, u'Low'),
+                         (2L, 2010.0, u'Medium'),
+                         (2L, 2010.0, u'N/A')),
+                        ((1L, 2014.0, u'High'),
+                         (8L, 2014.0, u'Low'),
+                         (4L, 2014.0, u'Medium'),
+                         (9L, 2014.0, u'N/A'),
+                         (1L, 2013.0, u'High'),
+                         (9L, 2013.0, u'Low'),
+                         (8L, 2013.0, u'Medium'),
+                         (5L, 2013.0, u'N/A'),
+                         (12L, 2012.0, u'Low'),
+                         (7L, 2012.0, u'Medium'),
+                         (11L, 2012.0, u'N/A'),
+                         (1L, 2011.0, u'High'),
+                         (24L, 2011.0, u'Low'),
+                         (6L, 2011.0, u'Medium'),
+                         (6L, 2011.0, u'N/A'),
+                         (17L, 2010.0, u'Low'),
+                         (7L, 2010.0, u'Medium'),
+                         (21L, 2010.0, u'N/A')),
+                        ((2L, 2014.0, u'N/A'),
+                         (2L, 2012.0, u'Low'),
+                         (4L, 2012.0, u'N/A'),
+                         (11L, 2011.0, u'Low'),
+                         (43L, 2011.0, u'Medium'),
+                         (2L, 2011.0, u'N/A'),
+                         (2L, 2010.0, u'Low'),
+                         (1L, 2010.0, u'Medium'),
+                         (2L, 2010.0, u'N/A'))]
 
         self.assertEqual(lafd.nfirsstatistic_set.count(), 0)
 
-        mock_con = mock_connect.return_value
-        mock_con.cursor.return_value = MockNFIRSCursor()
+        mock_cur = mock_connections['nfirs'].cursor.return_value
+        mock_cur.fetchall.side_effect = side_effects
 
         update_nfirs_counts(lafd.id)
 
@@ -313,8 +291,8 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
 
         self.assertEqual(lafd.nfirsstatistic_set.get(year=2010, level=1, metric='civilian_casualties').count, 6L)
 
-    @mock.patch("psycopg2.connect")
-    def test_calculate_department_census_geom(self, mock_connect):
+    @mock.patch('firecares.tasks.update.connections')
+    def test_calculate_department_census_geom(self, mock_connections):
         us = Country.objects.create(iso_code='US', name='United States')
 
         address = Address.objects.create(address_line1='Test', country=us,
@@ -322,10 +300,10 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         lafd = FireDepartment.objects.create(name='Los Angeles', population=0, population_class=9, state='CA',
                                              headquarters_address=address, featured=0, archived=0)
 
-        mock_con = mock_connect.return_value
-        mock_cur = mock_con.cursor.return_value
-        # Test with MultiPolygon
-        mock_cur.fetchone.return_value = ('01060000000200000001030000000200000005000000000000000000F03F000000000000F03F0000000000001440000000000000F03F00000000000014400000000000001440000000000000F03F0000000000001440000000000000F03F000000000000F03F0500000000000000000000400000000000000040000000000000084000000000000000400000000000000840000000000000084000000000000000400000000000000840000000000000004000000000000000400103000000010000000400000000000000000008400000000000000840000000000000184000000000000000400000000000001840000000000000104000000000000008400000000000000840',)
+        mock_cur = mock_connections['nfirs'].cursor.return_value
+        # MultiPolygon test
+        g = GEOSGeometry('MULTIPOLYGON (((1 1, 5 1, 5 5, 1 5, 1 1), (2 2, 3 2, 3 3, 2 3, 2 2)), ((3 3, 6 2, 6 4, 3 3)))')
+        mock_cur.fetchone.side_effect = [(g.hex,), (GEOSGeometry('MULTIPOLYGON (((0 0, 0 50, 50 50, 50 0, 0 0)))').hex,)]
 
         calculate_department_census_geom.delay(lafd.id)
 
@@ -333,11 +311,33 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         self.assertIsNotNone(lafd.owned_tracts_geom)
         self.assertEqual(lafd.owned_tracts_geom.num_geom, 2)
 
-        # Test w/ Polygon as well
-        mock_cur.fetchone.return_value = ('010600000001000000010300000001000000050000000000000000000000000000000000000000000000000000000000000000004940000000000000494000000000000049400000000000004940000000000000000000000000000000000000000000000000',)
+        # Enusre that geoms with single polygons will work as well
 
         calculate_department_census_geom.delay(lafd.id)
         lafd.refresh_from_db()
 
         self.assertIsNotNone(lafd.owned_tracts_geom)
         self.assertEqual(lafd.owned_tracts_geom.num_geom, 1)
+
+    @mock.patch('firecares.tasks.update.connections')
+    def test_calculate_structure_counts(self, mock_connections):
+        us = Country.objects.create(iso_code='US', name='United States')
+
+        address = Address.objects.create(address_line1='Test', country=us,
+                                         geom=Point(-118.42170426600454, 34.09700463377199))
+        lafd = FireDepartment.objects.create(name='Los Angeles', population=0, population_class=9, state='CA',
+                                             headquarters_address=address, featured=0, archived=0)
+        lafd.owned_tracts_geom = GEOSGeometry('MULTIPOLYGON (((1 1, 5 1, 5 5, 1 5, 1 1), (2 2, 3 2, 3 3, 2 3, 2 2)), ((3 3, 6 2, 6 4, 3 3)))')
+        lafd.save()
+
+        ret = [(543338L, 236418L, 19695L, 1069L)]
+
+        mock_cur = mock_connections['nfirs'].cursor.return_value
+        mock_cur.description = [('low',), ('medium',), ('high',), ('na',)]
+        mock_cur.fetchall.return_value = ret
+
+        calculate_structure_counts.delay(lafd.id)
+
+        self.assertEqual(lafd.metrics.structure_counts_by_risk_category.low, 543338L)
+        # This will fail as soon as we enable the "Unknown" level
+        self.assertEqual(lafd.metrics.structure_counts_by_risk_category.all, sum(ret[0][:3]))
