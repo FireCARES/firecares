@@ -43,6 +43,12 @@ workon firecares
 python manage.py test
 ```
 
+Additionally, individual tests can be run using the full module/classname/test name path.  If not testing migrations `--keepdb` will significantly speed up the whole process:
+
+```
+python manage.py test firecares.firestation.tests.test_metrics:FireDepartmentMetricsTests.test_calculate_structure_counts --noinput --keepdb
+```
+
 #### Generating CSS
 
 This project uses LESS CSS pre-processor to generate CSS rules.  To make a modification to a CSS rule, follow these steps:

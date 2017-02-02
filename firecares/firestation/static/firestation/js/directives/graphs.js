@@ -481,8 +481,13 @@
           element.find('svg').appear(function() {
             var width = parseInt(attrs.width);
             var height = parseInt(attrs.height);
-            var margins = {top: 20, left: 50, right: 20, bottom: 50};
-            var data = {'Low': attrs.low || 0, 'Medium': attrs.medium || 0, 'High': attrs.high || 0, 'Unknown': attrs.unknown || 0};
+            var margins = {top: 20, left: 55, right: 20, bottom: 50};
+
+            var data = {'Low': parseInt(attrs.low || 0),
+              'Medium': parseInt(attrs.medium || 0),
+              'High': parseInt(attrs.high || 0),
+              'Unknown': parseInt(attrs.unknown || 0)
+            };
 
             var svg = d3.select(element).selectAll('svg')
               .attr("width", width + margins.left + margins.right)
@@ -501,15 +506,16 @@
             y.domain([0, d3.max(d3.values(data))]);
 
             var idx = 0;
+            var keyCount = Object.keys(data).length
             for (var d in data) {
               svgBarGroup.append('rect')
                 .attr('class', 'chart-section-data')
-                .attr('x', x(d) - margins.left / 2.25)
+                .attr('x', x(d) - margins.left / 2.5)
                 .attr('y', height)
                 .attr('width', x.rangeBand())
                 .attr('height', 0)
                 .transition()
-                  .duration(500)
+                  .duration(1000)
                   .delay(idx * 200)
                   .ease('cubic-out')
                   .attr('height', height - y(data[d]))
@@ -522,13 +528,12 @@
 
             svg.append('g')
                 .attr('class', 'x axis')
-                .attr('transform', 'translate(' + -(margins.left / 2.25) + ',' + (height + 5) + ')')
+                .attr('transform', 'translate(' + -(margins.left / 2.5) + ',' + (height + 5) + ')')
                 .call(xAxis);
 
             svg.append('g')
               .attr('class', 'y axis')
               .call(yAxis);
-
           });
         }
       }
