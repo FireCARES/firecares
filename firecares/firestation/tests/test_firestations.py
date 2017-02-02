@@ -44,8 +44,8 @@ class FireStationTests(BaseFirecaresTestcase):
 
         c = Client()
 
-        for resource in ['staffing', 'firestations', 'fire-departments']:
-            url = '{0}?format=json'.format(reverse('api_dispatch_list', args=[self.current_api_version, resource]),)
+        for resource in ['staffing', 'fire-departments']:
+            url = reverse('api_dispatch_list', args=[self.current_api_version, resource])
             response = c.get(url)
             self.assertEqual(response.status_code, 401)
 
@@ -53,6 +53,10 @@ class FireStationTests(BaseFirecaresTestcase):
             response = c.get(url)
             self.assertEqual(response.status_code, 200)
             c.logout()
+
+        # We ARE able to pull fire stations w/o logging in
+        response = c.get(reverse('api_dispatch_list', args=[self.current_api_version, 'firestations']))
+        self.assertEqual(response.status_code, 200)
 
     def test_add_capability_to_station(self):
         """
@@ -81,6 +85,12 @@ class FireStationTests(BaseFirecaresTestcase):
 
         c.login(**self.non_admin_creds)
 
+        response = c.post(url, data=json.dumps(capability), content_type='application/json')
+        self.assertEqual(response.status_code, 401)
+
+        c.logout()
+
+        # Anonymous users unable to add capabilities
         response = c.post(url, data=json.dumps(capability), content_type='application/json')
         self.assertEqual(response.status_code, 401)
 
@@ -286,9 +296,9 @@ class FireStationTests(BaseFirecaresTestcase):
 
         c = Client()
 
-        # MUST be logged in to use the FireStation API
+        # Anonymous user should be able to read from the FireStation API
         response = c.get(url)
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 200)
 
         c.login(**self.non_admin_creds)
 

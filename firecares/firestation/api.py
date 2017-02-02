@@ -4,7 +4,7 @@ from .forms import StaffingForm
 from .models import FireStation, Staffing, FireDepartment
 from django.core.serializers.json import DjangoJSONEncoder
 from tastypie import fields
-from tastypie.authentication import SessionAuthentication, ApiKeyAuthentication, MultiAuthentication
+from tastypie.authentication import SessionAuthentication, ApiKeyAuthentication, MultiAuthentication, Authentication
 from tastypie.authorization import DjangoAuthorization
 from tastypie.cache import SimpleCache
 from tastypie.constants import ALL
@@ -229,7 +229,7 @@ class FireStationResource(JSONDefaultModelResourceMixin, ModelResource):
                                               update_permission_code='change_firedepartment',
                                               create_permission_code='change_firedepartment',
                                               delete_permission_code='admin_firedepartment')
-        authentication = MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
+        authentication = MultiAuthentication(Authentication(), SessionAuthentication(), ApiKeyAuthentication())
         list_allowed_methods = ['get']
         detail_allowed_methods = ['get', 'put']
         filtering = {'department': ('exact',), 'state': ('exact',), 'id': ('exact',)}
