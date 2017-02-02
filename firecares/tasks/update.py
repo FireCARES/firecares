@@ -4,7 +4,7 @@ from firecares.celery import app
 from django.contrib.gis.geos import GEOSGeometry
 from django.db import connections
 from django.db.utils import ConnectionDoesNotExist
-from firecares.firestation.models import FireDepartment, create_quartile_views, LEVEL_CHOICES_REVERSE_DICT, LEVEL_CHOICES_DICT
+from firecares.firestation.models import FireDepartment, create_quartile_views, HazardLevels
 from firecares.firestation.models import NFIRSStatistic as nfirs
 from fire_risk.models import DIST, DISTMediumHazard, DISTHighHazard, NotEnoughRecords
 from fire_risk.models.DIST.providers.ahs import ahs_building_areas
@@ -69,6 +69,7 @@ def update_performance_score(id, dry_run=False):
     """
 
     cursor.execute(RESIDENTIAL_FIRES_BY_FDID_STATE, {'fdid': fd.fdid, 'state': fd.state})
+
     results = dictfetchall(cursor)
 
     all_counts = dict(object_of_origin=0,
@@ -77,9 +78,11 @@ def update_performance_score(id, dry_run=False):
                       building_of_origin=0,
                       beyond=0)
 
+    risk_mapping = {'Low': 1, 'Medium': 2, 'High': 4, 'N/A': 5}
+
     for result in results:
 
-        if result.get('risk_category') not in LEVEL_CHOICES_REVERSE_DICT:
+        if result.get('risk_category') not in risk_mapping:
             continue
 
         dist_model = dist_model_for_hazard_level(result.get('risk_category'))
@@ -104,13 +107,13 @@ def update_performance_score(id, dry_run=False):
         if response_times:
             counts['arrival_time_draw'] = LogNormalDraw(*response_times, multiplier=60)
 
-        record, _ = fd.firedepartmentriskmodels_set.get_or_create(level=LEVEL_CHOICES_REVERSE_DICT.get(result['risk_category']))
+        record, _ = fd.firedepartmentriskmodels_set.get_or_create(level=risk_mapping[result['risk_category']])
         old_score = record.dist_model_score
 
         try:
             dist = dist_model(floor_extent=False, **counts)
             record.dist_model_score = dist.gibbs_sample()
-            print 'updating fdid: {2} - {3} risk level from: {0} to {1}.'.format(old_score, record.dist_model_score, fd.id, LEVEL_CHOICES_DICT[record.level])
+            print 'updating fdid: {2} - {3} risk level from: {0} to {1}.'.format(old_score, record.dist_model_score, fd.id, HazardLevels(record.level).name)
 
         except (NotEnoughRecords, ZeroDivisionError):
             print 'Error updating DIST score: {}.'.format(traceback.format_exc())
@@ -119,14 +122,14 @@ def update_performance_score(id, dry_run=False):
         if not dry_run:
             record.save()
 
-    record, _ = fd.firedepartmentriskmodels_set.get_or_create(level=LEVEL_CHOICES_REVERSE_DICT.get('All'))
+    record, _ = fd.firedepartmentriskmodels_set.get_or_create(level=HazardLevels.All.value)
     old_score = record.dist_model_score
     dist_model = dist_model_for_hazard_level('All')
 
     try:
         dist = dist_model(floor_extent=False, **all_counts)
         record.dist_model_score = dist.gibbs_sample()
-        print 'updating fdid: {2} - {3} risk level from: {0} to {1}.'.format(old_score, record.dist_model_score, fd.id, LEVEL_CHOICES_DICT[record.level])
+        print 'updating fdid: {2} - {3} risk level from: {0} to {1}.'.format(old_score, record.dist_model_score, fd.id, HazardLevels(record.level).name)
 
     except (NotEnoughRecords, ZeroDivisionError):
         print 'Error updating DIST score: {}.'.format(traceback.format_exc())
@@ -311,13 +314,13 @@ def calculate_structure_counts(fd_id):
     tot = 0
     counts = dictfetchall(cursor)[0]
 
-    for l in set(LEVEL_CHOICES_DICT) - set({0}):
+    for l in HazardLevels.values_sans_all():
         rm, _ = fd.firedepartmentriskmodels_set.get_or_create(level=l)
         count = counts[mapping[l]]
         rm.structure_count = count
         rm.save()
         tot = tot + count
 
-    rm, _ = fd.firedepartmentriskmodels_set.get_or_create(level=0)
+    rm, _ = fd.firedepartmentriskmodels_set.get_or_create(level=HazardLevels.All.value)
     rm.structure_count = tot
     rm.save()

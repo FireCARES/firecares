@@ -21,6 +21,7 @@ from django.utils.functional import cached_property
 from django.utils.deconstruct import deconstructible
 from firecares.firecares_core.models import Address
 from firecares.firecares_core.validators import validate_choice
+from firecares.utils import IntChoiceEnum
 from numpy import histogram
 from phonenumber_field.modelfields import PhoneNumberField
 from firecares.firecares_core.models import Country
@@ -31,13 +32,35 @@ from .metrics import FireDepartmentMetrics
 from guardian.shortcuts import assign_perm, remove_perm, get_users_with_perms
 
 
-LEVEL_CHOICES = [(0, 'All'),
-                 (1, 'Low'),
-                 (2, 'Medium'),
-                 (4, 'High')]
+class HazardLevels(IntChoiceEnum):
+    All = 0
+    Low = 1
+    Medium = 2
+    High = 4
+    Unknown = 5
 
-LEVEL_CHOICES_DICT = {k: v for k, v in LEVEL_CHOICES}
-LEVEL_CHOICES_REVERSE_DICT = {v: k for k, v in LEVEL_CHOICES}
+    @classmethod
+    def coerce(cls, name):
+        if name.lower() == 'n/a' or name.lower() == 'na':
+            return cls.Unknown
+        elif name.lower() == 'low':
+            return cls.Low
+        elif name.lower() == 'medium' or name.lower() == 'med':
+            return cls.Medium
+        elif name.lower() == 'high':
+            return cls.High
+        elif name.lower() == 'all':
+            return cls.All
+        else:
+            raise KeyError
+
+    @classmethod
+    def values(cls):
+        return sorted(map(int, cls))
+
+    @classmethod
+    def values_sans_all(cls):
+        return sorted(filter(lambda x: x != cls.All.value, cls.values()))
 
 
 class USGSStructureData(models.Model):
@@ -640,7 +663,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
 
 
 class FireDepartmentRiskModels(models.Model):
-    level = models.IntegerField(choices=LEVEL_CHOICES, default=1)
+    level = models.IntegerField(choices=HazardLevels.choices(), default=1)
     department = models.ForeignKey(FireDepartment)
     dist_model_score = models.FloatField(null=True, blank=True, editable=False, db_index=True)
 
@@ -675,7 +698,7 @@ class FireDepartmentRiskModels(models.Model):
                                           verbose_name='Structure counts for this hazard level over department\'s owned census tracts')
 
     def __unicode__(self):
-        return '{level} risk - {department} ({f_id})'.format(level=LEVEL_CHOICES_DICT[self.level], department=self.department, f_id=self.department.id)
+        return '{level} risk - {department} ({f_id})'.format(level=HazardLevels(self.level).name, department=self.department, f_id=self.department.id)
 
 
 class FireStation(USGSStructureData, Archivable):
@@ -985,7 +1008,7 @@ class NFIRSStatistic(models.Model):
     metric = models.CharField(max_length=50, db_index=True)
     year = models.PositiveSmallIntegerField(db_index=True)
     count = models.PositiveSmallIntegerField(db_index=True, null=True)
-    level = models.IntegerField(choices=LEVEL_CHOICES, default=1, db_index=True)
+    level = models.IntegerField(choices=HazardLevels.choices(), default=1, db_index=True)
 
     class Meta:
         unique_together = ['fire_department', 'year', 'metric', 'level']
@@ -1013,7 +1036,7 @@ class PopulationClassQuartile(models.Model):
     region = models.CharField(max_length=20, null=True, blank=True, editable=False)
     geom = models.MultiPolygonField(null=True, blank=True, editable=False)
     objects = CalculationManager()
-    level = models.IntegerField(choices=LEVEL_CHOICES, default=1)
+    level = models.IntegerField(choices=HazardLevels.choices(), default=1)
     dist_model_score = models.FloatField(null=True, blank=True, editable=False)
 
     risk_model_deaths = models.FloatField(null=True, blank=True, editable=False,

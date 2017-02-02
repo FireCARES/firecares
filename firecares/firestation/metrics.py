@@ -13,7 +13,7 @@ class FireDepartmentMetrics(object):
         self.quartile_class = quartile_class
         self.peers = AttrDict()
 
-    RISK_LEVELS = [(0, 'all'), (1, 'low'), (2, 'medium'), (4, 'high')]
+    RISK_LEVELS = [(0, 'all'), (1, 'low'), (2, 'medium'), (4, 'high'), (5, 'unknown')]
 
     @cached_property
     def population_metrics_rows(self):
@@ -24,6 +24,7 @@ class FireDepartmentMetrics(object):
             'low': self.quartile_class.objects.filter(id=self.firedepartment.id, level=1).first(),
             'medium': self.quartile_class.objects.filter(id=self.firedepartment.id, level=2).first(),
             'high': self.quartile_class.objects.filter(id=self.firedepartment.id, level=4).first(),
+            'unknown': self.quartile_class.objects.filter(id=self.firedepartment.id, level=5).first(),
             'all': self.quartile_class.objects.filter(id=self.firedepartment.id, level=0).first()
         })
 
@@ -54,8 +55,9 @@ class FireDepartmentMetrics(object):
         low = self.quartile_class.objects.filter(population_class=self.firedepartment.population_class, level=1).aggregate(*aggs)
         med = self.quartile_class.objects.filter(population_class=self.firedepartment.population_class, level=2).aggregate(*aggs)
         high = self.quartile_class.objects.filter(population_class=self.firedepartment.population_class, level=4).aggregate(*aggs)
+        unknown = self.quartile_class.objects.filter(population_class=self.firedepartment.population_class, level=5).aggregate(*aggs)
         all_levels = self.quartile_class.objects.filter(population_class=self.firedepartment.population_class, level=0).aggregate(*aggs)
-        results = dict(low=low, medium=med, high=high, all=all_levels)
+        results = dict(low=low, medium=med, high=high, unknown=unknown, all=all_levels)
         cache.set(cache_key, results, timeout=60 * 60 * 24)
         return results
 
@@ -65,12 +67,14 @@ class FireDepartmentMetrics(object):
             low = self.population_metrics_rows.low
             med = self.population_metrics_rows.medium
             high = self.population_metrics_rows.high
+            unknown = self.population_metrics_rows.unknown
             all_levels = self.population_metrics_rows.all
 
             return AttrDict({
                 'low': float(low.residential_fires_avg_3_years) if low and low.residential_fires_avg_3_years is not None else None,
                 'medium': float(med.residential_fires_avg_3_years) if med and med.residential_fires_avg_3_years is not None else None,
                 'high': float(high.residential_fires_avg_3_years) if high and high.residential_fires_avg_3_years is not None else None,
+                'unknown': float(unknown.residential_fires_avg_3_years) if unknown and unknown.residential_fires_avg_3_years is not None else None,
                 'all': float(all_levels.residential_fires_avg_3_years) if all_levels and all_levels.residential_fires_avg_3_years is not None else None,
             })
         else:
@@ -82,6 +86,7 @@ class FireDepartmentMetrics(object):
             low = get(1)
             medium = get(2)
             high = get(4)
+            unknown = get(5)
             all_levels = get(0)
 
             return AttrDict({
@@ -149,6 +154,7 @@ class FireDepartmentMetrics(object):
             'low': get(self.peers.low),
             'medium': get(self.peers.medium),
             'high': get(self.peers.high),
+            'unknown': get(self.peers.unknown),
             'all': get(self.peers.all)
         })
 
@@ -165,6 +171,7 @@ class FireDepartmentMetrics(object):
             'low': get(self.peers.low),
             'medium': get(self.peers.medium),
             'high': get(self.peers.high),
+            'unknown': get(self.peers.unknown),
             'all': get(self.peers.all)
         })
 
@@ -181,6 +188,7 @@ class FireDepartmentMetrics(object):
             'low': get(self.peers.low),
             'medium': get(self.peers.medium),
             'high': get(self.peers.high),
+            'unknown': get(self.peers.unknown),
             'all': get(self.peers.all)
         })
 
@@ -197,6 +205,7 @@ class FireDepartmentMetrics(object):
             'low': get(self.peers.low),
             'medium': get(self.peers.medium),
             'high': get(self.peers.high),
+            'unknown': get(self.peers.unknown),
             'all': get(self.peers.all)
         })
 
@@ -213,6 +222,7 @@ class FireDepartmentMetrics(object):
             'low': get(self.peers.low),
             'medium': get(self.peers.medium),
             'high': get(self.peers.high),
+            'unknown': get(self.peers.unknown),
             'all': get(self.peers.all)
         })
 
@@ -229,6 +239,7 @@ class FireDepartmentMetrics(object):
             'low': get(self.peers.low),
             'medium': get(self.peers.medium),
             'high': get(self.peers.high),
+            'unknown': get(self.peers.unknown),
             'all': get(self.peers.all)
         })
 
@@ -245,6 +256,7 @@ class FireDepartmentMetrics(object):
             'low': get(self.peers.low),
             'medium': get(self.peers.medium),
             'high': get(self.peers.high),
+            'unknown': get(self.peers.unknown),
             'all': get(self.peers.all)
         })
 
@@ -261,6 +273,7 @@ class FireDepartmentMetrics(object):
             'low': get(self.peers.low),
             'medium': get(self.peers.medium),
             'high': get(self.peers.high),
+            'unknown': get(self.peers.unknown),
             'all': get(self.peers.all)
         })
 
@@ -277,6 +290,7 @@ class FireDepartmentMetrics(object):
             'low': get(self.peers.low),
             'medium': get(self.peers.medium),
             'high': get(self.peers.high),
+            'unknown': get(self.peers.unknown),
             'all': get(self.peers.all)
         })
 
@@ -325,12 +339,14 @@ class FireDepartmentMetrics(object):
         low = get(1)
         medium = get(2)
         high = get(4)
+        unknown = get(5)
         all_levels = get(0)
 
         return AttrDict({
             'low': low,
             'medium': medium,
             'high': high,
+            'unknown': unknown,
             'all': all_levels
         })
 
@@ -384,7 +400,7 @@ class FireDepartmentMetrics(object):
         Convenience method to sum
         """
 
-        low, med, high, all_levels = self._get_risk_model_rows()
+        low, med, high, unknown, all_levels = self._get_risk_model_rows()
 
         def empty_fires(x):
             if x:
@@ -400,6 +416,7 @@ class FireDepartmentMetrics(object):
             'low': None if empty_fires(low) else sum_fires(low),
             'medium': None if empty_fires(med) else sum_fires(med),
             'high': None if empty_fires(high) else sum_fires(high),
+            'unknown': None if empty_fires(unknown) else sum_fires(unknown),
             'all': None if empty_fires(all_levels) else sum_fires(all_levels)
         })
 
@@ -411,7 +428,7 @@ class FireDepartmentMetrics(object):
         Convenience method to sum
         """
 
-        low, med, high, all_levels = self._get_risk_model_rows()
+        low, med, high, unknown, all_levels = self._get_risk_model_rows()
 
         def empty_fires(x):
             if x:
@@ -425,6 +442,7 @@ class FireDepartmentMetrics(object):
             'low': None if empty_fires(low) else sum_fires(low),
             'medium': None if empty_fires(med) else sum_fires(med),
             'high': None if empty_fires(high) else sum_fires(high),
+            'unknown': None if empty_fires(unknown) else sum_fires(unknown),
             'all': None if empty_fires(all_levels) else sum_fires(all_levels)
         })
 
@@ -436,7 +454,7 @@ class FireDepartmentMetrics(object):
         Convenience method to sum
         """
 
-        low, med, high, all_levels = self._get_risk_model_rows()
+        low, med, high, unknown, all_levels = self._get_risk_model_rows()
 
         def empty_percentages(x):
             if x:
@@ -450,6 +468,7 @@ class FireDepartmentMetrics(object):
             'low': None if empty_percentages(low) else sum_fires(low),
             'medium': None if empty_percentages(med) else sum_fires(med),
             'high': None if empty_percentages(high) else sum_fires(high),
+            'unknown': None if empty_percentages(unknown) else sum_fires(unknown),
             'all': None if empty_percentages(all_levels) else sum_fires(all_levels)
         })
 
@@ -458,7 +477,7 @@ class FireDepartmentMetrics(object):
     @cached_property
     def deaths_and_injuries_sum(self):
 
-        low, med, high, all_levels = self._get_risk_model_rows()
+        low, med, high, unknown, all_levels = self._get_risk_model_rows()
 
         def empty_deaths(x):
             if x:
@@ -472,6 +491,7 @@ class FireDepartmentMetrics(object):
             'low': None if empty_deaths(low) else sum_deaths(low),
             'medium': None if empty_deaths(med) else sum_deaths(med),
             'high': None if empty_deaths(high) else sum_deaths(high),
+            'unknown': None if empty_deaths(unknown) else sum_deaths(unknown),
             'all': None if empty_deaths(all_levels) else sum_deaths(all_levels)
         })
 
@@ -496,18 +516,20 @@ class FireDepartmentMetrics(object):
         return (self.firedepartment.firedepartmentriskmodels_set.filter(level=1).first(),
                 self.firedepartment.firedepartmentriskmodels_set.filter(level=2).first(),
                 self.firedepartment.firedepartmentriskmodels_set.filter(level=4).first(),
+                self.firedepartment.firedepartmentriskmodels_set.filter(level=5).first(),
                 self.firedepartment.firedepartmentriskmodels_set.filter(level=0).first())
 
     def _get_risk_model_field(self, field):
         """
         Return low/medium/high risk models
         """
-        low, med, high, all_levels = self._get_risk_model_rows()
+        low, med, high, unknown, all_levels = self._get_risk_model_rows()
 
         return AttrDict({
             'low': getattr(low, field, None),
             'medium': getattr(med, field, None),
             'high': getattr(high, field, None),
+            'unknown': getattr(unknown, field, None),
             'all': getattr(all_levels, field, None)
         })
 

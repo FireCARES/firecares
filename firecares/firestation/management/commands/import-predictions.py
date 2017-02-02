@@ -2,7 +2,7 @@ import argparse
 import pandas as pd
 import numpy as np
 from django.core.management.base import BaseCommand
-from firecares.firestation.models import FireDepartment, FireDepartmentRiskModels
+from firecares.firestation.models import FireDepartment
 from firecares.tasks.update import update_performance_score, create_quartile_views_task
 from firecares.utils import lenient_summation, lenient_mean
 
@@ -50,10 +50,11 @@ fd_id, state, lr_fire, mr_fire, h.fire, lr_inj, mr_inj, h.inj, lr_death, mr_deat
             row = i[1]
             if ids is None or cur_id in ids:
                 fd = FireDepartment.objects.filter(id=cur_id).first()
-                low = fd.firedepartmentriskmodels_set.filter(level=1).first() or FireDepartmentRiskModels(department=fd, level=1)
-                medium = fd.firedepartmentriskmodels_set.filter(level=2).first() or FireDepartmentRiskModels(department=fd, level=2)
-                high = fd.firedepartmentriskmodels_set.filter(level=4).first() or FireDepartmentRiskModels(department=fd, level=4)
-                all_level = fd.firedepartmentriskmodels_set.filter(level=0).first() or FireDepartmentRiskModels(department=fd, level=0)
+                low, _ = fd.firedepartmentriskmodels_set.get_or_create(level=1)
+                medium, _ = fd.firedepartmentriskmodels_set.get_or_create(level=2)
+                high, _ = fd.firedepartmentriskmodels_set.get_or_create(level=4)
+                unknown, _ = fd.firedepartmentriskmodels_set.get_or_create(level=5)
+                all_level, _ = fd.firedepartmentriskmodels_set.get_or_create(level=0)
 
                 self.stdout.write('Updating risk models for {} ({} of {})'.format(fd, idx + 1, len(items)), ending='')
 
@@ -85,6 +86,8 @@ fd_id, state, lr_fire, mr_fire, h.fire, lr_inj, mr_inj, h.inj, lr_death, mr_deat
                 all_level.risk_model_fires_size1 = lenient_summation(low.risk_model_fires_size1, medium.risk_model_fires_size1, high.risk_model_fires_size1)
                 all_level.risk_model_fires_size2 = lenient_summation(low.risk_model_fires_size2, medium.risk_model_fires_size2, high.risk_model_fires_size2)
                 self.calculate_derived_values(all_level)
+
+                # TODO: Where/how to pull "Unknown" levels...
 
                 # TODO: Add nifrsstatistic "all" level calculations
 

@@ -222,6 +222,7 @@
                                     <li><a href ng-click="setLevel('low')">Low</a></li>
                                     <li><a href ng-click="setLevel('medium')">Medium</a><li>
                                     <li><a href ng-click="setLevel('high')">High</a></li>
+                                    <li><a href ng-click="setLevel('unknown')">Unknown</a></li>
                                     <li><a href ng-click="setLevel('all')">All levels</a></li>
                                 </ul>
                             </div>
@@ -423,9 +424,11 @@
                                 {% endif %}
                             </div>
                             <risk-distribution-bar-chart metric-title="STRUCTURE RISK DISTRIUBTION" width="230" height="150"
-                                low="{{ object.metrics.structure_counts_by_risk_category.low }}" medium="{{ object.metrics.structure_counts_by_risk_category.medium }}"
-                                high="{{ object.metrics.structure_counts_by_risk_category.high }}" all="{{ object.metrics.structure_counts_by_risk_category.high }}"
-                                unknown="{{ object.metrics.structure_counts_by_risk_category.unknown }}">
+                                low="{{ object.metrics.structure_counts_by_risk_category.low | default_if_none:'' }}"
+                                medium="{{ object.metrics.structure_counts_by_risk_category.medium | default_if_none:'' }}"
+                                high="{{ object.metrics.structure_counts_by_risk_category.high | default_if_none:'' }}"
+                                all="{{ object.metrics.structure_counts_by_risk_category.high | default_if_none:'' }}"
+                                unknown="{{ object.metrics.structure_counts_by_risk_category.unknown | default_if_none:'' }}">
                             </risk-distribution-bar-chart>
                         </div>
                         <div class="col-md-8">

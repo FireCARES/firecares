@@ -6,7 +6,7 @@ from django.core.management import call_command
 from django.db import connections
 from django.test.client import Client
 from firecares.firecares_core.tests.base import BaseFirecaresTestcase
-from firecares.firestation.models import FireDepartment, FireDepartmentRiskModels, PopulationClassQuartile
+from firecares.firestation.models import FireDepartment, FireDepartmentRiskModels, PopulationClassQuartile, HazardLevels
 from firecares.firestation.templatetags.firecares_tags import quartile_text, risk_level
 from firecares.tasks.update import (update_performance_score, dist_model_for_hazard_level, update_nfirs_counts,
                                     calculate_department_census_geom, calculate_structure_counts)
@@ -25,8 +25,8 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
                                            department_type='test')
 
         FireDepartmentRiskModels.objects.create(department=fd)
-        self.assertDictEqual(fd.metrics.size2_and_greater_percentile_sum, {'all': None, 'low': None, 'medium': None, 'high': None})
-        self.assertDictEqual(fd.metrics.deaths_and_injuries_sum, {'all': None, 'low': None, 'medium': None, 'high': None})
+        self.assertDictEqual(fd.metrics.size2_and_greater_percentile_sum, {'all': None, 'low': None, 'medium': None, 'high': None, 'unknown': None})
+        self.assertDictEqual(fd.metrics.deaths_and_injuries_sum, {'all': None, 'low': None, 'medium': None, 'high': None, 'unknown': None})
 
         rm = fd.firedepartmentriskmodels_set.first()
         rm.risk_model_deaths = 1
@@ -173,8 +173,8 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         self.assertAlmostEqual(1, lr_fire_percent)
 
         # Ensure that aggregated "ALL" risk level rows are created
-        self.assertEqual(len(fd.firedepartmentriskmodels_set.all()), 4)
-        self.assertEqual(len(fd2.firedepartmentriskmodels_set.all()), 4)
+        self.assertEqual(len(fd.firedepartmentriskmodels_set.all()), 5)
+        self.assertEqual(len(fd2.firedepartmentriskmodels_set.all()), 5)
 
     @mock.patch('firecares.tasks.update.connections')
     def test_update_nfirs(self, mock_connections):
@@ -201,10 +201,10 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         mock_cur.fetchall.return_value = query_result
         update_performance_score(lafd.id)
 
-        self.assertEqual(lafd.firedepartmentriskmodels_set.all().count(), 4)
+        self.assertEqual(lafd.firedepartmentriskmodels_set.all().count(), 5)
 
         # ensure risk model data was created and the dist_model_score was populated correctly
-        for i in ['0', '1', '2', '4']:
+        for i in HazardLevels.values():
             queryset = lafd.firedepartmentriskmodels_set.filter(level=i)
             self.assertEqual(queryset.count(), 1)
             self.assertTrue(queryset.filter(dist_model_score__isnull=False))
@@ -215,6 +215,7 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         self.assertEqual(dist_model_for_hazard_level('Medium'), DISTMediumHazard)
         self.assertEqual(dist_model_for_hazard_level('All'), DIST)
         self.assertEqual(dist_model_for_hazard_level('Low'), DIST)
+        self.assertEqual(dist_model_for_hazard_level('Unknown'), DIST)
 
     @mock.patch('firecares.tasks.update.connections')
     def test_pull_nfirs_statistics(self, mock_connections):
@@ -340,4 +341,4 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
 
         self.assertEqual(lafd.metrics.structure_counts_by_risk_category.low, 543338L)
         # This will fail as soon as we enable the "Unknown" level
-        self.assertEqual(lafd.metrics.structure_counts_by_risk_category.all, sum(ret[0][:3]))
+        self.assertEqual(lafd.metrics.structure_counts_by_risk_category.all, sum(ret[0]))

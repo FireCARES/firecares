@@ -1,6 +1,8 @@
+import inspect
 import numbers
 import re
 from django.core.files.storage import get_storage_class
+from enum import IntEnum
 from storages.backends.s3boto import S3BotoStorage
 
 
@@ -60,3 +62,15 @@ class AttrDict(dict):
 
 def get_email_domain(email):
     return re.match(r'(^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)$)', email).groups()[1]
+
+
+class IntChoiceEnum(IntEnum):
+    @classmethod
+    def choices(cls):
+        # get all members of the class
+        members = inspect.getmembers(cls, lambda m: not(inspect.isroutine(m)))
+        # filter down to just properties
+        props = [m for m in members if not(m[0][:2] == '__')]
+        # format into django choice tuple
+        choices = tuple([(p[1].value, p[0]) for p in props])
+        return choices

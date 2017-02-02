@@ -182,7 +182,7 @@ class FireStationTests(BaseFirecaresTestcase):
 
     def test_deleting_a_fire_station(self):
         """
-        Tests that DELETE requests through the API return a 405 (not supported).
+        Tests that DELETE firestation requests through the API return a 405 (not supported).
         """
 
         url = '{0}{1}/'.format(reverse('api_dispatch_list', args=[self.current_api_version, 'firestations']),
@@ -196,7 +196,7 @@ class FireStationTests(BaseFirecaresTestcase):
 
     def test_deleting_a_fire_department(self):
         """
-        Tests that DELETE requests through the API return a 405 (not supported).
+        Tests that DELETE department requests through the API return a 405 (not supported).
         """
 
         fd = self.load_la_department()
@@ -211,7 +211,7 @@ class FireStationTests(BaseFirecaresTestcase):
 
     def test_creating_a_fire_department(self):
         """
-        Tests that POST requests through the API return a 405 (not supported).
+        Tests that POST department requests through the API return a 405 (not supported).
         """
 
         fd = self.load_la_department()
@@ -226,7 +226,7 @@ class FireStationTests(BaseFirecaresTestcase):
 
     def test_creating_a_fire_station(self):
         """
-        Tests that POST requests through the API return a 405 (not supported).
+        Tests that POST fire station requests through the API return a 405 (not supported).
         """
 
         fd = self.load_la_department()
