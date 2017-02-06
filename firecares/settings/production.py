@@ -34,8 +34,7 @@ CACHES = {
 }
 
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', None)
-COMPRESS_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-COMPRESS_URL = "https://static.firecares.org/"
+COMPRESS_URL = os.getenv("COMPRESS_URL", None)
 COMPRESS_STORAGE = "firecares.utils.CachedS3BotoStorage"
 STATICFILES_STORAGE = "firecares.utils.CachedS3BotoStorage"
 STATIC_URL = COMPRESS_URL
