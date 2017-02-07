@@ -30,6 +30,7 @@ from reversion import revisions as reversion
 from storages.backends.s3boto import S3BotoStorage
 from .metrics import FireDepartmentMetrics
 from guardian.shortcuts import assign_perm, remove_perm, get_users_with_perms
+from annoying.fields import JSONField
 
 
 class HazardLevels(IntChoiceEnum):
@@ -696,6 +697,8 @@ class FireDepartmentRiskModels(models.Model):
 
     structure_count = models.IntegerField(null=True, blank=True,
                                           verbose_name='Structure counts for this hazard level over department\'s owned census tracts')
+
+    floor_count_coefficients = JSONField(null=True, blank=True)
 
     def __unicode__(self):
         return '{level} risk - {department} ({f_id})'.format(level=HazardLevels(self.level).name, department=self.department, f_id=self.department.id)

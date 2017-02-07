@@ -304,7 +304,7 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         mock_cur = mock_connections['nfirs'].cursor.return_value
         # MultiPolygon test
         g = GEOSGeometry('MULTIPOLYGON (((1 1, 5 1, 5 5, 1 5, 1 1), (2 2, 3 2, 3 3, 2 3, 2 2)), ((3 3, 6 2, 6 4, 3 3)))')
-        mock_cur.fetchone.side_effect = [(g.hex,), (GEOSGeometry('MULTIPOLYGON (((0 0, 0 50, 50 50, 50 0, 0 0)))').hex,)]
+        mock_cur.fetchone.side_effect = [(g.hex,), (GEOSGeometry('MULTIPOLYGON (((0 0, 0 50, 50 50, 50 0, 0 0)))').hex,), None]
 
         calculate_department_census_geom.delay(lafd.id)
 
@@ -319,6 +319,11 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
 
         self.assertIsNotNone(lafd.owned_tracts_geom)
         self.assertEqual(lafd.owned_tracts_geom.num_geom, 1)
+
+        try:
+            calculate_department_census_geom.delay(lafd.id)
+        except Exception:
+            self.fail('Empty census geom should not cause exception')
 
     @mock.patch('firecares.tasks.update.connections')
     def test_calculate_structure_counts(self, mock_connections):

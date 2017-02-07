@@ -259,8 +259,11 @@ def calculate_department_census_geom(fd_id):
 
     geom = cursor.fetchone()
 
-    fd.owned_tracts_geom = GEOSGeometry(geom[0])
-    fd.save()
+    if geom:
+        fd.owned_tracts_geom = GEOSGeometry(geom[0])
+        fd.save()
+    else:
+        print 'No census geom - {} ({})'.format(fd.name, fd.id)
 
 
 @app.task(queue='update')

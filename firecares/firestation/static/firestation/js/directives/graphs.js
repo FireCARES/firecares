@@ -470,7 +470,6 @@
           low: '@',
           medium: '@',
           high: '@',
-          all: '@',
           unknown: '@'
         },
         template: '<div class="chart-header" style="width: {{width}}px;">' +
