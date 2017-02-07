@@ -63,38 +63,23 @@ class FireDepartmentMetrics(object):
 
     @cached_property
     def residential_fires_3_year_avg(self):
-        if self.population_metrics_rows:
-            low = self.population_metrics_rows.low
-            med = self.population_metrics_rows.medium
-            high = self.population_metrics_rows.high
-            unknown = self.population_metrics_rows.unknown
-            all_levels = self.population_metrics_rows.all
+        def get(level):
+            return self.firedepartment.nfirsstatistic_set.filter(metric='residential_structure_fires',
+                                                                 year__gte=2010,
+                                                                 level=level).aggregate(Avg('count')).get('count__avg')
+        low = get(1)
+        medium = get(2)
+        high = get(4)
+        unknown = get(5)
+        all_levels = get(0)
 
-            return AttrDict({
-                'low': float(low.residential_fires_avg_3_years) if low and low.residential_fires_avg_3_years is not None else None,
-                'medium': float(med.residential_fires_avg_3_years) if med and med.residential_fires_avg_3_years is not None else None,
-                'high': float(high.residential_fires_avg_3_years) if high and high.residential_fires_avg_3_years is not None else None,
-                'unknown': float(unknown.residential_fires_avg_3_years) if unknown and unknown.residential_fires_avg_3_years is not None else None,
-                'all': float(all_levels.residential_fires_avg_3_years) if all_levels and all_levels.residential_fires_avg_3_years is not None else None,
-            })
-        else:
-            def get(level):
-                return self.firedepartment.nfirsstatistic_set.filter(fire_department=self,
-                                                                     metric='residential_structure_fires',
-                                                                     year__gte=2010,
-                                                                     level=level).aggregate(Avg('count')),
-            low = get(1)
-            medium = get(2)
-            high = get(4)
-            unknown = get(5)
-            all_levels = get(0)
-
-            return AttrDict({
-                'low': low,
-                'medium': medium,
-                'high': high,
-                'all': all_levels
-            })
+        return AttrDict({
+            'low': low,
+            'medium': medium,
+            'high': high,
+            'unknown': unknown,
+            'all': all_levels
+        })
 
     @cached_property
     def residential_fires_avg_3_years_breaks(self):
@@ -332,9 +317,8 @@ class FireDepartmentMetrics(object):
     def nfirs_deaths_and_injuries_sum(self):
         def get(level):
             return self.firedepartment.nfirsstatistic_set.filter(Q(metric='civilian_casualties') | Q(metric='firefighter_casualties'),
-                                                                 fire_department=self.firedepartment,
                                                                  level=level,
-                                                                 year__gte=2010).aggregate(Avg('count'))
+                                                                 year__gte=2010).aggregate(Avg('count')).get('count__avg')
 
         low = get(1)
         medium = get(2)
