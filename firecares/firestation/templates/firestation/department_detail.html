@@ -423,13 +423,14 @@
                                 </div>
                                 {% endif %}
                             </div>
+                            {% if object.metrics.structure_counts_by_risk_category.low != None or object.metrics.structure_counts_by_risk_category.medium != None or object.metrics.structure_counts_by_risk_category.high != None or object.metrics.structure_counts_by_risk_category.unknown != None %}
                             <risk-distribution-bar-chart metric-title="STRUCTURE RISK DISTRIUBTION" width="230" height="150"
                                 low="{{ object.metrics.structure_counts_by_risk_category.low | default_if_none:'' }}"
                                 medium="{{ object.metrics.structure_counts_by_risk_category.medium | default_if_none:'' }}"
                                 high="{{ object.metrics.structure_counts_by_risk_category.high | default_if_none:'' }}"
-                                all="{{ object.metrics.structure_counts_by_risk_category.high | default_if_none:'' }}"
                                 unknown="{{ object.metrics.structure_counts_by_risk_category.unknown | default_if_none:'' }}">
                             </risk-distribution-bar-chart>
+                            {% endif %}
                         </div>
                         <div class="col-md-8">
                             <div class="ct-heading ct-u-marginBottom10">
@@ -684,7 +685,7 @@
                                                     <span class="text-left ct-u-paddingLeft20">Average since 2010</span>
                                                 </div>
                                                 <div class="col-xs-3">
-                                                    <span class="text-right">{{ metrics.residential_fires_3_year_avg[level] | number:0 | defaultValue:"N/A" }}</span>
+                                                    <span class="text-right">{{ metrics.residential_fires_3_year_avg[level]  | number:0 | defaultValue:"N/A" }}</span>
                                                 </div>
                                             </div>
 
@@ -735,7 +736,7 @@
                                                     <span class="text-left ct-u-paddingLeft20">Actual</span>
                                                 </div>
                                                 <div class="col-xs-3">
-                                                    <span class="text-right">{{ metrics.nfirs_deaths_and_injuries_sum[level].count__avg | number:0 | defaultValue:"N/A" }}</span>
+                                                    <span class="text-right">{{ metrics.nfirs_deaths_and_injuries_sum[level] | number:0 | defaultValue:"N/A" }}</span>
                                                 </div>
                                             </div>
 
