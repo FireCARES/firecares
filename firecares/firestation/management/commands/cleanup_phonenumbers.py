@@ -3,10 +3,10 @@ from django.core.management.base import BaseCommand
 from firecares.firestation.models import FireDepartment
 from phonenumber_field.phonenumber import PhoneNumber
 from phonenumbers.phonenumberutil import NumberParseException
-import re
 
 valid = []
 invalid = []
+
 
 class Command(BaseCommand):
     """
