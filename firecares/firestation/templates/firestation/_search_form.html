@@ -43,7 +43,7 @@
 </div>
 <div class="ct-u-displayTableCell">
     <label class="text-center center-block ct-u-marginBottom30">Protected Population</label>
-    <input name="population" humanize="1" type="text" ng-model="params.population" class="slider ct-js-sliderTicks"  data-slider-handle="square" data-slider-min="{{ population_min|floatformat|default:0 }}" data-slider-max="{{ population_max|floatformat|default:1000 }}"  data-slider-step="1"
+    <input name="population" humanize="1" type="text" ng-model="params.population" class="slider ct-js-sliderTicks"  data-slider-handle="square" data-slider-min="{{ population_min|floatformat|default:0 }}" data-slider-max="{{ population_max|floatformat|default:1000 }}" data-slider-step="1"
            data-slider-value="[{{request.GET.population | default:population_min}} , {{population_max}}]"/>
 </div>
 <button type="submit" class="btn btn-warning ct-u-marginTop10" ng-click="search()">Search or Filter Now</button>
