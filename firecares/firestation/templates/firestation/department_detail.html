@@ -213,7 +213,7 @@
                         <div class="ct-u-displayTableCell">
                             {% verbatim %}
                             <div class="dropdown">
-                                <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="riskLevelDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="riskLevelDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                     <span ng-if="level !== 'all'">Filter by {{ level }} risk level</span>
                                     <span ng-if="level === 'all'">Display all risk levels</span>
                                     <span class="caret"></span>
@@ -424,7 +424,7 @@
                                 {% endif %}
                             </div>
                             {% if object.metrics.structure_counts_by_risk_category.low != None or object.metrics.structure_counts_by_risk_category.medium != None or object.metrics.structure_counts_by_risk_category.high != None or object.metrics.structure_counts_by_risk_category.unknown != None %}
-                            <risk-distribution-bar-chart metric-title="STRUCTURE RISK DISTRIUBTION" width="230" height="150"
+                            <risk-distribution-bar-chart metric-title="STRUCTURE RISK DISTRIBUTION" width="230" height="150"
                                 low="{{ object.metrics.structure_counts_by_risk_category.low | default_if_none:'' }}"
                                 medium="{{ object.metrics.structure_counts_by_risk_category.medium | default_if_none:'' }}"
                                 high="{{ object.metrics.structure_counts_by_risk_category.high | default_if_none:'' }}"

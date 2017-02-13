@@ -16,4 +16,3 @@ class Command(BaseCommand):
 
         for fd in vals:
             self.stdout.write(sql.format(fdid=fd.fdid, state=fd.state, id=fd.id) + '\n\n')
-
