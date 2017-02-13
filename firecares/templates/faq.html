@@ -1,0 +1,60 @@
+{% extends "firestation/_conservative_base.html" %}
+
+{% load compress %}
+
+{% block page_title %}
+FAQs
+{% endblock%}
+
+{% block title %}
+Frequently Asked Questions
+{% endblock%}
+
+{% block breadcrumbs %}
+    <a href="{% url 'firestation_home' %}">Home</a>
+{% endblock %}
+
+{% block section %}
+
+<section class="ct-u-paddingBoth60">
+  <div class="container">
+    <div class="row">
+
+      <p>
+        <h3><strong>Q:</strong>
+          Why did the chicken cross the road?
+        </h3>
+        <br>
+        <h4><strong>A:</strong>
+          To get to the other side.
+        </h4>
+      </p>
+
+      <hr>
+
+      <p>
+        <h3><strong>Q:</strong>
+          Why do Java developers wear glasses?</h3>
+        <br>
+        <h4><strong>A:</strong>
+          Because they can't C#.
+        </h4>
+      </p>
+
+      <hr>
+
+      <p>
+        <h3><strong>Q:</strong>
+          Why is this page filled with dumb jokes?</h3>
+        <br>
+        <h4><strong>A:</strong>
+          Because they're just placeholders for the real FAQs.
+        </h4>
+      </p>
+
+    </div>
+  </div>
+  
+</section>
+
+{% endblock %}
