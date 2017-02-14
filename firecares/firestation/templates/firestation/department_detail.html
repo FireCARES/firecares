@@ -249,6 +249,7 @@
                     </div>
                     <div class="ct-heading ct-u-marginTop30 ct-u-marginBottom20">
                         <h3>Community Risk Assessment</h3>
+                        <selected-risk level="level"></selected-risk>
                     </div>
                     {% verbatim %}
                     <div class="row ct-u-marginBottom30">
@@ -464,6 +465,7 @@
 
                             <div class="ct-heading ct-u-marginBottom10">
                                 <h3>Annual Structure Fires</h3>
+                                <selected-risk level="level"></selected-risk>
                             </div>
                             <p class="ct-u-marginBottom20">Annual structure fire counts for the {{ object.name }} based on the National Fire Incident Reporting System (NFIRS).
                             </p>
@@ -551,7 +553,8 @@
                             <div class="col-sm-6 col-md-12 ct-u-marginBottom10">
                                 <!-- Safe Grade Cards -->
                                 <div class="metric-cards-title">
-                                    <h4>Safe Grades</h4>
+                                    <h4 style="display: inline;">Safe Grades</h4>
+                                    <selected-risk level="level"></selected-risk>
                                 </div>
                                 {% if user.is_authenticated %}
                                 <div class="metric-card">

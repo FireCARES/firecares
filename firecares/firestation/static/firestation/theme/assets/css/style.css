@@ -10977,6 +10977,16 @@ img.mfp-img {
 table.residential-fires {
   font-size: 14px;
 }
+.selected-risk {
+  color: #999;
+  text-transform: capitalize;
+}
+.ct-heading .selected-risk {
+  font-size: 18px;
+}
+.metric-cards-title .selected-risk {
+  font-size: 14px;
+}
 .gauge {
   background: #F6542F;
   background: -webkit-linear-gradient(left, #F6542F, #FEBE00 50%, #74AC49);
