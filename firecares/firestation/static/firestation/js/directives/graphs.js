@@ -418,27 +418,12 @@
                         return d.value
                     });
 
-                    for (var i = 0; i < dataArcPaths[0].length; i++) {
-                        var arcPath = d3.select(dataArcPaths[0][i]);
-                        var nextD = dataArc(arcPath.data()[0]);
-                        arcPath.attr('nextD', nextD);
-                    }
-
-                    // Animate the data arcs to their new size.
-                    dataArcPaths.transition()
+                    // Use data binding to avoid use of path to array conversions
+                    dataArcPaths.data(pie(arcData))
+                        .transition()
                         .duration(500)
                         .ease('cubic-out')
-                        .attrTween("d", arcTween); // redraw the arcs
-
-                    function arcTween() {
-                        var dataArc = d3.select(this);
-                        var curD = SVGArcStrToArray(dataArc.attr('d'));
-                        var nextD = SVGArcStrToArray(dataArc.attr('nextD'));
-                        var interp = d3.interpolate(curD, nextD);
-                        return function(t) {
-                            return SVGArcArrayToStr(interp(t));
-                        };
-                    }
+                        .attr("d", dataArc)
                 });
 
                 heatmap.onFilterChanged(scope.filterType, scope, function(ev, filter) {
@@ -934,66 +919,5 @@
                     .call(chart);
             }
         };
-    }
-
-    //
-    // Helper functions
-    //
-
-    // Convert SVG arc 'd' string to an array of commands.
-    // https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths
-    function SVGArcStrToArray(str) {
-        // Chop closing 'Z' command at the end.
-        str = str.substring(0, str.length - 1);
-
-        var cmds = str.split(/(?=[LMA])/);
-
-        var array = [];
-        for (var i = 0; i < cmds.length; i++) {
-            var cmdStr = cmds[i];
-            var cmd = {};
-            cmd.type = cmdStr.charAt(0);
-            cmd.values = [];
-
-            // Remove 'type' character from start of cmd string.
-            cmdStr = cmdStr.substring(1);
-
-            // Command values come in a two dimensional array, dilineated by ' ' and ','.
-            var cmdStrNums = cmdStr.split(' ');
-            for (var j = 0; j < cmdStrNums.length; j++) {
-                var numStrs = cmdStrNums[j].split(',');
-                var nums = [];
-                for (var k = 0; k < numStrs.length; k++) {
-                    nums.push(Number(numStrs[k]));
-                }
-
-                cmd.values.push(nums);
-            }
-
-            array.push(cmd);
-        }
-
-        return array;
-    }
-
-    // Convert arc SVG array of commands back to 'd' string.
-    function SVGArcArrayToStr(array) {
-        var str = '';
-        for (var i = 0; i < array.length; i++) {
-            var section = array[i];
-            str += section.type;
-
-            var valuesStrArray = [];
-            for (var j = 0; j < section.values.length; j++) {
-                valuesStrArray.push(section.values[j].join(','));
-            }
-
-            str += valuesStrArray.join(' ');
-        }
-
-        // Add closing 'Z' command.
-        str += 'Z';
-
-        return str;
     }
 }());
