@@ -576,6 +576,9 @@
                     .attr('class', 'bar-chart-labels')
                 ;
 
+                // Override transform attribute to fix IE text flip.
+                svgLabelGroup.attr('transform', 'scale(1, -1)')
+
                 var barData = heatmap.totals[scope.filterType];
                 if (!barData) {
                     console.error("Heatmap does not have a '" + scope.filterType + "' filter.");
