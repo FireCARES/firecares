@@ -35,6 +35,15 @@
             }
           }
         })
+        .directive('selectedRisk', function() {
+          return {
+            restrict: 'E',
+            scope: {
+              level: '='
+            },
+            template: '<span ng-if="level !== \'all\'" class="selected-risk">&nbsp;{{ level }} Risk</span>',
+          }
+        })
     ;
 
     JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', '$filter', 'FireDepartment'];

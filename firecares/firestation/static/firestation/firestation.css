@@ -231,3 +231,17 @@ bar-chart > svg > g.bar-chart-labels {
 .chart-reset:hover {
     opacity: 1;
 }
+
+/*
+Current selected risk label
+*/
+.ct-heading .selected-risk {
+    font-size: 18px;
+}
+.metric-cards-title .selected-risk {
+    font-size: 14px;
+}
+.selected-risk {
+    color: #999;
+    text-transform: capitalize;
+}
