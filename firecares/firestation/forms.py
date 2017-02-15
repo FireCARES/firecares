@@ -1,6 +1,6 @@
 import os
 from django import forms
-from .models import Staffing, Document, FireDepartment
+from .models import Staffing, Document, FireDepartment, DataFeedback
 
 
 class StaffingForm(forms.ModelForm):
@@ -52,3 +52,10 @@ class DepartmentUserApprovalForm(forms.Form):
         super(DepartmentUserApprovalForm, self).__init__(*args, **kwargs)
         if self.data and not self.data.get('approved'):
             self.fields['message'].required = True
+
+
+class DataFeedbackForm(forms.ModelForm):
+    class Meta:
+        model = DataFeedback
+        fields = ('message',)
+        # exclude = ('user', 'department', 'firestation')

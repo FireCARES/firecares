@@ -1,0 +1,8 @@
+A feedback has been submitted:
+
+User: {{ contact.user.username }}
+Email: {{ contact.user.email }}
+Fire Department: {{ contact.department }} {% if contact.firestation %}
+Fire Station: {{ contact.firestation }} {% endif %}
+Message: {{ contact.message }}
+Created: {{ contact.created_at }}

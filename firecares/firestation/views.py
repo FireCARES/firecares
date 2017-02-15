@@ -5,12 +5,13 @@ import osr
 import shutil
 import urllib
 import uuid
-from django.views.generic import DetailView, ListView, TemplateView, View
+from django.views.generic import DetailView, ListView, TemplateView, View, CreateView
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import permission_required
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.models import Site
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
@@ -34,7 +35,7 @@ from firecares.usgs.models import (StateorTerritoryHigh, CountyorEquivalent,
 from guardian.mixins import PermissionRequiredMixin
 from tempfile import mkdtemp
 from firecares.tasks.cleanup import remove_file
-from .forms import DocumentUploadForm, DepartmentUserApprovalForm
+from .forms import DocumentUploadForm, DepartmentUserApprovalForm, DataFeedbackForm
 from django.views.generic.edit import FormView
 from .models import Document, FireStation, FireDepartment, Staffing, create_quartile_views
 from favit.models import Favorite
@@ -922,3 +923,87 @@ class AdminDepartmentAccountRequests(PermissionRequiredMixin, LoginRequiredMixin
                 send_mail.delay(email_message)
 
         return redirect(self.object)
+
+
+class DataFeedbackView(LoginRequiredMixin, CreateView):
+    """
+    Processes data feedback
+    """
+    template_name = "firestation/feedback.html"
+    form_class = DataFeedbackForm
+
+    def _get_detail_objects(self):
+        """
+        Get the detailed object based on the model passed through the url and return multiple objects to know current
+        fire department, current firestation, and the model used to query.
+        """
+        # Since model is passed from urlpatterns, get_object() can be used transparently
+        detail_obj = self.get_object()
+        if isinstance(detail_obj, FireDepartment):
+            firedepartment = detail_obj
+            firestation = None
+            selected = 'firedepartment'
+        else:
+            firedepartment = detail_obj.department
+            firestation = detail_obj
+            selected = 'firestation'
+        return firedepartment, firestation, selected
+
+    def get_success_url(self):
+        """
+        Generate success url based on the current detail object
+        """
+        firedepartment, firestation, selected = self._get_detail_objects()
+        if selected == 'firedepartment':
+            return reverse('firedepartment_detail_slug', kwargs={'pk': firedepartment.id, 'slug': firedepartment.slug})
+        else:
+            return reverse('firestation_detail_slug', kwargs={'pk': firestation.id, 'slug': firestation.slug})
+
+    def _send_email(self):
+        """
+        Email admins when new feedback are received
+        """
+        print "send_mail"
+        to = [x[1] for x in settings.ADMINS]
+        print self.object
+        body = loader.render_to_string('contact/data_feedback.txt', dict(contact=self.object))
+        email_message = EmailMultiAlternatives('{} - New feedback received.'.format(Site.objects.get_current().name),
+                                               body,
+                                               settings.DEFAULT_FROM_EMAIL,
+                                               to)
+        send_mail.delay(email_message)
+
+    def _save_and_notify(self, form):
+        firedepartment, firestation, selected = self._get_detail_objects()
+        self.object = form.save(commit=False)
+        self.object.user = self.request.user
+        self.object.department = firedepartment
+        self.object.firestation = firestation
+        self.object.save()
+        self._send_email()
+        return redirect(self.get_success_url())
+
+    def form_valid(self, form):
+        """
+        If the form is valid then send email with the feedback message
+        """
+        messages.add_message(self.request, messages.SUCCESS, 'Your message has been received and sent to FireCARES administrators.')
+        return self._save_and_notify(form)
+
+    def form_invalid(self, form):
+        """
+        If the form is invalid, show error message
+        """
+        messages.add_message(self.request, messages.ERROR, 'Error processing request.')
+        return redirect(self.get_success_url())
+
+    def get_context_data(self, *args, **kwargs):
+        """
+        Update context data of the feedback form, use current detail object to fill template
+        """
+        self.object = self.get_object()
+        kwargs.update({
+            'object': self.object
+        })
+
+        return super(DataFeedbackView, self).get_context_data(*args, **kwargs)
