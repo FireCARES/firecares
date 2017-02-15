@@ -457,21 +457,26 @@
           high: '@',
           unknown: '@'
         },
-        template: '<div class="chart-header" style="width: {{width}}px;">' +
-                    '<div class="chart-title">{{metricTitle}}</div>' +
-                  '</div>' +
-                  '<svg class="no-select"></svg>',
+        template: '<svg class="no-select"></svg>',
         link: function(scope, element, attrs) {
           element.find('svg').appear(function() {
             var width = parseInt(attrs.width);
             var height = parseInt(attrs.height);
-            var margins = {top: 20, left: 55, right: 20, bottom: 50};
+            var margins = {top: 0, left: 60, right: 0, bottom: 20};
 
-            var data = {'Low': parseInt(attrs.low || 0),
-              'Medium': parseInt(attrs.medium || 0),
-              'High': parseInt(attrs.high || 0),
-              'Unknown': parseInt(attrs.unknown || 0)
-            };
+            var data = [{
+                'level': 'Low',
+                'value': parseInt(attrs.low || 0)
+              },{
+                'level': 'Medium',
+                'value': parseInt(attrs.medium || 0)
+              },{
+                'level': 'High',
+                'value': parseInt(attrs.high || 0)
+              },{
+                'level': 'Unknown',
+                'value': parseInt(attrs.unknown || 0)
+              }];
 
             var svg = d3.select(element).selectAll('svg')
               .attr("width", width + margins.left + margins.right)
@@ -479,40 +484,51 @@
               .append('g')
               .attr('transform', 'translate(' + margins.left + ',' + margins.top + ')');
 
-            var svgBarGroup = svg.append('g').attr('class', 'bar-chart-bars');
+            var svgBarGroup = svg.append('g').attr('class', 'bar-chart-bars').attr('transform', 'translate(5,0)');
 
             var svgLabelGroup = svg.append('g').attr('class', 'bar-chart-labels');
+
+            var tip = d3.tip()
+              .attr('class', 'd3-tip')
+              .offset([-10, 0])
+              .html(function(d) {
+                return "<strong>Structure count:</strong> <span class='tip-value'>" + humanizeInteger(d.value) + "</span>";
+              });
+
+            svg.call(tip);
 
             var x = d3.scale.ordinal().rangeRoundBands([0, width], .5);
             var y = d3.scale.linear().range([height, 0]);
 
-            x.domain(['Low', 'Medium', 'High', 'Unknown']);
-            y.domain([0, d3.max(d3.values(data))]);
+            x.domain(_.pluck(data, 'level'));
+            y.domain([0, d3.max(_.pluck(data, 'value'))]);
 
             var idx = 0;
-            var keyCount = Object.keys(data).length
-            for (var d in data) {
-              svgBarGroup.append('rect')
+            var keyCount = Object.keys(data).length;
+
+            svgBarGroup.selectAll('.chart-section-data')
+                .data(data)
+              .enter()
+                .append('rect')
                 .attr('class', 'chart-section-data')
-                .attr('x', x(d) - margins.left / 2.5)
+                .attr('x', function(d) { return x(d.level) - margins.left / 3; })
                 .attr('y', height)
                 .attr('width', x.rangeBand())
                 .attr('height', 0)
+                .on('mouseover', tip.show)
+                .on('mouseout', tip.hide)
                 .transition()
                   .duration(1000)
-                  .delay(idx * 200)
                   .ease('cubic-out')
-                  .attr('height', height - y(data[d]))
-                  .attr('y', y(data[d]));
-              idx++;
-            }
+                  .attr('height', function(d) { return height - y(d.value); })
+                  .attr('y', function(d) { return y(d.value); });
 
             var xAxis = d3.svg.axis().scale(x).orient('bottom').tickSize(0);
             var yAxis = d3.svg.axis().scale(y).orient('left').ticks(4);
 
             svg.append('g')
                 .attr('class', 'x axis')
-                .attr('transform', 'translate(' + -(margins.left / 2.5) + ',' + (height + 5) + ')')
+                .attr('transform', 'translate(' + (-(margins.left / 3) + 5) + ',' + (height + 5) + ')')
                 .call(xAxis);
 
             svg.append('g')

@@ -425,12 +425,19 @@
                                 {% endif %}
                             </div>
                             {% if object.metrics.structure_counts_by_risk_category.low != None or object.metrics.structure_counts_by_risk_category.medium != None or object.metrics.structure_counts_by_risk_category.high != None or object.metrics.structure_counts_by_risk_category.unknown != None %}
-                            <risk-distribution-bar-chart metric-title="STRUCTURE RISK DISTRIBUTION" width="230" height="150"
-                                low="{{ object.metrics.structure_counts_by_risk_category.low | default_if_none:'' }}"
-                                medium="{{ object.metrics.structure_counts_by_risk_category.medium | default_if_none:'' }}"
-                                high="{{ object.metrics.structure_counts_by_risk_category.high | default_if_none:'' }}"
-                                unknown="{{ object.metrics.structure_counts_by_risk_category.unknown | default_if_none:'' }}">
-                            </risk-distribution-bar-chart>
+                            <div class="metric-cards-title ct-u-marginTop20">
+                                <h4>Structure Hazard Level Distribution</h4>
+                            </div>
+                            <div class="metric-card">
+                                <div class="main-text">
+                                    <risk-distribution-bar-chart width="180" height="150"
+                                        low="{{ object.metrics.structure_counts_by_risk_category.low | default_if_none:'' }}"
+                                        medium="{{ object.metrics.structure_counts_by_risk_category.medium | default_if_none:'' }}"
+                                        high="{{ object.metrics.structure_counts_by_risk_category.high | default_if_none:'' }}"
+                                        unknown="{{ object.metrics.structure_counts_by_risk_category.unknown | default_if_none:'' }}">
+                                    </risk-distribution-bar-chart>
+                                </div>
+                            </div>
                             {% endif %}
                         </div>
                         <div class="col-md-8">
