@@ -155,22 +155,18 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
 
         call_command('import-predictions', 'firecares/firestation/tests/mock/predictions.csv', stdout=StringIO())
 
-        # Shoud have a total of 31 fires across size0, size1 and size2
-        self.assertEqual(fd.metrics.risk_model_fires.low, 31)
-        self.assertEqual(fd.metrics.risk_model_fires_size0.low, 28)
+        # Should have a total of 28 fires across size0 (None), size1 and size2
+        self.assertEqual(fd.metrics.risk_model_fires.low, 28)
+
+        # Fires size0 deprecated
+        self.assertEqual(fd.metrics.risk_model_fires_size0.low, None)
+        self.assertEqual(fd.metrics.risk_model_fires_size0.medium, None)
 
         # Having an NA value that should be considered 0 in the summation
-        self.assertEqual(fd.metrics.risk_model_fires_size0.medium, 18)
-        self.assertEqual(fd.metrics.risk_model_fires_size2.high, 5)
+        self.assertEqual(fd.metrics.risk_model_fires_size2.high, 0.5625)
 
         # Test to make sure that existing data isn't overwritten in the case of incoming NA values
         self.assertEqual(fd2.metrics.risk_model_deaths.low, 2)
-
-        # Percentages should add up to 1
-        lr_fire_percent = (fd.metrics.risk_model_fires_size0_percentage.low +
-                           fd.metrics.risk_model_fires_size1_percentage.low +
-                           fd.metrics.risk_model_fires_size2_percentage.low)
-        self.assertAlmostEqual(1, lr_fire_percent)
 
         # Ensure that aggregated "ALL" risk level rows are created
         self.assertEqual(len(fd.firedepartmentriskmodels_set.all()), 5)

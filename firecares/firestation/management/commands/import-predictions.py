@@ -4,7 +4,7 @@ import numpy as np
 from django.core.management.base import BaseCommand
 from firecares.firestation.models import FireDepartment
 from firecares.tasks.update import update_performance_score, create_quartile_views_task
-from firecares.utils import lenient_summation, lenient_mean
+from firecares.utils import lenient_summation
 
 
 class Command(BaseCommand):
@@ -26,9 +26,8 @@ fd_id, state, lr_fire, mr_fire, h.fire, lr_inj, mr_inj, h.inj, lr_death, mr_deat
 
     def calculate_derived_values(self, obj):
         # Derived values update...
-        obj.risk_model_fires = lenient_summation(obj.risk_model_fires_size0, obj.risk_model_fires_size1, obj.risk_model_fires_size2)
         if obj.risk_model_fires:
-            obj.risk_model_fires_size0_percentage = (obj.risk_model_fires_size0 or 0) / obj.risk_model_fires
+            obj.risk_model_fires_size0_percentage = None
             obj.risk_model_fires_size1_percentage = (obj.risk_model_fires_size1 or 0) / obj.risk_model_fires
             obj.risk_model_fires_size2_percentage = (obj.risk_model_fires_size2 or 0) / obj.risk_model_fires
 
@@ -38,9 +37,8 @@ fd_id, state, lr_fire, mr_fire, h.fire, lr_inj, mr_inj, h.inj, lr_death, mr_deat
         df = pd.read_csv(options['file'])
         count = 0
         cols = ['lr_fire', 'mr_fire', 'h.fire', 'lr_inj', 'mr_inj', 'h.inj', 'lr_death', 'mr_death', 'h.death', 'lr_size_2', 'mr_size_2', 'h.size2', 'lr_size_3', 'mr_size_3', 'h.size3']
+
         items = df.groupby(['fd_id', 'state'])[cols].sum()
-        # Assumption: Mapping *_size_2 to risk_model_fires_size1 and *_size_3 to risk_model_fires_size2
-        # Another assumption: if the incoming value is NaN, then DON'T update an existing valid value
 
         def valid(num):
             return not np.isnan(num)
@@ -49,6 +47,22 @@ fd_id, state, lr_fire, mr_fire, h.fire, lr_inj, mr_inj, h.inj, lr_death, mr_deat
             cur_id = int(i[0][0])
             row = i[1]
             if ids is None or cur_id in ids:
+                df['lr_beyond_room'] = df[df['fd_id'] == cur_id].apply(lambda row: row['lr_fire'] * row['lr_size_2'], axis=1)
+                df['lr_beyond_structure'] = df[df['fd_id'] == cur_id].apply(lambda row: row['lr_fire'] * row['lr_size_2'] * row['lr_size_3'], axis=1)
+                df['mr_beyond_room'] = df[df['fd_id'] == cur_id].apply(lambda row: row['mr_fire'] * row['mr_size_2'], axis=1)
+                df['mr_beyond_structure'] = df[df['fd_id'] == cur_id].apply(lambda row: row['mr_fire'] * row['mr_size_2'] * row['mr_size_3'], axis=1)
+                df['hr_beyond_room'] = df[df['fd_id'] == cur_id].apply(lambda row: row['h.fire'] * row['h.size2'], axis=1)
+                df['hr_beyond_structure'] = df[df['fd_id'] == cur_id].apply(lambda row: row['h.fire'] * row['h.size2'] * row['h.size3'], axis=1)
+
+                sums = df[df['fd_id'] == cur_id].groupby(['fd_id', 'state']).sum()
+
+                lr_beyond_room = sums['lr_beyond_room'][0]
+                lr_beyond_structure = sums['lr_beyond_structure'][0]
+                mr_beyond_room = sums['mr_beyond_room'][0]
+                mr_beyond_structure = sums['mr_beyond_structure'][0]
+                hr_beyond_room = sums['hr_beyond_room'][0]
+                hr_beyond_structure = sums['hr_beyond_structure'][0]
+
                 fd = FireDepartment.objects.filter(id=cur_id).first()
                 low, _ = fd.firedepartmentriskmodels_set.get_or_create(level=1)
                 medium, _ = fd.firedepartmentriskmodels_set.get_or_create(level=2)
@@ -56,38 +70,41 @@ fd_id, state, lr_fire, mr_fire, h.fire, lr_inj, mr_inj, h.inj, lr_death, mr_deat
                 unknown, _ = fd.firedepartmentriskmodels_set.get_or_create(level=5)
                 all_level, _ = fd.firedepartmentriskmodels_set.get_or_create(level=0)
 
-                self.stdout.write('Updating risk models for {} ({} of {})'.format(fd, idx + 1, len(items)), ending='')
+                self.stdout.write('Updating predictions for {} ({} of {})'.format(fd, idx + 1, len(items)), ending='')
 
                 low.risk_model_deaths = row['lr_death'] if valid(row['lr_death']) else low.risk_model_deaths
                 low.risk_model_injuries = row['lr_inj'] if valid(row['lr_inj']) else low.risk_model_injuries
-                low.risk_model_fires_size0 = row['lr_fire'] if valid(row['lr_fire']) else low.risk_model_fires_size0
-                low.risk_model_fires_size1 = row['lr_size_2'] if valid(row['lr_size_2']) else low.risk_model_fires_size1
-                low.risk_model_fires_size2 = row['lr_size_3'] if valid(row['lr_size_3']) else low.risk_model_fires_size2
+                low.risk_model_fires = row['lr_fire'] if valid(row['lr_fire']) else low.risk_model_fires
+                low.risk_model_fires_size0 = None
+                low.risk_model_fires_size1 = lr_beyond_room if valid(lr_beyond_room) else low.risk_model_fires_size1
+                low.risk_model_fires_size2 = lr_beyond_structure if valid(lr_beyond_structure) else low.risk_model_fires_size2
                 self.calculate_derived_values(low)
 
                 medium.risk_model_deaths = row['mr_death'] if valid(row['mr_death']) else medium.risk_model_deaths
                 medium.risk_model_injuries = row['mr_inj'] if valid(row['mr_inj']) else medium.risk_model_injuries
-                medium.risk_model_fires_size0 = row['mr_fire'] if valid(row['mr_fire']) else medium.risk_model_fires_size0
-                medium.risk_model_fires_size1 = row['mr_size_2'] if valid(row['mr_size_2']) else medium.risk_model_fires_size1
-                medium.risk_model_fires_size2 = row['mr_size_3'] if valid(row['mr_size_3']) else medium.risk_model_fires_size2
+                medium.risk_model_fires = row['mr_fire'] if valid(row['mr_fire']) else medium.risk_model_fires
+                medium.risk_model_fires_size0 = None
+                medium.risk_model_fires_size1 = mr_beyond_room if valid(mr_beyond_room) else medium.risk_model_fires_size1
+                medium.risk_model_fires_size2 = mr_beyond_structure if valid(mr_beyond_structure) else medium.risk_model_fires_size2
                 self.calculate_derived_values(medium)
 
                 high.risk_model_deaths = row['h.death'] if valid(row['h.death']) else high.risk_model_deaths
                 high.risk_model_injuries = row['h.inj'] if valid(row['h.inj']) else high.risk_model_injuries
-                high.risk_model_fires_size0 = row['h.fire'] if valid(row['h.fire']) else high.risk_model_fires_size0
-                high.risk_model_fires_size1 = row['h.size2'] if valid(row['h.size2']) else high.risk_model_fires_size1
-                high.risk_model_fires_size2 = row['h.size3'] if valid(row['h.size3']) else high.risk_model_fires_size2
+                high.risk_model_fires = row['h.fire'] if valid(row['h.fire']) else high.risk_model_fires
+                high.risk_model_fires_size0 = None
+                high.risk_model_fires_size1 = hr_beyond_room if valid(hr_beyond_room) else high.risk_model_fires_size1
+                high.risk_model_fires_size2 = hr_beyond_structure if valid(hr_beyond_structure) else high.risk_model_fires_size2
                 self.calculate_derived_values(high)
 
-                all_level.dist_model_score = lenient_mean(low.dist_model_score, medium.dist_model_score, high.dist_model_score)
                 all_level.risk_model_deaths = lenient_summation(low.risk_model_deaths, medium.risk_model_deaths, high.risk_model_deaths)
                 all_level.risk_model_injuries = lenient_summation(low.risk_model_injuries, medium.risk_model_injuries, high.risk_model_injuries)
-                all_level.risk_model_fires_size0 = lenient_summation(low.risk_model_fires_size0, medium.risk_model_fires_size0, high.risk_model_fires_size0)
+                all_level.risk_model_fires = lenient_summation(low.risk_model_fires, medium.risk_model_fires, high.risk_model_fires)
+                all_level.risk_model_fires_size0 = None
                 all_level.risk_model_fires_size1 = lenient_summation(low.risk_model_fires_size1, medium.risk_model_fires_size1, high.risk_model_fires_size1)
                 all_level.risk_model_fires_size2 = lenient_summation(low.risk_model_fires_size2, medium.risk_model_fires_size2, high.risk_model_fires_size2)
                 self.calculate_derived_values(all_level)
 
-                # TODO: Where/how to pull "Unknown" levels...
+                # No data for "unknown" risk level in terms of predictions...
 
                 # TODO: Add nifrsstatistic "all" level calculations
 
@@ -101,7 +118,8 @@ fd_id, state, lr_fire, mr_fire, h.fire, lr_inj, mr_inj, h.inj, lr_death, mr_deat
 
                 self.stdout.write('...done')
 
-        self.stdout.write(self.style.MIGRATE_SUCCESS('Updated/created risk model records for {} departments'.format(count)))
+        self.stdout.write(self.style.MIGRATE_SUCCESS('Updated/created prediction records for {} departments'.format(count)))
+
         if not dry_run:
             self.stdout.write('Creating/refreshing "population_quartiles" view')
             create_quartile_views_task.delay()

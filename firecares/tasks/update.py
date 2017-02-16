@@ -1,9 +1,11 @@
 import copy
+import numpy as np
 import traceback
 from firecares.celery import app
 from django.contrib.gis.geos import GEOSGeometry
 from django.db import connections
 from django.db.utils import ConnectionDoesNotExist
+from scipy.stats import lognorm
 from firecares.firestation.models import FireDepartment, create_quartile_views, HazardLevels
 from firecares.firestation.models import NFIRSStatistic as nfirs
 from fire_risk.models import DIST, DISTMediumHazard, DISTHighHazard, NotEnoughRecords
@@ -86,6 +88,12 @@ def update_performance_score(id, dry_run=False):
             continue
 
         dist_model = dist_model_for_hazard_level(result.get('risk_category'))
+
+        if result.get('risk_category') in ['medium', 'high']:
+            rm = fd.firedepartmentriskmodels_set.get_or_create(level=risk_mapping[result['risk_category']])
+            if rm.floor_count_coefficients:
+                # TODO
+                dist_model.number_of_floors_draw = LogNormalDraw(rm.floor_count_coefficients)
 
         counts = dict(object_of_origin=result.get('1', 0),
                       room_of_origin=result.get('2', 0),
@@ -327,3 +335,58 @@ def calculate_structure_counts(fd_id):
     rm, _ = fd.firedepartmentriskmodels_set.get_or_create(level=HazardLevels.All.value)
     rm.structure_count = tot
     rm.save()
+
+
+@app.task(queue='update')
+def calculate_story_distribution(fd_id):
+    """
+    Using the department in combination with similar departments, calculate the story distribution of structures in
+    owned census tracts.  Only medium and high risk structures are included in the calculations.
+    """
+
+    MAX_STORIES = 108
+
+    try:
+        fd = FireDepartment.objects.get(id=fd_id)
+        cursor = connections['nfirs'].cursor()
+    except (FireDepartment.DoesNotExist, ConnectionDoesNotExist):
+        return
+
+    geoms = list(fd.similar_departments.filter(owned_tracts_geom__isnull=False).values_list('owned_tracts_geom', flat=True))
+    geoms.append(fd.owned_tracts_geom)
+
+    FIND_STORY_COUNTS = """SELECT count(1), p.story_nbr
+    FROM parcel_stories p
+    JOIN "LUSE_swg" lu ON lu."Code" = p.land_use,
+    (SELECT g.owned_tracts_geom FROM (VALUES {values}) AS g (owned_tracts_geom)) owned_tracts
+    WHERE lu.include_in_floor_dist AND lu.risk_category = %(level)s
+    AND ST_Intersects(owned_tracts.owned_tracts_geom, p.wkb_geometry)
+    GROUP BY p.story_nbr
+    ORDER BY count DESC, p.story_nbr;"""
+
+    values = ','.join(['(ST_SetSRID(\'{}\'::geometry, 4326))'.format(geom.hex) for geom in geoms])
+    mapping = {2: 'Medium', 4: 'High'}
+
+    def expand(values, weights):
+        ret = []
+        for v in zip(values, weights):
+            ret = ret + [v[0]] * v[1]
+        return ret
+
+    for nlevel, level in mapping.items():
+        cursor.execute(FIND_STORY_COUNTS.format(values=values), {'level': level})
+        res = cursor.fetchall()
+
+        # Filter out `None` story counts and obnoxious values
+        a = filter(lambda x: x[1] is not None and x[1] <= MAX_STORIES, res)
+        weights = map(lambda x: x[0], a)
+        vals = map(lambda x: x[1], a)
+
+        expanded = expand(vals, weights)
+        samples = np.random.choice(expanded, size=10000)
+        samp = lognorm.fit(samples)
+
+        # Fit curve to story counts
+        rm = fd.firedepartmentriskmodels_set.get(level=nlevel)
+        rm.floor_count_coefficients = {'shape': samp[0], 'loc': samp[1], 'scale': samp[2]}
+        rm.save()

@@ -44,3 +44,4 @@ django-extensions==1.5.9
 requests-oauthlib==0.7.0
 python-memcached==1.57
 coverage==4.2
+scipy==0.17.0
