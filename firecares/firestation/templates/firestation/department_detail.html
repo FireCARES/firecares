@@ -110,6 +110,17 @@
                     {% if user_can_admin %}
                         <a href="{% url 'admin_department_users' object.id %}" title="Manage department users" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-people fa-2x"></i></a>
                     {% endif %}
+                    {% if user.is_authenticated %}
+                        <feedback
+                            url="{%url 'firedeparment_data_feedback_slug' object.id object.slug %}"
+                            user="{{ user.id }}""
+                            firedepartment="{{ object.id }}"
+                            firestation=""
+                            csrftoken="{{ csrf_token }}"
+                        >
+                            <i class="fa fa-envelope-o fa-2x ct-u-text--white"></i>
+                        </feedback>
+                    {% endif %}
                 </div>
             </div>
         </div>
