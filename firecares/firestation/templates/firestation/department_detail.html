@@ -112,7 +112,7 @@
                     {% endif %}
                     {% if user.is_authenticated %}
                         <feedback
-                            url="{%url 'firedeparment_data_feedback_slug' object.id object.slug %}"
+                            url="{%url 'firedepartment_data_feedback_slug' object.id object.slug %}"
                             user="{{ user.id }}""
                             firedepartment="{{ object.id }}"
                             firestation=""
