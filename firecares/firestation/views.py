@@ -930,6 +930,7 @@ class DataFeedbackView(LoginRequiredMixin, CreateView):
     Processes data feedback
     """
     form_class = DataFeedbackForm
+    http_method_names = ['post']
 
     def _send_email(self):
         """
