@@ -57,5 +57,4 @@ class DepartmentUserApprovalForm(forms.Form):
 class DataFeedbackForm(forms.ModelForm):
     class Meta:
         model = DataFeedback
-        fields = ('message',)
-        # exclude = ('user', 'department', 'firestation')
+        fields = ('message', 'user', 'department', 'firestation')

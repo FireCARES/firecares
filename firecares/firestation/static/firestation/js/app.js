@@ -20,6 +20,7 @@
       'fireStation.search',
       'fireStation.graphs',
       'fireStation.map',
+      'fireStation.feedback',
       'ui.bootstrap',
       'mapstory.uploader'
   ])
