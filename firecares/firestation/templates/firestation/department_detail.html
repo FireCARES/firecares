@@ -57,7 +57,7 @@
     {% include 'google_analytics.html' %}
 </head>
 
-<body class="ct-headroom--fixedTopBar cssAnimate" ng-controller="jurisdictionController" ng-app="fireStation">
+<body class="ct-headroom--fixedTopBar cssAnimate" ng-controller="jurisdictionController" ng-app="fireStation" ng-init="setLevel('all')">
 
 {% include 'firestation/_mobile_navbar.html' %}
 {% include 'firestation/_mobile_search.html' %}

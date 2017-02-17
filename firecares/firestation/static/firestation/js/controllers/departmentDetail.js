@@ -46,9 +46,9 @@
         })
     ;
 
-    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', '$filter', 'FireDepartment'];
+    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', '$filter', 'FireDepartment', '$analytics'];
 
-    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter, FireDepartment) {
+    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter, FireDepartment, $analytics) {
         var departmentMap = map.initMap('map', {scrollWheelZoom: false});
         var showStations = true;
         var stationIcon = L.FireCARESMarkers.firestationmarker();
@@ -64,6 +64,10 @@
         $scope.uploadBoundary = false;
         var layersControl = L.control.layers().addTo(departmentMap);
         var fires = L.featureGroup().addTo(departmentMap);
+
+        departmentMap.on('overlayadd', function(layer) {
+          $analytics.eventTrack(layer.name, {category: 'department.onoverlayadd'});
+        });
 
         if (showStations) {
             FireStation.query({department: config.id}).$promise.then(function(data) {
@@ -367,6 +371,7 @@
         };
 
         $scope.setLevel = function(level) {
+          $analytics.eventTrack(level, {category: 'department.setLevel'});
           $scope.level = level;
         };
 

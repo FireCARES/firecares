@@ -21,7 +21,9 @@
       'fireStation.graphs',
       'fireStation.map',
       'ui.bootstrap',
-      'mapstory.uploader'
+      'mapstory.uploader',
+      'angulartics',
+      'angulartics.google.analytics'
   ])
 
   .filter('defaultValue', function() {
@@ -44,10 +46,11 @@
     }
   })
 
-  .config(function($interpolateProvider, $httpProvider, $resourceProvider) {
+  .config(function($interpolateProvider, $httpProvider, $resourceProvider, $analyticsProvider) {
     $httpProvider.defaults.xsrfCookieName = 'csrftoken';
     $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
     $resourceProvider.defaults.stripTrailingSlashes = false;
+    $analyticsProvider.virtualPageviews(false);
   })
 
   .run(function(editableOptions) {
