@@ -496,6 +496,10 @@ class FireDepartmentMetrics(object):
 
         return ret
 
+    @cached_property
+    def total_protected_structures(self):
+        return self.firedepartment.firedepartmentriskmodels_set.get(level=0).structure_count
+
     def _get_risk_model_rows(self):
         return (self.firedepartment.firedepartmentriskmodels_set.filter(level=1).first(),
                 self.firedepartment.firedepartmentriskmodels_set.filter(level=2).first(),

@@ -436,6 +436,9 @@
                                         high="{{ object.metrics.structure_counts_by_risk_category.high | default_if_none:'' }}"
                                         unknown="{{ object.metrics.structure_counts_by_risk_category.unknown | default_if_none:'' }}">
                                     </risk-distribution-bar-chart>
+                                    <div class="description text-center">
+                                        {{ object.metrics.total_protected_structures|intcomma }} total structures protected
+                                    </div>
                                 </div>
                             </div>
                             {% endif %}
