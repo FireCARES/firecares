@@ -20,7 +20,7 @@ class FeedbackTests(BaseFirecaresTestcase):
             # Create fire department and fire station
             fd = FireDepartment.objects.create(name='Fire Department 1')
             fs = FireStation.create_station(department=fd, address_string='1', name='Fire Station 1')
-            feedback_url = reverse('firedeparment_data_feedback_slug', kwargs={'pk': fd.id, 'slug': fd.slug})
+            feedback_url = reverse('firedepartment_data_feedback_slug', kwargs={'pk': fd.id, 'slug': fd.slug})
             response = c.get(feedback_url)
             self.assert_redirect_to_login(response)
 
