@@ -339,6 +339,10 @@ class FireDepartmentMetrics(object):
         return self._get_risk_model_field('dist_model_score')
 
     @cached_property
+    def dist_model_score_fire_count(self):
+        return self._get_risk_model_field('dist_model_score_fire_count')
+
+    @cached_property
     def risk_model_deaths(self):
         return self._get_risk_model_field('risk_model_deaths')
 

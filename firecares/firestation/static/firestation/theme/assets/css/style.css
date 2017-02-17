@@ -11948,6 +11948,14 @@ div.is-your-department {
 .d3-tip .tip-value {
   color: #F29A00;
 }
+.score-disclaimer {
+  color: #777777;
+  border: 2px solid #c66;
+  padding: 1em;
+  box-shadow: 0 0 6px #f8b9b7;
+  -webkit-box-shadow: 0 0 6px #f8b9b7;
+  -moz-box-shadow: 0 0 6px #f8b9b7;
+}
 .ct-pageWrapper {
   background-color: #ffffff;
   overflow: hidden;

@@ -42,6 +42,7 @@
         "risk_model_fires": {{ object.metrics.risk_model_fires | jsonify }},
         "residential_fires_avg_3_years_breaks": {{ object.metrics.residential_fires_avg_3_years_breaks | jsonify }},
         "dist_model_score": {{ object.metrics.dist_model_score | jsonify }},
+        "dist_model_score_fire_count": {{ object.metrics.dist_model_score_fire_count | jsonify }},
         "population_class_stats": {{ object.metrics.population_class_stats | jsonify }},
         "risk_model_deaths": {{ object.metrics.risk_model_deaths | jsonify }},
         "risk_model_fires_size0": {{ object.metrics.risk_model_fires_size0 | jsonify }},
@@ -547,6 +548,9 @@
                                        metric-title="Performance Score" min="{{ metrics.population_class_stats[level].dist_model_score__min | number:0 }}"
                                        max="{{ metrics.population_class_stats[level].dist_model_score__max | number:0 }}" value="{{ metrics.dist_model_score[level] | number:1 | trimDecimal | defaultValue:'N/A' }}" inverse learn-more="{{ urls.models_performance_score }}"></gauge>
                                 {% endverbatim %}
+                                <div class="score-disclaimer ng-invalid ct-u-marginTop20 text-center" ng-if="metrics.dist_model_score_fire_count[level] < 100 && metrics.dist_model_score_fire_count[level] && metrics.dist_model_score[level]">
+                                    The Fire Department Performance Score is generated from a statistical model. There is the potential for high uncertainty in the model for communities with less than <strong>100</strong> aggregate fires.
+                                </div>
                             </div>
                             {% else %}
                             <div class="col-sm-6 col-md-12 ct-u-marginBottom30 ct-u-marginTop20 unauthenticated">
@@ -698,7 +702,7 @@
                                                     <span class="text-left ct-u-paddingLeft20">Average since 2010</span>
                                                 </div>
                                                 <div class="col-xs-3">
-                                                    <span class="text-right">{{ metrics.residential_fires_3_year_avg[level]  | number:0 | defaultValue:"N/A" }}</span>
+                                                    <span class="text-right">{{ metrics.residential_fires_3_year_avg[level] | number:0 | defaultValue:"N/A" }}</span>
                                                 </div>
                                             </div>
 

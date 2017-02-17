@@ -89,11 +89,13 @@ def update_performance_score(id, dry_run=False):
 
         dist_model = dist_model_for_hazard_level(result.get('risk_category'))
 
-        if result.get('risk_category') in ['medium', 'high']:
-            rm = fd.firedepartmentriskmodels_set.get_or_create(level=risk_mapping[result['risk_category']])
+        # Use floor draws based on the LogNormal of the structure type distribution for med/high risk categories
+        if result.get('risk_category') in ['Medium', 'High']:
+            rm, _ = fd.firedepartmentriskmodels_set.get_or_create(level=risk_mapping[result['risk_category']])
             if rm.floor_count_coefficients:
+                pass
                 # TODO
-                dist_model.number_of_floors_draw = LogNormalDraw(rm.floor_count_coefficients)
+                # dist_model.number_of_floors_draw = LogNormalDraw(*rm.floor_count_coefficients)
 
         counts = dict(object_of_origin=result.get('1', 0),
                       room_of_origin=result.get('2', 0),
@@ -121,6 +123,7 @@ def update_performance_score(id, dry_run=False):
         try:
             dist = dist_model(floor_extent=False, **counts)
             record.dist_model_score = dist.gibbs_sample()
+            record.dist_model_score_fire_count = dist.total_fires
             print 'updating fdid: {2} - {3} risk level from: {0} to {1}.'.format(old_score, record.dist_model_score, fd.id, HazardLevels(record.level).name)
 
         except (NotEnoughRecords, ZeroDivisionError):
@@ -383,7 +386,7 @@ def calculate_story_distribution(fd_id):
         vals = map(lambda x: x[1], a)
 
         expanded = expand(vals, weights)
-        samples = np.random.choice(expanded, size=10000)
+        samples = np.random.choice(expanded, size=1000)
         samp = lognorm.fit(samples)
 
         # Fit curve to story counts
