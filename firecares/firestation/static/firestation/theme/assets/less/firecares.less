@@ -1337,3 +1337,32 @@ div.is-your-department {
 .d3-tip .tip-value {
   color: @brand-primary;
 }
+
+.form-popover {
+  // Use default font-family from typography.less;
+  font-family: @font-family-main;
+  .popover-title {
+    // Use the same style
+    font-size: 14px;
+    line-height: 24px;
+    padding: 8px;
+    display: block;
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .popover-content {
+    padding: 0;
+    form {
+      border-radius: 0 0 5px 5px;
+      padding: 30px 20px 30px 20px;
+      p {
+        color: #fff;
+        font-size: 15px;
+        line-height: 21px;
+      }
+      textarea {
+        resize: vertical;
+      }
+    }
+  }
+}

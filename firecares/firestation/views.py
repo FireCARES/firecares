@@ -929,35 +929,7 @@ class DataFeedbackView(LoginRequiredMixin, CreateView):
     """
     Processes data feedback
     """
-    template_name = "firestation/feedback.html"
     form_class = DataFeedbackForm
-
-    def _get_detail_objects(self):
-        """
-        Get the detailed object based on the model passed through the url and return multiple objects to know current
-        fire department, current firestation, and the model used to query.
-        """
-        # Since model is passed from urlpatterns, get_object() can be used transparently
-        detail_obj = self.get_object()
-        if isinstance(detail_obj, FireDepartment):
-            firedepartment = detail_obj
-            firestation = None
-            selected = 'firedepartment'
-        else:
-            firedepartment = detail_obj.department
-            firestation = detail_obj
-            selected = 'firestation'
-        return firedepartment, firestation, selected
-
-    def get_success_url(self):
-        """
-        Generate success url based on the current detail object
-        """
-        firedepartment, firestation, selected = self._get_detail_objects()
-        if selected == 'firedepartment':
-            return reverse('firedepartment_detail_slug', kwargs={'pk': firedepartment.id, 'slug': firedepartment.slug})
-        else:
-            return reverse('firestation_detail_slug', kwargs={'pk': firestation.id, 'slug': firestation.slug})
 
     def _send_email(self):
         """
@@ -974,36 +946,24 @@ class DataFeedbackView(LoginRequiredMixin, CreateView):
         send_mail.delay(email_message)
 
     def _save_and_notify(self, form):
-        firedepartment, firestation, selected = self._get_detail_objects()
-        self.object = form.save(commit=False)
-        self.object.user = self.request.user
-        self.object.department = firedepartment
-        self.object.firestation = firestation
-        self.object.save()
+        self.object = form.save()
         self._send_email()
-        return redirect(self.get_success_url())
+        # After success return created response
+        return HttpResponse(status=201)
 
     def form_valid(self, form):
         """
         If the form is valid then send email with the feedback message
         """
-        messages.add_message(self.request, messages.SUCCESS, 'Your message has been received and sent to FireCARES administrators.')
         return self._save_and_notify(form)
 
     def form_invalid(self, form):
         """
-        If the form is invalid, show error message
+        If the form is invalid, return errors as json.
         """
-        messages.add_message(self.request, messages.ERROR, 'Error processing request.')
-        return redirect(self.get_success_url())
-
-    def get_context_data(self, *args, **kwargs):
-        """
-        Update context data of the feedback form, use current detail object to fill template
-        """
-        self.object = self.get_object()
-        kwargs.update({
-            'object': self.object
-        })
-
+        return HttpResponse(
+            json.dumps(form.errors),
+            content_type="application/json",
+            status=400
+        )
         return super(DataFeedbackView, self).get_context_data(*args, **kwargs)
