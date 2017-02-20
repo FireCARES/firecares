@@ -65,9 +65,10 @@ def update_performance_score(id, dry_run=False):
              ) AS x
         ) AS y using (state, inc_date, exp_no, fdid, inc_no)
     where a.state='%(state)s' and a.fdid='%(fdid)s' and prop_use in (''419'',''429'',''439'',''449'',''459'',''460'',''462'',''464'',''400'')
+        and fire_sprd is not null and fire_sprd != ''''
     group by risk_category, fire_sprd
     order by risk_category, fire_sprd ASC')
-    AS ct(risk_category text, "1" bigint, "2" bigint, "3" bigint, "4" bigint, "5" bigint);
+    AS ct(risk_category text, "object_of_origin" bigint, "room_of_origin" bigint, "floor_of_origin" bigint, "building_of_origin" bigint, "beyond" bigint);
     """
 
     cursor.execute(RESIDENTIAL_FIRES_BY_FDID_STATE, {'fdid': fd.fdid, 'state': fd.state})
@@ -81,6 +82,8 @@ def update_performance_score(id, dry_run=False):
                       beyond=0)
 
     risk_mapping = {'Low': 1, 'Medium': 2, 'High': 4, 'N/A': 5}
+
+    ahs_building_size = ahs_building_areas(fd.fdid, fd.state)
 
     for result in results:
 
@@ -97,17 +100,15 @@ def update_performance_score(id, dry_run=False):
                 # TODO
                 # dist_model.number_of_floors_draw = LogNormalDraw(*rm.floor_count_coefficients)
 
-        counts = dict(object_of_origin=result.get('1', 0),
-                      room_of_origin=result.get('2', 0),
-                      floor_of_origin=result.get('3', 0),
-                      building_of_origin=result.get('4', 0),
-                      beyond=result.get('5', 0))
+        counts = dict(object_of_origin=result.get('object_of_origin', 0),
+                      room_of_origin=result.get('room_of_origin', 0),
+                      floor_of_origin=result.get('floor_of_origin', 0),
+                      building_of_origin=result.get('building_of_origin', 0),
+                      beyond=result.get('beyond', 0))
 
         # add current risk category to the all risk category
         for key, value in counts.items():
             all_counts[key] += value
-
-        ahs_building_size = ahs_building_areas(fd.fdid, fd.state)
 
         if ahs_building_size is not None:
             counts['building_area_draw'] = ahs_building_size
@@ -138,6 +139,14 @@ def update_performance_score(id, dry_run=False):
     dist_model = dist_model_for_hazard_level('All')
 
     try:
+        if ahs_building_size is not None:
+            all_counts['building_area_draw'] = ahs_building_size
+
+        response_times = response_time_distributions.get('{0}-{1}'.format(fd.fdid, fd.state))
+
+        if response_times:
+            all_counts['arrival_time_draw'] = LogNormalDraw(*response_times, multiplier=60)
+
         dist = dist_model(floor_extent=False, **all_counts)
         record.dist_model_score = dist.gibbs_sample()
         print 'updating fdid: {2} - {3} risk level from: {0} to {1}.'.format(old_score, record.dist_model_score, fd.id, HazardLevels(record.level).name)
@@ -308,7 +317,8 @@ def calculate_structure_counts(fd_id):
     except (FireDepartment.DoesNotExist, ConnectionDoesNotExist):
         return
 
-    if not fd.owned_tracts_geom:
+    # Skip over existing calculations or missing dept owned tracts
+    if not fd.owned_tracts_geom or fd.firedepartmentriskmodels_set.filter(structure_count__isnull=False).count() == 5:
         return
 
     STRUCTURE_COUNTS = """SELECT sum(case when l.risk_category = 'Low' THEN 1 ELSE 0 END) as low,

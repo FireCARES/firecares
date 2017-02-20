@@ -1091,7 +1091,7 @@ class PopulationClassQuartile(models.Model):
 
 def create_quartile_views(sender, **kwargs):
     """
-    Creates DB views based on quartile queries.
+    Creates DB view based on quartile queries.
     """
 
     query = """
