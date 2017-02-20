@@ -6,6 +6,8 @@ from django.core.validators import validate_email
 from django.http import HttpResponse
 from django.template.context import RequestContext
 from django.utils import timezone
+from django.views.generic import DeleteView
+from django.http.response import JsonResponse
 from invitations import signals
 from invitations.adapters import get_invitations_adapter
 from invitations.exceptions import AlreadyInvited, AlreadyAccepted, UserRegisteredEmail
@@ -112,6 +114,21 @@ class AcceptDepartmentInvite(AcceptInvite):
     def post(self, request, *args, **kwargs):
         ret = super(AcceptDepartmentInvite, self).post(self, request, *args, **kwargs)
         # AOK to proceed if the email address was stashed, allow for preregistration check bypass
-        if request.session['account_verified_email']:
+        if 'account_verified_email' in request.session and request.session['account_verified_email']:
             request.session[SESSION_EMAIL_WHITELISTED] = request.session['account_verified_email']
         return ret
+
+
+class CancelInvite(DeleteView):
+    model = Invitation
+    http_method_names = ['post']
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        dept = self.object.departmentinvitation.department
+        if not dept.is_admin(request.user) or self.object.accepted:
+            status_code = 401
+        else:
+            status_code = 200
+            self.object.delete()
+        return JsonResponse({}, status=status_code)

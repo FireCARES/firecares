@@ -11810,6 +11810,9 @@ form[name='boundaryUpload'] a.commit:hover {
 .invitations .form-inline .form-control {
   width: 100%;
 }
+.invitations .delete-invitation {
+  color: red;
+}
 .invitations .panel-group {
   margin-bottom: 1em;
 }

@@ -44,6 +44,7 @@
     var invites = [
       {% for i in invites %}
       {
+        id: {{ i.id }},
         accepted: {{ i.accepted|yesno:"true,false" }},
         email: "{{ i.email }}",
         inviter: "{{ i.inviter.username }}",
@@ -259,6 +260,14 @@
                                     <ul class="list-group list-unstyled">
                                         {% verbatim %}
                                         <li ng-repeat="i in invitations" class="ng-cloak list-group-item">
+                                            <a href=""
+                                                class="btn btn-default btn-xs"
+                                                title="Cancel this invitation"
+                                                ng-click="cancelInvitation(i)"
+                                                ng-show="!i.accepted"
+                                                >
+                                                <i class="fa fa-minus-circle delete-invitation"></i>
+                                            </a>
                                             <span class="pull-right label label-success" ng-if="i.accepted">Invite accepted, username is &quot;{{ i.username }}&quot;</span>
                                             <strong>{{ i.email }}</strong> - sent {{ i.sent }} by {{ i.inviter }}
                                         </li>
