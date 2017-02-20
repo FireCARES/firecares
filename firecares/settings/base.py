@@ -137,7 +137,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'reversion.middleware.RevisionMiddleware',
-    'firecares.firecares_core.middleware.DisclaimerAcceptedMiddleware'
+    'firecares.firecares_core.middleware.DisclaimerAcceptedMiddleware',
+    'firecares.firecares_core.middleware.RequestDurationMiddleware'
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -240,11 +241,16 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'firecares.firecares_core.middleware': {
+            'handlers': [],
+            'level': 'INFO',
+            'propagate': True,
+        },
         'firecares': {
             'handlers': ['console'],
             'level': 'ERROR',
             'propagate': True,
-        },
+        }
     }
 }
 

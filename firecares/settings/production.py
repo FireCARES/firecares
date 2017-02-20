@@ -35,7 +35,7 @@ HELIX_FUNCTIONAL_TITLE_URL = HELIX_ROOT + '/App/api/v2/Membership/FuncTitle/'
 
 if 'ELASTICSEARCH_HOST' in os.environ:
     LOGGING['handlers']['elasticsearch'] = {  # noqa
-        'level': os.getenv('ELASTICSEARCH_LEVEL', 'DEBUG'),
+        'level': os.getenv('ELASTICSEARCH_LEVEL', 'INFO'),
         'class': 'cmreslogging.handlers.CMRESHandler',
         'hosts': [{'host': os.getenv('ELASTICSEARCH_HOST'), 'port': int(os.getenv('ELASTICSEARCH_PORT', 80))}],
         'es_index_name': 'firecares-logs',
