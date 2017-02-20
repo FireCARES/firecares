@@ -31,5 +31,22 @@
         }
       });
     };
+
+    $scope.cancelInvitation = function(invitation) {
+      $http.post("/invitations/cancel-invite/" + invitation.id + "/").then(function success(response) {
+        $scope.invitations.splice($scope.invitations.indexOf(invitation), 1);
+        $scope.success = 'Invitation canceled';
+        $scope.error = null;
+        $timeout(function() {
+          $scope.success = null;
+        }, 5000);
+      }, function error(response) {
+        $scope.error = "There was a problem canceling the invitation"
+        $timeout(function() {
+          $scope.error = null;
+        }, 5000);
+      });
+    };
   }
 })();
+

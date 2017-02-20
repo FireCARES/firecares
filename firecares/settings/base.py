@@ -321,6 +321,7 @@ REGISTRATION_FORM = 'firecares.firecares_core.ext.registration.forms.LimitedRegi
 INVITATIONS_SIGNUP_REDIRECT = 'registration_register'
 INVITATIONS_ALLOW_JSON_INVITES = True
 INVITATIONS_ACCEPT_INVITE_AFTER_SIGNUP = True
+INVITATIONS_GONE_ON_ACCEPT_ERROR = False
 INVITATIONS_ADAPTER = 'firecares.firecares_core.ext.invitations.adapters.DepartmentInvitationsAdapter'
 
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'localhost')
