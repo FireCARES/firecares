@@ -11959,6 +11959,12 @@ div.is-your-department {
   -webkit-box-shadow: 0 0 6px #f8b9b7;
   -moz-box-shadow: 0 0 6px #f8b9b7;
 }
+.faq-list {
+  margin-top: 1em;
+}
+.faq-list li {
+  list-style-type: disc;
+}
 .ct-pageWrapper {
   background-color: #ffffff;
   overflow: hidden;

@@ -11,7 +11,7 @@ Frequently Asked Questions
 {% endblock%}
 
 {% block breadcrumbs %}
-    <a href="{% url 'firestation_home' %}">Home</a>
+  <a href="{% url 'firestation_home' %}">Home</a>
 {% endblock %}
 
 {% block section %}
@@ -21,16 +21,18 @@ Frequently Asked Questions
     <div class="row">
 
     <h1>Login</h1>
-      <hr>
-      <p>
-        <h3><strong>Q:</strong>
-          I am having trouble logging in. What can I do?
-        </h3>
-        <br>
-        <h4><strong>A:</strong>
-          Joe or Tyler -- this needs your expertise as I am not sure off all the intricacies you guys built with login.
-        </h4>
-      </p>
+    <hr>
+    <h3><strong>Q:</strong>
+      I am having trouble logging in. What can I do?
+    </h3>
+    <br>
+    <h4><strong>A:</strong> There are multiple methods to login to FireCARES:</h4>
+    <ol class="faq-list">
+        <li>Local presidents or officers for fire departments can use IMIS credentials to <span class="learn-more-link"><a href="{% url 'login' %}">login</a></span> to FireCARES. [IMIS DOES NOT YET HAVE DEPARTMENT ASSOCIATIONS OR A MEANS TO DETERMINE IF AN INCOMING USER IS INDEED A LOCAL PRESIDENT OR OFFICER]</li>
+        <li>Fire chiefs can <span class="learn-more-link"><a href="{% url 'login' %}">login</a></span> via the Helix single sign on service to authenticate with FireCARES.</li>
+        <li>If you are a member of a specific organization [NEED LIST OF ORGANIZATION DOMAINS TO WHITELIST FOR SELF-REGISTRATION], you can <span class="learn-more-link"><a href="{% url 'registration_register' %}">self-register</a></span> to get a FireCARES account.</li>
+        <li>If you work at a fire department, you may be able to send an account request through FireCARES that will notify your chief or local president of your account request.  <span class="learn-more-link"><a href="{% url 'firedepartment_list' %}">Search</a></span> for your department and click <strong>&quot;Request access from your fire chief or local president.&quot;</strong>  If fire chief or local president has registered with FireCARES for your department, then he/she will receive a notification to approve your account request.</li>
+    </ol>
 
       <hr>
       <p>
@@ -146,7 +148,7 @@ Frequently Asked Questions
 
     </div>
   </div>
-  
+
 </section>
 
 {% endblock %}
