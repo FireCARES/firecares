@@ -45,3 +45,5 @@ requests-oauthlib==0.7.0
 python-memcached==1.57
 coverage==4.2
 scipy==0.17.0
+CMRESHandler==1.0.0b2
+requests_aws4auth==0.9

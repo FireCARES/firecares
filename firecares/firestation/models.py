@@ -700,6 +700,8 @@ class FireDepartmentRiskModels(models.Model):
 
     floor_count_coefficients = JSONField(null=True, blank=True)
 
+    dist_model_score_fire_count = models.IntegerField(null=True, blank=True)
+
     def __unicode__(self):
         return '{level} risk - {department} ({f_id})'.format(level=HazardLevels(self.level).name, department=self.department, f_id=self.department.id)
 
@@ -1089,7 +1091,7 @@ class PopulationClassQuartile(models.Model):
 
 def create_quartile_views(sender, **kwargs):
     """
-    Creates DB views based on quartile queries.
+    Creates DB view based on quartile queries.
     """
 
     query = """

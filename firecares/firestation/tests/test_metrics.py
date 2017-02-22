@@ -193,7 +193,7 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         ]
 
         mock_cur = mock_connections['nfirs'].cursor.return_value
-        mock_cur.description = [('risk_category',), ('1',), ('2',), ('3',), ('4',), ('5',)]
+        mock_cur.description = [('risk_category',), ('object_of_origin',), ('room_of_origin',), ('floor_of_origin',), ('building_of_origin',), ('beyond',)]
         mock_cur.fetchall.return_value = query_result
         update_performance_score(lafd.id)
 

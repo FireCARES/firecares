@@ -339,6 +339,10 @@ class FireDepartmentMetrics(object):
         return self._get_risk_model_field('dist_model_score')
 
     @cached_property
+    def dist_model_score_fire_count(self):
+        return self._get_risk_model_field('dist_model_score_fire_count')
+
+    @cached_property
     def risk_model_deaths(self):
         return self._get_risk_model_field('risk_model_deaths')
 
@@ -495,6 +499,10 @@ class FireDepartmentMetrics(object):
             ret[level] = [dict(year=i.year, count=i.count, year_max=i.year_max, year_min=i.year_min) for i in v]
 
         return ret
+
+    @cached_property
+    def total_protected_structures(self):
+        return self.firedepartment.firedepartmentriskmodels_set.get(level=0).structure_count
 
     def _get_risk_model_rows(self):
         return (self.firedepartment.firedepartmentriskmodels_set.filter(level=1).first(),

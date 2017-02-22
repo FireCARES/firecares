@@ -11810,6 +11810,9 @@ form[name='boundaryUpload'] a.commit:hover {
 .invitations .form-inline .form-control {
   width: 100%;
 }
+.invitations .delete-invitation {
+  color: red;
+}
 .invitations .panel-group {
   margin-bottom: 1em;
 }
@@ -11948,6 +11951,7 @@ div.is-your-department {
 .d3-tip .tip-value {
   color: #F29A00;
 }
+
 .form-popover {
   font-family: "Open Sans", sans-serif;
 }
@@ -11973,6 +11977,20 @@ div.is-your-department {
 }
 .form-popover .popover-content form textarea {
   resize: vertical;
+}
+.score-disclaimer {
+  color: #777777;
+  border: 2px solid #c66;
+  padding: 1em;
+  box-shadow: 0 0 6px #f8b9b7;
+  -webkit-box-shadow: 0 0 6px #f8b9b7;
+  -moz-box-shadow: 0 0 6px #f8b9b7;
+}
+.faq-list {
+  margin-top: 1em;
+}
+.faq-list li {
+  list-style-type: disc;
 }
 .ct-pageWrapper {
   background-color: #ffffff;

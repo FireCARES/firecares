@@ -137,7 +137,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'reversion.middleware.RevisionMiddleware',
-    'firecares.firecares_core.middleware.DisclaimerAcceptedMiddleware'
+    'firecares.firecares_core.middleware.DisclaimerAcceptedMiddleware',
+    'firecares.firecares_core.middleware.RequestDurationMiddleware'
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -240,11 +241,16 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'firecares.firecares_core.middleware': {
+            'handlers': [],
+            'level': 'INFO',
+            'propagate': True,
+        },
         'firecares': {
             'handlers': ['console'],
             'level': 'ERROR',
             'propagate': True,
-        },
+        }
     }
 }
 
@@ -263,6 +269,7 @@ CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'amqp')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', None)
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', None)
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', None)
+AWS_REGION = os.getenv('AWS_REGION', 'us-east-1')
 MAPBOX_ACCESS_TOKEN = os.getenv('MAPBOX_ACCESS_TOKEN', None)
 GOOGLE_ANALYTICS_TRACKING_ID = os.getenv('GOOGLE_ANALYTICS_TRACKING_ID', None)
 
@@ -314,6 +321,7 @@ REGISTRATION_FORM = 'firecares.firecares_core.ext.registration.forms.LimitedRegi
 INVITATIONS_SIGNUP_REDIRECT = 'registration_register'
 INVITATIONS_ALLOW_JSON_INVITES = True
 INVITATIONS_ACCEPT_INVITE_AFTER_SIGNUP = True
+INVITATIONS_GONE_ON_ACCEPT_ERROR = False
 INVITATIONS_ADAPTER = 'firecares.firecares_core.ext.invitations.adapters.DepartmentInvitationsAdapter'
 
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'localhost')

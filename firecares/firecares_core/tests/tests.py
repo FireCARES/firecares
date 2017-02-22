@@ -399,6 +399,58 @@ class CoreTests(BaseFirecaresTestcase):
         self.assertFalse(fd.is_curator(user))
         self.assertFalse(fd.is_admin(user))
 
+    def test_cancel_invitation(self):
+        fd = self.load_la_department()
+
+        dept_user = Client()
+        anon_user = Client()
+        fd.add_admin(self.non_admin_user)
+        dept_user.login(**self.non_admin_creds)
+
+        # Create invitation to test
+        resp = dept_user.post(reverse('invitations:send-json-invite'), data=json.dumps([dict(department_id=fd.id, email='joe@test.com')]), content_type='application/json')
+
+        invitation = fd.departmentinvitation_set.first().invitation
+
+        # If invitation already accepted, return 401
+        invitation.accepted = True
+        invitation.save()
+        resp = dept_user.post(
+            reverse('invitations:cancel-invite', kwargs={'pk': invitation.id}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp.status_code, 401)
+
+        # If user isn't an admin in the department, return 401
+        invitation.accepted = False
+        invitation.save()
+        fd.remove_admin(self.non_admin_user)
+        resp = dept_user.post(
+            reverse('invitations:cancel-invite', kwargs={'pk': invitation.id}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp.status_code, 401)
+
+        # Deleting invitation with admin permissions
+        fd.add_admin(self.non_admin_user)
+        resp = dept_user.post(
+            reverse('invitations:cancel-invite', kwargs={'pk': invitation.id}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        # After deleting, invitation link should not be available
+        # Extract invite link from outbound email
+        msg = mail.outbox[0]
+        self.assertIn('non_admin@example.com', msg.body)
+        self.assertIn('/invitations/accept-invite/', msg.body)
+        url = re.findall('(https?://\S+)', msg.body)[0]
+        path = urlparse(url).path
+        resp = anon_user.get(path)
+        # without enabling settings.INVITATIONS_GONE_ON_ACCEPT_ERROR, return 410
+        # self.assertEqual(resp.status_code, 410)
+        self.assert_redirect_to_login(resp)
+
     def test_predetermined_user_import(self):
         FireDepartment.objects.get_or_create(id=77549, name='FD1')
         FireDepartment.objects.get_or_create(id=92723, name='FD2')
