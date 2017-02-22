@@ -2,8 +2,7 @@
 
 (function() {
   angular.module('fireStation.firestationDetailController', ['xeditable', 'ui.bootstrap'])
-  .controller('fireStationController', function($scope, $window, $http, Staffing, $timeout, map, FireStation, $filter, $interpolate, $compile) {
-
+  .controller('fireStationController', function($scope, $window, $http, Staffing, $timeout, map, FireStation, $filter, $interpolate, $compile, $analytics) {
     var thisFirestation = '/api/v1/firestations/' + config.id + '/';
     var serviceAreaData = null;
     var stationGeom = {
@@ -52,6 +51,10 @@
     var mouseOverAddedOpacity = 0.25; // put in settings?
     var highlightColor = 'blue';      // put in settings?
     var serviceArea, max;
+
+    map.on('overlayadd', function(layer) {
+      $analytics.eventTrack(layer.name, {category: 'station.onoverlayadd'});
+    });
 
     station.bindPopup('<b>' + config.stationName + '</b>');
     station.addTo(map);
