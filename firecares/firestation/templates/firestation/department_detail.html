@@ -577,7 +577,6 @@
                                     <h4 style="display: inline;">Safe Grades</h4>
                                     <selected-risk level="level"></selected-risk>
                                 </div>
-                                {% if user.is_authenticated %}
                                 <div class="metric-card">
                                     <div class="main-content">
                                         <div class="main-text">
@@ -598,6 +597,18 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="metric-card">
+                                  <div class="main-content">
+                                    <div class="main-text">
+                                      <div class="community-risk-legend safe-grade-legend">
+                                        <span class="help-text">
+                                          <a href="/faq">Learn more</a> about how these values are calculated.
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                {% if user.is_authenticated %}
                                 {% verbatim %}
                                 <div class="metric-card">
                                     <label class="control-label {{ metrics.dist_model_residential_fires_quartile[level] | riskLevel:'unavailable' }}">{{ metrics.dist_model_residential_fires_quartile[level] | grade:"not available" }}</label>
@@ -794,29 +805,7 @@
                                       value="{{ object.risk_model_fires }}"
                                       color="#F5C97E"></div>
                                  {% endcomment %}
-
                                 {% else %}
-                                <div class="metric-card">
-                                    <div class="main-content">
-                                        <div class="main-text">
-                                            <div class="community-risk-legend safe-grade-legend">
-                                               <div>
-                                                <div class="safe-grade-legend-icon low"></div>
-                                                <span class="help-text"><span class="help-text-category">Good</span><span>: less than 25% of departments have an equal or better performance score.</span></span>
-                                               </div>
-                                               <div>
-                                                <div class="safe-grade-legend-icon medium"></div>
-                                                <span class="help-text"><span class="help-text-category">Fair</span><span>: 25-75% of departments have a better performance score.</span></span>
-                                                </div>
-                                               <div>
-                                                <div class="safe-grade-legend-icon high"></div>
-                                                <span class="help-text"><span class="help-text-category">Poor</span><span>: over 75% of departments have an equal or better performance score.</span></span>
-                                               </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <div class="metric-card">
                                     <label class="control-label unavailable">not available</label>
                                     <div class="main-content">
@@ -885,7 +874,6 @@
                                 </div>
                                 {% endif %}
                             </div>
-
                         </div>
                     </div>
                 </div>
