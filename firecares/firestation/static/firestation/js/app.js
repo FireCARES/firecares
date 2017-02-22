@@ -51,6 +51,7 @@
     $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
     $resourceProvider.defaults.stripTrailingSlashes = false;
     $analyticsProvider.virtualPageviews(false);
+    $analyticsProvider.firstPageview(false);
   })
 
   .run(function(editableOptions) {
