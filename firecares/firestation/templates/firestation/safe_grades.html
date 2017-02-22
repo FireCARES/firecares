@@ -1,0 +1,140 @@
+{% extends "firestation/_conservative_base.html" %}
+
+{% block page_title %}
+Models - Safe Grades · FireCARES
+{% endblock %}
+
+{% block meta_description %}
+Safe Grades for fire departments were determined via statistical regression models that predict various types of risk as a function of community attributes.  Click here to learn more.
+{% endblock %}
+
+{% block title %}
+    Safe Grades
+{% endblock %}
+
+{% block scrollspy %}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'firestation_home' %}">Home</a>
+    <a href="#">Safe Grades</a>
+{% endblock %}
+
+
+{% block section %}
+    <section class="ct-u-paddingBoth60">
+    <div class="container safe-grades">
+        <div class="row">
+            <div class="col-sm-12 col-md-12">
+                <div class="ct-u-marginBottom50">
+                    <div class="ct-u-marginBottom70">
+                        <h2>Overview</h2>
+                        <hr/>
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec efficitur eros eget leo lobortis, nec congue nisi aliquet.
+                                Nulla iaculis, sapien nec sollicitudin ornare, turpis sapien efficitur nulla, in ornare sem ligula eget sapien.
+                                Praesent in leo sem. Nam malesuada facilisis sem, ut luctus sem rhoncus id. Phasellus lobortis varius tempor.
+                                Sed imperdiet libero et nisl interdum, facilisis pulvinar ante porttitor. Phasellus semper, felis vel commodo
+                                porttitor, turpis ante blandit lacus, pellentesque maximus ipsum orci sit amet ex. Suspendisse potenti.
+                        </p>
+                    </div>
+                    <div id="number-of-fires" class="ct-u-marginBottom60">
+                        <h3>Assessment of performance score based on the number of fires.</h3>
+                        <hr/>
+                        <h4>Subheading</h4>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec efficitur eros eget leo lobortis, nec congue nisi aliquet.
+                            Nulla iaculis, sapien nec sollicitudin ornare, turpis sapien efficitur nulla, in ornare sem ligula eget sapien.
+                            Praesent in leo sem. Nam malesuada facilisis sem, ut luctus sem rhoncus id. Phasellus lobortis varius tempor.
+                            Sed imperdiet libero et nisl interdum, facilisis pulvinar ante porttitor. Phasellus semper, felis vel commodo
+                            porttitor, turpis ante blandit lacus, pellentesque maximus ipsum orci sit amet ex. Suspendisse potenti.
+                        </p>
+                        <h4>Another subheading</h4>
+                        <p>
+                            Aliquam et dolor vitae nibh fermentum porta et eu justo. Nunc viverra sem nec elit fermentum, sed ultricies augue rhoncus.
+                            Pellentesque posuere at purus eu bibendum. Ut quis lorem ex. Praesent in augue dictum, blandit ante ac, fringilla nibh.
+                            Aliquam erat volutpat. Aenean quam urna, fermentum eget bibendum eu, commodo non quam.
+                            Donec eleifend velit sed lorem euismod, et auctor sem tincidunt.
+                            <span class="learn-more-link"><a href="#somewhere">Link</a></span>
+                        </p>
+                    </div>
+
+                    <div id="fire-spread" class="ct-u-marginBottom60">
+                        <h3>Assessment of performance score based on fire spread risk.</h3>
+                        <hr/>
+                        <h4>Subheading</h4>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec efficitur eros eget leo lobortis, nec congue nisi aliquet.
+                            Nulla iaculis, sapien nec sollicitudin ornare, turpis sapien efficitur nulla, in ornare sem ligula eget sapien.
+                            Praesent in leo sem. Nam malesuada facilisis sem, ut luctus sem rhoncus id. Phasellus lobortis varius tempor.
+                            Sed imperdiet libero et nisl interdum, facilisis pulvinar ante porttitor. Phasellus semper, felis vel commodo
+                            porttitor, turpis ante blandit lacus, pellentesque maximus ipsum orci sit amet ex. Suspendisse potenti.
+                        </p>
+                        <h4>Another subheading</h4>
+                        <p>
+                            Aliquam et dolor vitae nibh fermentum porta et eu justo. Nunc viverra sem nec elit fermentum, sed ultricies augue rhoncus.
+                            Pellentesque posuere at purus eu bibendum. Ut quis lorem ex. Praesent in augue dictum, blandit ante ac, fringilla nibh.
+                            Aliquam erat volutpat. Aenean quam urna, fermentum eget bibendum eu, commodo non quam.
+                            Donec eleifend velit sed lorem euismod, et auctor sem tincidunt.
+                            <span class="learn-more-link"><a href="#somewhere">Link</a></span>
+                        </p>
+                    </div>
+
+                    <div id="death-and-injury" class="ct-u-marginBottom60">
+                        <h3>Assessment of performance score based on the risk of death and injury.</h3>
+                        <hr/>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec efficitur eros eget leo lobortis, nec congue nisi aliquet.
+                            Nulla iaculis, sapien nec sollicitudin ornare, turpis sapien efficitur nulla, in ornare sem ligula eget sapien.
+                            Praesent in leo sem. Nam malesuada facilisis sem, ut luctus sem rhoncus id. Phasellus lobortis varius tempor.
+                            Sed imperdiet libero et nisl interdum, facilisis pulvinar ante porttitor. Phasellus semper, felis vel commodo
+                            porttitor, turpis ante blandit lacus, pellentesque maximus ipsum orci sit amet ex. Suspendisse potenti.
+                        </p>
+                        <p>
+                            Aliquam et dolor vitae nibh fermentum porta et eu justo. Nunc viverra sem nec elit fermentum, sed ultricies augue rhoncus.
+                            Pellentesque posuere at purus eu bibendum. Ut quis lorem ex. Praesent in augue dictum, blandit ante ac, fringilla nibh.
+                            Aliquam erat volutpat. Aenean quam urna, fermentum eget bibendum eu, commodo non quam.
+                            Donec eleifend velit sed lorem euismod, et auctor sem tincidunt.
+                            <span class="learn-more-link"><a href="#somewhere">Link</a></span>
+                        </p>
+                    </div>
+
+                    <div id="national-fire-spread" class="ct-u-marginBottom60">
+                        <h3>National assessment of performance score based on the fire spread.</h3>
+                        <hr/>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec efficitur eros eget leo lobortis, nec congue nisi aliquet.
+                            Nulla iaculis, sapien nec sollicitudin ornare, turpis sapien efficitur nulla, in ornare sem ligula eget sapien.
+                            Praesent in leo sem. Nam malesuada facilisis sem, ut luctus sem rhoncus id. Phasellus lobortis varius tempor.
+                            Sed imperdiet libero et nisl interdum, facilisis pulvinar ante porttitor. Phasellus semper, felis vel commodo
+                            porttitor, turpis ante blandit lacus, pellentesque maximus ipsum orci sit amet ex. Suspendisse potenti.
+                        </p>
+                        <p>
+                            Aliquam et dolor vitae nibh fermentum porta et eu justo. Nunc viverra sem nec elit fermentum, sed ultricies augue rhoncus.
+                            Pellentesque posuere at purus eu bibendum. Ut quis lorem ex. Praesent in augue dictum, blandit ante ac, fringilla nibh.
+                            Aliquam erat volutpat. Aenean quam urna, fermentum eget bibendum eu, commodo non quam.
+                            Donec eleifend velit sed lorem euismod, et auctor sem tincidunt.
+                            <span class="learn-more-link"><a href="#somewhere">Link</a></span>
+                        </p>
+                    </div>
+
+                    <div id="national-death-and-injury-risk" class="ct-u-marginBottom60">
+                        <h3>National assessment of performance score based on the death and injury risk.</h3>
+                        <hr/>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec efficitur eros eget leo lobortis, nec congue nisi aliquet.
+                            Nulla iaculis, sapien nec sollicitudin ornare, turpis sapien efficitur nulla, in ornare sem ligula eget sapien.
+                            Praesent in leo sem. Nam malesuada facilisis sem, ut luctus sem rhoncus id. Phasellus lobortis varius tempor.
+                            Sed imperdiet libero et nisl interdum, facilisis pulvinar ante porttitor. Phasellus semper, felis vel commodo
+                            porttitor, turpis ante blandit lacus, pellentesque maximus ipsum orci sit amet ex. Suspendisse potenti.
+                        </p>
+                        <p>
+                            Aliquam et dolor vitae nibh fermentum porta et eu justo. Nunc viverra sem nec elit fermentum, sed ultricies augue rhoncus.
+                            Pellentesque posuere at purus eu bibendum. Ut quis lorem ex. Praesent in augue dictum, blandit ante ac, fringilla nibh.
+                            Aliquam erat volutpat. Aenean quam urna, fermentum eget bibendum eu, commodo non quam.
+                            Donec eleifend velit sed lorem euismod, et auctor sem tincidunt.
+                            <span class="learn-more-link"><a href="#somewhere">Link</a></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </section>
+
+{% endblock %}

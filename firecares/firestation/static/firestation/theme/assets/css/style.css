@@ -11951,7 +11951,6 @@ div.is-your-department {
 .d3-tip .tip-value {
   color: #F29A00;
 }
-
 .form-popover {
   font-family: "Open Sans", sans-serif;
 }
@@ -11991,6 +11990,9 @@ div.is-your-department {
 }
 .faq-list li {
   list-style-type: disc;
+}
+.safe-grades hr {
+  margin-top: 10px;
 }
 .ct-pageWrapper {
   background-color: #ffffff;

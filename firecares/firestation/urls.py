@@ -35,4 +35,5 @@ urlpatterns = patterns('',
                        url(r'^stats/fire-stations/?$', Stats.as_view(), name='firestation_stats'),
                        url(r'^media$', TemplateView.as_view(template_name='firestation/media.html'), name='media'),
                        url(r'^slack/firecares$', FireCARESSlack.as_view(), name='slack'),
+                       url(r'^safe-grades/?$', TemplateView.as_view(template_name='firestation/safe_grades.html'), name='safe_grades'),
                        )
