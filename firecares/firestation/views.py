@@ -5,12 +5,13 @@ import osr
 import shutil
 import urllib
 import uuid
-from django.views.generic import DetailView, ListView, TemplateView, View
+from django.views.generic import DetailView, ListView, TemplateView, View, CreateView
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import permission_required
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.models import Site
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
@@ -34,7 +35,7 @@ from firecares.usgs.models import (StateorTerritoryHigh, CountyorEquivalent,
 from guardian.mixins import PermissionRequiredMixin
 from tempfile import mkdtemp
 from firecares.tasks.cleanup import remove_file
-from .forms import DocumentUploadForm, DepartmentUserApprovalForm
+from .forms import DocumentUploadForm, DepartmentUserApprovalForm, DataFeedbackForm
 from django.views.generic.edit import FormView
 from .models import Document, FireStation, FireDepartment, Staffing, create_quartile_views
 from favit.models import Favorite
@@ -922,3 +923,48 @@ class AdminDepartmentAccountRequests(PermissionRequiredMixin, LoginRequiredMixin
                 send_mail.delay(email_message)
 
         return redirect(self.object)
+
+
+class DataFeedbackView(LoginRequiredMixin, CreateView):
+    """
+    Processes data feedback
+    """
+    form_class = DataFeedbackForm
+    http_method_names = ['post']
+
+    def _send_email(self):
+        """
+        Email admins when new feedback are received
+        """
+        print "send_mail"
+        to = [x[1] for x in settings.ADMINS]
+        print self.object
+        body = loader.render_to_string('contact/data_feedback.txt', dict(contact=self.object))
+        email_message = EmailMultiAlternatives('{} - New feedback received.'.format(Site.objects.get_current().name),
+                                               body,
+                                               settings.DEFAULT_FROM_EMAIL,
+                                               to)
+        send_mail.delay(email_message)
+
+    def _save_and_notify(self, form):
+        self.object = form.save()
+        self._send_email()
+        # After success return created response
+        return HttpResponse(status=201)
+
+    def form_valid(self, form):
+        """
+        If the form is valid then send email with the feedback message
+        """
+        return self._save_and_notify(form)
+
+    def form_invalid(self, form):
+        """
+        If the form is invalid, return errors as json.
+        """
+        return HttpResponse(
+            json.dumps(form.errors),
+            content_type="application/json",
+            status=400
+        )
+        return super(DataFeedbackView, self).get_context_data(*args, **kwargs)

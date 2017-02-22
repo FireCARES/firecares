@@ -1,4 +1,4 @@
-from .models import FireStation, FireDepartment, Staffing, Document, IntersectingDepartmentLog
+from .models import FireStation, FireDepartment, Staffing, Document, IntersectingDepartmentLog, DataFeedback
 from firecares.firecares_core.models import Address
 from firecares.firecares_core.admin import LocalOpenLayersAdmin
 from django.contrib.gis import admin
@@ -67,8 +67,14 @@ class IntersectingDepartmentLogAdmin(admin.ModelAdmin):
     pass
 
 
+class DataFeedbackAdmin(admin.ModelAdmin):
+    list_display = ['user', 'department', 'firestation', 'created_at', 'message']
+    list_filter = ['created_at']
+
+
 admin.site.register(FireStation, FireStationAdmin)
 admin.site.register(FireDepartment, FireDepartmentAdmin)
 admin.site.register(Staffing, ResponseCapabilityAdmin)
 admin.site.register(Document, DocumentAdmin)
 admin.site.register(IntersectingDepartmentLog, IntersectingDepartmentLogAdmin)
+admin.site.register(DataFeedback, DataFeedbackAdmin)

@@ -1188,6 +1188,17 @@ class Document(models.Model):
         return '{0} uploaded by: {1} at {2}'.format(self.filename or '', self.uploaded_by or 'Unknown', self.created)
 
 
+class DataFeedback(models.Model):
+    """
+    Model to store data feedback information.
+    """
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    department = models.ForeignKey(FireDepartment, null=True, blank=True)
+    firestation = models.ForeignKey(FireStation, null=True, blank=True)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 reversion.register(FireStation)
 reversion.register(FireDepartment)
 reversion.register(Staffing)

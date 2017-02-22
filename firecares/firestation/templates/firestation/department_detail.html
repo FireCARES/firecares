@@ -111,6 +111,18 @@
                     {% if user_can_admin %}
                         <a href="{% url 'admin_department_users' object.id %}" title="Manage department users" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-people fa-2x"></i></a>
                     {% endif %}
+                    {% if user.is_authenticated %}
+                        <feedback
+                            class="btn btn-sm btn-transparent–border"
+                            url="{%url 'firedepartment_data_feedback_slug' object.id object.slug %}"
+                            user="{{ user.id }}""
+                            firedepartment="{{ object.id }}"
+                            firestation=""
+                            csrftoken="{{ csrf_token }}"
+                        >
+                            <i class="fa fa-bullhorn fa-2x ct-u-text--white"></i>
+                        </feedback>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -121,24 +133,7 @@
 </div>
 <section class="ct-u-paddingBottom60">
     <div class="container">
-        <div class="ct-productMeta--single">
-            <div class="row usgs-messages">
-                <div class="col-md-12 col-lg-12">
-                    <ul>
-                        {% for message in messages %}
-                        <div class="alert {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}alert-success{% else %}alert-danger{% endif %}" role="alert">
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            {{ message }}
-                        </div>
-                        {% endfor %}
-                        <div class="alert" role="alert" ng-repeat="message in messages" ng-class="message.class">
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <span ng-bind="message.text"/>
-                        </div>
-                    </ul>
-                </div>
-            </div>
-        </div>
+        {% include 'firestation/_message_notifications.html' with use_angular=True %}
         <div class="ct-productMeta--single ">
             <div class="row">
                 <div class="col-md-9">
@@ -151,6 +146,18 @@
                         </div>
 
                         <div class="ct-u-displayTableCell text-right">
+                            {% if user.is_authenticated %}
+                                <feedback
+                                    class="usgs-update-link"
+                                    url="{%url 'firedepartment_data_feedback_slug' object.id object.slug %}"
+                                    user="{{ user.id }}""
+                                    firedepartment="{{ object.id }}"
+                                    firestation=""
+                                    csrftoken="{{ csrf_token }}"
+                                >
+                                    <i class="fa fa-bullhorn"></i>  Feedback
+                                </feedback>
+                            {% endif %}
                             <a href="" class="usgs-update-link" ng-click="toggleFullScreenMap()"><i class="fa fa-arrows-alt"></i> View Fullscreen Map</a>
                             {% if user_can_change or user_can_admin%}
                             <div class="dropdown pull-right">

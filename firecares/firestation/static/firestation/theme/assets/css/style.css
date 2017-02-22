@@ -11951,6 +11951,33 @@ div.is-your-department {
 .d3-tip .tip-value {
   color: #F29A00;
 }
+
+.form-popover {
+  font-family: "Open Sans", sans-serif;
+}
+.form-popover .popover-title {
+  font-size: 14px;
+  line-height: 24px;
+  padding: 8px;
+  display: block;
+  text-transform: uppercase;
+  text-align: center;
+}
+.form-popover .popover-content {
+  padding: 0;
+}
+.form-popover .popover-content form {
+  border-radius: 0 0 5px 5px;
+  padding: 30px 20px 30px 20px;
+}
+.form-popover .popover-content form p {
+  color: #fff;
+  font-size: 15px;
+  line-height: 21px;
+}
+.form-popover .popover-content form textarea {
+  resize: vertical;
+}
 .score-disclaimer {
   color: #777777;
   border: 2px solid #c66;
