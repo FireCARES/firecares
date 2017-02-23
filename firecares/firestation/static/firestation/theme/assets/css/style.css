@@ -11621,6 +11621,9 @@ form[name='boundaryUpload'] a.commit:hover {
 .apparatus .apparatus-help {
   margin: 1em 0;
 }
+.apparatus .no-apparatus {
+  margin: 2em;
+}
 .contactForm {
   width: 100%;
 }

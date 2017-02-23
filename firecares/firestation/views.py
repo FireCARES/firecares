@@ -967,4 +967,4 @@ class DataFeedbackView(LoginRequiredMixin, CreateView):
             content_type="application/json",
             status=400
         )
-        return super(DataFeedbackView, self).get_context_data(*args, **kwargs)
+        return super(DataFeedbackView, self).get_context_data()

@@ -365,13 +365,18 @@
                         </div>
                         {% verbatim %}
                         <div ng-if="!canModifyApparatuses" class="ng-cloak ct-u-marginTop20 well">
-                            <p>This station has <strong>{{ forms.length }}</strong> staffed apparatuses:</p>
-                            <ul>
-                                <li ng-repeat="form in forms">
-                                    <strong>{{ form.apparatus }}</strong>: staffed with <strong>{{ form.personnel }}</strong> personnel
-                                    <span ng-if="form.als">and also <strong>provides Advanced Life Support</strong></span>
-                                </li>
-                            </ul>
+                            <div ng-if="forms.length">
+                                <p>This station has <strong>{{ forms.length }}</strong> staffed apparatuses:</p>
+                                <ul>
+                                    <li ng-repeat="form in forms">
+                                        <strong>{{ form.apparatus }}</strong>: staffed with <strong>{{ form.personnel }}</strong> personnel
+                                        <span ng-if="form.als">and also <strong>provides Advanced Life Support</strong></span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div ng-if="!forms.length">
+                                <p class="text-center no-apparatus"><strong>This fire station currently does not have any apparatus information available.</strong></p>
+                            </div>
                         </div>
                         {% endverbatim %}
                     </div>
