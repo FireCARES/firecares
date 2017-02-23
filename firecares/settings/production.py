@@ -12,6 +12,7 @@ CACHES = {
     }
 }
 
+AWS_S3_CUSTOM_DOMAIN = os.getenv('AWS_S3_CUSTOM_DOMAIN', None)
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', None)
 COMPRESS_URL = os.getenv("COMPRESS_URL", None)
 COMPRESS_STORAGE = "firecares.utils.CachedS3BotoStorage"
