@@ -11745,6 +11745,14 @@ form[name='boundaryUpload'] a.commit:hover {
 .ct-u-displayTableCell .popover-wrapper form {
   top: -83px;
 }
+.underlined-link {
+  color: #F29A00;
+  border-bottom: 1px dotted white;
+}
+.underlined-link:hover {
+  color: #F29A00;
+  border-bottom: 1px dotted;
+}
 .learn-more-link a {
   color: #F29A00;
   border-bottom: 1px dotted white;
@@ -11988,11 +11996,30 @@ div.is-your-department {
   -webkit-box-shadow: 0 0 6px #f8b9b7;
   -moz-box-shadow: 0 0 6px #f8b9b7;
 }
-.faq-list {
+.faqs a {
+  color: #F29A00;
+  border-bottom: 1px dotted white;
+}
+.faqs a:hover {
+  color: #F29A00;
+  border-bottom: 1px dotted;
+}
+.faqs hr {
+  margin-top: 10px;
+}
+.faqs .faq-list {
   margin-top: 1em;
 }
-.faq-list li {
+.faqs .faq-list li {
   list-style-type: disc;
+}
+.safe-grades a {
+  color: #F29A00;
+  border-bottom: 1px dotted white;
+}
+.safe-grades a:hover {
+  color: #F29A00;
+  border-bottom: 1px dotted;
 }
 .safe-grades hr {
   margin-top: 10px;

@@ -12,42 +12,57 @@ Frequently Asked Questions
 
 {% block breadcrumbs %}
   <a href="{% url 'firestation_home' %}">Home</a>
+  <a href="#">FAQs</a>
 {% endblock %}
 
 {% block section %}
 
 <section class="ct-u-paddingBoth60">
-  <div class="container">
+  <div class="container faqs">
     <div class="row">
 
-    <h1>Login</h1>
-    <hr>
-    <h3><strong>Q:</strong>
-      I am having trouble logging in. What can I do?
-    </h3>
-    <br>
-    <h4><strong>A:</strong> There are multiple methods to login to FireCARES:</h4>
-    <ol class="faq-list">
-        <li>Local presidents or officers for fire departments can use IMIS credentials to <span class="learn-more-link"><a href="{% url 'login' %}">login</a></span> to FireCARES. [IMIS DOES NOT YET HAVE DEPARTMENT ASSOCIATIONS OR A MEANS TO DETERMINE IF AN INCOMING USER IS INDEED A LOCAL PRESIDENT OR OFFICER]</li>
-        <li>Fire chiefs can <span class="learn-more-link"><a href="{% url 'login' %}">login</a></span> via the Helix single sign on service to authenticate with FireCARES.</li>
-        <li>If you are a member of a specific organization [NEED LIST OF ORGANIZATION DOMAINS TO WHITELIST FOR SELF-REGISTRATION], you can <span class="learn-more-link"><a href="{% url 'registration_register' %}">self-register</a></span> to get a FireCARES account.</li>
-        <li>If you work at a fire department, you may be able to send an account request through FireCARES that will notify your chief or local president of your account request.  <span class="learn-more-link"><a href="{% url 'firedepartment_list' %}">Search</a></span> for your department and click <strong>&quot;Request access from your fire chief or local president.&quot;</strong>  If fire chief or local president has registered with FireCARES for your department, then he/she will receive a notification to approve your account request.</li>
-    </ol>
+    <h1>Accounts</h1>
+    <hr/>
 
-      <hr>
-      <p>
-        <h3><strong>Q:</strong>
-          When I am on a fire department page, the Performance Score and Safe Grade are grayed out?
-        </h3>
-        <br>
-        <h4><strong>A:</strong>
-          While a large portion of FireCARES is completely open, to see those features of FireCARES you need to be logged in. To obtain a login please XXX - tyler/joe/lori -- not sure the text that should go here.
-        </h4>
-      </p>
+    <div class="ct-u-marginBottom50" id="get-an-account">
+        <h3>How can I get an account with FireCARES?</h3>
+        <ol class="faq-list">
+            <li>Local presidents or officers for fire departments can use IMIS credentials to <a href="{% url 'login' %}">login</a>
+                to FireCARES. [IMIS DOES NOT YET HAVE DEPARTMENT ASSOCIATIONS OR A MEANS TO DETERMINE IF AN INCOMING USER IS INDEED
+                A LOCAL PRESIDENT OR OFFICER]
+            </li>
+            <li>Fire chiefs can <a href="{% url 'login' %}">login</a> via the Helix single sign on service to authenticate
+                with FireCARES.
+            </li>
+            <li>If you are a member of a specific organization [NEED LIST OF ORGANIZATION DOMAINS TO WHITELIST FOR SELF-REGISTRATION],
+                you can <a href="{% url 'registration_register' %}">register</a> to get a FireCARES account.
+            </li>
+            <li>If you work at a fire department, you may be able to send an account request through FireCARES that will notify
+                your chief or local president of your account request.  <a href="{% url 'firedepartment_list' %}">Search</a> for your
+                department and click <strong>&quot;Request access from your fire chief or local president.&quot;</strong>
+                If fire chief or local president has registered with FireCARES for your department, then he/she will receive a
+                notification to approve your account request.
+            </li>
+        </ol>
+    </div>
 
-    <hr>
-    <hr>
+    <div class="ct-u-marginBottom50" id="trouble-logging-in">
+        <h3>I am having trouble logging in. What can I do?</h3>
+        <p class="ct-u-marginTop10">
+            You can <a href="{% url 'password_reset' %}">reset your FireCARES password</a> or
+            <a href="{% url 'forgot_username' %}">retrieve your username</a>.  However, if you use IMIS or Helix to login
+            into FireCARES, you'll need to work with those respective providers to retrieve your username and/or have your
+            password reset.
+        </p>
+    </div>
 
+    <div class="ct-u-marginBottom50" id="grayed-out">
+        <h3>When I am on a fire department page, why are the Performance Score and Safe Grades are grayed out?</h3>
+        <p class="ct-u-marginTop10">
+          While a large portion of FireCARES is completely open, to see those features of FireCARES you need to be logged in.
+          To obtain a login please see <a href="#get-an-account">&quot;How can I get an account with FireCARES?&quot;</a> above.
+        </p>
+    </div>
 
     <h1>Data</h1>
 

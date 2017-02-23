@@ -1078,7 +1078,7 @@ form[name='boundaryUpload'] {
     top: -83px;
 }
 
-.learn-more-link a {
+.underlined-link {
   color: @brand-primary;
   border-bottom: 1px dotted white;
 
@@ -1086,6 +1086,10 @@ form[name='boundaryUpload'] {
     color: @brand-primary;
     border-bottom: 1px dotted;
   }
+}
+
+.learn-more-link a {
+  .underlined-link;
 }
 
 /* Disclaimer */
@@ -1384,14 +1388,22 @@ div.is-your-department {
   -moz-box-shadow: 0 0 6px #f8b9b7;
 }
 
-.faq-list {
-  margin-top: 1em;
-  li {
-    list-style-type: disc;
+.faqs {
+  .safe-grades;
+
+  .faq-list {
+    margin-top: 1em;
+    li {
+      list-style-type: disc;
+    }
   }
 }
 
 .safe-grades {
+  a {
+    .underlined-link;
+  }
+  
   hr {
     margin-top: 10px;
   }
