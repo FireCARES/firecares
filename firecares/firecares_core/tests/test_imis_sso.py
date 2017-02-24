@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import Client
 from requests_mock import Mocker
+from firecares.firestation.models import FireDepartment
 from .base import BaseFirecaresTestcase
 
 User = get_user_model()
@@ -16,8 +17,10 @@ class IMISSingleSignOnTests(BaseFirecaresTestcase):
         self.service_wsdl = settings.IMIS_SSO_SERVICE_URL
         self.service_root = self.service_wsdl.split('?')[0]
         self.valid_session = True
+        self.is_iaff_member = True
         self.user_info_updated = False
         self.disposed = []
+        self.fd, _ = FireDepartment.objects.get_or_create(id=12345, name='TEST IMIS SSO')
 
     def load_mock(self, filename):
         with open(os.path.join(os.path.dirname(__file__), 'mocks/imis', filename), 'r') as f:
@@ -34,10 +37,13 @@ class IMISSingleSignOnTests(BaseFirecaresTestcase):
         return self.load_mock('dispose_session.xml')
 
     def user_info_callback(self, request, context):
-        if self.user_info_updated:
-            return self.load_mock('updated_user_info.xml')
+        if self.is_iaff_member:
+            if self.user_info_updated:
+                return self.load_mock('updated_user_info.xml')
+            else:
+                return self.load_mock('user_info.xml')
         else:
-            return self.load_mock('user_info.xml')
+            return self.load_mock('non_member_user_info.xml')
 
     def setup_mocks(self, mock):
         mock.get(self.service_wsdl, text=self.load_mock('wsdl.xml'))
@@ -80,8 +86,27 @@ class IMISSingleSignOnTests(BaseFirecaresTestcase):
         self.assertEqual(user.first_name, 'Tester')
         self.assertEqual(user.last_name, 'McTest')
         self.assertEqual(user.email, 'tester@prominentedge.com')
+        self.assertEqual(user.userprofile.department, self.fd)
+        self.assertTrue(self.fd.is_admin(user))
+        self.assertTrue(self.fd.is_curator(user))
         c.logout()
         self.assertEqual(len(self.disposed), 1)
+
+    def test_gate_non_members(self, mock):
+        """
+        Ensure that only IAFF members are able to user IMIS to login
+        """
+
+        self.setup_mocks(mock)
+
+        c = Client()
+        uuid = uuid4()
+
+        self.is_iaff_member = False
+
+        resp = c.get(reverse('imis') + '?ibctoken{}'.format(uuid))
+        self.assert_redirect_to(resp, 'login')
+        self.assertFalse('ibcToken' in c.session)
 
     def test_user_information_updates(self, mock):
         """

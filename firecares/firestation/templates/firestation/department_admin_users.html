@@ -158,7 +158,7 @@
                                         <span class="ct-fw-600">Phone</span>
                                     </div>
                                     <div class="ct-u-displayTableCell text-right">
-                                        <span>{{ object.headquarters_phone|default:"Unknown" }}</span>
+                                        <span>{{ object.headquarters_phone|phonenumber|default:"Unknown" }}</span>
                                     </div>
                                 </div>
                                 <div class="ct-u-displayTableRow">
@@ -166,7 +166,7 @@
                                         <span class="ct-fw-600">Fax</span>
                                     </div>
                                     <div class="ct-u-displayTableCell text-right">
-                                        <span>{{ object.headquarters_fax|default:"Unknown" }}</span>
+                                        <span>{{ object.headquarters_fax|phonenumber|default:"Unknown" }}</span>
                                     </div>
                                 </div>
                                 <div class="ct-u-displayTableRow">

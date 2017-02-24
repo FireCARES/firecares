@@ -39,8 +39,7 @@
                     <COUNTRY xmlns="">USA</COUNTRY>
                     <UserId xmlns="">JOE@PROMINENTEDGE.COM</UserId>
                     <MOTOGROUP_MEM_NUM xmlns=""></MOTOGROUP_MEM_NUM>
-                    <security_role xmlns="">FIREPAC_USA,Local_CompanyAdmin,Local_Officer,Member</security_role>
-                    <firecares_id xmlns="">12345</firecares_id>
+                    <security_role xmlns="">FIREPAC_USA,Local_CompanyAdmin</security_role>
                 </ExtensionData>
                 <WebLogin>JOE@PROMINENTEDGE.COM</WebLogin>
             </FetchUserInfoResult>

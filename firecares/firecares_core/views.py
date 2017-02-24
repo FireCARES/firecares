@@ -16,11 +16,12 @@ from django.views.generic import View, CreateView, TemplateView
 from requests_oauthlib import OAuth2Session
 from oauthlib.common import to_unicode
 from zeep import Client
+from guardian.shortcuts import get_objects_for_user
 from firecares.tasks.email import send_mail, email_admins
-from firecares.firecares_core.models import PredeterminedUser
+from firecares.firestation.models import FireDepartment
 from firecares.firecares_core.ext.registration.views import SESSION_EMAIL_WHITELISTED
 from .forms import ContactForm
-from .models import RegistrationWhitelist, DepartmentAssociationRequest
+from .models import PredeterminedUser, RegistrationWhitelist, DepartmentAssociationRequest
 from .mixins import LoginRequiredMixin
 
 
@@ -308,6 +309,33 @@ class IMISRedirect(View):
     def _create_username(self, user_info):
         return 'iaff-{}'.format(user_info.get('ImisId'))
 
+    def _is_member(self, user_info):
+        ext = user_info.get('extension_data')
+        if ext and 'member' in ext.get('security_role').lower():
+            return True
+        else:
+            return False
+
+    def _should_be_department_admin(self, user_info):
+        ext = user_info.get('extension_data')
+        if ext and self._is_member(user_info):
+            security_role = ext.get('security_role', '').lower()
+            if 'member' in security_role and 'local_officer' in security_role:
+                return True
+
+        return False
+
+    def _get_firecares_id(self, user_info):
+        ext = user_info.get('extension_data')
+        if ext:
+            return ext.get('firecares_id')
+
+        return None
+
+    def _is_whitelisted(self, user_info):
+        email = user_info.get('EmailAddress', None)
+        return RegistrationWhitelist.is_whitelisted(email)
+
     def get(self, request):
         # Looking to start a new session
         if 'ibcToken' in request.GET:
@@ -315,10 +343,19 @@ class IMISRedirect(View):
             self.imis = Client(settings.IMIS_SSO_SERVICE_URL) if not self.imis else self.imis
             # Verify token and create user if none exists
             token = request.GET['ibcToken']
+
             if self.imis.service.ValidateSession(applicationInstance=self.application_instance, userToken=token):
                 request.session['ibcToken'] = token
                 info = self.imis.service.FetchUserInfo(applicationInstance=self.application_instance, userToken=token)
                 user_info = self._extract_user_info(info)
+
+                if not self._is_whitelisted(user_info) and not self._should_be_department_admin(user_info):
+                    messages.add_message(request, messages.ERROR, 'Must be approved by a local officer to login to FireCARES using IMIS')
+                    return redirect(reverse('login'))
+
+                if not self._is_member(user_info):
+                    messages.add_message(request, messages.ERROR, 'Must be an approved IAFF member to login to FireCARES using IMIS')
+                    return redirect(reverse('login'))
 
                 user = auth.authenticate(remote_user=self._create_username(user_info))
                 # Sync user information on every login
@@ -327,7 +364,22 @@ class IMISRedirect(View):
                     user.first_name = user_info.get('FirstName', user.first_name)
                     user.last_name = user_info.get('LastName', user.last_name)
                     user.save()
-                    # TODO: Handle department association if permissions are found
+
+                    deptid = self._get_firecares_id(user_info)
+                    user.userprofile.department = FireDepartment.objects.filter(id=deptid).first()
+                    user.userprofile.save()
+
+                    if self._should_be_department_admin(user_info) and deptid:
+                        # Remove existing department permissions
+                        departments = get_objects_for_user(user, 'firestation.admin_firedepartment')
+                        for department in departments:
+                            if department.id != deptid:
+                                department.remove_admin(user)
+                                department.remove_curator(user)
+                        # Make this user an admin on the their "firecares_id" department
+                        fd = FireDepartment.objects.get(id=deptid)
+                        fd.add_admin(user)
+                        fd.add_curator(user)
                     auth.login(request, user)
                     return redirect(request.GET.get('next') or reverse('firestation_home'))
 
