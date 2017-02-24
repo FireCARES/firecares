@@ -320,7 +320,8 @@ class IMISRedirect(View):
         ext = user_info.get('extension_data')
         if ext and self._is_member(user_info):
             security_role = ext.get('security_role', '').lower()
-            if 'member' in security_role and 'local_officer' in security_role:
+            roles = ['dvp_trustee', 'state_prov_officer', 'local_officer']
+            if 'member' in security_role and any(map(lambda x: x in security_role, roles)):
                 return True
 
         return False
