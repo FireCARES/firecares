@@ -154,17 +154,17 @@ class AdminDepartmentUsers(PermissionRequiredMixin, LoginRequiredMixin, DetailVi
             can_admin_users = request.POST.getlist('can_admin')
             can_change_users = request.POST.getlist('can_change')
             for user in can_admin_users:
-                cur = User.objects.get(username=user)
+                cur = User.objects.get(email=user)
                 self.object.add_admin(cur)
             for user in users:
-                if user.username not in can_admin_users:
+                if user.email not in can_admin_users:
                     self.object.remove_admin(user)
 
             for user in can_change_users:
-                cur = User.objects.get(username=user)
+                cur = User.objects.get(email=user)
                 self.object.add_curator(cur)
             for user in users:
-                if user.username not in can_change_users:
+                if user.email not in can_change_users:
                     self.object.remove_curator(user)
 
             messages.add_message(request, messages.SUCCESS, 'Updated department\'s authorized users.')

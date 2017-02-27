@@ -11,14 +11,16 @@
     $scope.toadd = null;
 
     $scope.autocompleteUsers = function(username) {
-      return $http.get("/autocomplete/UserAutocomplete/?q=" + username).then(function(response){
-        var r = /data-value="(\d+)">(\w+)/g;
+      // return $http.get("/autocomplete/UserAutocomplete/?q=" + username).then(function(response){
+      return $http.get("/autocomplete/UserEmailAutocomplete/?q=" + username).then(function(response){
+        var r = /data-value="([^"]+)">(\w+)/g;
         var resp = [];
         var match = r.exec(response.data);
         while (match !== null) {
+          var user_email = match[1]
           var username = match[2];
-          if (_.isEmpty(_.filter($scope.users, {username: username})) && username !== 'AnonymousUser') {
-            resp.push(username);
+          if (_.isEmpty(_.filter($scope.users, {username: username}))) {
+            resp.push(user_email);
           }
           match = r.exec(response.data);
         }
@@ -33,6 +35,7 @@
     $scope.addUser = function() {
       if (!$scope.toadd) {
         $scope.toadd = {
+          email: '',
           username: '',
           can_change: false,
           can_admin: false

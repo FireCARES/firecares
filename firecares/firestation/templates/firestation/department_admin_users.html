@@ -35,6 +35,7 @@
       {
         id: {{ u.user.id }},
         username: "{{ u.user.username }}",
+        email: "{{ u.user.email }}",
         can_change: {{ u.can_change|yesno:"true,false" }},
         can_admin: {{ u.can_admin|yesno:"true,false" }}
       }{% if not forloop.last %},{% endif %}
@@ -342,7 +343,7 @@
                         <table class="table table-striped well">
                             <thead>
                                 <tr>
-                                    <th>Username</th>
+                                    <th>User email</th>
                                     <th>Can change this department's data?</th>
                                     <th>Can administer this department's associated users?</th>
                                     <th></th>
@@ -351,18 +352,18 @@
                             <tbody>
                                 {% verbatim %}
                                 <tr ng-repeat="u in users" class="ng-cloak">
-                                    <td><strong>{{ u.username }}</strong></td>
-                                    <td><input type="checkbox" name="can_change" value="{{ u.username }}" ng-model="u.can_change"/></td>
-                                    <td><input type="checkbox" name="can_admin" value="{{ u.username }}" ng-model="u.can_admin"/></td>
+                                    <td><strong>{{ u.email }}</strong></td>
+                                    <td><input type="checkbox" name="can_change" value="{{ u.email }}" ng-model="u.can_change"/></td>
+                                    <td><input type="checkbox" name="can_admin" value="{{ u.email }}" ng-model="u.can_admin"/></td>
                                     <td><a href="" ng-click="deletePerms(u)" title="Remove this user's permissions for this department completely" class="btn btn-default btn-xs pull-right delete-perms"><i class="fa fa-minus-circle"></i></a></td>
                                 </tr>
                                 <tr ng-show="toadd" class="ng-cloak">
-                                    <td><input type="text" autocomplete="off" name="username" ng-model="toadd.username" placeholder="Type an existing username" uib-typeahead="suggestion for suggestion in autocompleteUsers($viewValue)"/></td>
+                                    <td><input type="text" autocomplete="off" name="email" ng-model="toadd.email" placeholder="Type an existing user email    " uib-typeahead="suggestion for suggestion in autocompleteUsers($viewValue)"/></td>
                                     <td><input type="checkbox" name="can_change" ng-model="toadd.can_change"/></td>
                                     <td><input type="checkbox" name="can_admin" ng-model="toadd.can_admin"/></td>
                                     <td>
                                         <button type="button" ng-click="cancelAdd()" class="btn btn-default pull-right">Cancel</button>
-                                        <button type="button" ng-click="addComplete()" ng-disabled="(!toadd.can_change && !toadd.can_admin) || !toadd.username" class="btn btn-primary pull-right">Add</button>
+                                        <button type="button" ng-click="addComplete()" ng-disabled="(!toadd.can_change && !toadd.can_admin) || !toadd.email" class="btn btn-primary pull-right">Add</button>
                                     </td>
                                 </tr>
                                 <tr>

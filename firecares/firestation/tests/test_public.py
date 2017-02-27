@@ -262,11 +262,11 @@ class TestPublic(BaseFirecaresTestcase):
 
     def test_department_user_admin(self):
         fd = self.load_la_department()
-        user, creds = self.create_test_user('user2', 'user2')
+        user, creds = self.create_test_user('user2', 'user2', email="user2@example.com")
 
         c = Client()
         c.login(**self.admin_creds)
-        perms = {'can_change': ['non_admin', 'user2'], 'can_admin': 'non_admin', 'form': 'users'}
+        perms = {'can_change': ['non_admin@example.com', 'user2@example.com'], 'can_admin': 'non_admin@example.com', 'form': 'users'}
 
         resp = c.post(reverse('admin_department_users', args=[fd.id]), data=perms)
         self.assert_redirect_to(resp, 'firedepartment_detail_slug')
@@ -276,7 +276,7 @@ class TestPublic(BaseFirecaresTestcase):
         self.assertTrue(fd.is_admin(self.non_admin_user))
 
         # Ensure that permission deletion works as well
-        perms = {'can_change': ['non_admin'], 'can_admin': 'non_admin', 'form': 'users'}
+        perms = {'can_change': ['non_admin@example.com'], 'can_admin': 'non_admin@example.com', 'form': 'users'}
 
         resp = c.post(reverse('admin_department_users', args=[fd.id]), data=perms)
         self.assertFalse(fd.is_curator(user))
