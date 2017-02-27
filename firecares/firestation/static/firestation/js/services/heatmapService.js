@@ -187,7 +187,7 @@
 
                             // Preprocess dates into individual parts. This is MUCH faster than
                             // doing it for each dimension, and speeds up loading significantly.
-                            var risks = { "":0, "Low":1, "Medium":2, "High":3 };
+                            var risks = { "Unknown":0, "Low":1, "Medium":2, "High":3 };
                             for (var i = 0; i < lines.length; i++) {
                                 var line = lines[i];
                                 var dateTime = line.alarm.split(' ');
