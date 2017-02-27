@@ -47,9 +47,20 @@ al.register(FireDepartment,
             },)
 
 
+# TODO: Check if this autocomplete is still needed
 al.register(User,
             search_fields=['username'],
             attrs={
                 'data-autocomplete-minimum-characters': 1,
             },
             choices=User.objects.filter(is_active=True)),
+
+
+al.register(User,
+            name='UserEmailAutocomplete',
+            search_fields=['email'],
+            attrs={
+                'data-autocomplete-minimum-characters': 1,
+            },
+            choices=User.objects.filter(is_active=True).exclude(username='AnonymousUser'),
+            choice_value=lambda self, choice: choice.email)
