@@ -32,12 +32,7 @@
     $scope.message = {};
     var fitBoundsOptions = {padding: [6, 6]};
 
-    Staffing.query({firestation: config.id}).$promise.then(function(data){
-      if ( !data.length && $scope.canModifyApparatuses) {
-        $scope.AddForm();
-        return;
-      }
-
+    Staffing.query({firestation: config.id}).$promise.then(function(data) {
       $scope.forms = data;
     });
 

@@ -89,7 +89,7 @@
     </style>
 </head>
 
-<body class="ct-headroom--fixedTopBar cssAnimate" ng-controller="fireStationController" ng-app="fireStation">
+<body class="ct-headroom--fixedTopBar cssAnimate fire-station" ng-controller="fireStationController" ng-app="fireStation">
 
 {% include 'firestation/_mobile_navbar.html' %}
 {% include 'firestation/_mobile_search.html' %}
@@ -204,7 +204,7 @@
                         </div>
                     </div>
                     {% if user_can_change %}
-                        <div>
+                        <div class="ng-cloak">
                             <div ng-show="shp">
                                 <form name="boundaryUpload">
                                     <input class="hide" type="file" name="newBoundary" onchange="angular.element(this).scope().processBoundaryShapefile(this.files[0])"/>
@@ -390,6 +390,7 @@
                                 <button type="button" class="close" data-dismiss="alert">&times;</button>
                                 {{ message.message }}
                             </div>
+                            <p><strong><em>Department and station administrators and curators, please make sure your apparatus information is accurate.</em></strong></p>
                             <ul class="nav nav-tabs apparatus-tabs">
                                 <li id="tab-{{ form.id }}" ng-repeat="form in forms" ng-class="{'active': $last}">
                                     <a href="#{{ form.id }}" data-toggle="tab">{{ form.apparatus }} </a>

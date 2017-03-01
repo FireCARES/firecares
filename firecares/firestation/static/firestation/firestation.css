@@ -13,14 +13,6 @@ h2 {
     line-height: 25px;
 }
 
-.response-capability-well {
-    background-color: white;
-    padding: 8px;
-    border: 0px;
-    box-shadow: none;
-    -webkit-box-shadow: none;
-}
-
 /*
 The .nav-action class mimics nav-tab links. Only used to avoid href="#"
 which moves the window when the user clicks on the link.
@@ -35,6 +27,11 @@ which moves the window when the user clicks on the link.
     -moz-border-radius: 4px 4px 0 0;
     border-radius: 4px 4px 0 0;
     margin-right: 2px;
+    background-color: #ccc;
+    -moz-transition: all 0.2s;
+    -o-transition: all 0.2s;
+    -webkit-transition: all 0.2s;
+    transition: all 0.2s;
 }
 
 .nav-action:hover {
@@ -70,7 +67,7 @@ input.ng-invalid {
     padding-bottom: 15px;
 }
 
-.fire-station-header h1, h2, h3 {
+.fire-station h2 {
     line-height: 30px;
 }
 

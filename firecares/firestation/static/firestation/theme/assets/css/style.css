@@ -12024,6 +12024,9 @@ div.is-your-department {
 .safe-grades hr {
   margin-top: 10px;
 }
+.fire-station h2 {
+  line-height: 30px;
+}
 .ct-pageWrapper {
   background-color: #ffffff;
   overflow: hidden;
