@@ -48,6 +48,7 @@
     var headquartersGeom = config.headquarters ? L.latLng(config.headquarters.coordinates.reverse()) : null;
     var stationGeom = config.geom ? L.latLng(config.geom.coordinates.reverse()) : null;
     var station = L.marker(stationGeom, {icon: stationIcon, zIndexOffset: 1000, draggable: config.draggable});
+    var district = null;
     var mouseOverAddedOpacity = 0.25; // put in settings?
     var highlightColor = 'blue';      // put in settings?
     var serviceArea, max;
@@ -89,7 +90,7 @@
     layersControl.addOverlay(serviceArea, 'Service area');
 
     if (config.district) {
-      var district = L.geoJson(config.district, {
+      district = L.geoJson(config.district, {
         style: function (feature) {
           return {color: '#0074D9', fillOpacity: .05, opacity:.8, weight:2};
         }
@@ -227,5 +228,68 @@
         $scope.message = {};
       }, 4000);
     };
-  });
+
+    // Update district boundaries
+    $scope.shp = null;
+
+    $scope.toggleBoundary = function() {
+      if (!$scope.shp) {
+        angular.element("input[name='newBoundary']").click();
+      }
+    };
+
+    $scope.processBoundaryShapefile = function(file) {
+      var fr = new FileReader();
+      fr.onload = function(f) {
+        var content = f.currentTarget.result;
+        // No perceived error event, so resort to timeout
+        var to = $timeout(function() {
+          $scope.messages = [];
+          $scope.messages.push({class: 'alert-danger', text: 'Shapefile appears to be invalid or unparseable, please ensure your target file is a .zip file with the mandatory .shp, .dbf and .shx files and re-upload.  If there is a .shp.xml file in the zipped bundle, removing that file from the bundle could help.'})
+        }, 2000);
+        var shp = new L.Shapefile(content).on('data:loaded', function(e) {
+          $scope.$apply(function() {
+            $timeout.cancel(to);
+            $scope.messages = [];
+            $scope.shp = e.target;
+            $scope.shp.addTo(map);
+            map.fitBounds($scope.shp);
+          });
+        });
+      };
+      fr.readAsArrayBuffer(file);
+    };
+
+    $scope.commitBoundary = function() {
+      var features = $scope.shp.getLayers()[0].toGeoJSON();
+      // Force multipolygon
+      if (features.geometry.type === "Polygon") {
+        features.geometry.coordinates = [features.geometry.coordinates];
+        features.geometry.type = "MultiPolygon";
+      }
+      $scope.station.district = features.geometry;
+
+      FireStation.update({id: $scope.station.id}, $scope.station).$promise.then(function() {
+        // Remove old district boundary
+        if (district) {
+          map.removeLayer(district);
+          layersControl.removeLayer(district);
+        }
+        district = $scope.shp;
+        district.setStyle({color: '#0074D9', fillOpacity: .05, opacity: .8, weight: 2});
+        layersControl.addOverlay(district, 'District');
+        $scope.shp = null;
+        $scope.messages = [];
+        $scope.messages.push({class: 'alert-success', text: 'Fire station district boundary updated.'});
+      }, function() {
+        $scope.messages.push({class: 'alert-danger', text: 'Server issue updating district boundary.'});
+      });
+    };
+
+    $scope.cancelBoundary = function() {
+      map.removeLayer($scope.shp);
+      $scope.shp = null;
+      angular.element("form[name='boundaryUpload']").get(0).reset();
+    };
+  })
 })();
