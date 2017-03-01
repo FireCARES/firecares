@@ -176,8 +176,44 @@
                                 </feedback>
                             {% endif %}
                             <a href="" class="usgs-update-link" ng-click="toggleFullScreenMap()"><i class="fa fa-arrows-alt"></i> View Fullscreen Map</a>
+                            {% if user_can_change %}
+                                <div class="dropdown pull-right">
+                                    <a href="" class="usgs-update-link dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                        <i class="fa fa-cog"></i>
+                                        Tools
+                                    </a>
+                                    <ul class="dropdown-menu in-front" aria-labelledby="dropdownMenu1">
+                                        {% if user_can_change %}
+                                        <li>
+                                            <a href="{% url 'firestation_boundary_shapefile' object.id object.slug %}">
+                                                <i class="fa fa-download"></i>
+                                                Download District Boundary
+                                                <span class="format">(shp)</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="" ng-click="toggleBoundary()" ng-class="{active: shp !== null}">
+                                                <i class="fa fa-cloud-upload"></i>
+                                                Upload Boundary
+                                            </a>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
+                    {% if user_can_change %}
+                        <div>
+                            <div ng-show="shp">
+                                <form name="boundaryUpload">
+                                    <input class="hide" type="file" name="newBoundary" onchange="angular.element(this).scope().processBoundaryShapefile(this.files[0])"/>
+                                    <a href="" class="commit" ng-click="commitBoundary()">Save updated boundary</a>
+                                    <a href="" ng-click="cancelBoundary()">Cancel</a>
+                                </form>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
  <!--                <div class="col-md-4 col-lg-3 text-right">
                     <a href=""><i class="fa fa-times"></i>report abuse</a>

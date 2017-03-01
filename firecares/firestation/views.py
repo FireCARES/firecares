@@ -605,8 +605,10 @@ class DownloadShapefile(LoginRequiredMixin, View):
     def get_queryset(self, *args, **kwargs):
         if kwargs.get('feature_type') == 'department_boundary':
             return FireDepartment.objects.filter(id=kwargs.get('pk'))
+        elif kwargs.get('feature_type') == 'firestation_boundary':
+            return FireStation.objects.filter(id=kwargs.get('pk'))
         else:
-            return kwargs.get('department').firestation_set.all()
+            return kwargs.get('instance').firestation_set.all()
 
     def create_shapefile(self, queryset, filename, geom):
         path = mkdtemp()
@@ -786,22 +788,31 @@ class DownloadShapefile(LoginRequiredMixin, View):
         return file_path, zip_file
 
     def filename(self, *args, **kwargs):
-        return '{0}-{1}-{2}'.format(kwargs.get('department').id,
-                                    kwargs.get('department').slug,
+        return '{0}-{1}-{2}'.format(kwargs.get('instance').id,
+                                    kwargs.get('instance').slug,
                                     kwargs.get('geom_type'))
 
     def get(self, request, *args, **kwargs):
         response = HttpResponse(content_type=self.content_type)
         geom = self.kwargs.get('geometry_field', 'geom')
+        feature_type = kwargs.get('feature_type')
 
         geom_type = self.kwargs.get('geom_type', 'stations')
 
         if geom == 'district':
-            geom_type = 'districts'
+            if feature_type == 'firestation_boundary':
+                geom_type = 'district'
+            else:
+                geom_type = 'districts'
 
-        department = get_object_or_404(FireDepartment, id=kwargs['pk'])
-        filename = self.filename(department=department, geom_type=geom_type)
-        queryset = self.get_queryset(department=department, **kwargs)
+        if feature_type == 'firestation_boundary':
+            instance = get_object_or_404(FireStation, id=kwargs['pk'])
+        else:
+            instance = get_object_or_404(FireDepartment, id=kwargs['pk'])
+
+        filename = self.filename(instance=instance, geom_type=geom_type)
+        queryset = self.get_queryset(instance=instance, **kwargs)
+
         if kwargs.get('feature_type') == 'department_boundary':
             file_path, zip_file = self.create_department_boundary_shapefile(queryset, filename, geom)
         else:
@@ -936,9 +947,7 @@ class DataFeedbackView(LoginRequiredMixin, CreateView):
         """
         Email admins when new feedback are received
         """
-        print "send_mail"
         to = [x[1] for x in settings.ADMINS]
-        print self.object
         body = loader.render_to_string('contact/data_feedback.txt', dict(contact=self.object))
         email_message = EmailMultiAlternatives('{} - New feedback received.'.format(Site.objects.get_current().name),
                                                body,

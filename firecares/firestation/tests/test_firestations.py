@@ -852,8 +852,8 @@ class FireStationTests(BaseFirecaresTestcase):
             self.assertEqual(layer.num_feat, 1)
             expected_fields = ['id', 'name', 'department', 'station_nu', 'address_l1',
                                'address_l2', 'city', 'state', 'zipcode', 'country', 'engine',
-                               'engine_1', 'engine_2', 'truck', 'quint', 'als_am', 'bls_am', 'rescue', 'boat', 'hazmat',
-                               'chief', 'other']
+                               'engine_1', 'engine_2', 'truck', 'quint', 'als_am', 'bls_am', 'rescue', 'boat',
+                               'hazmat', 'chief', 'other']
 
             self.assertListEqual(layer.fields, expected_fields)
 
@@ -876,6 +876,12 @@ class FireStationTests(BaseFirecaresTestcase):
         response = c.get(reverse('department_districts_shapefile', args=[fd.id, fd.slug]))
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.has_header('X-Accel-Redirect'))
+
+        response = c.get(reverse('department_boundary_shapefile', args=[fd.id, fd.slug]))
+        self.assertEqual(response.status_code, 200)
+
+        response = c.get(reverse('firestation_boundary_shapefile', args=[fs.id, fs.slug]))
+        self.assertEqual(response.status_code, 200)
 
     def test_documents(self):
         c = Client()
@@ -1146,3 +1152,72 @@ class FireStationTests(BaseFirecaresTestcase):
         resp = admin_client.get(reverse('admin_department_account_requests', args=[fd.id]) + '?email=tester2@mytest.com')
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'This request has already been approved')
+
+    def test_update_firestation_boundaries(self):
+        us = Country.objects.create(iso_code='US', name='United States')
+        add = Address.objects.create(address_line1='123 Test Drive', country=us)
+
+        fd = FireDepartment.objects.create(name='Test db',
+                                           population=0,
+                                           population_class=1,
+                                           department_type='test')
+
+        fs = FireStation.objects.create(station_number=25, name='Test Station', geom=Point(35, -77),
+                                        district=None, department=fd,
+                                        station_address=add)
+
+        new_geom = """
+{
+  "district": {
+    "coordinates": [
+      [
+        [
+          [
+            0, 0
+          ],
+          [
+            1, 1
+          ],
+          [
+            2, 0
+          ],
+          [
+            1, -1
+          ],
+          [
+            0, 0
+          ]
+        ]
+      ]
+    ],
+    "type": "MultiPolygon"
+  },
+  "geom": {
+    "coordinates": [
+      35.0,
+      -77.0
+    ],
+    "type": "Point"
+  }
+}
+"""
+
+        c = Client()
+        c.login(**self.non_admin_creds)
+        url = '{root}{fs}/'.format(root=reverse('api_dispatch_list', args=[self.current_api_version, 'firestations']),
+                                   fs=fs.id)
+
+        # Ensure that a non-admin user can't update the firestation boundaries
+        response = c.put(url, data=new_geom, content_type='application/json')
+        self.assertEqual(response.status_code, 401)
+
+        fd.add_curator(self.non_admin_user)
+
+        response = c.put(url, data=new_geom, content_type='application/json')
+        self.assertEqual(response.status_code, 204)
+        response = c.get(url)
+        self.assertDictEqual(json.loads(response.content).get('district'), json.loads(new_geom).get('district'))
+
+        c.login(**self.admin_creds)
+        response = c.put(url, data=new_geom, content_type='application/json')
+        self.assertEqual(response.status_code, 204)
