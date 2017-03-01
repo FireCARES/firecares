@@ -32,6 +32,10 @@ can run collect static from the `firecares-ansible` directory on the host machin
 
 `ansible-playbook vagrant.yml -i vagrant_server --tags django.collectstatic`
 
+### Pre-commit configuration
+
+We use [pre-commit](http://pre-commit.com/), see how to [install](http://pre-commit.com/#install) in your local repository.
+
 ### Unit Testing
 
 You'll need the following commands to run all of the unit tests.  Tests are run on each commit automatically, so please run them yourself before you commit.

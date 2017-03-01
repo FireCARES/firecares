@@ -93,6 +93,7 @@ def update_performance_score(id, dry_run=False):
         dist_model = dist_model_for_hazard_level(result.get('risk_category'))
 
         # Use floor draws based on the LogNormal of the structure type distribution for med/high risk categories
+        # TODO: Detect support for number_of_floors_draw on risk model vs being explicit on hazard levels used :/
         if result.get('risk_category') in ['Medium', 'High']:
             rm, _ = fd.firedepartmentriskmodels_set.get_or_create(level=risk_mapping[result['risk_category']])
             if rm.floor_count_coefficients:
@@ -100,11 +101,11 @@ def update_performance_score(id, dry_run=False):
                 # TODO
                 # dist_model.number_of_floors_draw = LogNormalDraw(*rm.floor_count_coefficients)
 
-        counts = dict(object_of_origin=result.get('object_of_origin', 0),
-                      room_of_origin=result.get('room_of_origin', 0),
-                      floor_of_origin=result.get('floor_of_origin', 0),
-                      building_of_origin=result.get('building_of_origin', 0),
-                      beyond=result.get('beyond', 0))
+        counts = dict(object_of_origin=result['object_of_origin'] or 0,
+                      room_of_origin=result['room_of_origin'] or 0,
+                      floor_of_origin=result['floor_of_origin'] or 0,
+                      building_of_origin=result['building_of_origin'] or 0,
+                      beyond=result['beyond'] or 0)
 
         # add current risk category to the all risk category
         for key, value in counts.items():
@@ -132,6 +133,15 @@ def update_performance_score(id, dry_run=False):
             record.dist_model_score = None
 
         if not dry_run:
+            record.save()
+
+    # Clear out scores for missing hazard levels
+    if not dry_run:
+        missing_categories = set(risk_mapping.keys()) - set(map(lambda x: x.get('risk_category'), results))
+        for r in missing_categories:
+            print 'clearing {0} level from {1} due to missing categories in aggregation'.format(r, fd.id)
+            record, _ = fd.firedepartmentriskmodels_set.get_or_create(level=risk_mapping[r])
+            record.dist_model_score = None
             record.save()
 
     record, _ = fd.firedepartmentriskmodels_set.get_or_create(level=HazardLevels.All.value)
