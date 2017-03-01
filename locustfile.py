@@ -12,10 +12,11 @@ Alternatively, you can run it from within the virtual machine like this.
 
 locust --host=http://localhost Users AnonUsers
 
-If you have a port conflict, use the -P flag to change the port. If you would 
+If you have a port conflict, use the -P flag to change the port. If you would
 like to use a different login, you can use the environment variables $FCUSER and
 $FCPASS.
 """
+
 
 # Behaviors performed by anyone
 class GeneralBehavior(TaskSet):
@@ -59,13 +60,15 @@ class GeneralBehavior(TaskSet):
     def search_department_score_region(self):
         self.client.get("/departments?favorites=false&state=CA&region=West&population=1814307+%2C+8687331&dist_model_score=35+%2C+286")
 
+
 # Behaviors performed by anonymous users
 class AnonBehavior(TaskSet):
-    tasks = {GeneralBehavior:10}
+    tasks = {GeneralBehavior: 10}
+
 
 # Behaviors performed by logged in users
 class UserBehavior(TaskSet):
-    tasks = {GeneralBehavior:10}
+    tasks = {GeneralBehavior: 10}
 
     # Log the user in
     @task(1)
@@ -73,9 +76,9 @@ class UserBehavior(TaskSet):
         response = self.client.get("/login/")
         token = response.cookies['csrftoken']
         result = self.client.post("/login/", {
-            "csrfmiddlewaretoken":token,
-            "username":os.getenv("FCUSER", "admin"),
-            "password":os.getenv("FCPASS", "admin")
+            "csrfmiddlewaretoken": token,
+            "username": os.getenv("FCUSER", "admin"),
+            "password": os.getenv("FCPASS", "admin")
         }, catch_response=True)
 
         page = result.content.decode("utf-8")
@@ -86,11 +89,13 @@ class UserBehavior(TaskSet):
         else:
             result.success()
 
+
 class AnonUsers(HttpLocust):
     weight = 10
     task_set = AnonBehavior
     min_wait = 5000
     max_wait = 9000
+
 
 class Users(HttpLocust):
     weight = 1
