@@ -8,9 +8,10 @@ from firecares.firestation.managers import Ntile, Case, When
 
 
 class FireDepartmentMetrics(object):
-    def __init__(self, firedepartment, quartile_class):
+    def __init__(self, firedepartment, quartile_class, national_calculations):
         self.firedepartment = firedepartment
         self.quartile_class = quartile_class
+        self.national_calculations = national_calculations
         self.peers = AttrDict()
 
     RISK_LEVELS = [(0, 'all'), (1, 'low'), (2, 'medium'), (4, 'high'), (5, 'unknown')]
@@ -283,34 +284,24 @@ class FireDepartmentMetrics(object):
     def national_risk_model_size1_percent_size2_percent_sum_quartile(self):
         # TODO: Need to optimize...
         ret = AttrDict()
+        results = self.national_calculations.objects.filter(id=self.firedepartment.id)
         for numlevel, level in self.RISK_LEVELS:
-            with connections['default'].cursor() as cursor:
-
-                cursor.execute(self.national_calculations.format(id=self.firedepartment.id,
-                                                                 field='risk_model_size1_percent_size2_percent_sum_quartile',
-                                                                 level=numlevel))
-                try:
-                    ret[level] = cursor.fetchone()[0]
-                except (KeyError, TypeError):
-                    ret[level] = None
-
+            ret[level] = None
+            for result in results:
+                if result.level == numlevel:
+                    ret[level] = result.risk_model_size1_percent_size2_percent_sum_quartile
         return ret
 
     @cached_property
     def national_risk_model_deaths_injuries_sum_quartile(self):
         # TODO: Need to optimize...
         ret = AttrDict()
+        results = self.national_calculations.objects.filter(id=self.firedepartment.id)
         for numlevel, level in self.RISK_LEVELS:
-            with connections['default'].cursor() as cursor:
-                cursor.execute(self.national_calculations.format(id=self.firedepartment.id,
-                                                                 field='risk_model_deaths_injuries_sum_quartile',
-                                                                 level=numlevel))
-
-                try:
-                    ret[level] = cursor.fetchone()[0]
-                except (KeyError, TypeError):
-                    ret[level] = None
-
+            ret[level] = None
+            for result in results:
+                if result.level == numlevel:
+                    ret[level] = result.risk_model_deaths_injuries_sum_quartile
         return ret
 
     @cached_property
@@ -556,38 +547,3 @@ class FireDepartmentMetrics(object):
                                                                                'dist_model_risk_model_deaths_injuries_quartile')))
             else:
                 self.peers[level] = None
-
-    national_calculations = """
-        WITH results AS
-            ( SELECT fd."id",
-                     rm."dist_model_score",
-                     rm."level",
-                     CASE
-                         WHEN (rm."risk_model_fires_size1_percentage" IS NOT NULL
-                               OR rm."risk_model_fires_size2_percentage" IS NOT NULL) THEN ntile(4) over (partition BY COALESCE(rm.risk_model_fires_size1_percentage,0)+COALESCE(rm.risk_model_fires_size2_percentage,0) != 0, level
-                                                                                                                                    ORDER BY COALESCE(rm.risk_model_fires_size1_percentage,0)+COALESCE(rm.risk_model_fires_size2_percentage,0))
-                         ELSE NULL
-                     END AS "risk_model_size1_percent_size2_percent_sum_quartile",
-                     CASE
-                         WHEN (rm."risk_model_deaths" IS NOT NULL
-                               OR rm."risk_model_injuries" IS NOT NULL) THEN ntile(4) over (partition BY COALESCE(rm.risk_model_deaths,0)+COALESCE(rm.risk_model_injuries,0) != 0, level
-                                                                                                                      ORDER BY COALESCE(rm.risk_model_deaths,0)+COALESCE(rm.risk_model_injuries,0))
-                         ELSE NULL
-                     END AS "risk_model_deaths_injuries_sum_quartile"
-             FROM "firestation_firedepartment" fd
-             INNER JOIN "firestation_firedepartmentriskmodels" rm on rm.department_id = fd.id
-             WHERE rm."dist_model_score" IS NOT NULL and rm.level = {level}
-             ORDER BY fd."name" ASC ),
-              row AS
-            ( SELECT *
-             FROM results
-             WHERE results.id={id} )
-        SELECT ntile_results.ntile
-        FROM
-            (SELECT results.id,
-                    ntile(4) over (
-                                   ORDER BY results.dist_model_score ASC)
-             FROM results
-             INNER JOIN row ON results.{field}=row.{field}) AS ntile_results
-        WHERE ntile_results.id={id};
-        """

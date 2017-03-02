@@ -8,5 +8,6 @@ class FireStationAppConfig(AppConfig):
     name = 'firecares.firestation'
 
     def ready(self):
-        from .models import create_quartile_views
+        from .models import create_quartile_views, create_national_calculations_view
         post_migrate.connect(create_quartile_views, sender=self)
+        post_migrate.connect(create_national_calculations_view, sender=self)
