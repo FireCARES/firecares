@@ -462,7 +462,7 @@
           element.find('svg').appear(function() {
             var width = parseInt(attrs.width);
             var height = parseInt(attrs.height);
-            var margins = {top: 0, left: 60, right: 0, bottom: 20};
+            var margins = {top: 5, left: 60, right: 0, bottom: 15};
 
             var data = [{
                 'level': 'Low',
