@@ -11761,6 +11761,13 @@ form[name='boundaryUpload'] a.commit:hover {
   color: #F29A00;
   border-bottom: 1px dotted;
 }
+.learn-more-link-icon a {
+  color: #F29A00;
+  border-bottom: 0;
+}
+.learn-more-link-icon a i {
+  padding: 0 !important;
+}
 /* Disclaimer */
 .accept-terms {
   text-align: center;
