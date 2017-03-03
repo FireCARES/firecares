@@ -1180,10 +1180,10 @@ def create_national_calculations_view(sender, **kwargs):
 
     query = """
         SELECT
-            d.id,
+            fs_fd.id,
             d.ntile1 AS risk_model_size1_percent_size2_percent_sum_quartile,
             d.ntile2 AS risk_model_deaths_injuries_sum_quartile,
-            d.level
+            (SELECT {selected_level}) as level
         FROM firestation_firedepartment fs_fd,
         LATERAL(
             WITH
@@ -1232,39 +1232,32 @@ def create_national_calculations_view(sender, **kwargs):
                 FROM results
                 WHERE results.id=fs_fd.id
             ),
-            risk_model_size1_percent_size2_percent_sum_quartile AS (
-                SELECT *
-                FROM (
-                    SELECT results.level, results.id, ntile(4) over (ORDER BY results.dist_model_score ASC)
-                    FROM results
-                    INNER JOIN row
-                    ON
-                        results.risk_model_size1_percent_size2_percent_sum_quartile =
-                        row.risk_model_size1_percent_size2_percent_sum_quartile
-                ) as ntile_results
-            ),
-            risk_model_deaths_injuries_sum_quartile AS (
-                SELECT *
-                FROM (
-                    SELECT results.level, results.id, ntile(4) over (ORDER BY results.dist_model_score ASC)
-                    FROM results
-                    INNER JOIN row
-                    ON results.risk_model_deaths_injuries_sum_quartile=row.risk_model_deaths_injuries_sum_quartile
-                ) as ntile_results
-            ),
             all_data AS (
                 SELECT
-                    risk_model_size1_percent_size2_percent_sum_quartile.id as id,
-                    risk_model_size1_percent_size2_percent_sum_quartile.ntile as ntile1,
-                    risk_model_deaths_injuries_sum_quartile.ntile as ntile2,
-                    risk_model_size1_percent_size2_percent_sum_quartile.level as level
-                FROM risk_model_size1_percent_size2_percent_sum_quartile
-                INNER JOIN risk_model_deaths_injuries_sum_quartile
-                on risk_model_size1_percent_size2_percent_sum_quartile.id = risk_model_deaths_injuries_sum_quartile.id
+                    (SELECT ntile_results.ntile
+                        FROM
+                            (SELECT results.id,
+                                ntile(4) over (ORDER BY results.dist_model_score ASC)
+                            FROM results
+                            INNER JOIN row
+                            ON results.risk_model_size1_percent_size2_percent_sum_quartile =
+                                row.risk_model_size1_percent_size2_percent_sum_quartile
+                            ) AS ntile_results
+                        WHERE ntile_results.id=fs_fd.id
+                    ) as ntile1,
+                    (SELECT ntile_results.ntile
+                        FROM
+                            (SELECT results.id,
+                                ntile(4) over (ORDER BY results.dist_model_score ASC)
+                            FROM results
+                            INNER JOIN row
+                            ON results.risk_model_deaths_injuries_sum_quartile =
+                                row.risk_model_deaths_injuries_sum_quartile
+                            ) AS ntile_results
+                        WHERE ntile_results.id=fs_fd.id
+                    ) as ntile2
             )
-            select all_data.id, all_data.level, all_data.ntile1, all_data.ntile2
-            from all_data
-            where all_data.id=fs_fd.id
+            select * from all_data where ntile1 IS NOT NULL OR ntile2 IS NOT NULL
         ) d
     """
     cursor = connections['default'].cursor()
