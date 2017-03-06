@@ -176,7 +176,8 @@
         // Parcels
         //
         var parcels = new L.TileLayer.MVTSource({
-          url: "https://{s}.firecares.org/parcels/{z}/{x}/{y}.pbf",
+          //DO NOT COMMIT THE CHANGE BELOW!!!!!
+          url: "http://192.168.33.16/parcels/{z}/{x}/{y}.pbf",
           debug: false,
           clickableLayers: null,
           mutexToggle: true,
@@ -237,7 +238,21 @@
                 break;
               case 3: //'Polygon'
                 // unselected
-                style.color = 'rgba(149,139,255,0)';
+                switch (feature.properties.risk_category) {
+                  case 'Low':
+                    style.color = 'rgba(50%,100%,50%,0.2)';
+                    break;
+                  case 'Medium':
+                    style.color = 'rgba(100%,75%,50%,0.2)';
+                    break;
+                  case 'High':
+                    style.color = 'rgba(100%,50%,50%,0.2)';
+                    break;
+                  default:
+                    style.color = 'rgba(50%,50%,50%,0.2)';
+                    break;
+                }
+
                 style.outline = {
                   color: 'rgb(20,20,20)',
                   size: 1
@@ -250,7 +265,6 @@
                     size: 3
                   }
                 };
-
             }
 
             return style;
@@ -276,7 +290,8 @@
                       'Bed Rooms': 'bed_rooms',
                       'Total Value': 'tot_val',
                       'Land Value': 'lan_val',
-                      'Improvements Value': 'imp_val'
+                      'Improvements Value': 'imp_val',
+                      'Strucutre Hazard Risk Level': 'risk_category'
                   };
 
                   _.each(_.pairs(items), function(pair){
