@@ -176,8 +176,7 @@
         // Parcels
         //
         var parcels = new L.TileLayer.MVTSource({
-          //DO NOT COMMIT THE CHANGE BELOW!!!!!
-          url: "http://192.168.33.16/parcels/{z}/{x}/{y}.pbf",
+          url: "https://{s}.firecares.org/parcels/{z}/{x}/{y}.pbf",
           debug: false,
           clickableLayers: null,
           mutexToggle: true,
