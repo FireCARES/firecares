@@ -256,6 +256,11 @@
                         <aster-chart filter-type="risk" metric-title="RISK"></aster-chart>
                     </div>
                     <div class="ct-heading ct-u-marginTop30 ct-u-marginBottom20">
+                        <span class="learn-more-link-icon">
+                            <a href="{% url 'models_community_risk' %}" data-toggle="tooltip" data-title="Learn More" data-placement="bottom">
+                                <i class="fa fa-info-circle fa-2x"></i>
+                            </a>
+                        </span>
                         <h3>Community Risk Assessment</h3>
                         <selected-risk level="level"></selected-risk>
                     </div>
@@ -276,7 +281,7 @@
                                                     Fire Risk
                                                 </div>
                                                 <div class="description">
-                                                    This department falls into the {{ metrics.population_metrics_rows[level].risk_model_fires_quartile | riskLevel:'unknown' }} risk category for structure fires when compared to other fire departments with communities of the same size classification.<span class="learn-more-link"><a href="/community-risk">  Learn more.</a></span>
+                                                    This department falls into the {{ metrics.population_metrics_rows[level].risk_model_fires_quartile | riskLevel:'unknown' }} risk category for structure fires when compared to other fire departments with communities of the same size classification.
                                                 </div>
                                             </div>
                                         </div>
@@ -299,7 +304,7 @@
                                                     Fire Spread Risk
                                                 </div>
                                                 <div class="description">
-                                                    This department falls into the {{ metrics.population_metrics_rows[level].risk_model_size1_percent_size2_percent_sum_quartile | riskLevel:'unknown' }} risk category for the number of fires spread beyond room of origin when compared to other fire departments with communities of the same size classification. <span class="learn-more-link"><a href="/community-risk">  Learn more.</a></span>
+                                                    This department falls into the {{ metrics.population_metrics_rows[level].risk_model_size1_percent_size2_percent_sum_quartile | riskLevel:'unknown' }} risk category for the number of fires spread beyond room of origin when compared to other fire departments with communities of the same size classification.
                                                 </div>
                                             </div>
                                         </div>
@@ -322,7 +327,7 @@
                                                     Death and Injury Risk
                                                 </div>
                                                 <div class="description">
-                                                    This department falls into the {{ metrics.population_metrics_rows[level].risk_model_deaths_injuries_sum_quartile | riskLevel:'unknown' }} risk category for the number of fire-related deaths and injuries when compared to other fire departments with communities of the same size classification.  <span class="learn-more-link"><a href="/community-risk">  Learn more.</a></span>
+                                                    This department falls into the {{ metrics.population_metrics_rows[level].risk_model_deaths_injuries_sum_quartile | riskLevel:'unknown' }} risk category for the number of fire-related deaths and injuries when compared to other fire departments with communities of the same size classification.
                                                 </div>
                                             </div>
                                         </div>
@@ -574,6 +579,11 @@
                             <div class="col-sm-6 col-md-12 ct-u-marginBottom10">
                                 <!-- Safe Grade Cards -->
                                 <div class="metric-cards-title">
+                                    <h4 class="learn-more-link-icon pull-left">
+                                        <a href="{% url 'safe_grades' %}" data-toggle="tooltip" data-title="Learn More" data-placement="bottom">
+                                            <i class="fa fa-info-circle"></i>
+                                        </a>
+                                    </h4>
                                     <h4 style="display: inline;">Safe Grades</h4>
                                     <selected-risk level="level"></selected-risk>
                                 </div>
@@ -597,7 +607,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="metric-card">
+                                <!-- <div class="metric-card">
                                   <div class="main-content">
                                     <div class="main-text">
                                       <div class="community-risk-legend safe-grade-legend">
@@ -607,7 +617,7 @@
                                       </div>
                                     </div>
                                   </div>
-                                </div>
+                                </div> -->
                                 {% if user.is_authenticated %}
                                 {% verbatim %}
                                 <div class="metric-card">
