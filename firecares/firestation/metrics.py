@@ -1,6 +1,5 @@
 import pandas as pd
 from django.core.cache import cache
-from django.db import connections
 from django.db.models import IntegerField, Avg, Max, Min, Q
 from django.utils.functional import cached_property
 from firecares.utils import AttrDict
