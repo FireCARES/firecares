@@ -6,7 +6,8 @@ from django.contrib.gis.geos import GEOSGeometry
 from django.db import connections
 from django.db.utils import ConnectionDoesNotExist
 from scipy.stats import lognorm
-from firecares.firestation.models import FireDepartment, create_quartile_views, HazardLevels
+from firecares.firestation.models import (
+    FireDepartment, create_quartile_views, HazardLevels, create_national_calculations_view)
 from firecares.firestation.models import NFIRSStatistic as nfirs
 from fire_risk.models import DIST, DISTMediumHazard, DISTHighHazard, NotEnoughRecords
 from fire_risk.models.DIST.providers.ahs import ahs_building_areas
@@ -302,6 +303,14 @@ def create_quartile_views_task():
     Updates the Quartile Materialized Views.
     """
     return create_quartile_views(None)
+
+
+@app.task(queue='update')
+def create_national_calculations_view_task():
+    """
+    Updates the National Calculation View.
+    """
+    return create_national_calculations_view(None)
 
 
 @app.task(queue='update')

@@ -282,7 +282,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
     ]
 
     def __init__(self, *args, **kwargs):
-        self.metrics = FireDepartmentMetrics(self, PopulationClassQuartile)
+        self.metrics = FireDepartmentMetrics(self, PopulationClassQuartile, NationalCalculations)
         super(FireDepartment, self).__init__(*args, **kwargs)
 
     created = models.DateTimeField(auto_now=True)
@@ -322,7 +322,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
         )
 
     def reload_metrics(self):
-        self.metrics = FireDepartmentMetrics(self, PopulationClassQuartile)
+        self.metrics = FireDepartmentMetrics(self, PopulationClassQuartile, NationalCalculations)
 
     @property
     def headquarters_geom(self):
@@ -1156,6 +1156,120 @@ def create_quartile_views(sender, **kwargs):
     print '(re)creating materialized view for "population_quartiles"'
     cursor.execute("DROP MATERIALIZED VIEW IF EXISTS population_quartiles;")
     cursor.execute("CREATE MATERIALIZED VIEW population_quartiles AS ({query});".format(query=query))
+
+
+class NationalCalculations(models.Model):
+    """
+    National Calculations Views
+    """
+
+    id = models.OneToOneField(FireDepartment, db_column='id', primary_key=True)
+    level = models.IntegerField(choices=HazardLevels.choices(), default=1)
+    risk_model_size1_percent_size2_percent_sum_quartile = models.IntegerField(null=True, blank=True)
+    risk_model_deaths_injuries_sum_quartile = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        managed = False
+        db_table = 'national_calculations'
+
+
+def create_national_calculations_view(sender, **kwargs):
+    """
+    Creates DB view based on national calculations queries
+    """
+
+    query = """
+        SELECT
+            fs_fd.id,
+            d.ntile1 AS risk_model_size1_percent_size2_percent_sum_quartile,
+            d.ntile2 AS risk_model_deaths_injuries_sum_quartile,
+            (SELECT {selected_level}) as level
+        FROM firestation_firedepartment fs_fd,
+        LATERAL(
+            WITH
+            results AS (
+                SELECT fd."id", rm."dist_model_score", rm."level",
+                    CASE
+                        WHEN (rm."risk_model_fires_size1_percentage" IS NOT NULL
+                            OR rm."risk_model_fires_size2_percentage" IS NOT NULL)
+                        THEN
+                            ntile(4) over (
+                                partition BY COALESCE(
+                                        rm.risk_model_fires_size1_percentage, 0
+                                    ) + COALESCE(
+                                        rm.risk_model_fires_size2_percentage, 0
+                                    ) != 0, level
+                                ORDER BY COALESCE(
+                                        rm.risk_model_fires_size1_percentage, 0
+                                    ) + COALESCE(
+                                        rm.risk_model_fires_size2_percentage, 0
+                                    )
+                            )
+                        ELSE NULL
+                    END AS "risk_model_size1_percent_size2_percent_sum_quartile",
+                    CASE
+                        WHEN (rm."risk_model_deaths" IS NOT NULL
+                            OR rm."risk_model_injuries" IS NOT NULL)
+                        THEN ntile(4) over (
+                            partition BY COALESCE(
+                                rm.risk_model_deaths, 0
+                            ) + COALESCE(
+                                rm.risk_model_injuries, 0
+                            ) != 0, level
+                            ORDER BY
+                                COALESCE(rm.risk_model_deaths, 0) +
+                                COALESCE(rm.risk_model_injuries, 0)
+                        )
+                        ELSE NULL
+                    END AS "risk_model_deaths_injuries_sum_quartile"
+                FROM "firestation_firedepartment" fd
+                INNER JOIN "firestation_firedepartmentriskmodels" rm on rm.department_id = fd.id
+                WHERE rm."dist_model_score" IS NOT NULL and rm.level = {selected_level}
+                ORDER BY fd."name" ASC
+            ),
+            row AS (
+                SELECT *
+                FROM results
+                WHERE results.id=fs_fd.id
+            ),
+            all_data AS (
+                SELECT
+                    (SELECT ntile_results.ntile
+                        FROM
+                            (SELECT results.id,
+                                ntile(4) over (ORDER BY results.dist_model_score ASC)
+                            FROM results
+                            INNER JOIN row
+                            ON results.risk_model_size1_percent_size2_percent_sum_quartile =
+                                row.risk_model_size1_percent_size2_percent_sum_quartile
+                            ) AS ntile_results
+                        WHERE ntile_results.id=fs_fd.id
+                    ) as ntile1,
+                    (SELECT ntile_results.ntile
+                        FROM
+                            (SELECT results.id,
+                                ntile(4) over (ORDER BY results.dist_model_score ASC)
+                            FROM results
+                            INNER JOIN row
+                            ON results.risk_model_deaths_injuries_sum_quartile =
+                                row.risk_model_deaths_injuries_sum_quartile
+                            ) AS ntile_results
+                        WHERE ntile_results.id=fs_fd.id
+                    ) as ntile2
+            )
+            select * from all_data where ntile1 IS NOT NULL OR ntile2 IS NOT NULL
+        ) d
+    """
+    cursor = connections['default'].cursor()
+
+    # Force materialied view recreation in case there are changes in the query
+    print '(re)creating materialized view for "national_calculations"'
+    cursor.execute("DROP MATERIALIZED VIEW IF EXISTS national_calculations;")
+    complete_query = []
+    for numlevel, level in FireDepartmentMetrics.RISK_LEVELS:
+        complete_query.append(query.format(selected_level=numlevel))
+    query = ' union '.join(complete_query)
+    cursor.execute("CREATE MATERIALIZED VIEW national_calculations AS ({query});".format(query=query))
 
 
 @deconstructible
