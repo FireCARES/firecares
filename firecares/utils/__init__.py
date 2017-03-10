@@ -1,28 +1,7 @@
 import inspect
 import numbers
 import re
-from django.core.files.storage import get_storage_class
 from enum import IntEnum
-from storages.backends.s3boto import S3BotoStorage
-
-
-class CachedS3BotoStorage(S3BotoStorage):
-    """
-    S3 storage backend that saves the files locally, too.
-    """
-    def __init__(self, *args, **kwargs):
-        super(CachedS3BotoStorage, self).__init__(*args, **kwargs)
-        self.local_storage = get_storage_class(
-            "compressor.storage.CompressorFileStorage")()
-
-        # A hack, this also saves the static files locally since some static files are hardcoded to /static
-        self.static_files_storage = get_storage_class("django.contrib.staticfiles.storage.StaticFilesStorage")()
-
-    def save(self, name, content):
-        self.static_files_storage._save(name, content)
-        self.local_storage._save(name, content)
-        super(CachedS3BotoStorage, self).save(name, self.local_storage._open(name))
-        return name
 
 
 def dictfetchall(cursor):

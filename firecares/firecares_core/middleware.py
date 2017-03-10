@@ -1,4 +1,3 @@
-import time
 from logging import getLogger
 from django.core.urlresolvers import reverse, resolve
 from django.http.response import HttpResponseRedirect
@@ -17,16 +16,3 @@ class DisclaimerAcceptedMiddleware(object):
             return None
         if request.user.is_authenticated() and not request.user.userprofile.has_accepted_terms:
             return HttpResponseRedirect(reverse('disclaimer') + '?next=' + request.path)
-
-
-class RequestDurationMiddleware(object):
-    def process_request(self, request):
-        self.start_time = time.time()
-
-    def process_response(self, request, response):
-        try:
-            req_time = time.time() - self.start_time
-            log.info("%s %s %s" % (response.status_code, request.method, request.get_full_path()), extra={'exec_time': req_time})
-        except Exception, e:
-            log.error("LoggingMiddleware Error: %s" % e)
-        return response

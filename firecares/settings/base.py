@@ -138,7 +138,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'reversion.middleware.RevisionMiddleware',
     'firecares.firecares_core.middleware.DisclaimerAcceptedMiddleware',
-    'firecares.firecares_core.middleware.RequestDurationMiddleware'
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
