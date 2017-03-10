@@ -175,6 +175,19 @@
         //
         // Parcels
         //
+        var previousParcels = {};
+        // Declare variables to avoid reallocating.
+        var filter_iterator = 0;
+        var joined_coordinate = '';
+
+        // join coordinates on string to check if already added
+        var join_coordinates = function(feature) {
+          joined_coordinate = '';
+          feature.forEach(function(currentValue) {
+            joined_coordinate += currentValue.x + currentValue.y;
+          });
+          return joined_coordinate;
+        };
         var parcels = new L.TileLayer.MVTSource({
           url: "https://{s}.firecares.org/parcels/{z}/{x}/{y}.pbf",
           debug: false,
@@ -187,12 +200,17 @@
             return feature.properties.parcel_id;
           },
 
-          filter: function(feature, context) {
-            return true;
-          },
-
-
           style: function(feature) {
+            // If overlapping parcel then make it transparent.
+            var current_coordinates = join_coordinates(feature.coordinates[0])
+            if (current_coordinates in previousParcels) {
+              return {
+                color: 'rgba(0,0,0,0)'
+              }
+            } else {
+              previousParcels[current_coordinates] = null;
+            }
+
             var style = {};
             var selected = style.selected = {};
             var pointRadius = 1;
