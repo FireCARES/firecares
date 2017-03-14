@@ -37,6 +37,7 @@
                                 <a class="text-capitalize" href="{% url 'safe_grades' %}">Safe Grades</a>
                                 <a class="text-capitalize" href="{% url 'faq.html' %}">FAQs</a>
                                 <a class="text-capitalize" href="{% url 'media' %}">FireCARES in the Media</a>
+                                <a class="text-capitalize" target="_blank" href="{{ STATIC_URL }}/access_policy.pdf">FireCARES Access Policy</a>
                             </div>
                             <div class="col-md-6">
                                 {% if not user.is_authenticated %}
