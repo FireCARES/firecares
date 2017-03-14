@@ -12003,6 +12003,9 @@ div.is-your-department {
   -webkit-box-shadow: 0 0 6px #f8b9b7;
   -moz-box-shadow: 0 0 6px #f8b9b7;
 }
+.faqs {
+  /* small screens */
+}
 .faqs a {
   color: #F29A00;
   border-bottom: 1px dotted white;
@@ -12014,39 +12017,79 @@ div.is-your-department {
 .faqs hr {
   margin-top: 10px;
 }
+.faqs h2 {
+  text-transform: uppercase;
+}
 .faqs .faq-list {
   margin-top: 1em;
 }
 .faqs .faq-list li {
   list-style-type: disc;
 }
-.faqs h3 {
+.faqs h3,
+.faqs h4 {
   border-bottom: none;
-  color: #2d3a51;
+  color: #2D3A51;
 }
-.faqs h3 i {
+.faqs h3 i,
+.faqs h4 i {
   visibility: hidden;
   font-size: 17px;
 }
-.faqs h3:hover {
+.faqs h3:hover,
+.faqs h4:hover {
   border-bottom: none;
-  color: #2d3a51;
+  color: #2D3A51;
 }
-.faqs h3:hover i {
+.faqs h3:hover i,
+.faqs h4:hover i {
   visibility: visible;
   cursor: pointer;
-  color: #2d3a51;
+  color: #2D3A51;
   border-bottom: none;
 }
-.faqs h3 a {
-  color: #2d3a51;
+.faqs h3 a,
+.faqs h4 a {
+  color: #2D3A51;
   cursor: text;
   text-decoration: none;
   border-bottom: none;
 }
-.faqs h3 a:hover {
+.faqs h3 a:hover,
+.faqs h4 a:hover {
   text-decoration: none;
   border-bottom: none;
+}
+.faqs nav[data-toggle=toc] .nav > .active:focus > a,
+.faqs nav[data-toggle=toc] .nav > .active:hover > a,
+.faqs nav[data-toggle=toc] .nav > .active > a {
+  color: #F29A00;
+  border-left-color: #F29A00;
+}
+.faqs nav[data-toggle=toc] .nav > li > a:focus,
+.faqs nav[data-toggle=toc] .nav > li > a:hover {
+  color: #F29A00;
+  border-left-color: #F29A00;
+}
+.faqs nav[data-toggle=toc] {
+  margin-top: 30px;
+}
+.faqs nav.affix {
+  top: 30px;
+}
+@media (max-width: 768px) {
+  .faqs {
+    /* override the Affix plugin so that the navigation isn't sticky */
+    /* PICK ONE */
+    /* don't expand nested items, which pushes down the rest of the page when navigating */
+    /* alternatively, if you *do* want the second-level navigation to be shown (as seen on this page on mobile), use this */
+  }
+  .faqs nav.affix[data-toggle='toc'] {
+    position: static;
+  }
+  .faqs nav[data-toggle='toc'] .nav .nav {
+    display: block;
+  }
 }
 .safe-grades a {
   color: #F29A00;
@@ -12058,6 +12101,9 @@ div.is-your-department {
 }
 .safe-grades hr {
   margin-top: 10px;
+}
+.safe-grades h2 {
+  text-transform: uppercase;
 }
 .fire-station h2 {
   line-height: 30px;
