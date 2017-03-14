@@ -24,18 +24,22 @@ Frequently Asked Questions
                 <div class="ct-u-marginBottom50">
                     <div class="ct-u-marginBottom70">
 
-                        <h2>Accounts</h2>
+                        <h3 id="accounts">
+                          Accounts
+                          <a href="#accounts">
+                            <i class="fa fa-link" style="font-size: 17px"></i>
+                          </a>
+                        </h3>
                         <hr/>
 
                         <div class="ct-u-marginBottom50" id="get-an-account">
-                            <h3>How can I get an account with FireCARES?</h3>
+                            <h4>How can I get an account with FireCARES?</h4>
                             <ol class="faq-list">
                                 <li>Local presidents or officers for fire departments can use IMIS credentials to <a href="{% url 'login' %}">login</a>
                                     to FireCARES. [IMIS DOES NOT YET HAVE DEPARTMENT ASSOCIATIONS OR A MEANS TO DETERMINE IF AN INCOMING USER IS INDEED
                                     A LOCAL PRESIDENT OR OFFICER]
                                 </li>
-                                <li>Fire chiefs can <a href="{% url 'login' %}">login</a> via the Helix single sign on service to authenticate
-                                    with FireCARES.
+                                <li>Fire chiefs can <a href="{% url 'login' %}">login</a> via the IAFC's Helix single sign on service.
                                 </li>
                                 <li>If you are a member of a specific organization [NEED LIST OF ORGANIZATION DOMAINS TO WHITELIST FOR SELF-REGISTRATION],
                                     you can <a href="{% url 'registration_register' %}">register</a> to get a FireCARES account.
@@ -50,7 +54,7 @@ Frequently Asked Questions
                         </div>
 
                         <div class="ct-u-marginBottom50" id="trouble-logging-in">
-                            <h3>I am having trouble logging in. What can I do?</h3>
+                            <h4>I am having trouble logging in. What can I do?</h4>
                             <p class="ct-u-marginTop10">
                                 You can <a href="{% url 'password_reset' %}">reset your FireCARES password</a> or
                                 <a href="{% url 'forgot_username' %}">retrieve your username</a>.  However, if you use the IMIS or Helix single-sign-on provider to login
@@ -60,79 +64,89 @@ Frequently Asked Questions
                         </div>
 
                         <div class="ct-u-marginBottom50" id="grayed-out">
-                            <h3>When I am on a fire department page, why are the Performance Score and Safe Grades are grayed out?</h3>
+                            <h4>When I am on a fire department page, why are the Performance Score and Safe Grades grayed out?</h4>
                             <p class="ct-u-marginTop10">
-                                While a large portion of FireCARES is completely open, to see those features of FireCARES you need to be logged in.
-                                To obtain a login please see <a href="#get-an-account">&quot;How can I get an account with FireCARES?&quot;</a> above.
+                                While a large portion of FireCARES is completely open, to see those features you need to be logged in.
+                                To obtain a login please see <a href="#get-an-account">How can I get an account with FireCARES?</a> above.
                             </p>
                         </div>
 
-                        <h2>Data</h2>
+                        <h3 id="data">
+                          Data
+                          <a href="#data">
+                            <i class="fa fa-link"></i>
+                          </a>
+                        </h3>
                         <hr/>
 
                         <div class="ct-u-marginBottom50" id="missing-stations">
-                            <h3>There are missing or incorrect stations or there is a issue regarding the composition of my department (i.e. Multiple landing pages for the same department). How do I fix this issue?</h3>
+                            <h4>There are missing or incorrect stations or there is a issue regarding the composition of my department (i.e. Multiple landing pages for the same department). How do I fix this issue?</h4>
                             <p class="ct-u-marginTop10">
-                                We worked very hard to capture the fire stations for all the departments in the FireCARES system, but we recognize that fire stations change over time and we may not have identified everything station. Please send an email to: <a href="mailto:stations@firecares.org?Subject=Station Data Question" target="_top"><i class="fa fa-envelope-o"></i>FireCARES Stations</a>. Be sure to include your Fire Department Name and FDID as it is specified on <a href="https://firecares.org">FireCARES</a>.
+                                We worked very hard to capture the fire stations for all the departments in the FireCARES system, but we recognize that fire stations change over time and we may not have identified every station. Please send an email to: <a href="mailto:stations@firecares.org?Subject=Station Data Question" target="_top">FireCARES Stations</a>. Be sure to include your Fire Department Name and FDID as it is specified on <a href="https://firecares.org">FireCARES</a>.
                             </p>
                         </div>
 
                         <div class="ct-u-marginBottom50" id="department-jurisdiction">
-                            <h3>What if I can't find my fire department jurisdiction?</h3>
+                            <h4>What if I can't find my fire department jurisdiction?</h4>
                             <p class="ct-u-marginTop10">
-                                FireCARES categorizes fire departments by their respective Fire Department ID code (FDID = the ID code used for data entry into the NFIRS system).  For some cities, towns, or other municipalities contained within larger County jurisdictions, these FDIDs may be similar.  If you are unable to locate your fire department by entering the name of your jurisdiction in the search bar, then please search for the county containing your fire department.  To find your jurisdiction, let’s see if it is contained within the larger county by entering the county name in the search bar and then checking the fire station addresses contained in the county list.  If your stations are contained in the county list, please go to the <a href="{% url 'contact_us' %}">Contact Us</a> page on the FireCARES site and provide us the list of your stations with complete street addresses.  You will be contacted within 1 week to verify the information and assure that your area is broken out of the larger county jurisdiction.
+                                FireCARES categorizes fire departments by their respective Fire Department ID code (FDID = the ID code used for data entry into the NFIRS system).  For some cities, towns, or other municipalities contained within larger County jurisdictions, the FDIDs may be similar.  If you are unable to locate your fire department by entering the name of your jurisdiction in the search bar, then please search for the county containing your fire department.  To find your jurisdiction, let’s see if it is contained within the larger county by entering the county name in the search bar and then checking the fire station addresses contained in the county list.  If your stations are contained in the county list, please go to the <a href="{% url 'contact_us' %}">Contact Us</a> page and provide us the list of your stations with complete street addresses.  You will be contacted within 1 week to verify the information and assure that your area is broken out of the larger county jurisdiction.
                             </p>
                         </div>
 
                         <div class="ct-u-marginBottom50" id="boundary-missing">
-                            <h3>My jurisdictional boundary is missing or incorrect. How do I update this information?</h3>
+                            <h4>My jurisdictional boundary is missing or incorrect. How do I update this information?</h4>
                             <p class="ct-u-marginTop10">
-                                We used national data sets plus manual manipulation whenever possible to provide the best representation for jurisdictional boundaries for all departments in FireCARES. We also know that we do not have the same depth of knowledge about every community compared to those who serve that community. If you notice differences or if boundaries have changed, please send an email to: <a href="mailto:boundaries@firecares.org?Subject=Jurisdictional Boundary Question" target="_top"><i class="fa fa-envelope-o"></i>FireCARES Jurisdictions</a>. Be sure to include your Fire Department Name and FDID as it is specified on <a href="{% url 'firestation_home' %}">FireCARES</a>.
+                                We used national data sets plus manual manipulation whenever possible to provide the best representation for jurisdictional boundaries for all departments in FireCARES. We also know that we do not have the same depth of knowledge about every community compared to those who serve that community. If you notice differences or if boundaries have changed, please send an email to: <a href="mailto:boundaries@firecares.org?Subject=Jurisdictional Boundary Question" target="_top">FireCARES Jurisdictions</a>. Be sure to include your Fire Department Name and FDID as it is specified on <a href="{% url 'firestation_home' %}">FireCARES</a>.
 
                             </p>
                         </div>
 
                         <div class="ct-u-marginBottom50" id="annual-structure-fires">
-                            <h3>The data presented in Annual Structure Fires is Not Available or Incorrect. How do I update this information?</h3>
+                            <h4>The data presented in Annual Structure Fires is Not Available or Incorrect. How do I update this information?</h4>
                             <p class="ct-u-marginTop10">
-                                The data presented here primarily comes from <a href="https://www.nfirs.fema.gov/">NFIRS</a>. Depending on your department's reporting procedures there can exist inconsistencies between your local records and those in NFIRS. If you would like to update this data, please email <a href="mailto:data@firecares.org?Subject=Local Fire Data" target="_top"><i class="fa fa-envelope-o"></i>FireCARES Data Update</a> to determine a work flow for updating data. Be sure to include your Fire Department Name and FDID as it is specified on <a href="{% url 'firestation_home' %}">FireCARES</a>.
+                                The data presented here primarily comes from <a href="https://www.nfirs.fema.gov/">NFIRS</a>. Depending on your department's reporting procedures there can exist inconsistencies between your local records and those in NFIRS. If you would like to update this data, please email <a href="mailto:data@firecares.org?Subject=Local Fire Data" target="_top">FireCARES Data Update</a> to determine a work flow for updating data. Be sure to include your Fire Department Name and FDID as it is specified on <a href="{% url 'firestation_home' %}">FireCARES</a>.
                             </p>
                         </div>
 
                         <div class="ct-u-marginBottom50" id="unkn">
-                            <h3>Why are there so many structures in the Unknown group in the fire heat map when the Structure Hazard Level Distribution graph does not show as many Unknowns?</h3>
+                            <h4>Why are there so many structures in the Unknown group in the fire heat map when the Structure Hazard Level Distribution graph does not show as many Unknowns?</h4>
                             <p class="ct-u-marginTop10">
                                 To classify the hazard level of the structure where a fire occurred, that fire needed to be geocoded and tied to a physical parcel. That parcel also needed to have information about the structure present. If the geocode of the fire did not get tied to a parcel (structure) or there was insufficient information describing that parcel then that fire was classified as an N/A. In most cases, this was due to issues the geocode of the fire placing the fire in the middle of street versus at a particular parcel. We are continually working on improving the quality of the geocoding, so this should improve over time.
                             <p>
                         </div>
 
                         <div class="ct-u-marginBottom50" id="annual-structure-fires">
-                            <h3>Why do other departments have districts visualized and mine does not?</h3>
+                            <h4>Why do other departments have districts visualized and mine does not?</h4>
                             <p class="ct-u-marginTop10">
-                                We do not have fire district data for all departments. If you would like add your district data, please email <a href="mailto:boundaries@firecares.org?Subject=Fire Districts Question" target="_top"><i class="fa fa-envelope-o"></i>FireCARES Fire Districts</a>. Be sure to include your Fire Department Name and FDID as it is specified on <a href="{% url 'firestation_home' %}">FireCARES</a>.
+                                We do not have fire district data for all departments. If you would like add your district data, please email <a href="mailto:boundaries@firecares.org?Subject=Fire Districts Question" target="_top">FireCARES Fire Districts</a>. Be sure to include your Fire Department Name and FDID as it is specified on <a href="{% url 'firestation_home' %}">FireCARES</a>.
                             </p>
                         </div>
 
 
-                        <h2>Site Usage</h2>
+                        <h3 id="site-usage">
+                          Site Usage
+                          <a href="#site-usage">
+                            <i class="fa fa-link"></i>
+                          </a>
+                        </h3>
                         <hr>
 
                         <div class="ct-u-marginBottom50" id="no-parcel-data">
-                            <h3>Why can I not see the parcel data layer in the map?</h3>
+                            <h4>Why can I not see the parcel data layer in the map?</h4>
                             <p class="ct-u-marginTop10">
                                 Make sure you have un-clicked the radio button for 'Jurisdiction Boundary' in the map drop down. Also, trying zooming in on map. Note that the data may take a minute to load.
                             </p>
                         </div>
 
                         <div class="ct-u-marginBottom50" id="annual-structure-fires">
-                            <h3>How are the community risk scores calculated?</h3>
+                            <h4>How are the community risk scores calculated?</h4>
                             <p class="ct-u-marginTop10">
                                 See more information about the <a href="{% url 'models_performance_score' %}">FireCARES Risk Score</a>.
                             </p>
                         </div>
 
                         <div class="ct-u-marginBottom50" id="annual-structure-fires">
-                            <h3>How are the community risk scores calculated?</h3>
+                            <h4>How are the community risk scores calculated?</h4>
                             <p class="ct-u-marginTop10">
                                 See more information about the <a href="{% url 'models_community_risk' %}">FireCARES Community Risk</a>.
                             </p>

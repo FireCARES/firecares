@@ -12020,6 +12020,34 @@ div.is-your-department {
 .faqs .faq-list li {
   list-style-type: disc;
 }
+.faqs h3 {
+  border-bottom: none;
+  color: #2d3a51;
+}
+.faqs h3 i {
+  visibility: hidden;
+  font-size: 17px;
+}
+.faqs h3:hover {
+  border-bottom: none;
+  color: #2d3a51;
+}
+.faqs h3:hover i {
+  visibility: visible;
+  cursor: pointer;
+  color: #2d3a51;
+  border-bottom: none;
+}
+.faqs h3 a {
+  color: #2d3a51;
+  cursor: text;
+  text-decoration: none;
+  border-bottom: none;
+}
+.faqs h3 a:hover {
+  text-decoration: none;
+  border-bottom: none;
+}
 .safe-grades a {
   color: #F29A00;
   border-bottom: 1px dotted white;

@@ -1408,6 +1408,40 @@ div.is-your-department {
       list-style-type: disc;
     }
   }
+
+  h3 {
+    border-bottom: none;
+    color: @text-color;
+
+    i {
+      visibility: hidden;
+      font-size: 17px;
+    }
+
+    &:hover {
+      border-bottom: none;
+      color: @text-color;
+
+      i {
+        visibility: visible;
+        cursor: pointer;
+        color: @text-color;
+        border-bottom: none;
+      }
+    }
+
+    & a {
+      color: @text-color;
+      cursor: text;
+      text-decoration: none;
+      border-bottom: none;
+
+      &:hover {
+        text-decoration: none;
+        border-bottom: none;
+      }
+    }
+  }
 }
 
 .safe-grades {
