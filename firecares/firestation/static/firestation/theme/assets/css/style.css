@@ -12020,33 +12020,42 @@ div.is-your-department {
 .faqs .faq-list li {
   list-style-type: disc;
 }
-.faqs h3 {
+.faqs h3,
+.faqs h4 {
   border-bottom: none;
-  color: #2d3a51;
+  color: #2D3A51;
 }
-.faqs h3 i {
+.faqs h3 i,
+.faqs h4 i {
   visibility: hidden;
   font-size: 17px;
 }
-.faqs h3:hover {
+.faqs h3:hover,
+.faqs h4:hover {
   border-bottom: none;
-  color: #2d3a51;
+  color: #2D3A51;
 }
-.faqs h3:hover i {
+.faqs h3:hover i,
+.faqs h4:hover i {
   visibility: visible;
   cursor: pointer;
-  color: #2d3a51;
+  color: #2D3A51;
   border-bottom: none;
 }
-.faqs h3 a {
-  color: #2d3a51;
+.faqs h3 a,
+.faqs h4 a {
+  color: #2D3A51;
   cursor: text;
   text-decoration: none;
   border-bottom: none;
 }
-.faqs h3 a:hover {
+.faqs h3 a:hover,
+.faqs h4 a:hover {
   text-decoration: none;
   border-bottom: none;
+}
+.faqs h4 i {
+  font-size: 14px;
 }
 .safe-grades a {
   color: #F29A00;

@@ -24,35 +24,133 @@ Frequently Asked Questions
                 <div class="ct-u-marginBottom50">
                     <div class="ct-u-marginBottom70">
 
+                        <h3 id="firecares">
+                          FireCARES
+                          <a href="#firecares">
+                            <i class="fa fa-link"></i>
+                          </a>
+                        </h3>
+                        <hr/>
+
+                        <div class="ct-u-marginBottom50" id="what-is-firecares">
+                            <h4>
+                                What is FireCARES?
+                                <a href="#what-is-firecares">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
+
+                            <p class="ct-u-marginTop10">
+                                The Fire-Community Assessment Response Evaluation System, known as FireCARES,
+                                is a &quot;big data&quot; analytical system providing important information to fire service and
+                                community leaders about their local fire department and the risk environment in which
+                                firefighters are called to respond. FireCARES includes more than a decade of research
+                                on structure fires and related injuries and death, as well as building footprints, housing
+                                and mobile home units, public health and census data, and vulnerable populations.
+                                FireCARES combines large sets of data from various sources to &quot;tell the story&quot; of a fire
+                                department in regard to its risk environment, resource capacity, and overall capability to
+                                respond to emergency incidents.
+                            </p>
+
+                            <p>
+                                The FireCARES project, funded by FEMA AFG, raises the bar for the technical
+                                discussion of community hazards and risks and the impact of changes to fire department
+                                resource levels.
+                            </p>
+                        </div>
+
+                        <div class="ct-u-marginBottom50" id="who-built-firecares">
+                            <h4>
+                                Who built FireCARES?
+                                <a href="#who-built-firecares">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
+
+                            <p class="ct-u-marginTop10">
+                                The same team of researchers, academics, and fire service professionals who
+                                conducted the landmark NIST Residential Fireground Experiments (NIST TN 1661) and
+                                the NIST High-Rise Fireground Experiments (NIST TN 1797) built FireCARES.
+                                FireCARES partners include NIST, the International Association of Fire Chiefs (IAFC),
+                                the Metropolitan Fire Chiefs Association, the International Association of Fire Fighters
+                                (IAFF), the Commission on Fire Accreditation International (CFAI-Risk), Underwriters
+                                Laboratory (UL), the Urban Institute, the University of Texas at Austin, and Worcester
+                                Polytechnic.
+                            </p>
+                        </div>
+
+                        <div class="ct-u-marginBottom50" id="who-funded-firecares">
+                            <h4>
+                                Who funded FireCARES?
+                                <a href="#who-funded-firecares">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
+
+                            <p class="ct-u-marginTop10">
+                                The FireCARES project is funded by Department of Homeland Security (DHS) FEMA
+                                Assistance to Firefighters Grants (AFG). (EMW-2015- FP-00312)
+                            </p>
+                        </div>
+
+                        <div class="ct-u-marginBottom50" id="is-there-a-cost">
+                            <h4>
+                                Is there a cost to fire departments to use or add data to FireCARES?
+                                <a href="#who-funded-firecares">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
+
+                            <p class="ct-u-marginTop10">
+                                No, at this time there is no cost to fire departments to use the system.
+                            </p>
+                        </div>
+
                         <h3 id="accounts">
                           Accounts
                           <a href="#accounts">
-                            <i class="fa fa-link" style="font-size: 17px"></i>
+                            <i class="fa fa-link"></i>
                           </a>
                         </h3>
                         <hr/>
 
                         <div class="ct-u-marginBottom50" id="get-an-account">
-                            <h4>How can I get an account with FireCARES?</h4>
+                            <h4>
+                                How can I get an account with FireCARES?
+                                <a href="#get-an-account">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
                             <ol class="faq-list">
-                                <li>Local presidents or officers for fire departments can use IMIS credentials to <a href="{% url 'login' %}">login</a>
+                                <li>
+                                    IAFF Local affiliate officers can use IMIS credentials to <a href="{% url 'login' %}">login</a> to FireCARES.
                                     to FireCARES.
                                 </li>
-                                <li>Fire chiefs can <a href="{% url 'login' %}">login</a> via the IAFC's Helix single sign on service.
+                                <li>
+                                    Fire Chiefs can <a href="{% url 'login' %}">login</a> via the IAFC's Helix single sign on service.
                                 </li>
-                                <li>If you are a member of a specific organization, you can <a href="{% url 'registration_register' %}">register</a> to get a FireCARES account.
+                                <li>
+                                    If you are a member of a specific organization that has been cleared for login, you can <a href="{% url 'registration_register' %}">register</a>
+                                    to get a FireCARES account using your email with the organizations email domain.
                                 </li>
-                                <li>If you work at a fire department, you may be able to send an account request through FireCARES that will notify
-                                    your chief or local president of your account request.  <a href="{% url 'firedepartment_list' %}">Search</a> for your
-                                    department and click <strong>&quot;Request access from your fire chief or local president.&quot;</strong>
-                                    If fire chief or local president has registered with FireCARES for your department, then he/she will receive a
+                                <li>
+                                    If you work at a fire department, you may be able to send an account request through FireCARES that will notify
+                                    your chief or IAFF local president of your account request.  request. Upon their approval, you will be provided
+                                    access.<a href="{% url 'firedepartment_list' %}">Search</a> for your department and click
+                                    <strong>&quot;Request access from your fire chief or local president.&quot;</strong> If your fire
+                                    chief or local president has registered with FireCARES for your department, then he/she will receive a
                                     notification to approve your account request.
                                 </li>
                             </ol>
                         </div>
 
                         <div class="ct-u-marginBottom50" id="trouble-logging-in">
-                            <h4>I am having trouble logging in. What can I do?</h4>
+                            <h4>
+                                I am having trouble logging in. What can I do?
+                                <a href="#trouble-logging-in">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
                             <p class="ct-u-marginTop10">
                                 You can <a href="{% url 'password_reset' %}">reset your FireCARES password</a> or
                                 <a href="{% url 'forgot_username' %}">retrieve your username</a>.  However, if you use the IMIS or Helix single-sign-on provider to login
@@ -61,10 +159,15 @@ Frequently Asked Questions
                             </p>
                         </div>
 
-                        <div class="ct-u-marginBottom50" id="grayed-out">
-                            <h4>When I am on a fire department page, why are the Performance Score and Safe Grades grayed out?</h4>
+                        <div class="ct-u-marginBottom50" id="scores-grayed-out">
+                            <h4>
+                                When I am on a fire department page, why are the Performance Score and Safe Grades grayed out?
+                                <a href="#scores-grayed-out">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
                             <p class="ct-u-marginTop10">
-                                While a large portion of FireCARES is completely open, to see those features you need to be logged in.
+                                While a large portion of FireCARES is completely open to the public, to see many features, you need to be logged in.
                                 To obtain a login please see <a href="#get-an-account">How can I get an account with FireCARES?</a> above.
                             </p>
                         </div>
@@ -78,47 +181,200 @@ Frequently Asked Questions
                         <hr/>
 
                         <div class="ct-u-marginBottom50" id="missing-stations">
-                            <h4>There are missing or incorrect stations or there is a issue regarding the composition of my department (i.e. Multiple landing pages for the same department). How do I fix this issue?</h4>
+                            <h4>
+                                There are missing or incorrect stations or there is an issue regarding the composition of my
+                                department (i.e. Multiple landing pages for the same department). How do I fix this issue?
+                                <a href="#missing-stations">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
                             <p class="ct-u-marginTop10">
-                                We worked very hard to capture the fire stations for all the departments in the FireCARES system, but we recognize that fire stations change over time and we may not have identified every station. Please send an email to: <a href="mailto:stations@firecares.org?Subject=Station Data Question" target="_top">FireCARES Stations</a>. Be sure to include your Fire Department Name and FDID as it is specified on <a href="https://firecares.org">FireCARES</a>.
+                                We worked very hard to capture the fire stations for all the departments in the FireCARES system,
+                                but we recognize that fire stations change over time and we may not have identified every station.
+                                Please send an email to: <a href="mailto:stations@firecares.org?Subject=Station Data Question" target="_top">FireCARES Stations</a>.
+                                Be sure to include your Fire Department Name and FDID as it is specified on <a href="{% url 'firestation_home' %}">FireCARES</a>.
                             </p>
                         </div>
 
-                        <div class="ct-u-marginBottom50" id="department-jurisdiction">
-                            <h4>What if I can't find my fire department jurisdiction?</h4>
+                        <div class="ct-u-marginBottom50" id="cant-find-department-jurisdiction">
+                            <h4>
+                                What if I can't find my fire department jurisdiction?
+                                <a href="#cant-find-department-jurisdiction">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
                             <p class="ct-u-marginTop10">
-                                FireCARES categorizes fire departments by their respective Fire Department ID code (FDID = the ID code used for data entry into the NFIRS system).  For some cities, towns, or other municipalities contained within larger County jurisdictions, the FDIDs may be similar.  If you are unable to locate your fire department by entering the name of your jurisdiction in the search bar, then please search for the county containing your fire department.  To find your jurisdiction, let’s see if it is contained within the larger county by entering the county name in the search bar and then checking the fire station addresses contained in the county list.  If your stations are contained in the county list, please go to the <a href="{% url 'contact_us' %}">Contact Us</a> page and provide us the list of your stations with complete street addresses.  You will be contacted within 1 week to verify the information and assure that your area is broken out of the larger county jurisdiction.
+                                FireCARES categorizes fire departments by their respective Fire Department ID code
+                                (FDID = the ID code used for data entry into the NFIRS system).  For some cities, towns, or
+                                other municipalities contained within larger County jurisdictions, the FDIDs may be similar.
+                                If you are unable to locate your fire department by entering the name of your jurisdiction in
+                                the search bar, then please search for the county containing your fire department.  To find your
+                                jurisdiction, let's see if it is contained within the larger county by entering the county name
+                                in the search bar and then checking the fire station addresses contained in the county list.
+                                If your stations are contained in the county list, please go to the
+                                <a href="{% url 'contact_us' %}">Contact Us</a> page and provide us the list of your stations
+                                with complete street addresses.  You will be contacted within 1 week to verify the information
+                                and assure that your area is broken out of the larger county jurisdiction.
                             </p>
                         </div>
 
-                        <div class="ct-u-marginBottom50" id="boundary-missing">
-                            <h4>My jurisdictional boundary is missing or incorrect. How do I update this information?</h4>
+                        <div class="ct-u-marginBottom50" id="jurisdiction-boundary-missing">
+                            <h4>
+                                My jurisdictional boundary is missing or incorrect. How do I update this information?
+                                <a href="#jurisdiction-boundary-missing">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
                             <p class="ct-u-marginTop10">
-                                We used national data sets plus manual manipulation whenever possible to provide the best representation for jurisdictional boundaries for all departments in FireCARES. We also know that we do not have the same depth of knowledge about every community compared to those who serve that community. If you notice differences or if boundaries have changed, please send an email to: <a href="mailto:boundaries@firecares.org?Subject=Jurisdictional Boundary Question" target="_top">FireCARES Jurisdictions</a>. Be sure to include your Fire Department Name and FDID as it is specified on <a href="{% url 'firestation_home' %}">FireCARES</a>.
-
+                                We used national data sets plus manual manipulation whenever possible to provide the best
+                                representation for jurisdictional boundaries for all departments in FireCARES. We also know that
+                                we do not have the same depth of knowledge about every community compared to those who serve that
+                                community. If you notice differences or if boundaries have changed, please send an email to:
+                                <a href="mailto:boundaries@firecares.org?Subject=Jurisdictional Boundary Question" target="_top">FireCARES Jurisdictions</a>.
+                                Be sure to include your Fire Department Name and FDID as it is specified on <a href="{% url 'firestation_home' %}">FireCARES</a>.
                             </p>
                         </div>
 
                         <div class="ct-u-marginBottom50" id="annual-structure-fires">
-                            <h4>The data presented in Annual Structure Fires is Not Available or Incorrect. How do I update this information?</h4>
+                            <h4>
+                                The data presented in Annual Structure Fires is Not Available or Incorrect. How do I update this information?
+                                <a href="#annual-structure-fires">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
                             <p class="ct-u-marginTop10">
-                                The data presented here primarily comes from <a href="https://www.nfirs.fema.gov/">NFIRS</a>. Depending on your department's reporting procedures there can exist inconsistencies between your local records and those in NFIRS. If you would like to update this data, please email <a href="mailto:data@firecares.org?Subject=Local Fire Data" target="_top">FireCARES Data Update</a> to determine a work flow for updating data. Be sure to include your Fire Department Name and FDID as it is specified on <a href="{% url 'firestation_home' %}">FireCARES</a>.
+                                The data presented here primarily comes from <a target="_blank" href="https://www.nfirs.fema.gov/">NFIRS</a>.
+                                Depending on your department's reporting
+                                procedures, there can exist inconsistencies between your local records and those in NFIRS. Also,
+                                NFIRS data are not yet available for the most recent two years. If you would like to update your
+                                data in the FireCARES system, please email <a href="mailto:data@firecares.org?Subject=Local Fire Data" target="_top">FireCARES Data Update</a>
+                                to determine a workflow for updating data. Be sure to include your Fire Department Name and FDID
+                                as it is specified on <a href="{% url 'firestation_home' %}">FireCARES</a>.
                             </p>
                         </div>
 
-                        <div class="ct-u-marginBottom50" id="unkn">
-                            <h4>Why are there so many structures in the Unknown group in the fire heat map when the Structure Hazard Level Distribution graph does not show as many Unknowns?</h4>
+                        <div class="ct-u-marginBottom50" id="unknown-heat-map">
+                            <h4>
+                                Why are there so many structures in the Unknown group in the fire heat map when the Structure Hazard Level Distribution
+                                graph does not show as many Unknowns?
+                                <a href="#unknown-heat-map">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
                             <p class="ct-u-marginTop10">
-                                To classify the hazard level of the structure where a fire occurred, that fire needed to be geocoded and tied to a physical parcel. That parcel also needed to have information about the structure present. If the geocode of the fire did not get tied to a parcel (structure) or there was insufficient information describing that parcel then that fire was classified as an N/A. In most cases, this was due to issues the geocode of the fire placing the fire in the middle of street versus at a particular parcel. We are continually working on improving the quality of the geocoding, so this should improve over time.
+                                To classify the hazard level of the structure where a fire occurred, that fire needed to be
+                                geocoded and tied to a physical parcel. That parcel also needed to have information about the
+                                structure present. If the geocode of the fire location did not get linked to an actual parcel
+                                (structure) or there was insufficient information describing that parcel then that fire was
+                                classified as an N/A. In most cases, this was due to the address (geocode) of the fire placing
+                                the fire in the middle of street versus at a particular parcel address. We are continually working
+                                on improving the quality of data from your system using a new data extraction module known as
+                                NFORS CAD and we are also working to improve  the geocoding, so this situation should improve
+                                over time. The better the data in the system, the more accurate the outcomes will be. To learn
+                                more about NFORS, go to <a target="_blank" href="http://www.NFORS.org">www.NFORS.org</a>.
                             <p>
                         </div>
 
-                        <div class="ct-u-marginBottom50" id="annual-structure-fires">
-                            <h4>Why do other departments have districts visualized and mine does not?</h4>
+                        <div class="ct-u-marginBottom50" id="structure-level-determination">
+                            <h4>
+                                How are the structure hazard levels determined?
+                                <a href="#structure-level-determination">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
                             <p class="ct-u-marginTop10">
-                                We do not have fire district data for all departments. If you would like add your district data, please email <a href="mailto:boundaries@firecares.org?Subject=Fire Districts Question" target="_top">FireCARES Fire Districts</a>. Be sure to include your Fire Department Name and FDID as it is specified on <a href="{% url 'firestation_home' %}">FireCARES</a>.
+                                The hazard levels are determined using NFPA's definition of low, medium, and high hazard structures.
+                                <ul>
+                                    <li>
+                                        <strong>High-Hazard Occupancies</strong> -
+                                        High-rise buildings, hospitals, schools, nursing homes, explosive plants, refineries,
+                                        public assembly structures, and other high life hazard or large fire potential occupancies.
+                                    </li>
+                                    <li>
+                                        <strong>Medium-Hazard Occupancies</strong> -
+                                        Apartments, offices, mercantile and industrial occupancies that may require extensive use of fire fighting forces.
+                                    </li>
+                                    <li>
+                                        <strong>Low-Hazard Occupancies</strong> -
+                                        One-, two- or three-family dwellings and scattered small business and industrial occupancies.
+                                    </li>
+                                </ul>
                             </p>
                         </div>
+
+                        <div class="ct-u-marginBottom50" id="no-districts-visualized">
+                            <h4>
+                                Why do other departments have districts visualized and mine does not?
+                                <a href="#no-districts-visualized">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
+                            <p class="ct-u-marginTop10">
+                                We do not have fire district data for all departments. If you would like add your district data,
+                                please email <a href="mailto:boundaries@firecares.org?Subject=Fire Districts Question" target="_top">FireCARES Fire Districts</a>.
+                                Be sure to include your Fire Department Name and FDID as it is specified on
+                                <a href="{% url 'firestation_home' %}">FireCARES</a>.
+                            </p>
+                        </div>
+
+                        <div class="ct-u-marginBottom50" id="add-gis-data">
+                            <h4>
+                                Can we add GIS data layers to the maps?
+                                <a href="#add-gis-data">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
+                            <p class="ct-u-marginTop10">
+                                Yes.  GIS data layers of any description may be added to the system for visualization and use
+                                in FireCARES.  To add data, please select the <a href="{% url 'contact_us' %}">contact us</a> button on the website and
+                                send a message including your contact information. You will be contacted within 1 week to update
+                                the information. Suggested data sets to add to FireCARES include hydrants, building inspections,
+                                and smoke detector distributions.
+                            </p>
+                        </div>
+
+                        <div class="ct-u-marginBottom50" id="add-response-resources">
+                            <h4>
+                                How do I add response resources (apparatus and crew sizes) to the station data?
+                                <a href="#add-response-resources">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
+                            <p class="ct-u-marginTop10">
+                                To add data, please select the <a href="{% url 'contact_us' %}">contact us</a> button on the
+                                website and send a message including your contact information. You will be contacted within
+                                1 week to update the information.
+                            </p>
+                        </div>
+
+                        <div class="ct-u-marginBottom50" id="first-due-zones">
+                            <h4>
+                                Why do other departments have first-due zones visualized and mine does not?
+                                <a href="#first-due-zones">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
+                            <p class="ct-u-marginTop10">
+                                We do not have first due area (zone) data for all departments. If you would like add your
+                                first due zones or &quot;box alarm area&quot; data, please email <a href="mailto:boundaries@firecares.org?Subject=Response Zones" target="_top">FireCARES Response Zones</a>.
+                                Be sure to include your Fire Department Name and FDID as it is specified on <a href="{% url 'firestation_home' %}">FireCARES</a>.
+                            </p>
+                        </div>
+
+                        <div class="ct-u-marginBottom50" id="add-ems-response-data">
+                            <h4>
+                                Can we add EMS response data to the system?
+                                <a href="#add-ems-response-data">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
+                            <p class="ct-u-marginTop10">
+                                Yes. EMS response data can be added to the system. To add data, please select the
+                                <a href="{% url 'contact_us' %}">contact us</a> button on the website and send a message
+                                including your contact information. You will be contacted within 1 week to update the information.
+                            </p>
+                        </div>
+
 
 
                         <h3 id="site-usage">
@@ -127,26 +383,155 @@ Frequently Asked Questions
                             <i class="fa fa-link"></i>
                           </a>
                         </h3>
-                        <hr>
+                        <hr/>
 
                         <div class="ct-u-marginBottom50" id="no-parcel-data">
-                            <h4>Why can I not see the parcel data layer in the map?</h4>
+                            <h4>
+                                Why can I not see the parcel data layer in the map?
+                                <a href="#no-parcel-data">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
                             <p class="ct-u-marginTop10">
-                                Make sure you have un-clicked the radio button for 'Jurisdiction Boundary' in the map drop down. Also, trying zooming in on map. Note that the data may take a minute to load.
+                                To see the parcel data in FireCARES, be sure you have un-clicked the radio button for
+                                'Jurisdiction Boundary' in the map drop down (Top Right of the map window).
+                                Also, trying zooming in on map. Note that the data may take a minute to load.
                             </p>
                         </div>
 
-                        <div class="ct-u-marginBottom50" id="annual-structure-fires">
-                            <h4>How are the FireCARES risk scores calculated?</h4>
+                        <div class="ct-u-marginBottom50" id="risk-scores-calculated">
+                            <h4>
+                                How are the FireCARES risk scores calculated?
+                                <a href="#no-parcel-data">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
                             <p class="ct-u-marginTop10">
                                 See more information about the <a href="{% url 'models_performance_score' %}">FireCARES Risk Score</a>.
                             </p>
                         </div>
 
-                        <div class="ct-u-marginBottom50" id="annual-structure-fires">
-                            <h4>How are the community risk scores calculated?</h4>
+                        <div class="ct-u-marginBottom50" id="community-risk-scores-calculated">
+                            <h4>
+                                How are the community risk scores calculated?
+                                <a href="#community-risk-scores-calculated">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
                             <p class="ct-u-marginTop10">
                                 See more information about the <a href="{% url 'models_community_risk' %}">FireCARES Community Risk</a>.
+                            </p>
+                        </div>
+
+                        <div class="ct-u-marginBottom50" id="individual-station-response-maps">
+                            <h4>
+                                Can I do individual station response area maps in the FireCARES system?
+                                <a href="#individual-station-response-maps">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
+                            <p class="ct-u-marginTop10">
+                                Yes. By selecting a station from the station list at the bottom of your department's page,
+                                FireCARES will take you to a map featuring that station.  Then by clicking on the &quot;stack of paper&quot;
+                                icon in the upper right of the map, you may select &quot;service area&quot; and the system will calculate
+                                and display 4-minute, 6-minute- and 8-minute response map for crews responding from that station.
+                                To see each timed response, scroll over the area and each segment will be highlighted for you.
+                                Remember that all map displays may be printed for use in presentations or hard-copy reports.
+                            </p>
+                        </div>
+
+                        <div class="ct-u-marginBottom50" id="print-features">
+                            <h4>
+                                Can I print features displayed in my departments FireCARES page?
+                                <a href="#print-features">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
+                            <p class="ct-u-marginTop10">
+                                Yes. Any features displayed in the map area of your department's FireCARES page may be printed
+                                using the &quot;printer&quot; icon at the top right of the page.
+                            </p>
+                        </div>
+
+                        <div class="ct-u-marginBottom50" id="store-reports">
+                            <h4>
+                                Can I store department relevant reports in FireCARES?
+                                <a href="#store-reports">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
+                            <p class="ct-u-marginTop10">
+                                Yes. By clicking the documents icon in the top right corner of a fire department's page, annual
+                                reports, consultant reports, data summaries, and other documents can be uploaded and stored for
+                                future reference.
+                            </p>
+                        </div>
+
+                        <h3 id="related-projects">
+                            Other Related Projects
+                            <a href="#related-projects">
+                                <i class="fa fa-link"></i>
+                            </a>
+                        </h3>
+                        <hr/>
+
+                        <div class="ct-u-marginBottom50" id="relationship-to-nfors">
+                            <h4>
+                                How is FireCARES connected with National Fire Operations Reporting System (NFORS)?
+                                <a href="#relationship-to-nfors">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
+                            <p class="ct-u-marginTop10">
+                                FireCARES and NFORS are parallel projects both funded by the Department of Homeland Security/FEMA
+                                Assistance to Firefighters Grants.  NFORS is a data gathering application (software) that
+                                links with a fire departments CAD or records management system (RMS) to ingest operational data
+                                directly without additional firefighter input.  That data can then be analyzed with in the
+                                NFORS system for instant reports and it can be loaded into the FireCARES system for use in
+                                calculating and updating a fire department's Performance Score and Safe Grade.
+                            </p>
+                        </div>
+
+                        <div class="ct-u-marginBottom50" id="nfors-available">
+                            <h4>
+                                Is the National Fire Operations Reporting System (NFORS) up and running?
+                                <a href="#nfors-available">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
+                            <p class="ct-u-marginTop10">
+                                Yes.  The NFORS project was developed in parallel and is linked to the Fire Community Assessment
+                                Response Evaluation System (FireCARES) Project. The NFORS modules and reports have been designed
+                                to be user friendly, encourage accurate and timely data entry, and allow data exchange with systems
+                                like FireCARES. In fact, the first NFORS module being field tested is in conjunction with the FireCARES
+                                project.
+                            </p>
+                            <p>
+                                Field testing for the first NFORS module began in September 2016.  The first module is known as
+                                NFORS-CAD (Computer Aided Dispatch).  This module is implemented via a fire department's CAD or
+                                RMS (Records management System) for automatic extraction of operational data for ALL TYPE responses.
+                                The NFORS-CAD may require programming modification to a local CAD to assure that the appropriate
+                                operational data elements are captured.  As operational data flow from a local fire department
+                                CAD system into the NFORS-CAD Library, they are available for use in local department reporting
+                                and will also appear in the fire department's FireCARES page.
+                            </p>
+                            <p>
+                                Additional modules will begin field testing soon including the NFORS Firefighter Exposure Module
+                                that links to the NFORS-CAD Module creating a response diary for individual firefighters.
+                                This NFORS Firefighter Exposure Module is being used by AFG funded grant projects for firefighter
+                                cancer surveillance.
+                            </p>
+                        </div>
+
+                        <div class="ct-u-marginBottom50" id="use-nfors">
+                            <h4>
+                                How can my Department use NFORS data system?
+                                <a href="#use-nfors">
+                                    <i class="fa fa-link"></i>
+                                </a>
+                            </h4>
+                            <p class="ct-u-marginTop10">
+                                Go to <a target="_blank" href="http://www.NFORS.org">www.NFORS.org</a> for details
                             </p>
                         </div>
                     </div>
