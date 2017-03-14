@@ -10,7 +10,7 @@
             class: 'form-popover'
         })
       }])
-      .directive('feedback', function($http, $compile) {
+      .directive('feedback', function($http, $compile, $analytics) {
         return {
           restrict: 'E',
           transclude: true,
@@ -19,7 +19,8 @@
             csrftoken: '@',
             user: '@',
             firedepartment: '@',
-            firestation: '@'
+            firestation: '@',
+            eventCategory: '@'
           },
           templateUrl: '/static/firestation/js/directives/partial/feedback/feedback.tpl.html',
           link: function(scope, element, attrs) {
@@ -58,6 +59,10 @@
                 scope.sendingForm = false;
                 scope.formSent = true;
                 scope.successForm = false;
+              }).finally(function(){
+                $analytics.eventTrack('send feedback', {
+                  category: scope.eventCategory
+                 });
               });
             }
           }

@@ -143,7 +143,14 @@
                             firedepartment="{{ object.department.id }}"
                             firestation="{{ object.id }}"
                             csrftoken="{{ csrf_token }}"
-                        >
+                            analytics-on="click"
+                            analytics-event="Click"
+                            {% verbatim %}
+                            analytics-category="{{eventCategory}}"
+                            event-category="{{eventCategory}}"
+                            {% endverbatim %}
+                            analytics-label="Feedback Button"
+                            >
                             <i class="fa fa-bullhorn  fa-2x ct-u-text--white"></i>
                         </feedback>
                     {% endif %}
@@ -171,6 +178,13 @@
                                     firedepartment="{{ object.department.id }}"
                                     firestation="{{ object.id }}"
                                     csrftoken="{{ csrf_token }}"
+                                    analytics-on="click"
+                                    analytics-event="Click"
+                                    {% verbatim %}
+                                    event-category="{{eventCategory}}"
+                                    analytics-category="{{eventCategory}}"
+                                    {% endverbatim %}
+                                    analytics-label="Feedback Button"
                                 >
                                     <i class="fa fa-bullhorn"></i>  Feedback
                                 </feedback>

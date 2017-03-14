@@ -30,6 +30,7 @@
     $scope.forms = [];
     $scope.stations = [];
     $scope.message = {};
+    $scope.eventCategory = 'station detail';
     var fitBoundsOptions = {padding: [6, 6]};
 
     Staffing.query({firestation: config.id}).$promise.then(function(data) {
@@ -47,10 +48,6 @@
     var mouseOverAddedOpacity = 0.25; // put in settings?
     var highlightColor = 'blue';      // put in settings?
     var serviceArea, max;
-
-    map.on('overlayadd', function(layer) {
-      $analytics.eventTrack(layer.name, {category: 'station.onoverlayadd'});
-    });
 
     station.bindPopup('<b>' + config.stationName + '</b>');
     station.addTo(map);
@@ -127,6 +124,27 @@
           map.spin(false);
         });
       }
+    });
+
+    map.on('overlayadd', function(layer) {
+      $analytics.eventTrack('enable layer', {
+        category: $scope.eventCategory + ': map',
+         label: layer.name
+       });
+    });
+
+    map.on('fullscreenchange', function(e) {
+      status = e.target.isFullscreen() ? 'enable' : 'disable';
+      $analytics.eventTrack(status + ' full screen', {
+        category: $scope.eventCategory + ': map'
+      });
+    });
+
+    map.on('overlayremove', function(layer) {
+      $analytics.eventTrack('disable layer', {
+        category: $scope.eventCategory + ': map',
+        label: layer.name
+      });
     });
 
     $scope.closeMapPopup = function() {
