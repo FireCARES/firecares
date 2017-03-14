@@ -110,7 +110,10 @@
 
                 // Notify listeners.
                 $rootScope.$emit('heatmap.' + filterType + 'FilterChanged', filter);
-
+                _map.fireEvent( 'heatmapfilterchanged',  {
+                  filterType: filterType,
+                  filter: filter
+                });
                 this.refresh();
             },
 

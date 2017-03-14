@@ -55,6 +55,7 @@
         var headquartersIcon = L.FireCARESMarkers.headquartersmarker();
         var fitBoundsOptions = {};
         var countyBoundary = null;
+        var eventCategory = 'department detail';
         $scope.metrics = window.metrics;
         $scope.urls = window.urls;
         $scope.level = window.level;
@@ -64,10 +65,6 @@
         $scope.uploadBoundary = false;
         var layersControl = L.control.layers().addTo(departmentMap);
         var fires = L.featureGroup().addTo(departmentMap);
-
-        departmentMap.on('overlayadd', function(layer) {
-          $analytics.eventTrack(layer.name, {category: 'department.onoverlayadd'});
-        });
 
         if (showStations) {
             FireStation.query({department: config.id}).$promise.then(function(data) {
@@ -403,9 +400,43 @@
         };
 
         $scope.setLevel = function(level) {
-          $analytics.eventTrack(level, {category: 'department.setLevel'});
+          $analytics.eventTrack('change risk level', {
+            category: eventCategory,
+            label: level
+          });
           $scope.level = level;
         };
+
+        departmentMap.on('overlayadd', function(layer) {
+          $analytics.eventTrack('enable layer', {
+            category: eventCategory + ': map',
+             label: layer.name
+           });
+        });
+
+        departmentMap.on('overlayremove', function(layer) {
+          $analytics.eventTrack('disable layer', {
+            category: eventCategory + ': map',
+            label: layer.name
+          });
+        });
+
+        departmentMap.on('fullscreenchange', function(e) {
+          status = e.target.isFullscreen() ? 'enable' : 'disable';
+          $analytics.eventTrack(status + ' full screen', {
+            category: eventCategory + ': map'
+          });
+        });
+
+        function heatMapFiltered(e) {
+          $analytics.eventTrack('filter heat map', {
+            category: eventCategory + ': map',
+            label: 'filter type: ' + e.filterType + ', filter: ' + e.filter
+          });
+        }
+
+        departmentMap.on('heatmapfilterchanged',
+          _.throttle(heatMapFiltered, 500, {trailing: true}))
 
         $timeout(function() {
           angular.element(".loading").fadeOut();
