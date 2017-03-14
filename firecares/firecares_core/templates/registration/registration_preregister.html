@@ -1,6 +1,7 @@
 {% extends 'registration/registration_base.html' %}
 {% load humanize %}
 {% load widget_tweaks %}
+{% load firecares_tags %}
 
 
 {% block meta_title %}Sign up · FireCARES{% endblock %}
@@ -15,9 +16,9 @@ Create an account on FireCARES to learn how fire department resources are deploy
         <h2 class="text-uppercase ct-fw-600 ct-u-marginBottom20">
             <span class="ct-u-text--motive">FireCARES</span> registration
         </h2>
-        Currently, FireCARES allows for anyone to request an account; however, only specific email addresses allow for
-        automatic registration.  If your email address or email address domain is not whitelisted, an account
-        request for you will be created and we contact you for further verification.
+        <p>Though anyone may request an account on FireCARES to view publicly available information, at this time, only active Fire Chiefs and designated Fire Service Leaders may receive login to the full system.</p>
+        <p>IAFF Local Officers should login to FireCARES using <a href="{{ global_settings.IMIS_SSO_LOGIN_URL }}{% absurl 'imis' %}?next={% url 'firestation_home' %}" class="underlined-link">IMIS</a> and fire chiefs should use the <a href="{% url 'oauth_redirect' %}" class="underlined-link">Helix</a></span> single-sign-on service.</p>
+        <p>In addition to these active fire service groups, specific fire service industry email address domains allow for automatic registration. If your email address does not receive immediate registration and login, an account request will be created in the system and we contact you for further verification.</p>
     </div>
 </div>
 <div class="col-md-6">
