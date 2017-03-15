@@ -23,40 +23,70 @@ Community risks for fire departments were determined via statistical regression 
 
 {% block section %}
     <section class="ct-u-paddingBoth60">
-    <div class="container">
+    <div class="container community-risk">
         <div class="row">
             <div class="col-sm-12 col-md-12">
 
                 <div class="ct-u-marginBottom50">
-                    <p>Community risks for fire departments were determined via statistical regression models that predict various types of risk as a function of community attributes.  Five community risks were assessed through the statistical modelling exercise:</p>
-
+                    <p>
+                        Community risks were determined via statistical regression models that predict various types of risk as
+                        a function of community attributes. Five community risks were modeled separately for low- medium-
+                        and high-hazard structures. The community risks were:
+                    </p>
                     <ul>
-                        <li>number of structure fires,</li>
-                        <li>percentage of fires that go beyond the room of origin (labelled “size 2 fires”),</li>
-                        <li>percentage of fires beyond the room of origin that proceed beyond the structure of origin (we call these “size 3 fires”),</li>
-                        <li>number of injuries resulting from structure fires, </li>
-                        <li>and number of deaths resulting from structure fires.</li>
+                        <li>
+                            number of reported structure fires,
+                        </li>
+                        <li>
+                            percentage of reported fires that spread beyond the room of origin (labelled &quot;size 2 fires&quot;),
+                        </li>
+                        <li>
+                            percentage of reported fires that spread beyond the room of origin and spread beyond the structure of
+                            origin (labelled &quot;size 3 fires&quot;),
+                        </li>
+                        <li>
+                            number of reported injuries resulting from structure fires,
+                        </li>
+                        <li>
+                            and number of reported deaths resulting from structure fires.
+                        </li>
                     </ul>
 
-                <p>Community risks were estimated as a function of the socio-demographic and geographic characteristics of the locations (census tracts) of structure fires over a 13 year period (2014-2002) according to NFIRS data.  The socio-demographic attributes to help predict risk included such items as:</p>
+                    <p>
+                        Community risks were estimated for each of three different classes of structures in a community including
+                        low, medium, and high hazard structures as categorized by the NFPA.
+                    </p>
 
-                <ul>
-                    <li><i>Population characteristics</i> (e.g., size category of total resident population served by department as shown in <a href="#table-1">Table 1</a>, number of males, age group counts, race counts)</li>
+                    <p>
+                        Community risks were also estimated as a function of the socio-demographic and geographic
+                        characteristics of the locations (census tracts) of reported structure fires over a seven year period
+                        (2007-2013) according to available NFIRS data. The socio-demographic attributes include:
+                    </p>
 
-                    <li><i>Housing characteristics</i> (e.g., total housing units, total vacancies, size of home, number of renters, age of units)</li>
+                    <ul>
+                        <li>
+                            <em>Population characteristics</em> (e.g., size category of the department, population, number of males,
+                            age group counts, race counts)
+                        </li>
+                        <li>
+                            <em>Housing characteristics</em> (e.g., total housing units, total vacancies, size of home, number of renters,
+                            age of units)
+                        </li>
+                        <li>
+                            <em>Household characteristics</em> (e.g., median household income, social vulnerability index)
+                        </li>
+                        <li>
+                            <em>Geographic region.</em>
+                        </li>
+                    </ul>
 
-                    <li><i>Household characteristics</i> (e.g., median household income, social vulnerability index)  in the Separate regression prediction equations were developed independently for each of the five risks.  The models are based on census data. The predictors used differ by model, based on what census data contributes significantly to predicting each of the models</li>
-
-                    <li><i>Geographic region.</i></li>
-                </ul>
-
-                <p>Models were separately calculated for groups of departments with similar protected population size and region. (Departments serving fewer than 10,000 people were excluded from the analysis.)
-                    One exception is that departments serving 1 million or more people were analyzed as a single group regardless of region. Separate models were computed for 24 department size × region combinations.
-                    Specific notes about individual groups of regressions follow:  Fire size models predicting the proportions of fires that fit into each size category as well as models predicting deaths and injuries
-                    represent an overall ‘average’ department (i.e., the models do not include a department specific ‘effect’). Also, note that because deaths are rare, many departments will be predicted to have only a
-                    fractional number of deaths.</p>
-
+                    <p>
+                        The final set of variables varied by model, and were selected to ensure the best prediction of risk.
+                        Note that because deaths are rare, many departments will be predicted to have only a fractional number
+                        of deaths.
+                    </p>
                 </div>
+
                 <div style="width: 50%; margin: 0 auto; ">
                     <h5 id="table-1">Table 1: Number of departments by size and region.</h5><br/>
                     <table class="table-striped table-condensed">

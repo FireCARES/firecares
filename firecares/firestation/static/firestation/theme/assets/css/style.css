@@ -12003,58 +12003,112 @@ div.is-your-department {
   -webkit-box-shadow: 0 0 6px #f8b9b7;
   -moz-box-shadow: 0 0 6px #f8b9b7;
 }
-.faqs a {
+.faqs a,
+.safe-grades a,
+.performance-score a,
+.community-risk a {
   color: #F29A00;
   border-bottom: 1px dotted white;
 }
-.faqs a:hover {
+.faqs a:hover,
+.safe-grades a:hover,
+.performance-score a:hover,
+.community-risk a:hover {
   color: #F29A00;
   border-bottom: 1px dotted;
 }
-.faqs hr {
+.faqs hr,
+.safe-grades hr,
+.performance-score hr,
+.community-risk hr {
   margin-top: 10px;
 }
-.faqs .faq-list {
+.faqs .faq-list,
+.safe-grades .faq-list,
+.performance-score .faq-list,
+.community-risk .faq-list {
   margin-top: 1em;
 }
-.faqs .faq-list li {
+.faqs .faq-list li,
+.safe-grades .faq-list li,
+.performance-score .faq-list li,
+.community-risk .faq-list li {
   list-style-type: disc;
 }
 .faqs h3,
-.faqs h4 {
+.safe-grades h3,
+.performance-score h3,
+.community-risk h3,
+.faqs h4,
+.safe-grades h4,
+.performance-score h4,
+.community-risk h4 {
   border-bottom: none;
   color: #2D3A51;
 }
 .faqs h3 i,
-.faqs h4 i {
+.safe-grades h3 i,
+.performance-score h3 i,
+.community-risk h3 i,
+.faqs h4 i,
+.safe-grades h4 i,
+.performance-score h4 i,
+.community-risk h4 i {
   visibility: hidden;
   font-size: 17px;
 }
 .faqs h3:hover,
-.faqs h4:hover {
+.safe-grades h3:hover,
+.performance-score h3:hover,
+.community-risk h3:hover,
+.faqs h4:hover,
+.safe-grades h4:hover,
+.performance-score h4:hover,
+.community-risk h4:hover {
   border-bottom: none;
   color: #2D3A51;
 }
 .faqs h3:hover i,
-.faqs h4:hover i {
+.safe-grades h3:hover i,
+.performance-score h3:hover i,
+.community-risk h3:hover i,
+.faqs h4:hover i,
+.safe-grades h4:hover i,
+.performance-score h4:hover i,
+.community-risk h4:hover i {
   visibility: visible;
   cursor: pointer;
   color: #2D3A51;
   border-bottom: none;
 }
 .faqs h3 a,
-.faqs h4 a {
+.safe-grades h3 a,
+.performance-score h3 a,
+.community-risk h3 a,
+.faqs h4 a,
+.safe-grades h4 a,
+.performance-score h4 a,
+.community-risk h4 a {
   color: #2D3A51;
   cursor: text;
   text-decoration: none;
   border-bottom: none;
 }
 .faqs h3 a:hover,
-.faqs h4 a:hover {
+.safe-grades h3 a:hover,
+.performance-score h3 a:hover,
+.community-risk h3 a:hover,
+.faqs h4 a:hover,
+.safe-grades h4 a:hover,
+.performance-score h4 a:hover,
+.community-risk h4 a:hover {
   text-decoration: none;
   border-bottom: none;
 }
-.faqs h4 i {
+.faqs h4 i,
+.safe-grades h4 i,
+.performance-score h4 i,
+.community-risk h4 i {
   font-size: 14px;
 }
 .safe-grades a {
