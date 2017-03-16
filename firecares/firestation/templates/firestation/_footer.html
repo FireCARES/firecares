@@ -13,10 +13,11 @@
 
                     <div class="ct-contactList ">
                         <a href="mailto:data@firecares.org"><i class="fa fa-envelope-o"></i>data@firecares.org</a>
-                        <a href="mailto:contact@firecares.org"><i class="fa fa-envelope-o"></i>contact@firecares.org</a>
+                        <a href="mailto:info@firecares.org"><i class="fa fa-envelope-o"></i>info@firecares.org</a>
                     </div>
 
                     <ul class="ct-panel--socials ct-panel--navbar list-inline list-unstyled ct-u-marginBottom30">
+                        <li><a href="https://twitter.com/firecares"><div class="ct-socials ct-socials--circle"><i class="fa fa-twitter"></i></div></a></li>
                         <li><a href="https://github.com/FireCARES"><div class="ct-socials ct-socials--circle"><i class="fa fa-github"></i></div></a></li>
                     </ul>
 
@@ -28,18 +29,14 @@
                             <div class="col-md-6">
                                 <a class="text-capitalize" href="{% url 'firestation_home' %}">Home</a>
                                 <a class="text-capitalize" href="{% url 'firedepartment_list' %}">Browse Departments</a>
-                                {% if user.is_authenticated %}
-                                <a class="text-capitalize" href="{% url 'firedepartment_list' %}?favorites=true">Favorite Departments</a>
-                                <a class="text-capitalize" href="{% url 'firestation_favorite_list' %}">Favorite FireStations</a>
-                                {% endif %}
                                 <a class="text-capitalize" href="{% url 'models_community_risk' %}">Community Risk</a>
                                 <a class="text-capitalize" href="{% url 'models_performance_score' %}">Performance Score</a>
                                 <a class="text-capitalize" href="{% url 'safe_grades' %}">Safe Grades</a>
+                            </div>
+                            <div class="col-md-6">
                                 <a class="text-capitalize" href="{% url 'faq.html' %}">FAQs</a>
                                 <a class="text-capitalize" href="{% url 'media' %}">FireCARES in the Media</a>
                                 <a class="text-capitalize" target="_blank" href="{{ STATIC_URL }}access_policy.pdf">FireCARES Access Policy</a>
-                            </div>
-                            <div class="col-md-6">
                                 {% if not user.is_authenticated %}
                                 <a href="{% url 'registration_register' %}" class="text-capitalize">sign up</a>
                                 <a href="{% url 'login' %}?next={% url 'firedepartment_list' %}" class="text-capitalize">login</a>
