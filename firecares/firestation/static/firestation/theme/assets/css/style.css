@@ -11799,6 +11799,9 @@ form[name='boundaryUpload'] a.commit:hover {
 .ct-formRegister *[type="submit"] {
   width: 100%;
 }
+.ct-formRegister button {
+  width: 100%;
+}
 .ct-formRegister h4 {
   color: #eeeeee;
 }

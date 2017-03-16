@@ -112,30 +112,30 @@
                                 <a href="{% url 'forgot_username' %}">Username?</a><br/>
                             </div>
 
-                            <div class="ct-form--item">
+                            <div class="ct-form--item ct-u-marginBottom10">
                                 <button type="submit" class="btn btn-warning center-block">Login</button>
                             </div>
+
+                            <div class="ct-form--item text-center recovery ct-u-marginBottom10">
+                                or
+                            </div>
+
+                            <div class="ct-form--item text-center recovery ct-u-marginBottom20">
+                                <button class="btn btn-sm btn-default" href="{% url 'registration_register' %}" >Sign Up</button>
+                            </div>
+
                             <hr/>
                             <div class="ct-form--item text-center add-on">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <h4 class="ct-u-marginBottom20 ct-u-marginTop10">IAFF president or officer?</h4>
+                                        <h4 class="ct-u-marginBottom20 ct-u-marginTop10">IAFF President or Officer?</h4>
                                         <a href="{{ global_settings.IMIS_SSO_LOGIN_URL }}{% absurl 'imis' %}?next={% url 'firestation_home' %}" class="btn btn-sm btn-default center-block ct-u-marginBottom10">Login using IMIS</a>
                                         <p><em>Note: you will be redirected to IAFF's login portal</em></p>
                                     </div>
                                     <div class="col-md-6">
-                                        <h4 class="ct-u-marginBottom20 ct-u-marginTop10">IAFC fire chief?<br/><br/></h4>
+                                        <h4 class="ct-u-marginBottom20 ct-u-marginTop10">IAFC Fire Chief?<br/><br/></h4>
                                         <a href="{% url 'oauth_redirect' %}" class="btn btn-sm btn-default center-block ct-u-marginBottom10">Login using Helix</a>
                                         <p><em>Note: you will be redirected to IAFC's login portal</em></p>
-                                    </div>
-                                </div>
-                            </div>
-                            <hr/>
-                            <div class="ct-form--item text-center add-on">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <h4 class="ct-u-marginBottom20 ct-u-marginTop10">Not a member?</h4>
-                                        <a class="btn btn-sm btn-default" href="{% url 'registration_register' %}" >Sign Up</a>
                                     </div>
                                 </div>
                             </div>
