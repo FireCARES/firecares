@@ -86,8 +86,10 @@ class ChooseDepartmentView(LoginRequiredMixin, FormView):
         # Send email to DEPARTMENT_ADMIN_VERIFIERS
         context = dict(association=association, email=association.user.email, username=association.user.username, site=get_current_site(self.request))
         body = loader.render_to_string('registration/verify_admin_email.txt', context)
+        body_html = loader.render_to_string('registration/verify_admin_email.html', context)
         subject = 'Department administrator request - {email}'.format(email=association.user.email)
         email_message = EmailMultiAlternatives(subject, body, settings.DEFAULT_FROM_EMAIL, [x[1] for x in settings.DEPARTMENT_ADMIN_VERIFIERS])
+        email_message.attach_alternative(body_html, "text/html")
         send_mail.delay(email_message)
 
         self.request.session['message'] = 'Your request has been received, an administrator will contact you shortly to verify your information.  In the meantime, feel free to peruse the FireCARES site!'
@@ -141,8 +143,10 @@ class VerifyAssociationRequest(SuperUserRequiredMixin, TemplateView):
         # Send email reponse to requesting user of acceptance or denial
         context = dict(association=req, message=body.get('message'), site=get_current_site(self.request))
         body = loader.render_to_string('registration/association_response_email.txt', context)
+        body_html = loader.render_to_string('registration/association_response_email.html', context)
         subject = 'Department administrator request'
         email_message = EmailMultiAlternatives(subject, body, settings.DEFAULT_FROM_EMAIL, [req.user.email])
+        email_message.attach_alternative(body_html, "text/html")
         send_mail.delay(email_message)
 
         req.refresh_from_db()

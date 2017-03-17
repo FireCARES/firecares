@@ -932,8 +932,10 @@ class AdminDepartmentAccountRequests(PermissionRequiredMixin, LoginRequiredMixin
                 body = form.cleaned_data['message']
                 context = dict(account_request=req, message=body, site=get_current_site(self.request))
                 body = loader.render_to_string('registration/department_account_request_email.txt', context)
+                body_html = loader.render_to_string('registration/department_account_request_email.html', context)
                 subject = 'Your FireCARES account request'
                 email_message = EmailMultiAlternatives(subject, body, settings.DEFAULT_FROM_EMAIL, [req.email])
+                email_message.attach_alternative(body_html, "text/html")
                 send_mail.delay(email_message)
 
         return redirect(self.object)
