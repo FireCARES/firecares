@@ -132,7 +132,7 @@ class FireDepartmentMetrics(object):
             self._get_peers()
 
         def get(df):
-            if df is not None:
+            if df is not None and not df.empty:
                 return df.dist_model_risk_model_greater_than_size_2_quartile.mean()
 
         return AttrDict({
@@ -149,7 +149,7 @@ class FireDepartmentMetrics(object):
             self._get_peers()
 
         def get(df):
-            if df is not None:
+            if df is not None and not df.empty:
                 return df.dist_model_risk_model_deaths_injuries_quartile_avg.mean()
 
         return AttrDict({
@@ -169,7 +169,7 @@ class FireDepartmentMetrics(object):
             self._get_peers()
 
         def get(df):
-            if df is not None:
+            if df is not None and not df.empty:
                 return df.dist_model_residential_fires_quartile_avg.mean()
 
         return AttrDict({
@@ -189,7 +189,7 @@ class FireDepartmentMetrics(object):
             self._get_peers()
 
         def get(df):
-            if df is not None:
+            if df is not None and not df.empty:
                 return df.groupby(['dist_model_risk_model_greater_than_size_2_quartile']).max()['dist_model_score'].tolist()
 
         return AttrDict({
@@ -209,7 +209,7 @@ class FireDepartmentMetrics(object):
             self._get_peers()
 
         def get(df):
-            if df is not None:
+            if df is not None and not df.empty:
                 return df.groupby(['dist_model_risk_model_deaths_injuries_quartile']).max()['dist_model_score'].tolist()
 
         return AttrDict({
@@ -226,7 +226,7 @@ class FireDepartmentMetrics(object):
             self._get_peers()
 
         def get(df):
-            if df is not None:
+            if df is not None and not df.empty:
                 return df.groupby(['dist_model_residential_fires_quartile']).max()['dist_model_score'].tolist()
 
         return AttrDict({
@@ -243,7 +243,7 @@ class FireDepartmentMetrics(object):
             self._get_peers()
 
         def get(df):
-            if df is not None:
+            if df is not None and not df.empty:
                 return df.loc[df['id'] == self.firedepartment.id].dist_model_residential_fires_quartile.values[0]
 
         return AttrDict({
@@ -260,7 +260,7 @@ class FireDepartmentMetrics(object):
             self._get_peers()
 
         def get(df):
-            if df is not None:
+            if df is not None and not df.empty:
                 return df.loc[df['id'] == self.firedepartment.id].dist_model_risk_model_greater_than_size_2_quartile.values[0]
 
         return AttrDict({
@@ -277,7 +277,7 @@ class FireDepartmentMetrics(object):
             self._get_peers()
 
         def get(df):
-            if df is not None:
+            if df is not None and not df.empty:
                 return df.loc[df['id'] == self.firedepartment.id].dist_model_risk_model_deaths_injuries_quartile.values[0]
 
         return AttrDict({
