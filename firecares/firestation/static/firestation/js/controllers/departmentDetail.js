@@ -305,7 +305,7 @@
                       'Total Value': 'tot_val',
                       'Land Value': 'lan_val',
                       'Improvements Value': 'imp_val',
-                      'Strucutre Hazard Risk Level': 'risk_category'
+                      'Structure Hazard Risk Level': 'risk_category'
                   };
 
                   _.each(_.pairs(items), function(pair){
