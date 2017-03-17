@@ -1,0 +1,19 @@
+{% extends "email_template.html" %}
+
+{% load i18n %}
+{% autoescape off %}
+
+{% block email_message %}
+
+Hello,
+
+You ({{ email }}) have been invited by {{ inviter }} to join {{ site_name }}.
+
+If you'd like to join, please go to {{ invite_url }} to accept the invite.
+
+{% blocktrans %}Best regards{% endblocktrans %},
+{{ site_name }} {% blocktrans %}Management{% endblocktrans %}
+
+{% endblock %}
+
+{% endautoescape %}
