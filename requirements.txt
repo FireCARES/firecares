@@ -18,7 +18,7 @@ django-storages==1.1.8
 django-compressor==1.5
 django-widget-tweaks==1.4.1
 numpy==1.9.2
--e git+https://github.com/FireCARES/fire-risk.git@4c07f0a5f011a802e52da23167d415b5ed51e001#egg=fire-risk
+-e git+https://github.com/FireCARES/fire-risk.git@b70d03156d3ca74489450dbb2767bf4840512f98#egg=fire-risk
 django-queryset-csv==0.3.1
 django-registration-redux==1.2
 django-autocomplete-light==2.2.5
