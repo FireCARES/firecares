@@ -19,14 +19,15 @@ class AddressAdmin(LocalOpenLayersAdmin):
     search_fields = ['address_line1', 'state_province', 'city']
 
 
-class ContactRequestAdmin(LocalOpenLayersAdmin):
+class ContactRequestAdmin(admin.ModelAdmin):
     list_display = ['name', 'email', 'created_at']
     search_fields = ['name', 'email']
 
 
-class AccountRequestAdmin(LocalOpenLayersAdmin):
+class AccountRequestAdmin(admin.ModelAdmin):
     list_display = ['email', 'created_at']
     search_fields = ['email']
+    form = autocomplete_light.modelform_factory(AccountRequest, fields='__all__')
 
 
 class ProfileInline(admin.StackedInline):
