@@ -412,7 +412,7 @@ class FireDepartmentListView(PaginationMixin, ListView, SafeSortMixin, LimitMixi
     def handle_search(self, queryset):
 
         # search in favorite departments only
-        if self.request.GET.get('favorites', 'false') == 'true':
+        if self.request.GET.get('favorites', 'false') == 'true' and self.request.user.is_authenticated():
             favorite_departments = map(lambda obj: obj.target.pk,
                                        Favorite.objects.for_user(self.request.user, model=FireDepartment))
             queryset = queryset.filter(pk__in=favorite_departments)
