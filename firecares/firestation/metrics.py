@@ -529,7 +529,9 @@ class FireDepartmentMetrics(object):
         for numlevel, level in self.RISK_LEVELS:
             if object_values[level]:
                 similar_department_ids = self.firedepartment.similar_departments.values_list('id', flat=True)
-                report_card_peers = self.quartile_class.objects.filter(id__in=similar_department_ids, level=numlevel)
+                similar_and_self = list(similar_department_ids)
+                similar_and_self.append(self.firedepartment.id)
+                report_card_peers = self.quartile_class.objects.filter(id__in=similar_and_self, level=numlevel)
                 report_card_peers = report_card_peers.annotate(dist_model_residential_fires_quartile=Case(When(
                     **{'dist_model_score__isnull': False,
                        'residential_fires_avg_3_years_quartile': object_values.get(level).residential_fires_avg_3_years_quartile,
