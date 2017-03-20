@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 class BaseSitemap(sitemaps.Sitemap):
 
     def items(self):
-        return ['media', 'models_performance_score', 'models_community_risk', 'login', 'contact_us',
+        return ['media', 'models_performance_score', 'models_community_risk', 'safe_grades', 'login', 'contact_us',
                 'firedepartment_list']
 
     def priority(self, item):
