@@ -1,5 +1,8 @@
-User-agent: *
+{% if request.META.HTTP_HOST == 'firecares.org' %}User-agent: *
 Sitemap: https://firecares.org/sitemap.xml
 Disallow: /service-area/
 Disallow: /tmp/
 Disallow: /autocomplete/
+{% else %}User-agent: *
+Disallow: /
+{% endif %}

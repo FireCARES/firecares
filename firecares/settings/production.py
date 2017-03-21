@@ -27,6 +27,7 @@ HELIX_FUNCTIONAL_TITLE_URL = HELIX_ROOT + '/App/api/v2/Membership/FuncTitle/'
 
 STATICSITEMAPS_URL = 'https://firecares.org/static/'
 STATICSITEMAPS_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+STATICSITEMAPS_ROOT_DIR = ''
 
 CELERYBEAT_SCHEDULE = {
     # Executes nightly at midnight.
