@@ -50,6 +50,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 CELERY_ALWAYS_EAGER = True
 
 REGISTRATION_OPEN = True
+STATICSITEMAPS_USE_GZIP = False
+STATICSITEMAPS_ROOT_DIR = '/tmp/sitemaps'
 
 try:
     from local_settings import *  # noqa

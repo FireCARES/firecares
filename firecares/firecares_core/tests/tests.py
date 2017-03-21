@@ -31,14 +31,22 @@ class CoreTests(BaseFirecaresTestcase):
         FireDepartment.objects.create(name='testy3', population=3)
         FireDepartment.objects.create(name='testy4', population=4)
 
+        call_command('refresh_sitemap')
+
         c = Client()
         response = c.get('/sitemap.xml')
+
         self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content, 'xml')
-        sitemap_list = soup.find_all('url')
-        self.assertEqual(len(sitemap_list), 3 + 7)  # 3 test departments and 7 set navigation pages
+        sitemap_list = soup.find_all('loc')
+        self.assertEqual(len(sitemap_list), 2)  # Should have 2 sitemap items
+
+        departments = BeautifulSoup(open('/tmp/sitemaps/sitemap-departments-1.xml'))
+        department_list = departments.find_all('url')
+        
+        self.assertEqual(len(department_list), 3)  # 3 test departments
         # find the three elements
-        for testy in sitemap_list:
+        for testy in department_list:
             if 'testy2' in testy.loc.get_text():
                 testy2 = testy
             elif 'testy3' in testy.loc.get_text():
