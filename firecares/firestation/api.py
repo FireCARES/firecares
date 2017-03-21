@@ -213,6 +213,27 @@ class FireDepartmentResource(JSONDefaultModelResourceMixin, ModelResource):
         limit = 120
         max_limit = 2000
 
+    def dehydrate(self, bundle):
+        """
+        remove fields not requested
+
+        note: this is called for every object, so works for both detail and
+              list requests
+        """
+        only_fields = bundle.request.GET.get('fields')
+        debug_fields = bundle.request.GET.get('fields_debug', False)
+        if only_fields:
+            only_fields = only_fields.split(',')
+            fields_to_remove = [field for field in bundle.data.keys()
+                                if field not in only_fields]
+            for field in fields_to_remove:
+                del bundle.data[field]
+            if debug_fields:
+                bundle.data['_fields_selected'] = [field for field in only_fields
+                                                   if field in bundle.data.keys()]
+                bundle.data['_fields_removed'] = fields_to_remove
+        return bundle
+
 
 class FireStationResource(JSONDefaultModelResourceMixin, ModelResource):
     """

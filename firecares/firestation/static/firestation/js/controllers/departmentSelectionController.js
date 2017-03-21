@@ -20,7 +20,7 @@
         $scope.departments = null;
         $http({
           method: 'GET',
-          url: '/api/v1/fire-departments/?limit=2000&state=' + val
+          url: '/api/v1/fire-departments/?limit=2000&fields=id,name&state=' + val
         }).then(function successCallback(response) {
           $scope.departments = response.data.objects;
           $scope.loading = false;
