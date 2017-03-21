@@ -184,6 +184,7 @@ INSTALLED_APPS = (
     'guardian',
     'django_nose',
     'invitations',
+    'static_sitemaps',
 )
 
 OSGEO_IMPORTER = 'firecares.importers.GeoDjangoImport'
@@ -288,6 +289,8 @@ HELIX_LOGOUT_URL = HELIX_ROOT + '/App/logout/' + HELIX_CLIENT_ID
 HELIX_WHOAMI_URL = HELIX_ROOT + '/App/api/v2/Account/WhoAmI'
 HELIX_FUNCTIONAL_TITLE_URL = HELIX_ROOT + '/App/api/v2/Membership/FuncTitle/'
 HELIX_ACCEPTED_CHIEF_ADMIN_TITLES = ['FIRE_CHIEF']
+
+STATICSITEMAPS_ROOT_SITEMAP = 'firecares.urls.sitemaps'
 
 CELERY_DEFAULT_QUEUE = "default"
 CELERY_DEFAULT_EXCHANGE = "default"

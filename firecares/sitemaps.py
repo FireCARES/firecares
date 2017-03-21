@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 
 
 class BaseSitemap(sitemaps.Sitemap):
+    protocol = 'https'
 
     def items(self):
         return ['media', 'models_performance_score', 'models_community_risk', 'safe_grades', 'login', 'contact_us',
@@ -18,6 +19,7 @@ class BaseSitemap(sitemaps.Sitemap):
 
 
 class DepartmentsSitemap(sitemaps.Sitemap):
+    protocol = 'https'
     max_population = 1
 
     def items(self):

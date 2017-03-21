@@ -25,6 +25,9 @@ HELIX_LOGOUT_URL = HELIX_ROOT + '/App/logout/' + HELIX_CLIENT_ID
 HELIX_WHOAMI_URL = HELIX_ROOT + '/App/api/v2/Account/WhoAmI'
 HELIX_FUNCTIONAL_TITLE_URL = HELIX_ROOT + '/App/api/v2/Membership/FuncTitle/'
 
+STATICSITEMAPS_URL = 'https://firecares.org/static/'
+STATICSITEMAPS_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+
 CELERYBEAT_SCHEDULE = {
     # Executes nightly at midnight.
     'cache_every_midnight': {
@@ -34,6 +37,10 @@ CELERYBEAT_SCHEDULE = {
     'ensure_valid_data_every_midnight': {
         'task': 'firecares.tasks.email.ensure_valid_data',
         'schedule': crontab(minute=0, hour=0),
+    },
+    'update_sitemap_every_60_minutes': {
+        'task': 'static_sitemaps.tasks.GenerateSitemap',
+        'schedule': crontab(minute=0)
     }
 }
 

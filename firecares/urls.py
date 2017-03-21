@@ -13,7 +13,6 @@ from .firestation.api import StaffingResource, FireStationResource, FireDepartme
 from tastypie.api import Api
 from firestation.views import Home
 from osgeo_importer.urls import FileAddView, importer_api
-from django.contrib.sitemaps.views import sitemap
 from django.contrib.auth.decorators import permission_required
 from sitemaps import BaseSitemap, DepartmentsSitemap
 
@@ -62,7 +61,7 @@ urlpatterns = patterns('',
     url(r'^autocomplete/(?P<autocomplete>[-\w]+)/$', login_required(AutocompleteView.as_view()), name='autocomplete_light_autocomplete'),
     url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain'), name='robots.txt'),
     url(r'^faq/$', TemplateView.as_view(template_name='faq.html', content_type='text/html'), name='faq.html'),
-    url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+    url(r'^sitemap\.xml$', include('static_sitemaps.urls')),
 
     url(r'^favit/', include('favit.urls')),
 
