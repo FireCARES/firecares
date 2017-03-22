@@ -50,11 +50,16 @@ class RegistrationWhitelistAdmin(admin.ModelAdmin):
     form = autocomplete_light.modelform_factory(RegistrationWhitelist, fields='__all__')
 
 
+class PredeterminedUserAdmin(admin.ModelAdmin):
+    model = PredeterminedUser
+    form = autocomplete_light.modelform_factory(PredeterminedUser, fields='__all__')
+
+
 admin.site.register(Address, AddressAdmin)
 admin.site.register(ContactRequest, ContactRequestAdmin)
 admin.site.register(AccountRequest, AccountRequestAdmin)
 admin.site.register(RegistrationWhitelist, RegistrationWhitelistAdmin)
-admin.site.register(PredeterminedUser)
+admin.site.register(PredeterminedUser, PredeterminedUserAdmin)
 admin.site.register(DepartmentAssociationRequest, DepartmentAssociationRequestAdmin)
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
