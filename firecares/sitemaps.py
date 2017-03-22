@@ -23,7 +23,7 @@ class DepartmentsSitemap(sitemaps.Sitemap):
     max_population = 1
 
     def items(self):
-        queryset = FireDepartment.objects.filter(archived=False)
+        queryset = FireDepartment.objects.filter(archived=False).only('population', 'featured', 'name')
         self.max_population = queryset.aggregate(Max('population'))['population__max']
         return queryset
 
