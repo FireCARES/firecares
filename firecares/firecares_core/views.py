@@ -1,6 +1,8 @@
 import json
 import logging
 import requests
+import random
+import string
 from .forms import ForgotUsernameForm, AccountRequestForm
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -218,7 +220,8 @@ class OAuth2Callback(View):
         return requests.get(settings.HELIX_WHOAMI, headers={'Authorization': 'Bearer ' + token.get('access_token')}).json()
 
     def _create_username(self, token):
-        return 'iafc-{}'.format(token['membershipid'])
+        rand_username = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
+        return 'iafc-{}'.format(token['membershipid'] or rand_username)
 
     def _allowed_in(self, token):
         return token.get('membershipid') and get_functional_title(token) in settings.HELIX_ACCEPTED_CHIEF_ADMIN_TITLES

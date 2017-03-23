@@ -18,7 +18,7 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         self.logout_url = settings.HELIX_LOGOUT_URL
         self.token_url = settings.HELIX_TOKEN_URL
         self.whoami_url = settings.HELIX_WHOAMI_URL
-        self.functional_title_matcher = re.compile(settings.HELIX_FUNCTIONAL_TITLE_URL + '\d+')
+        self.functional_title_matcher = re.compile(settings.HELIX_FUNCTIONAL_TITLE_URL + '\d*')
         self.valid_membership = False
         self.is_a_chief = False
 
@@ -134,8 +134,9 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         PredeterminedUser.objects.create(email='tester-iafc@prominentedge.com', department=fd)
 
         c = Client()
-        self.valid_membership = True
-        self.is_a_chief = True
+        # We shouldn't have to care about being a valid chief or member has the predetermined user list overrides
+        self.valid_membership = False
+        self.is_a_chief = False
 
         resp = c.get(reverse('oauth_redirect'))
         self.assertTrue('oauth_state' in c.session)
@@ -147,10 +148,10 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         resp = c.get(reverse('oauth_callback') + '?code=1231231234&state={}'.format(c.session['oauth_state']))
         self.assertRedirects(resp, '/departments/{}'.format(fd.id), fetch_redirect_response=False)
 
-        user = User.objects.filter(username='iafc-1234567').first()
+        user = User.objects.filter(email='tester-iafc@prominentedge.com').first()
         # Department should be associated w/ user
         self.assertEqual(user.userprofile.department, fd)
-        self.assertEqual(user.userprofile.functional_title, 'FIRE_CHIEF')
+        self.assertEqual(user.userprofile.functional_title, 'OTHER')
         self.assertTrue(fd.is_admin(user))
         self.assertFalse(fd.is_curator(user))
 
@@ -164,7 +165,7 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         RegistrationWhitelist.objects.create(email_or_domain='tester-iafc@prominentedge.com', department=fd)
 
         c = Client()
-        self.valid_membership = True
+        self.valid_membership = False
 
         resp = c.get(reverse('oauth_redirect'))
         self.assertTrue('oauth_state' in c.session)
@@ -176,7 +177,7 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         resp = c.get(reverse('oauth_callback') + '?code=1231231234&state={}'.format(c.session['oauth_state']))
         self.assertRedirects(resp, '/departments/{}'.format(fd.id), fetch_redirect_response=False)
 
-        user = User.objects.filter(username='iafc-1234567').first()
+        user = User.objects.filter(email='tester-iafc@prominentedge.com').first()
         # Department should be associated w/ user
         self.assertEqual(user.userprofile.department, fd)
         self.assertEqual(user.userprofile.functional_title, 'OTHER')
@@ -188,12 +189,12 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         RegistrationWhitelist.objects.all().delete()
 
         # Ensure that whitelisted users that DIDN'T get whitelisted by a specific department are correctly redirected
-
         RegistrationWhitelist.objects.create(email_or_domain='tester-iafc@prominentedge.com')
 
         resp = c.get(reverse('oauth_redirect'))
         resp = c.get(reverse('oauth_callback') + '?code=1231231234&state={}'.format(c.session['oauth_state']))
+
+        user = User.objects.filter(email='tester-iafc@prominentedge.com').first()
         self.assert_redirect_to(resp, 'firestation_home')
-        self.assertEqual(user.userprofile.functional_title, 'OTHER')
         self.assertFalse(fd.is_admin(user))
         self.assertFalse(fd.is_curator(user))
