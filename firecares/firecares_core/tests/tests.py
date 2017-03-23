@@ -43,7 +43,7 @@ class CoreTests(BaseFirecaresTestcase):
 
         departments = BeautifulSoup(open('/tmp/sitemaps/sitemap-departments-1.xml'))
         department_list = departments.find_all('url')
-        
+
         self.assertEqual(len(department_list), 3)  # 3 test departments
         # find the three elements
         for testy in department_list:

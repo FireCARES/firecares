@@ -1,4 +1,5 @@
 import json
+import logging
 import requests
 from .forms import ForgotUsernameForm, AccountRequestForm
 from django.conf import settings
@@ -23,6 +24,8 @@ from firecares.firecares_core.ext.registration.views import SESSION_EMAIL_WHITEL
 from .forms import ContactForm
 from .models import PredeterminedUser, RegistrationWhitelist, DepartmentAssociationRequest
 from .mixins import LoginRequiredMixin
+
+logger = logging.getLogger(__name__)
 
 
 class ForgotUsername(View):
@@ -251,7 +254,9 @@ class OAuth2Callback(View):
 
             email = token.get('email')
 
-            # If the user logs in through Helix AND they are in the perdetermined user list, then assign admin perms
+            logger.info(str(token))
+
+            # If the user logs in through Helix AND they are in the predetermined user list, then assign admin perms
             if email in PredeterminedUser.objects.values_list('email', flat=True):
                 user = self._auth_user(token)
                 if user:
@@ -260,11 +265,24 @@ class OAuth2Callback(View):
                     pdu.department.add_admin(user)
                     # Also, associate this department with the user explicitly in the user's profile
                     user.userprofile.department = pdu.department
+                    user.userprofile.functional_title = get_functional_title(token)
                     user.userprofile.save()
                     email_admins('Department admin user activated: {}'.format(user.username),
                                  'Admin permissions automatically granted for {} ({}) on {} ({})'.format(user.username, user.email, pdu.department.name, pdu.department.id))
                     # Send to associated department on login
                     return redirect(reverse('firedepartment_detail', args=[user.userprofile.department.id]))
+            elif RegistrationWhitelist.is_whitelisted(email):
+                user = self._auth_user(token)
+                if user:
+                    login(request, user)
+                    dept = RegistrationWhitelist.get_department_for_email(email)
+                    if dept:
+                        user.userprofile.department = dept
+                        user.userprofile.functional_title = get_functional_title(token)
+                        user.userprofile.save()
+                        return redirect(reverse('firedepartment_detail', args=[user.userprofile.department.id]))
+                    else:
+                        return redirect(reverse('firestation_home'))
             else:
                 if self._allowed_in(token):
                     user = self._auth_user(token)

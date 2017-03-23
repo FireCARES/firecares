@@ -199,7 +199,7 @@ class FireDepartmentResource(JSONDefaultModelResourceMixin, ModelResource):
 
     class Meta:
         resource_name = 'fire-departments'
-        queryset = FireDepartment.objects.filter(archived=False)
+        queryset = FireDepartment.objects.defer('owned_tracts_geom').filter(archived=False)
         authorization = GuardianAuthorization(view_permission_code=None,
                                               update_permission_code='change_firedepartment',
                                               create_permission_code='change_firedepartment',

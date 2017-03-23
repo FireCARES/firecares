@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.test import Client
 from requests_mock import Mocker
 from .base import BaseFirecaresTestcase
-from firecares.firecares_core.models import PredeterminedUser
+from firecares.firecares_core.models import PredeterminedUser, RegistrationWhitelist
 from firecares.firestation.models import FireDepartment
 
 User = get_user_model()
@@ -101,6 +101,7 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         self.assertEqual(user.first_name, 'Tester')
         self.assertEqual(user.last_name, 'McTesting')
         self.assertEqual(user.email, 'tester-iafc@prominentedge.com')
+        self.assertEqual(user.userprofile.functional_title, 'FIRE_CHIEF')
 
         # Fire chief should sent to choose their department, need to simulate disclaimer acceptance
         user.userprofile.has_accepted_terms = True
@@ -134,6 +135,7 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
 
         c = Client()
         self.valid_membership = True
+        self.is_a_chief = True
 
         resp = c.get(reverse('oauth_redirect'))
         self.assertTrue('oauth_state' in c.session)
@@ -148,5 +150,50 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         user = User.objects.filter(username='iafc-1234567').first()
         # Department should be associated w/ user
         self.assertEqual(user.userprofile.department, fd)
+        self.assertEqual(user.userprofile.functional_title, 'FIRE_CHIEF')
         self.assertTrue(fd.is_admin(user))
+        self.assertFalse(fd.is_curator(user))
+
+    def test_whitelisted_helix_logins(self, mock):
+        """
+        Ensure that whitelisted users are able to login to FireCARES via Helix in addition to the other authentication providers.
+        """
+        self.setup_mocks(mock)
+
+        fd = FireDepartment.objects.create(id=1234, name='testy2', population=2, featured=True)
+        RegistrationWhitelist.objects.create(email_or_domain='tester-iafc@prominentedge.com', department=fd)
+
+        c = Client()
+        self.valid_membership = True
+
+        resp = c.get(reverse('oauth_redirect'))
+        self.assertTrue('oauth_state' in c.session)
+        self.assertEqual(resp.status_code, 302)
+        # User is redirected to the FireCARES Helix login portal and then, after authenticating, redirected back to FireCARES
+        # w/ the auth code and state
+
+        # Ensure that a user has been created and that the user is redirected to his/her associated department
+        resp = c.get(reverse('oauth_callback') + '?code=1231231234&state={}'.format(c.session['oauth_state']))
+        self.assertRedirects(resp, '/departments/{}'.format(fd.id), fetch_redirect_response=False)
+
+        user = User.objects.filter(username='iafc-1234567').first()
+        # Department should be associated w/ user
+        self.assertEqual(user.userprofile.department, fd)
+        self.assertEqual(user.userprofile.functional_title, 'OTHER')
+        self.assertFalse(fd.is_admin(user))
+        self.assertFalse(fd.is_curator(user))
+
+        user.delete()
+        c.logout()
+        RegistrationWhitelist.objects.all().delete()
+
+        # Ensure that whitelisted users that DIDN'T get whitelisted by a specific department are correctly redirected
+
+        RegistrationWhitelist.objects.create(email_or_domain='tester-iafc@prominentedge.com')
+
+        resp = c.get(reverse('oauth_redirect'))
+        resp = c.get(reverse('oauth_callback') + '?code=1231231234&state={}'.format(c.session['oauth_state']))
+        self.assert_redirect_to(resp, 'firestation_home')
+        self.assertEqual(user.userprofile.functional_title, 'OTHER')
+        self.assertFalse(fd.is_admin(user))
         self.assertFalse(fd.is_curator(user))

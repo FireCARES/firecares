@@ -221,7 +221,7 @@ LOGGING = {
             'class': 'django.utils.log.AdminEmailHandler'
         },
         'slack_admins': {
-            'level': 'ERROR',
+            'level': 'INFO',
             'filters': ['require_debug_false'],
             'class': 'django_slack.log.SlackExceptionHandler'
         },
@@ -242,14 +242,14 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-        'firecares.firecares_core.middleware': {
-            'handlers': [],
-            'level': 'INFO',
-            'propagate': True,
-        },
         'firecares': {
             'handlers': ['console'],
             'level': 'ERROR',
+            'propagate': True,
+        },
+        'firecares.firecares_core.views': {
+            'handlers': ['console', 'slack_admins'],
+            'level': 'INFO',
             'propagate': True,
         }
     }
