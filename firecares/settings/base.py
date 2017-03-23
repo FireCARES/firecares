@@ -185,6 +185,7 @@ INSTALLED_APPS = (
     'django_nose',
     'invitations',
     'static_sitemaps',
+    'import_export',
 )
 
 OSGEO_IMPORTER = 'firecares.importers.GeoDjangoImport'

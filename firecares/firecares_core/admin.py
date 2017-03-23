@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.gis import admin
+from import_export.admin import ExportMixin
 from firecares.firecares_core.models import UserProfile, PredeterminedUser, DepartmentAssociationRequest
 
 User = get_user_model()
@@ -19,12 +20,12 @@ class AddressAdmin(LocalOpenLayersAdmin):
     search_fields = ['address_line1', 'state_province', 'city']
 
 
-class ContactRequestAdmin(admin.ModelAdmin):
+class ContactRequestAdmin(ExportMixin, admin.ModelAdmin):
     list_display = ['name', 'email', 'created_at']
     search_fields = ['name', 'email']
 
 
-class AccountRequestAdmin(admin.ModelAdmin):
+class AccountRequestAdmin(ExportMixin, admin.ModelAdmin):
     list_display = ['email', 'created_at']
     search_fields = ['email']
     form = autocomplete_light.modelform_factory(AccountRequest, fields='__all__')
@@ -36,21 +37,22 @@ class ProfileInline(admin.StackedInline):
     form = autocomplete_light.modelform_factory(UserProfile, fields='__all__')
 
 
-class UserAdmin(BaseUserAdmin):
+class UserAdmin(ExportMixin, BaseUserAdmin):
+    list_display = ['username', 'email', 'first_name', 'last_name', 'is_staff', 'date_joined']
     inlines = [ProfileInline]
 
 
-class DepartmentAssociationRequestAdmin(admin.ModelAdmin):
+class DepartmentAssociationRequestAdmin(ExportMixin, admin.ModelAdmin):
     model = DepartmentAssociationRequest
     form = autocomplete_light.modelform_factory(DepartmentAssociationRequest, fields='__all__')
 
 
-class RegistrationWhitelistAdmin(admin.ModelAdmin):
+class RegistrationWhitelistAdmin(ExportMixin, admin.ModelAdmin):
     model = RegistrationWhitelist
     form = autocomplete_light.modelform_factory(RegistrationWhitelist, fields='__all__')
 
 
-class PredeterminedUserAdmin(admin.ModelAdmin):
+class PredeterminedUserAdmin(ExportMixin, admin.ModelAdmin):
     model = PredeterminedUser
     form = autocomplete_light.modelform_factory(PredeterminedUser, fields='__all__')
 
