@@ -256,6 +256,10 @@ class OAuth2Callback(View):
 
             logger.info(str(token))
 
+            title = get_functional_title(token)
+
+            logger.info(title)
+
             # If the user logs in through Helix AND they are in the predetermined user list, then assign admin perms
             if email in PredeterminedUser.objects.values_list('email', flat=True):
                 user = self._auth_user(token)
