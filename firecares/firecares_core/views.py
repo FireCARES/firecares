@@ -257,10 +257,9 @@ class OAuth2Callback(View):
 
             email = token.get('email')
 
-            logger.info(str(token))
-
             title = get_functional_title(token)
 
+            logger.info(str(token))
             logger.info(title)
 
             # If the user logs in through Helix AND they are in the predetermined user list, then assign admin perms
@@ -270,6 +269,7 @@ class OAuth2Callback(View):
                     login(request, user)
                     pdu = PredeterminedUser.objects.get(email=email)
                     pdu.department.add_admin(user)
+                    pdu.department.add_curator(user)
                     # Also, associate this department with the user explicitly in the user's profile
                     user.userprofile.department = pdu.department
                     user.userprofile.functional_title = get_functional_title(token)
@@ -374,6 +374,8 @@ class IMISRedirect(View):
                 request.session['ibcToken'] = token
                 info = self.imis.service.FetchUserInfo(applicationInstance=self.application_instance, userToken=token)
                 user_info = self._extract_user_info(info)
+
+                logging.info(str(user_info))
 
                 if not self._is_whitelisted(user_info) and not self._should_be_department_admin(user_info):
                     messages.add_message(request, messages.ERROR, 'Must be approved by a local officer to login to FireCARES using IMIS')

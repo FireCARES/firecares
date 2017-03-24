@@ -33,6 +33,11 @@ LOGGING['loggers'] = {  # noqa
         'level': 'DEBUG',
         'propagate': True,
     },
+    'firecares': {
+        'handlers': ['console'],
+        'level': 'ERROR',
+        'propagate': True,
+    },
 }
 
 

@@ -226,7 +226,7 @@ LOGGING = {
             'class': 'django_slack.log.SlackExceptionHandler'
         },
         'console': {
-            'level': 'ERROR',
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
         },
@@ -244,7 +244,7 @@ LOGGING = {
         },
         'firecares': {
             'handlers': ['console'],
-            'level': 'ERROR',
+            'level': 'INFO',
             'propagate': True,
         },
         'firecares.firecares_core.views': {

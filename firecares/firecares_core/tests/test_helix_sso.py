@@ -153,7 +153,7 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         self.assertEqual(user.userprofile.department, fd)
         self.assertEqual(user.userprofile.functional_title, 'OTHER')
         self.assertTrue(fd.is_admin(user))
-        self.assertFalse(fd.is_curator(user))
+        self.assertTrue(fd.is_curator(user))
 
     def test_whitelisted_helix_logins(self, mock):
         """
