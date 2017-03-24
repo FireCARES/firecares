@@ -1,3 +1,4 @@
+import autocomplete_light
 from .models import FireStation, FireDepartment, Staffing, Document, IntersectingDepartmentLog, DataFeedback
 from firecares.firecares_core.models import Address
 from firecares.firecares_core.admin import LocalOpenLayersAdmin
@@ -70,6 +71,7 @@ class IntersectingDepartmentLogAdmin(admin.ModelAdmin):
 class DataFeedbackAdmin(admin.ModelAdmin):
     list_display = ['user', 'department', 'firestation', 'created_at', 'message']
     list_filter = ['created_at']
+    form = autocomplete_light.modelform_factory(DataFeedback, fields='__all__')
 
 
 admin.site.register(FireStation, FireStationAdmin)
