@@ -210,6 +210,8 @@ def helix_token_compliance_hook(request):
 
 def get_functional_title(token):
     membershipid = token.get('membershipid')
+    if not membershipid:
+        return ''
     auth = {'Authorization': 'Bearer ' + token.get('access_token')}
     resp = requests.get(settings.HELIX_FUNCTIONAL_TITLE_URL + membershipid, headers=auth)
     return resp.content.strip('"')
@@ -224,7 +226,10 @@ class OAuth2Callback(View):
         return 'iafc-{}'.format(token['membershipid'] or rand_username)
 
     def _allowed_in(self, token):
-        return token.get('membershipid') and get_functional_title(token) in settings.HELIX_ACCEPTED_CHIEF_ADMIN_TITLES
+        return token.get('membershipid')
+
+    def _will_be_admin(self, title):
+        return title in settings.HELIX_ACCEPTED_CHIEF_ADMIN_TITLES
 
     def _auth_user(self, token):
         user = authenticate(remote_user=self._create_username(token))
@@ -272,7 +277,7 @@ class OAuth2Callback(View):
                     pdu.department.add_curator(user)
                     # Also, associate this department with the user explicitly in the user's profile
                     user.userprofile.department = pdu.department
-                    user.userprofile.functional_title = get_functional_title(token)
+                    user.userprofile.functional_title = title
                     user.userprofile.save()
                     email_admins('Department admin user activated: {}'.format(user.username),
                                  'Admin permissions automatically granted for {} ({}) on {} ({})'.format(user.username, user.email, pdu.department.name, pdu.department.id))
@@ -285,7 +290,7 @@ class OAuth2Callback(View):
                     dept = RegistrationWhitelist.get_department_for_email(email)
                     if dept:
                         user.userprofile.department = dept
-                        user.userprofile.functional_title = get_functional_title(token)
+                        user.userprofile.functional_title = title
                         user.userprofile.save()
                         return redirect(reverse('firedepartment_detail', args=[user.userprofile.department.id]))
                     else:
@@ -295,12 +300,12 @@ class OAuth2Callback(View):
                     user = self._auth_user(token)
                     if user:
                         login(request, user)
-                        user.userprofile.functional_title = get_functional_title(token)
+                        user.userprofile.functional_title = title
                         user.userprofile.save()
-                        if not DepartmentAssociationRequest.user_has_association_request(user):
-                            return redirect(reverse('registration_choose_department'))
-                        else:
-                            return redirect(request.GET.get('next') or reverse('firestation_home'))
+                        if self._will_be_admin(title):
+                            if not DepartmentAssociationRequest.user_has_association_request(user):
+                                return redirect(reverse('registration_choose_department'))
+                        return redirect(request.GET.get('next') or reverse('firestation_home'))
 
                 else:
                     return self._gate(request)

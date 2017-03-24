@@ -20,7 +20,7 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         self.whoami_url = settings.HELIX_WHOAMI_URL
         self.functional_title_matcher = re.compile(settings.HELIX_FUNCTIONAL_TITLE_URL + '\d*')
         self.valid_membership = False
-        self.is_a_chief = False
+        self.role = '"OTHER"'
 
     def token_callback(self, request, context):
         if self.valid_membership:
@@ -29,10 +29,7 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
             return self.load_mock('not_a_member_token.json')
 
     def functional_title_callback(self, request, context):
-        if self.is_a_chief:
-            return '"FIRE_CHIEF"'
-        else:
-            return '"OTHER"'
+        return self.role
 
     def load_mock(self, filename):
         with open(os.path.join(os.path.dirname(__file__), 'mocks/helix', filename), 'r') as f:
@@ -71,8 +68,7 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         # Ensure that a user has been created
         resp = c.get(reverse('oauth_redirect'))
         resp = c.get(reverse('oauth_callback') + '?code=1231231234&state={}'.format(c.session['oauth_state']))
-        # We're not a chief, so make sure that we're gated
-        self.assert_redirect_to(resp, 'show_message')
+        self.assert_redirect_to(resp, 'firestation_home')
 
     def test_fire_chief_registration(self, mock):
         """
@@ -84,7 +80,7 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
 
         c = Client()
         self.valid_membership = True
-        self.is_a_chief = True
+        self.role = '"FIRE_CHIEF"'
 
         resp = c.get(reverse('oauth_redirect'))
         self.assertTrue('oauth_state' in c.session)
@@ -136,7 +132,6 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         c = Client()
         # We shouldn't have to care about being a valid chief or member has the predetermined user list overrides
         self.valid_membership = False
-        self.is_a_chief = False
 
         resp = c.get(reverse('oauth_redirect'))
         self.assertTrue('oauth_state' in c.session)
@@ -151,7 +146,7 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         user = User.objects.filter(email='tester-iafc@prominentedge.com').first()
         # Department should be associated w/ user
         self.assertEqual(user.userprofile.department, fd)
-        self.assertEqual(user.userprofile.functional_title, 'OTHER')
+        self.assertEqual(user.userprofile.functional_title, '')
         self.assertTrue(fd.is_admin(user))
         self.assertTrue(fd.is_curator(user))
 
@@ -180,7 +175,7 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         user = User.objects.filter(email='tester-iafc@prominentedge.com').first()
         # Department should be associated w/ user
         self.assertEqual(user.userprofile.department, fd)
-        self.assertEqual(user.userprofile.functional_title, 'OTHER')
+        self.assertEqual(user.userprofile.functional_title, '')
         self.assertFalse(fd.is_admin(user))
         self.assertFalse(fd.is_curator(user))
 
