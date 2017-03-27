@@ -1,3 +1,4 @@
+from django.core import mail
 from django.core.management import call_command
 from django.core.urlresolvers import reverse
 from django.test.client import Client
@@ -287,13 +288,18 @@ class TestPublic(BaseFirecaresTestcase):
         c = Client()
         c.login(**self.admin_creds)
 
-        whitelists = {'email_or_domain': ['test.com', 'test2@tester.com'], 'id': ['', ''], 'give_admin': ['true', 'false'], 'give_curator': ['true', 'false'], 'form': 'whitelist'}
+        whitelists = {'email_or_domain': ['test.com', 'test2@tester.com'], 'id': ['', ''], 'give_admin': ['false', 'true'], 'give_curator': ['false', 'true'], 'form': 'whitelist'}
         resp = c.post(reverse('admin_department_users', args=[fd.id]), data=whitelists)
+
+        # We've got an individual whitelist email address added, so make sure that an email went out
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertTrue('email address (test2@tester.com) has been whitelisted' in mail.outbox[0].body)
+
         self.assert_redirect_to(resp, 'firedepartment_detail_slug')
 
         self.assertTrue(RegistrationWhitelist.is_department_whitelisted('test.com'))
         self.assertEqual(RegistrationWhitelist.get_department_for_email('test.com'), fd)
-        reg = RegistrationWhitelist.get_for_email('testing@test.com')
+        reg = RegistrationWhitelist.get_for_email('test2@tester.com')
         self.assertEqual(reg.department, fd)
         self.assertEqual(reg.permission, 'change_firedepartment,admin_firedepartment')
 

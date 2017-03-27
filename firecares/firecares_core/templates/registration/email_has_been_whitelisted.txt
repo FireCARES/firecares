@@ -1,0 +1,19 @@
+{% load i18n %}
+{% load url from future %}
+
+{% blocktrans %}Greetings{% endblocktrans %} {{ whitelist.email_or_domain }},
+
+Your email address ({{ whitelist.email_or_domain }}) has been whitelisted for login/registration with FireCARES.
+
+Feel free to login to FireCARES using your Helix or IMIS account that has this email address (recommended for IAFC/IAFF members):
+
+http://{{ site.domain }}/login/
+
+OR
+
+Create your own native FireCARES account at:
+
+http://{{ site.domain }}/accounts/register/
+
+{% blocktrans %}Best regards{% endblocktrans %},
+{{ site_name }} {% blocktrans %}Management{% endblocktrans %}

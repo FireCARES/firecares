@@ -159,6 +159,18 @@ class AdminDepartmentUsers(PermissionRequiredMixin, LoginRequiredMixin, DetailVi
                                                            email_or_domain=i[1],
                                                            created_by=request.user,
                                                            permission=','.join([give_curator, give_admin]))
+                # Also, send email IF it's an individual email address that is being whitelisted
+                if not reg.is_domain_whitelist:
+                    context = dict(whitelist=reg, site=get_current_site(request))
+                    body = loader.render_to_string('registration/email_has_been_whitelisted.txt', context)
+                    subject = 'Your email address is allowed to login to or register with FireCARES'
+                    email_message = EmailMultiAlternatives(
+                        subject,
+                        body,
+                        settings.DEFAULT_FROM_EMAIL,
+                        [reg.email_or_domain],
+                        reply_to=['contact@firecares.org'])
+                    send_mail.delay(email_message)
 
             messages.add_message(request, messages.SUCCESS, 'Updated whitelisted registration emails addresses/domains for this department in FireCARES.')
         elif section == 'users':
