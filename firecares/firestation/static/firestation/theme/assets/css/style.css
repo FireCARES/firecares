@@ -11713,7 +11713,7 @@ form[name='boundaryUpload'] a.commit:hover {
 .right-navbar {
   right: 45px;
   position: absolute;
-  width: 200px;
+  width: 300px;
 }
 .partners .owl-pagination {
   display: none;
@@ -11803,7 +11803,7 @@ form[name='boundaryUpload'] a.commit:hover {
   color: red;
 }
 .whitelist-admin td {
-  width: 33%;
+  width: 20%;
 }
 .whitelist-admin span.label.label-danger {
   margin-right: 2em;

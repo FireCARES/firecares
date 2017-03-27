@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import Client
 from requests_mock import Mocker
+from firecares.firecares_core.models import RegistrationWhitelist
 from firecares.firestation.models import FireDepartment
 from .base import BaseFirecaresTestcase
 
@@ -126,3 +127,33 @@ class IMISSingleSignOnTests(BaseFirecaresTestcase):
         c.get(reverse('imis') + '?ibcToken={}'.format(uuid))
         user.refresh_from_db()
         self.assertEqual(user.email, 'testing@prominentedge.com')
+
+    def test_whitelisted_login(self, mock):
+        self.setup_mocks(mock)
+        self.is_iaff_member = False
+
+        RegistrationWhitelist.objects.create(email_or_domain='tester@prominentedge.com')
+
+        c = Client()
+        uuid = uuid4()
+        c.get(reverse('imis') + '?ibcToken={}'.format(uuid))
+        user = User.objects.filter(username='iaff-0559211').first()
+        self.assertEqual(user.email, 'tester@prominentedge.com')
+
+        self.assertFalse(user.is_superuser)
+
+    def test_whitelisted_permission_assignment(self, mock):
+        self.setup_mocks(mock)
+        self.is_iaff_member = False
+
+        fd = FireDepartment.objects.create(name='TEST')
+        RegistrationWhitelist.objects.create(email_or_domain='tester@prominentedge.com', department=fd, permission='change_firedepartment,admin_firedepartment')
+
+        c = Client()
+        uuid = uuid4()
+        c.get(reverse('imis') + '?ibcToken={}'.format(uuid))
+        user = User.objects.filter(username='iaff-0559211').first()
+        self.assertEqual(user.email, 'tester@prominentedge.com')
+
+        self.assertTrue(fd.is_admin(user))
+        self.assertTrue(fd.is_curator(user))

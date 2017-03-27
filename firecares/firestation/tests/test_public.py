@@ -287,12 +287,15 @@ class TestPublic(BaseFirecaresTestcase):
         c = Client()
         c.login(**self.admin_creds)
 
-        whitelists = {'email_or_domain': ['test.com', 'test2@tester.com'], 'id': ['', ''], 'form': 'whitelist'}
+        whitelists = {'email_or_domain': ['test.com', 'test2@tester.com'], 'id': ['', ''], 'give_admin': ['true', 'false'], 'give_curator': ['true', 'false'], 'form': 'whitelist'}
         resp = c.post(reverse('admin_department_users', args=[fd.id]), data=whitelists)
         self.assert_redirect_to(resp, 'firedepartment_detail_slug')
 
         self.assertTrue(RegistrationWhitelist.is_department_whitelisted('test.com'))
         self.assertEqual(RegistrationWhitelist.get_department_for_email('test.com'), fd)
+        reg = RegistrationWhitelist.get_for_email('testing@test.com')
+        self.assertEqual(reg.department, fd)
+        self.assertEqual(reg.permission, 'change_firedepartment,admin_firedepartment')
 
         # Ensure that deletion works as well
         whitelists = {'email_or_domain': ['test2@tester.com'], 'id': [''], 'form': 'whitelist'}

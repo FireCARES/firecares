@@ -130,8 +130,12 @@ class AdminDepartmentUsers(PermissionRequiredMixin, LoginRequiredMixin, DetailVi
                                    can_admin=fd.is_admin(u)))
         context['user_perms'] = user_perms
         context['invites'] = Invitation.objects.filter(departmentinvitation__department=self.object).order_by('-sent')
-        context['whitelists'] = [dict(id=w.id, email_or_domain=w.email_or_domain, is_domain_whitelist=w.is_domain_whitelist)
-                                 for w in RegistrationWhitelist.objects.filter(department=self.object)]
+        context['whitelists'] = [dict(id=w.id,
+                                      email_or_domain=w.email_or_domain,
+                                      is_domain_whitelist=w.is_domain_whitelist,
+                                      give_curator='change_firedepartment' in (w.permission or ''),
+                                      give_admin='admin_firedepartment' in (w.permission or ''))
+                                 for w in RegistrationWhitelist.for_department(self.object)]
         return context
 
     def post(self, request, **kwargs):
@@ -139,14 +143,22 @@ class AdminDepartmentUsers(PermissionRequiredMixin, LoginRequiredMixin, DetailVi
         section = request.POST.get('form')
 
         if section == 'whitelist':
-            items = zip(request.POST.getlist('id'), request.POST.getlist('email_or_domain'))
+            items = zip(request.POST.getlist('id'),
+                        request.POST.getlist('email_or_domain'),
+                        request.POST.getlist('give_curator'),
+                        request.POST.getlist('give_admin'))
 
-            # Delete any whitelist items that don't exist anymore
+            # Delete any whitelist items that don't come back
             RegistrationWhitelist.for_department(self.object).exclude(id__in=[int(i[0]) for i in items if i[0]]).delete()
 
             # Create new items
             for i in filter(lambda x: x[0] == '', items):
-                RegistrationWhitelist.objects.create(department=self.object, email_or_domain=i[1], created_by=request.user)
+                give_curator = 'change_firedepartment' if i[2] == 'true' else ''
+                give_admin = 'admin_firedepartment' if i[3] == 'true' else ''
+                reg = RegistrationWhitelist.objects.create(department=self.object,
+                                                           email_or_domain=i[1],
+                                                           created_by=request.user,
+                                                           permission=','.join([give_curator, give_admin]))
 
             messages.add_message(request, messages.SUCCESS, 'Updated whitelisted registration emails addresses/domains for this department in FireCARES.')
         elif section == 'users':

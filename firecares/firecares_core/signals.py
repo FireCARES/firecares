@@ -57,5 +57,9 @@ def account_activated(sender, *args, **kwargs):
                      'Admin permissions granted for {} ({}) on {} ({})'.format(user.username, user.email, pdu.department.name, pdu.department.id))
 
     if RegistrationWhitelist.is_department_whitelisted(user.email):
+        wht = RegistrationWhitelist.get_for_email(user.email)
+        if wht:
+            wht.process_permission_assignment(user)
+
         user.userprofile.department = RegistrationWhitelist.get_department_for_email(user.email)
         user.userprofile.save()

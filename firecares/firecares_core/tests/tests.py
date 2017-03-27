@@ -345,21 +345,6 @@ class CoreTests(BaseFirecaresTestcase):
         self.assertEqual(RegistrationWhitelist.get_department_for_email('test@myfd.org'), fd)
         self.assertIsNone(RegistrationWhitelist.get_department_for_email('invalid@myfd.org'))
 
-    def test_permission_assignment(self):
-        """
-        Ensure that permission assignment is working as expected.
-        """
-
-        fd = self.load_la_department()
-        fd.add_curator(self.non_admin_user)
-        self.assertTrue(fd.is_curator(self.non_admin_user))
-
-        self.non_admin_user.is_active = False
-        self.non_admin_user.save()
-
-        # Non-activated users have no object-level permissions
-        self.assertFalse(fd.is_curator(self.non_admin_user))
-
     def test_invite_workflow(self):
         fd = self.load_la_department()
         fd2 = self.load_arlington_department()
@@ -522,7 +507,7 @@ class CoreTests(BaseFirecaresTestcase):
         fd, _ = FireDepartment.objects.get_or_create(name='FD1')
         fd2, _ = FireDepartment.objects.get_or_create(name='FD2')
         RegistrationWhitelist.objects.create(email_or_domain='myfd.org', department=fd)
-        RegistrationWhitelist.objects.create(email_or_domain='test@anotherfd.org', department=fd2)
+        RegistrationWhitelist.objects.create(email_or_domain='test@anotherfd.org', department=fd2, permission='admin_firedepartment,change_firedepartment')
 
         c = Client()
 
@@ -547,13 +532,46 @@ class CoreTests(BaseFirecaresTestcase):
             user.refresh_from_db()
             self.assertEqual(user.userprofile.department, fd)
             # Users might be associated with departments, but they will NOT get any department-related permissions
-            # when being added to the department email whitelist
+            # when being added to the department email whitelist unless explicitly indicated in the whitelisted entry
             self.assertFalse(fd.is_admin(user))
             self.assertFalse(fd.is_curator(user))
             # Ensure no permission crosstalk
             self.assertFalse(fd2.is_admin(user))
             self.assertFalse(fd2.is_curator(user))
             self.assertFalse(user.is_superuser)
+
+        c.logout()
+
+        # Ensure that permissions are assigned correctly when registering with a whitelisted address that has
+        # permissions indicated
+        resp = c.post(reverse('account_request'), dict(email='test@anotherfd.org'))
+        self.assert_redirect_to(resp, 'registration_register')
+
+        resp = c.post(reverse('registration_register'), data={'username': 'test_dept_whitelist2',
+                                                              'first_name': 'Joe',
+                                                              'last_name': 'Tester',
+                                                              'password1': 'test',
+                                                              'password2': 'test'})
+
+        user = User.objects.filter(username='test_dept_whitelist2').first()
+        self.assertIsNotNone(user)
+        self.assertFalse(user.is_active)
+        self.assertFalse(user.is_superuser)
+
+        # Make sure that account activation triggers the department association
+        response = c.get(reverse('registration_activate', kwargs={'activation_key':
+                                                                  user.registrationprofile.activation_key}))
+        # A 302 here means the activation succeeded
+        self.assertEqual(response.status_code, 302)
+        user.refresh_from_db()
+        self.assertEqual(user.userprofile.department, fd2)
+
+        self.assertTrue(fd2.is_admin(user))
+        self.assertTrue(fd2.is_curator(user))
+        # Ensure no permission crosstalk
+        self.assertFalse(fd.is_admin(user))
+        self.assertFalse(fd.is_curator(user))
+        self.assertFalse(user.is_superuser)
 
     def test_department_admin_requests(self):
         fd, _ = FireDepartment.objects.get_or_create(id=12345, name='FD1')

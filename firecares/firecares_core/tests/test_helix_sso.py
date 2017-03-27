@@ -1,7 +1,7 @@
 import os
 import re
 from django.conf import settings
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, get_user
 from django.core.urlresolvers import reverse
 from django.test import Client
 from requests_mock import Mocker
@@ -62,6 +62,8 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         resp = c.get(reverse('oauth_redirect'))
         resp = c.get(reverse('oauth_callback') + '?code=1231231234&state={}'.format(c.session['oauth_state']))
         self.assert_redirect_to(resp, 'show_message')
+        user = get_user(c)
+        self.assertFalse(user.is_authenticated())
 
         self.valid_membership = True
 
@@ -69,6 +71,8 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         resp = c.get(reverse('oauth_redirect'))
         resp = c.get(reverse('oauth_callback') + '?code=1231231234&state={}'.format(c.session['oauth_state']))
         self.assert_redirect_to(resp, 'firestation_home')
+        user = get_user(c)
+        self.assertTrue(user.is_authenticated())
 
     def test_fire_chief_registration(self, mock):
         """
@@ -193,3 +197,29 @@ class HelixSingleSignOnTests(BaseFirecaresTestcase):
         self.assert_redirect_to(resp, 'firestation_home')
         self.assertFalse(fd.is_admin(user))
         self.assertFalse(fd.is_curator(user))
+
+    def test_whitelisted_permission_assignment(self, mock):
+        self.setup_mocks(mock)
+
+        fd = FireDepartment.objects.create(id=4321, name='TEST WHITELIST PERMS')
+        RegistrationWhitelist.objects.create(email_or_domain='tester-iafc@prominentedge.com', department=fd, permission='admin_firedepartment,change_firedepartment')
+
+        c = Client()
+        self.valid_membership = False
+
+        resp = c.get(reverse('oauth_redirect'))
+        self.assertTrue('oauth_state' in c.session)
+        self.assertEqual(resp.status_code, 302)
+        # User is redirected to the FireCARES Helix login portal and then, after authenticating, redirected back to FireCARES
+        # w/ the auth code and state
+
+        # Ensure that a user has been created and that the user is redirected to his/her associated department
+        resp = c.get(reverse('oauth_callback') + '?code=1231231234&state={}'.format(c.session['oauth_state']))
+        self.assertRedirects(resp, '/departments/{}'.format(fd.id), fetch_redirect_response=False)
+
+        user = User.objects.filter(email='tester-iafc@prominentedge.com').first()
+        # Department should be associated w/ user
+        self.assertEqual(user.userprofile.department, fd)
+        self.assertEqual(user.userprofile.functional_title, '')
+        self.assertTrue(fd.is_admin(user))
+        self.assertTrue(fd.is_curator(user))

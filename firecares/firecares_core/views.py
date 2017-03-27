@@ -243,7 +243,7 @@ class OAuth2Callback(View):
 
     def _gate(self, request):
         request.session['message_title'] = 'Login error'
-        request.session['message'] = 'Only IAFC fire chiefs are allowed to login into FireCARES via the Helix authentication system'
+        request.session['message'] = 'Only IAFC members are allowed to login into FireCARES via the Helix authentication system'
         return redirect('show_message')
 
     def get(self, request):
@@ -289,6 +289,10 @@ class OAuth2Callback(View):
                     login(request, user)
                     dept = RegistrationWhitelist.get_department_for_email(email)
                     if dept:
+                        # Also, assign given permissions on department
+                        wht = RegistrationWhitelist.get_for_email(email)
+                        if wht:
+                            wht.process_permission_assignment(user)
                         user.userprofile.department = dept
                         user.userprofile.functional_title = title
                         user.userprofile.save()
@@ -361,8 +365,6 @@ class IMISRedirect(View):
         if ext:
             return ext.get('firecares_id')
 
-        return None
-
     def _is_whitelisted(self, user_info):
         email = user_info.get('EmailAddress', None)
         return RegistrationWhitelist.is_whitelisted(email)
@@ -382,13 +384,14 @@ class IMISRedirect(View):
 
                 logging.info(str(user_info))
 
-                if not self._is_whitelisted(user_info) and not self._should_be_department_admin(user_info):
-                    messages.add_message(request, messages.ERROR, 'Must be approved by a local officer to login to FireCARES using IMIS')
-                    return redirect(reverse('login'))
+                if not self._is_whitelisted(user_info):
+                    if not self._should_be_department_admin(user_info):
+                        messages.add_message(request, messages.ERROR, 'Must be approved by a local officer to login to FireCARES using IMIS')
+                        return redirect(reverse('login'))
 
-                if not self._is_member(user_info):
-                    messages.add_message(request, messages.ERROR, 'Must be an approved IAFF member to login to FireCARES using IMIS')
-                    return redirect(reverse('login'))
+                    if not self._is_member(user_info):
+                        messages.add_message(request, messages.ERROR, 'Must be an approved IAFF member to login to FireCARES using IMIS')
+                        return redirect(reverse('login'))
 
                 user = auth.authenticate(remote_user=self._create_username(user_info))
                 # Sync user information on every login
@@ -399,8 +402,13 @@ class IMISRedirect(View):
                     user.save()
 
                     deptid = self._get_firecares_id(user_info)
-                    user.userprofile.department = FireDepartment.objects.filter(id=deptid).first()
+                    dept = FireDepartment.objects.filter(id=deptid).first()
+                    user.userprofile.department = dept
                     user.userprofile.save()
+
+                    wht = RegistrationWhitelist.get_for_email(user.email)
+                    if wht:
+                        wht.process_permission_assignment(user)
 
                     if self._should_be_department_admin(user_info) and deptid:
                         # Remove existing department permissions

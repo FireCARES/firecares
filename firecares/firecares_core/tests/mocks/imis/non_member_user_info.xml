@@ -11,7 +11,7 @@
                 <WorkPhone>(314) 555-1234</WorkPhone>
                 <CompanyName>Pittsburgh</CompanyName>
                 <EmailAddress>tester@prominentedge.com</EmailAddress>
-                <MemberType>MEM</MemberType>
+                <MemberType>OTH</MemberType>
                 <ImisId>0559211</ImisId>
                 <ExtensionData xmlns="http://ibc.ssoprovider/">
                     <ID xmlns="">0559211</ID>
