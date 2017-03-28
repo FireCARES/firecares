@@ -38,7 +38,7 @@ from firecares.tasks.cleanup import remove_file
 from .forms import DocumentUploadForm, DepartmentUserApprovalForm, DataFeedbackForm
 from django.views.generic.edit import FormView
 from .models import (
-    Document, FireStation, FireDepartment, Staffing, create_quartile_views, create_national_calculations_view)
+    Document, FireStation, FireDepartment, Staffing, refresh_quartile_view, refresh_national_calculations_view)
 from favit.models import Favorite
 from invitations.models import Invitation
 
@@ -262,8 +262,8 @@ class DepartmentUpdateGovernmentUnits(PermissionRequiredMixin, LoginRequiredMixi
         messages.add_message(request, messages.SUCCESS, 'Government unit associations updated')
 
         if self.get_object().get_population_class() != population_class:
-            create_quartile_views(None)
-            create_national_calculations_view(None)
+            refresh_quartile_view()
+            refresh_national_calculations_view()
 
         return redirect(self.object)
 
@@ -301,8 +301,8 @@ class RemoveIntersectingDepartments(PermissionRequiredMixin, LoginRequiredMixin,
             self.object.remove_from_department(FireDepartment.objects.get(id=i))
 
         if self.get_object().get_population_class() != population_class:
-            create_quartile_views(None)
-            create_national_calculations_view(None)
+            refresh_quartile_view()
+            refresh_national_calculations_view()
 
         messages.add_message(request, messages.SUCCESS, 'Removed intersecting departments.')
 

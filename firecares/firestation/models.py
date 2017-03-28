@@ -1089,6 +1089,11 @@ class PopulationClassQuartile(models.Model):
         db_table = 'population_quartiles'
 
 
+def refresh_quartile_view():
+    with connections['default'].cursor() as cursor:
+        cursor.execute('REFRESH MATERIALIZED VIEW population_quartiles;')
+
+
 def create_quartile_views(sender, **kwargs):
     """
     Creates DB view based on quartile queries.
@@ -1151,7 +1156,6 @@ def create_quartile_views(sender, **kwargs):
         WHERE archived=False
         """
     cursor = connections['default'].cursor()
-
     # Force materialied view recreation in case there are changes in the query
     print '(re)creating materialized view for "population_quartiles"'
     cursor.execute("DROP MATERIALIZED VIEW IF EXISTS population_quartiles;")
@@ -1171,6 +1175,11 @@ class NationalCalculations(models.Model):
     class Meta:
         managed = False
         db_table = 'national_calculations'
+
+
+def refresh_national_calculations_view():
+    with connections['default'].cursor() as cursor:
+        cursor.execute('REFRESH MATERIALIZED VIEW national_calculations;')
 
 
 def create_national_calculations_view(sender, **kwargs):

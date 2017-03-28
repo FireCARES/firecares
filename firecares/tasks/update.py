@@ -7,7 +7,7 @@ from django.db import connections
 from django.db.utils import ConnectionDoesNotExist
 from scipy.stats import lognorm
 from firecares.firestation.models import (
-    FireDepartment, create_quartile_views, HazardLevels, create_national_calculations_view)
+    FireDepartment, refresh_quartile_view, HazardLevels, refresh_national_calculations_view)
 from firecares.firestation.models import NFIRSStatistic as nfirs
 from fire_risk.models import DIST, DISTMediumHazard, DISTHighHazard, NotEnoughRecords
 from fire_risk.models.DIST.providers.ahs import ahs_building_areas
@@ -298,19 +298,19 @@ def calculate_department_census_geom(fd_id):
 
 
 @app.task(queue='update')
-def create_quartile_views_task():
+def refresh_quartile_view_task():
     """
     Updates the Quartile Materialized Views.
     """
-    return create_quartile_views(None)
+    return refresh_quartile_view()
 
 
 @app.task(queue='update')
-def create_national_calculations_view_task():
+def refresh_national_calculations_view_task():
     """
     Updates the National Calculation View.
     """
-    return create_national_calculations_view(None)
+    return refresh_national_calculations_view()
 
 
 @app.task(queue='update')
