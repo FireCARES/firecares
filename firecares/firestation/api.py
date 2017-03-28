@@ -198,6 +198,7 @@ class FireDepartmentResource(JSONDefaultModelResourceMixin, ModelResource):
     """
 
     class Meta:
+        readonly_fields = ['owned_tracts_geom']
         resource_name = 'fire-departments'
         queryset = FireDepartment.objects.defer('owned_tracts_geom').filter(archived=False)
         authorization = GuardianAuthorization(view_permission_code=None,
@@ -212,6 +213,11 @@ class FireDepartmentResource(JSONDefaultModelResourceMixin, ModelResource):
         serializer = PrettyJSONSerializer()
         limit = 120
         max_limit = 2000
+
+    def __init__(self, **kwargs):
+        super(FireDepartmentResource, self).__init__(**kwargs)
+        for f in getattr(self.Meta, 'readonly_fields', []):
+            self.fields[f].readonly = True
 
     def dehydrate(self, bundle):
         """

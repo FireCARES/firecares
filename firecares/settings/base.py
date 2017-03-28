@@ -233,7 +233,7 @@ LOGGING = {
     },
     'loggers': {
         'django.request': {
-            'handlers': ['mail_admins', 'slack_admins'],
+            'handlers': ['console', 'mail_admins', 'slack_admins'],
             'level': 'ERROR',
             'propagate': True,
         },
@@ -248,7 +248,7 @@ LOGGING = {
             'propagate': True,
         },
         'firecares.firecares_core.views': {
-            'handlers': ['console', 'slack_admins'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         }
