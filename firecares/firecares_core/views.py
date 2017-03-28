@@ -117,8 +117,7 @@ class AccountRequestView(CreateView):
     template_name = 'firestation/home.html'
     form_class = AccountRequestForm
     http_method_names = ['post']
-    success_message = 'We will be in touch with you to verify your account. Please stay tuned to our partner websites'\
-                      ' and major fire service conferences for updates.'
+    success_message = 'You have been sent an email with the details of access policy, please contact your local fire department chief to allow you to register with FireCARES.'
 
     def form_valid(self, form):
         """
@@ -164,12 +163,14 @@ class AccountRequestView(CreateView):
             to = [x.email for x in self.object.department.get_department_admins()]
             body = loader.render_to_string('contact/account_request_department_admin_email.txt', dict(contact=self.object, site=Site.objects.get_current()))
         else:
-            to = [x[1] for x in settings.ADMINS]
-            body = loader.render_to_string('contact/account_request_email.txt', dict(contact=self.object))
-        email_message = EmailMultiAlternatives('{} - New account request received.'.format(Site.objects.get_current().name),
+            to = [self.object.email]
+            body = loader.render_to_string('contact/account_request_email.txt', dict(STATIC_URL=settings.STATIC_URL, contact=self.object, site=Site.objects.get_current()))
+        email_message = EmailMultiAlternatives('{} - Access.'.format(Site.objects.get_current().name),
                                                body,
                                                settings.DEFAULT_FROM_EMAIL,
-                                               to)
+                                               to,
+                                               cc=['contact@firecares.org'],
+                                               reply_to=['contact@firecares.org'])
         send_mail.delay(email_message)
 
 

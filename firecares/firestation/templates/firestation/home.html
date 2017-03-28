@@ -58,10 +58,7 @@
         </span>
         <span class="right-navbar">
             {% if not user.is_authenticated %}
-
-            <a href="#" class="text-uppercase sign-up-button" id="sign-up-popover" data-toggle="popover" title="Sign Up"
-               data-placement="bottom" tabindex="0" role="button">sign up</a>
-
+            <a href="{% url 'registration_register' %}" class="text-uppercase">request account</a>
             <a href="{% url 'login' %}?next={% url 'firedepartment_list' %}" class="text-uppercase">login</a>
             {% else %}
             <a href="{% url 'logout' %}" class="text-uppercase">logout</a>
@@ -69,17 +66,6 @@
         </span>
     </div>
 </section>
-
-
-<div id="popover_content_wrapper" style="display: none">
-    <form class="form-inline col-lg-12 ct-u-paddingBottom30 sign-up-popover-content" method="post" action="{% url 'account_request' %}">
-        {% csrf_token %}
-        <div class="text-center popup-content">Provide your email address and we will be in touch.</div>
-        <input id="contact_name_small" placeholder='example@domain.com' required name="email" type="email" class="form-control input-lg">
-        <div class="text-center">
-        <button type="submit" class="btn btn-primary">SIGN UP</button></div>
-    </form>
-</div>
 
 <div id="header"></div>
 <header class="home-header text-center ct-u-text--white header-gradient">
@@ -169,22 +155,6 @@
 <div class="ct-u-paddingTop40" id="partners">
     {% include 'firestation/_partners.html' %}
 </div>
-
-<section class="ct-mediaSection account-request-section ct-u-paddingBoth90 ct-u-text--white text-center" id="signup">
-    <div class="container">
-        <div class="ct-u-marginBottom15 text-center">
-            <h2 class="text-center">Sign up</h2>
-        </div>
-        <form class="form-inline col-lg-12" method="post" action="{% url 'account_request' %}">
-            {% csrf_token %}
-            <div class="ct-u-paddingBottom30 account-request-section-content">Provide your email address and we will be in touch.</div>
-            <div class="ct-form--item ct-u-marginBottom20">
-                <input id="contact_name" placeholder='example@domain.com' required size="65" name="email" type="email" class="form-control input-lg">
-            </div>
-            <button type="submit" class="btn btn-primary">SIGN UP</button>
-        </form>
-    </div>
-</section>
 
 {% include 'firestation/_footer.html' %}
 

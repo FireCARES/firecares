@@ -1097,11 +1097,11 @@ class FireStationTests(BaseFirecaresTestcase):
         resp = c.post(reverse('account_request'), data={'email': 'tester@mytest.com', 'department': fd.id})
         self.assert_redirect_to(resp, 'show_message')
         resp = c.get(resp['Location'])
-        self.assertContains(resp, 'We will be in touch with you to verify your account')
+        self.assertContains(resp, 'You have been sent an email with the details of access policy')
 
         # Email should be sent to this department's admins notifying them that an account request has been submitted...
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].recipients(), ['non_admin@example.com'])
+        self.assertEqual(mail.outbox[0].recipients(), ['non_admin@example.com', 'contact@firecares.org'])
 
         # Only department admin and superusers can see this page
         resp = c.get(reverse('admin_department_account_requests', args=[fd.id]) + '?email=tester@mytest.com')

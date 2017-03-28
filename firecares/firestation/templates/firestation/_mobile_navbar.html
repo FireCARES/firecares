@@ -7,7 +7,7 @@
         <li class="onepage"><a href="{% url 'contact_us' %}">contact us</a></li>
         <li class="onepage"><a href="{% url 'faq.html' %}">FAQs</a></li>
         {% if not user.is_authenticated %}
-            <li class="onepage"><a href="{% url 'firestation_home' %}#signup">sign up</a></li>
+            <li class="onepage"><a href="{% url 'registration_register' %}">request account</a></li>
             <li class="onepage"><a href="{% url 'login' %}?next={% url 'firedepartment_list' %}">login</a></li>
         {% else %}
             <li class="onepage"><a href="{% url 'logout' %}">logout</a></li>
