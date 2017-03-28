@@ -427,3 +427,12 @@ class IMISRedirect(View):
 
         messages.add_message(request, messages.ERROR, 'Invalid or missing IMIS session token')
         return redirect(reverse('login'))
+
+
+class FAQView(TemplateView):
+    template_name = 'faq.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(FAQView, self).get_context_data(**kwargs)
+        context['whitelisted_domains'] = RegistrationWhitelist.domain_whitelists()
+        return context

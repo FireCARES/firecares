@@ -326,6 +326,10 @@ class RegistrationWhitelist(models.Model):
 
             return by_email.department if by_email else by_domain.department
 
+    @classmethod
+    def domain_whitelists(cls):
+        return cls.objects.exclude(email_or_domain__contains='@')
+
 
 class DepartmentInvitation(models.Model):
     invitation = AutoOneToOneField(Invitation, on_delete=models.CASCADE)
