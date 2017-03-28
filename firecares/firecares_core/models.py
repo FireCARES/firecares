@@ -240,6 +240,7 @@ class RegistrationWhitelist(models.Model):
     # to the department after account activation and also assigned the permission if given on that specific department.
     department = models.ForeignKey('firestation.FireDepartment', null=True, blank=True)
     permission = models.CharField(max_length=255, null=True, blank=True)
+    permissions_applied = models.BooleanField(default=False)
     # For anonymous-user-submitted whitelist requests, they need to be vetted by a department admin
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
@@ -270,10 +271,12 @@ class RegistrationWhitelist(models.Model):
                 return domain_whitelists.filter(email_or_domain=domain).first()
 
     def process_permission_assignment(self, user):
-        if self.permission and self.department and user:
+        if self.permission and self.department and user and not self.permissions_applied:
             for p in self.permission.split(','):
                 if p:
                     assign_perm(p, user, self.department)
+            self.permissions_applied = True
+            self.save()
 
     @classmethod
     def is_whitelisted(cls, email):
