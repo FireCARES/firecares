@@ -664,6 +664,9 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
 
 
 class FireDepartmentRiskModels(models.Model):
+    class Meta:
+        unique_together = ['level', 'department']
+
     level = models.IntegerField(choices=HazardLevels.choices(), default=1)
     department = models.ForeignKey(FireDepartment)
     dist_model_score = models.FloatField(null=True, blank=True, editable=False, db_index=True)
