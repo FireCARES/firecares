@@ -8,13 +8,13 @@ User = get_user_model()
 
 al.register(Address,
             # Just like in ModelAdmin.search_fields
-            search_fields=['^address_line1', 'city', 'state_province', 'postal_code'],
+            search_fields=['address_line1', 'city', 'state_province', 'postal_code'],
             attrs={
                 # This will set the input placeholder attribute:
                 'placeholder': 'Address',
                 # This will set the yourlabs.Autocomplete.minimumCharacters
                 # options, the naming conversion is handled by jQuery
-                'data-autocomplete-minimum-characters': 1,
+                'data-autocomplete-minimum-characters': 3,
             },
             # This will set the data-widget-maximum-values attribute on the
             # widget container element, and will be set to

@@ -19,6 +19,11 @@ class AddressAdmin(LocalOpenLayersAdmin):
     list_filter = ['state_province']
     search_fields = ['address_line1', 'state_province', 'city']
 
+    def save_model(self, request, obj, form, change):
+        if change:
+            obj.geocode()
+        super(AddressAdmin, self).save_model(request, obj, form, change)
+
 
 class ContactRequestAdmin(ExportMixin, admin.ModelAdmin):
     list_display = ['name', 'email', 'created_at']

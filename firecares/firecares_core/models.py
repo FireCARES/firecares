@@ -3,7 +3,7 @@ from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from django.utils import timezone
 from geopy.geocoders import GoogleV3
-from geopy.exc import GeocoderQuotaExceeded
+from geopy.exc import GeocoderQuotaExceeded, GeocoderTimedOut
 from jsonfield import JSONField
 from time import sleep
 from reversion import revisions as reversion
@@ -133,6 +133,9 @@ class Address(models.Model):
         except GeocoderQuotaExceeded:
             sleep(0.5)
             results = g.geocode(query=query_string)
+        except GeocoderTimedOut:
+            sleep(0.5)
+            results = g.geocode(query=query_string)
 
         if results and results.latitude and results.longitude:
             self.geom = Point(results.longitude, results.latitude)
@@ -146,8 +149,7 @@ class Address(models.Model):
             row.geocode()
 
     def __unicode__(self):
-        return "%s, %s %s" % (self.city, self.state_province,
-                              str(self.country))
+        return "%s, %s %s - %s" % (self.address_line1, self.city, self.state_province, self.country.iso_code)
 
     class Meta:
         verbose_name_plural = "Addresses"
