@@ -293,6 +293,7 @@ class TestPublic(BaseFirecaresTestcase):
 
         # We've got an individual whitelist email address added, so make sure that an email went out
         self.assertEqual(len(mail.outbox), 1)
+        self.assert_email_appears_valid(mail.outbox[0])
         self.assertTrue('email address (test2@tester.com) has been whitelisted' in mail.outbox[0].body)
 
         self.assert_redirect_to(resp, 'firedepartment_detail_slug')

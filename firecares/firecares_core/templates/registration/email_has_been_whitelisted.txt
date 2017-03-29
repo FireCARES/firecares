@@ -16,4 +16,4 @@ Create your own native FireCARES account at:
 http://{{ site.domain }}/accounts/register/
 
 {% blocktrans %}Best regards{% endblocktrans %},
-{{ site_name }} {% blocktrans %}Management{% endblocktrans %}
+The {{ site.name }} {% blocktrans %}team{% endblocktrans %}

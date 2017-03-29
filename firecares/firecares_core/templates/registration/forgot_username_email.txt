@@ -8,4 +8,4 @@ Your username is: {{ username }}
 You can login with your username at: {{ login }}
 
 {% blocktrans %}Best regards{% endblocktrans %},
-{{ site_name }} {% blocktrans %}Management{% endblocktrans %}
+The {{ site.name }} {% blocktrans %}team{% endblocktrans %}

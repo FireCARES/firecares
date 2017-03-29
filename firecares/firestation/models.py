@@ -287,7 +287,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
 
     created = models.DateTimeField(auto_now=True)
     modified = models.DateTimeField(auto_now=True)
-    fdid = models.CharField(max_length=10)
+    fdid = models.CharField(max_length=10, blank=True)
     name = models.CharField(max_length=100)
     headquarters_address = models.ForeignKey(Address, null=True, blank=True, related_name='firedepartment_headquarters')
     mail_address = models.ForeignKey(Address, null=True, blank=True)

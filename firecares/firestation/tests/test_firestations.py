@@ -32,10 +32,10 @@ class FireStationTests(BaseFirecaresTestcase):
     def test_firestation_website_links(self):
         FireDepartment.objects.create(name='Good', website='http://www.google.com')
         test_all_departments_urls()
-        self.assertTrue(len(mail.outbox) == 0, "email sent to admin with errors")
+        self.assertTrue(len(mail.outbox) == 0, "email not sent to admin with errors")
         FireDepartment.objects.create(name='Bad', website='www.mawebsith.com')
         test_all_departments_urls()
-        self.assertTrue(len(mail.outbox) == 1, "email not sent to admin with errors")
+        self.assertTrue(len(mail.outbox) == 1, "email sent to admin with errors")
 
     def test_api_authentication(self):
         """
@@ -1101,6 +1101,7 @@ class FireStationTests(BaseFirecaresTestcase):
 
         # Email should be sent to this department's admins notifying them that an account request has been submitted...
         self.assertEqual(len(mail.outbox), 1)
+        self.assert_email_appears_valid(mail.outbox[0])
         self.assertEqual(mail.outbox[0].recipients(), ['non_admin@example.com', 'contact@firecares.org'])
 
         # Only department admin and superusers can see this page
@@ -1119,6 +1120,7 @@ class FireStationTests(BaseFirecaresTestcase):
         self.assert_redirect_to(resp, 'firedepartment_detail_slug')
 
         self.assertEqual(len(mail.outbox), 2)
+        map(self.assert_email_appears_valid, mail.outbox)
         self.assertEqual(mail.outbox[1].recipients(), ['tester@mytest.com'])
         self.assertTrue('Need more information' in mail.outbox[1].body)
 
@@ -1136,6 +1138,8 @@ class FireStationTests(BaseFirecaresTestcase):
 
         # 1 email for the request to the department admin, 1 for the invite to the end user
         self.assertEqual(len(mail.outbox), 4)
+        self.assert_email_appears_valid(mail.outbox[2])
+        self.assert_email_appears_valid(mail.outbox[3])
         user_email = mail.outbox[3]
         self.assertEqual(user_email.recipients(), ['tester2@mytest.com'])
         self.assertTrue('accept the invite' in user_email.body)

@@ -39,7 +39,7 @@ class FeedbackTests(BaseFirecaresTestcase):
             self.assertEqual(response.status_code, 201)
             self.assertEqual(DataFeedback.objects.filter(department=fd, firestation=fs).count(), 1)
             self.assertEqual(len(mail.outbox), 1)
-            print mail.outbox[0].body
+            self.assert_email_appears_valid(mail.outbox[0])
             mail_body = mail.outbox[0].body
             self.assertTrue(fd.name in mail_body)
             self.assertTrue(fs.name in mail_body)
@@ -54,6 +54,7 @@ class FeedbackTests(BaseFirecaresTestcase):
                 'message': 'This is a test'
             })
             self.assertEqual(len(mail.outbox), 2)
+            self.assert_email_appears_valid(mail.outbox[1])
             self.assertTrue('Fire Station:' not in mail.outbox[1].body)
 
             # Test invalid data

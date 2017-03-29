@@ -12,6 +12,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth.views import logout
 from django.contrib.sites.models import Site
+from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpResponseBadRequest
 from django.shortcuts import render, redirect, resolve_url
 from django.template import loader
@@ -44,7 +45,8 @@ class ForgotUsername(View):
             user = User.objects.filter(email=form.cleaned_data['email']).first()
             if user:
                 context = {'username': user.username,
-                           'login': request.build_absolute_uri(reverse('login'))}
+                           'login': request.build_absolute_uri(reverse('login')),
+                           'site': get_current_site(request)}
                 form.send_mail('Your FireCARES Username',
                                'registration/forgot_username_email.txt',
                                context,

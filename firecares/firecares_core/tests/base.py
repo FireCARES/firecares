@@ -22,6 +22,11 @@ class BaseFirecaresTestcase(TestCase):
         self.non_admin_user, self.non_admin_creds = self.create_test_user('non_admin', 'non_admin', email='non_admin@example.com')
         self.non_accepted_user, self.non_accepted_creds = self.create_test_user('non_accepted', 'non_accepted', has_accepted_terms=False)
 
+    def assert_email_appears_valid(self, message, ensure_multipart=False):
+        print message.message()
+        if 'admin@example.com' not in message.to:
+            self.assertIn('The example.com team', message.body)
+
     def assert_redirect_to_login(self, response):
         self.assert_redirect_to(response, 'login')
 

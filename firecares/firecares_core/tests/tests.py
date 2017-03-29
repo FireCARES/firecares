@@ -150,7 +150,7 @@ class CoreTests(BaseFirecaresTestcase):
             self.assertEqual(user.email, 'test_registration@example.com')
             self.assertFalse(user.registrationprofile.activation_key_expired())
             self.assertTrue(len(mail.outbox), 1)
-            print mail.outbox[0].message()
+            self.assert_email_appears_valid(mail.outbox[0])
 
             response = c.get(reverse('registration_activate', kwargs={'activation_key':
                                                                       user.registrationprofile.activation_key}))
@@ -192,6 +192,7 @@ class CoreTests(BaseFirecaresTestcase):
         self.assertEqual(resp.status_code, 302)
 
         self.assertEqual(len(mail.outbox), 1)
+        self.assert_email_appears_valid(mail.outbox[0])
 
         token = resp.context[0]['token']
         uid = resp.context[0]['uid']
@@ -226,6 +227,7 @@ class CoreTests(BaseFirecaresTestcase):
         self.assertEqual(resolve(urlsplit(resp.url).path).url_name, 'username_sent')
 
         self.assertEqual(len(mail.outbox), 1)
+        self.assert_email_appears_valid(mail.outbox[0])
         # Make sure that the username is actually in the email (otherwise what's the point?)
         self.assertTrue('tester_mcgee' in mail.outbox[0].body)
 
@@ -279,6 +281,7 @@ class CoreTests(BaseFirecaresTestcase):
 
             self.assertRedirects(resp, reverse('contact_thank_you'))
             self.assertEqual(len(mail.outbox), 1)
+            self.assert_email_appears_valid(mail.outbox[0])
 
     def test_display_404_page(self):
         c = Client()
@@ -303,7 +306,7 @@ class CoreTests(BaseFirecaresTestcase):
 
             # Make sure admin email is triggered.
             self.assertEqual(len(mail.outbox), 1)
-            print mail.outbox[0].message()
+            self.assert_email_appears_valid(mail.outbox[0])
 
     def test_signup_when_account_exists(self):
         """
@@ -364,7 +367,7 @@ class CoreTests(BaseFirecaresTestcase):
         # Extract invite link from outbound email and start registration
         self.assertEqual(len(mail.outbox), 1)
         msg = mail.outbox[0]
-        print mail.outbox[0].message()
+        self.assert_email_appears_valid(mail.outbox[0])
         self.assertIn('non_admin@example.com', msg.body)
         self.assertIn('/invitations/accept-invite/', msg.body)
         url = re.findall('(https?://\S+)', msg.body)[0]
@@ -380,7 +383,8 @@ class CoreTests(BaseFirecaresTestcase):
         self.assertFalse(User.objects.get(username='inviteuser').is_active)
         msg = mail.outbox[1]
         url = re.findall('(https?://\S+)', msg.body)[0]
-        print mail.outbox[1].message()
+        self.assert_email_appears_valid(mail.outbox[0])
+        self.assert_email_appears_valid(mail.outbox[1])
 
         # Activate account
         anon_user.get(url)
@@ -435,6 +439,7 @@ class CoreTests(BaseFirecaresTestcase):
         # After deleting, invitation link should not be available
         # Extract invite link from outbound email
         msg = mail.outbox[0]
+        self.assert_email_appears_valid(mail.outbox[0])
         self.assertIn('non_admin@example.com', msg.body)
         self.assertIn('/invitations/accept-invite/', msg.body)
         url = re.findall('(https?://\S+)', msg.body)[0]
@@ -489,6 +494,7 @@ class CoreTests(BaseFirecaresTestcase):
             self.assertEqual(response.status_code, 302)
             # 1 activation email to user, 1 notification to admins that a department admin account was activated
             self.assertEqual(len(mail.outbox), 2)
+            map(self.assert_email_appears_valid, mail.outbox)
             msg = next(iter(filter(lambda x: 'admin@example.com' in x.recipients(), mail.outbox)), None)
             self.assertIsNotNone(msg)
 
@@ -594,6 +600,7 @@ class CoreTests(BaseFirecaresTestcase):
 
             # Email for DEPARTMENT_ADMIN_VERIFIERS
             self.assertTrue(len(mail.outbox), 1)
+            self.assert_email_appears_valid(mail.outbox[0])
             self.assertEqual(mail.outbox[0].recipients(), ['admin@example.com'])
             self.assertTrue('/accounts/verify-association-request/?email=non_admin@example.com' in mail.outbox[0].body)
 
@@ -622,6 +629,7 @@ class CoreTests(BaseFirecaresTestcase):
 
         # Test denial
         self.assertEqual(len(mail.outbox), 2)
+        map(self.assert_email_appears_valid, mail.outbox)
         self.assertEqual(mail.outbox[1].recipients(), [req.user.email])
         self.assertTrue('DENIED!!!' in mail.outbox[1].body)
         self.non_admin_user.refresh_from_db()

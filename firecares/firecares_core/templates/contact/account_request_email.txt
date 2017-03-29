@@ -21,4 +21,4 @@ For more information, please see the access policy:
 {% static 'access_policy.pdf' %}
 
 {% blocktrans %}Best regards{% endblocktrans %},
-{{ site_name }} {% blocktrans %}Management{% endblocktrans %}
+The {{ site.name }} {% blocktrans %}team{% endblocktrans %}
