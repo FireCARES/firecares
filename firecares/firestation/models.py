@@ -616,7 +616,10 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
             print 'Stations:', station
 
     def __unicode__(self):
-        return self.name
+        if self.headquarters_address:
+            return u'{} - {}, {}'.format(self.name, self.headquarters_address.city, self.state)
+        else:
+            return u'{} - {}'.format(self.name, self.state)
 
     def remove_from_department(self, department):
         """

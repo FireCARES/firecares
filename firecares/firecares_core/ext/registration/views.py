@@ -32,7 +32,7 @@ class RegistrationPreregisterView(FormView):
             fd = FireDepartment.objects.get(id=request.GET['department'])
             admins = fd.get_department_admins()
             if not admins:
-                request.session['message'] = 'We\'re sorry, a Fire Chief or Local Officer needs to enable FireCARES on this department before your account can be approved by the department.'
+                request.session['message'] = 'We\'re sorry, a IAFC Official or Local Officer needs to enable FireCARES on this department before your account can be approved by the department.'
                 request.session['message_title'] = 'FireCARES not enabled for {}'.format(fd.name)
                 return redirect('show_message')
         return super(RegistrationPreregisterView, self).get(request)

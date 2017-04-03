@@ -28,7 +28,7 @@ al.register(Address,
 
 al.register(FireDepartment,
             # Just like in ModelAdmin.search_fields
-            search_fields=['name'],
+            search_fields=['name', 'fdid', 'id'],
             attrs={
                 # This will set the input placeholder attribute:
                 'placeholder': 'Fire Department',
