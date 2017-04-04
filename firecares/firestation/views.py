@@ -178,19 +178,30 @@ class AdminDepartmentUsers(PermissionRequiredMixin, LoginRequiredMixin, DetailVi
 
             can_admin_users = request.POST.getlist('can_admin')
             can_change_users = request.POST.getlist('can_change')
+            skipped = set([])
+
             for user in can_admin_users:
-                cur = User.objects.get(email=user)
+                cur = User.objects.filter(email=user).first()
+                if not cur:
+                    skipped.add(user)
+                    continue
                 self.object.add_admin(cur)
             for user in users:
                 if user.email not in can_admin_users:
                     self.object.remove_admin(user)
 
             for user in can_change_users:
-                cur = User.objects.get(email=user)
+                cur = User.objects.filter(email=user).first()
+                if not cur:
+                    skipped.add(user)
+                    continue
                 self.object.add_curator(cur)
             for user in users:
                 if user.email not in can_change_users:
                     self.object.remove_curator(user)
+
+            if skipped:
+                messages.add_message(request, messages.ERROR, 'Unable to find users with email addresses, skipping: {}'.format(', '.join(skipped)))
 
             messages.add_message(request, messages.SUCCESS, 'Updated department\'s authorized users.')
         else:

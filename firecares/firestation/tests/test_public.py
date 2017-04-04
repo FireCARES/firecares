@@ -282,6 +282,12 @@ class TestPublic(BaseFirecaresTestcase):
         resp = c.post(reverse('admin_department_users', args=[fd.id]), data=perms)
         self.assertFalse(fd.is_curator(user))
 
+        try:
+            perms = {'can_change': ['non_admin'], 'can_admin': 'invalidemail@example.com', 'form': 'users'}
+            c.post(reverse('admin_department_users', args=[fd.id]), data=perms)
+        except:
+            self.fail('Invalid email addresses should not raise 500 in managing user permissions')
+
     def test_department_whitelist_admin(self):
         fd = self.load_la_department()
 
