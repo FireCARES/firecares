@@ -1,7 +1,7 @@
 {% load humanize %}
 {% load firecares_tags %}
 {% load widget_tweaks %}
-{% load favit_tags %}
+
 <!DOCTYPE html>
 <!--[if IE 8 ]>
 <html class="no-js ie8" lang="en"> <![endif]-->
@@ -76,8 +76,7 @@
                     </span>
                 </div>
                 <div class="ct-u-displayTableCell text-right">
-                    {% favorite_button object %}
-                    <a href="javascript:window.print()" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-printer fa-2x"></i></a>
+                    {% include 'firestation/_department_header.html' %}
                 </div>
             </div>
         </div>

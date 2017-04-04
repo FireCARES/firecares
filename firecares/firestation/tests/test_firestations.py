@@ -885,15 +885,12 @@ class FireStationTests(BaseFirecaresTestcase):
 
     def test_documents(self):
         c = Client()
-        c.login(**self.admin_creds)
-        try:
-            fd = FireDepartment.objects.get(id=0)
-        except FireDepartment.DoesNotExist:
-            fd = FireDepartment.objects.create(id=0,
-                                               name='Test db',
-                                               population=0,
-                                               population_class=1,
-                                               department_type='test')
+        c.login(**self.non_admin_creds)
+        fd, _ = FireDepartment.objects.get_or_create(id=0,
+                                                     name='Test db',
+                                                     population=0,
+                                                     population_class=1,
+                                                     department_type='test')
 
         # Documents page
         response = c.get(reverse('documents', args=[fd.id]))
@@ -904,19 +901,33 @@ class FireStationTests(BaseFirecaresTestcase):
         file_content = 'file upload success'
         text_file = SimpleUploadedFile(filename, file_content, content_type='text/plain')
         response = c.post(reverse('documents', args=[fd.id]), {'file': text_file})
-        self.assertEqual(response.status_code, 302)
+        # Gated to only department data curators
+        self.assertEqual(response.status_code, 401)
+
+        fd.add_curator(self.non_admin_user)
+        text_file = SimpleUploadedFile(filename, file_content, content_type='text/plain')
+        response = c.post(reverse('documents', args=[fd.id]), {'file': text_file})
+        # Redirect == success
+        self.assert_redirect_to(response, 'documents_file')
+        fd.remove_curator(self.non_admin_user)
 
         # Ensure that the document is owned by the uploaded user
-        self.assertEqual(Document.objects.all().first().uploaded_by, self.admin_user)
+        self.assertEqual(Document.objects.all().first().uploaded_by, self.non_admin_user)
 
         # Download document
         response = c.get(reverse('documents_file', args=[fd.id, filename]))
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.has_header('X-Accel-Redirect'))
 
-        # Delete document
+        # Delete document, only available to curators
+        response = c.post(reverse('documents_delete', args=[fd.id]), {'filename': filename})
+        # Redirection to login == perm failure
+        self.assert_redirect_to_login(response)
+
+        fd.add_curator(self.non_admin_user)
         response = c.post(reverse('documents_delete', args=[fd.id]), {'filename': filename})
         self.assertEqual(response.status_code, 200)
+        fd.remove_curator(self.non_admin_user)
 
         c.logout()
         c.login(**self.non_admin_creds)
@@ -925,7 +936,7 @@ class FireStationTests(BaseFirecaresTestcase):
         self.assertEqual(response.status_code, 200)
 
         response = c.post(reverse('documents', args=[fd.id]), {'file': text_file})
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 401)
 
         response = c.get(reverse('documents_file', args=[fd.id, filename]))
         self.assertEqual(response.status_code, 200)
@@ -933,7 +944,7 @@ class FireStationTests(BaseFirecaresTestcase):
 
         # Delete document
         response = c.post(reverse('documents_delete', args=[fd.id]), {'filename': filename})
-        self.assertEqual(response.status_code, 302)
+        self.assert_redirect_to_login(response)
 
     def test_remove_intersecting_depts(self):
         us = Country.objects.create(iso_code='US', name='United States')

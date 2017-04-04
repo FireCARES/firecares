@@ -9,7 +9,6 @@ from django.views.generic import DetailView, ListView, TemplateView, View, Creat
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth import get_user_model
-from django.contrib.auth.decorators import permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.contrib.sites.shortcuts import get_current_site
@@ -23,7 +22,6 @@ from django.db.models.fields import FieldDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http.response import HttpResponseBadRequest
 from django.template import loader
-from django.utils.decorators import method_decorator
 from django.utils.encoding import smart_str
 from firecares.tasks.email import send_mail
 from firecares.firecares_core.ext.invitations.views import send_invites
@@ -129,6 +127,8 @@ class AdminDepartmentUsers(PermissionRequiredMixin, LoginRequiredMixin, DetailVi
                                    can_change=fd.is_curator(u),
                                    can_admin=fd.is_admin(u)))
         context['user_perms'] = user_perms
+        context['user_can_change'] = fd.is_curator(self.request.user)
+        context['user_can_admin'] = fd.is_admin(self.request.user)
         context['invites'] = Invitation.objects.filter(departmentinvitation__department=self.object).order_by('-sent')
         context['whitelists'] = [dict(id=w.id,
                                       email_or_domain=w.email_or_domain,
@@ -214,6 +214,9 @@ class DepartmentUpdateGovernmentUnits(PermissionRequiredMixin, LoginRequiredMixi
 
         geom = self.object.headquarters_geom.buffer(0.01)
 
+        context['user_can_change'] = self.object.is_curator(self.request.user)
+        context['user_can_admin'] = self.object.is_admin(self.request.user)
+
         context['current_incorporated_places'] = self._associated_government_unit_ids(IncorporatedPlace)
         context['incorporated_places'] = IncorporatedPlace.objects.filter(geom__intersects=geom)
         context['current_minor_civil_divisions'] = self._associated_government_unit_ids(MinorCivilDivision)
@@ -278,6 +281,9 @@ class RemoveIntersectingDepartments(PermissionRequiredMixin, LoginRequiredMixin,
 
     def get_context_data(self, **kwargs):
         context = super(RemoveIntersectingDepartments, self).get_context_data(**kwargs)
+
+        context['user_can_change'] = self.object.is_curator(self.request.user)
+        context['user_can_admin'] = self.object.is_admin(self.request.user)
 
         context['intersecting_departments'] = self.get_intersecting_departments()
 
@@ -851,7 +857,7 @@ class DownloadShapefile(LoginRequiredMixin, View):
 
 
 class DocumentsView(LoginRequiredMixin, FormView):
-    template_name = 'firestation/documents.html'
+    template_name = 'firestation/department_documents.html'
     success_url = 'documents'
     form_class = DocumentUploadForm
     objects_per_page = 25
@@ -875,15 +881,21 @@ class DocumentsView(LoginRequiredMixin, FormView):
         context['documents'] = documents
         context['object'] = department
 
+        context['user_can_change'] = department.is_curator(self.request.user)
+        context['user_can_admin'] = department.is_admin(self.request.user)
+
         return context
 
-    @method_decorator(permission_required('firestation.can_create_document'))
     def post(self, request, *args, **kwargs):
-        form = DocumentUploadForm(department_pk=self.kwargs.get('pk'), **self.get_form_kwargs())
-        if form.is_valid():
-            return self.form_valid(form)
+        department = get_object_or_404(FireDepartment, pk=self.kwargs.get('pk'))
+        if department.is_curator(self.request.user):
+            form = DocumentUploadForm(department_pk=self.kwargs.get('pk'), **self.get_form_kwargs())
+            if form.is_valid():
+                return self.form_valid(form)
+            else:
+                return self.form_invalid(form)
         else:
-            return self.form_invalid(form)
+            return HttpResponse(status=401)
 
     def form_valid(self, form):
         document = form.save(commit=False)
@@ -895,13 +907,13 @@ class DocumentsView(LoginRequiredMixin, FormView):
         return super(DocumentsView, self).form_valid(form)
 
 
-class DocumentsDeleteView(LoginRequiredMixin, View):
+class DocumentsDeleteView(PermissionRequiredMixin, LoginRequiredMixin, DetailView):
+    model = FireDepartment
+    permission_required = 'change_firedepartment'
 
-    @method_decorator(permission_required('firestation.can_delete_document'))
     def post(self, request, *args, **kwargs):
-        department = get_object_or_404(FireDepartment, pk=kwargs.get('pk'))
         document = get_object_or_404(Document,
-                                     department=department,
+                                     department=self.get_object(),
                                      filename=request.POST.get('filename'))
         document.file.delete()
         document.delete()
@@ -909,7 +921,6 @@ class DocumentsDeleteView(LoginRequiredMixin, View):
 
 
 class DocumentsFileView(LoginRequiredMixin, View):
-
     def get(self, request, *args, **kwargs):
         response = HttpResponse()
         response['X-Accel-Redirect'] = '/files/%s/departments/%s/%s' % (settings.DOCUMENT_UPLOAD_BUCKET,
@@ -928,6 +939,10 @@ class AdminDepartmentAccountRequests(PermissionRequiredMixin, LoginRequiredMixin
         email = self.request.GET['email']
         context['form'] = DepartmentUserApprovalForm(initial=dict(email=email))
         context['existing'] = AccountRequest.objects.filter(Q(approved_by__isnull=False) | Q(denied_by__isnull=False), email=email).first()
+
+        context['user_can_change'] = self.object.is_curator(self.request.user)
+        context['user_can_admin'] = self.object.is_admin(self.request.user)
+
         return context
 
     def get(self, request, **kwargs):

@@ -103,8 +103,7 @@
                     </span>
                 </div>
                 <div class="ct-u-displayTableCell text-right">
-                    {% favorite_button object %}
-                    <a href="javascript:window.print()" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-printer fa-2x"></i></a>
+                    {% include 'firestation/_department_header.html' %}
                 </div>
             </div>
         </div>
@@ -361,7 +360,7 @@
                     </form>
                     <hr style='clear: both;'/>
                     <h4 class="ct-u-marginBottom20">
-                        Manage user permissions
+                        Manage user permissions for existing FireCARES users
                         <i data-toggle="tooltip" data-placement="top" title="This section allows department administrators to assign specific permissions for existing FireCARES users on this department." class="fa fa-info-circle" aria-hidden="true"></i>
                     </h4>
                     <form role="form" method="post" action="" ng-controller="userAdminController" class="well user-admin">
