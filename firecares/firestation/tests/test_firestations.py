@@ -1241,7 +1241,10 @@ class FireStationTests(BaseFirecaresTestcase):
         for i in [95512, 95559, 95560, 97963]:
             FireDepartment.objects.create(id=i, name='TEST-{}'.format(i))
 
-        call_command('load-local-numbers', 'firecares/firestation/tests/mock/local_numbers.csv', stdout=StringIO())
+        try:
+            call_command('load-local-numbers', 'firecares/firestation/tests/mock/local_numbers.csv', stdout=StringIO())
+        except:
+            self.fail('Loading local #s that having a missing FireCARES department reference should NOT throw an exception')
 
         self.assertEqual(FireDepartment.objects.get(id=95512).iaff, '2876,3817')
         self.assertEqual(FireDepartment.objects.get(id=95559).iaff, '726')

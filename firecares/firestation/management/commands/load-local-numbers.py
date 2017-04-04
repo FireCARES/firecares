@@ -40,6 +40,5 @@ firecares_id, fdid, State_Code, IAFF_local"""
 
         if not dry_run:
             for r in ret:
-                fd = FireDepartment.objects.get(id=r['fc_id'])
-                fd.iaff = r['locals']
-                fd.save()
+                if not FireDepartment.objects.filter(id=r['fc_id']).update(iaff=r['locals']):
+                    print 'MISSING Fire Department with FireCARES ID = {} for local # {}'.format(r['fc_id'], r['locals'])
