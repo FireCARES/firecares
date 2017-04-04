@@ -1236,3 +1236,13 @@ class FireStationTests(BaseFirecaresTestcase):
         c.login(**self.admin_creds)
         response = c.put(url, data=new_geom, content_type='application/json')
         self.assertEqual(response.status_code, 204)
+
+    def test_local_number_loading(self):
+        for i in [95512, 95559, 97963]:
+            FireDepartment.objects.create(id=i, name='TEST-{}'.format(i))
+
+        call_command('load-local-numbers', 'firecares/firestation/tests/mock/local_numbers.csv', stdout=StringIO())
+
+        self.assertEqual(FireDepartment.objects.get(id=95512).iaff, '2876,3817')
+        self.assertEqual(FireDepartment.objects.get(id=95559).iaff, '726')
+        self.assertEqual(FireDepartment.objects.get(id=97963).iaff, '452,4378')
