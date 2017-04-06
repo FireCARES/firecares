@@ -183,7 +183,8 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
                                              headquarters_address=address, featured=0, archived=0)
 
         # ensure no risk model data before run
-        self.assertFalse(lafd.firedepartmentriskmodels_set.all())
+        for rm in lafd.firedepartmentriskmodels_set.all():
+            self.assertIsNone(rm.dist_model_score)
 
         query_result = [
             (u'High', 30L, 44L, 16L, 13L, 9L),
