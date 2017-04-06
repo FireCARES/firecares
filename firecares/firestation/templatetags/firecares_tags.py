@@ -10,7 +10,6 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import pgettext, ugettext as _, ungettext  # noqa
 from ..serializers import FireCARESJSONSerializer
 
-
 register = template.Library()
 
 

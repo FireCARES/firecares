@@ -12,6 +12,7 @@ from django.contrib.gis.geos import Point, MultiPolygon
 from django.contrib.gis.measure import D
 from django.core.validators import MaxValueValidator
 from django.db import connections
+from django.db.models.signals import post_save
 from django.utils.text import slugify
 from firecares.firecares_core.models import RecentlyUpdatedMixin, Archivable
 from django.core.urlresolvers import reverse
@@ -1188,6 +1189,35 @@ def refresh_national_calculations_view():
         cursor.execute('REFRESH MATERIALIZED VIEW national_calculations;')
 
 
+def set_department_region(sender, instance, **kwargs):
+    """
+    Sets a department's region when it is instantiated with a state.
+    """
+    # Get the json data containing state to region mappings and store it in a dict.
+    regionFile = open(os.path.join(os.path.dirname(__file__), 'data/nfpa-regions.json'))
+    regionDict = json.loads(regionFile.read())
+    # Get a list of available states for checking.
+    states = list(regionDict.keys())
+
+    if instance.state in states:
+        instance.region = regionDict[instance.state]
+    else:
+        instance.region = ""
+
+
+def update_department(sender, instance, **kwargs):
+    """
+    Creates an FD's thumbnail and updates its performance score and NFIRS counts when it is instantiated.
+    """
+    if not kwargs.get('created'):
+        return
+    from firecares.tasks import update
+    from firecares import celery
+    celery.cache_thumbnail.delay(instance.id, upload_to_s3=not(settings.TESTING))
+    update.update_performance_score.delay(instance.id, dry_run=False)
+    update.update_nfirs_counts.delay(instance.id)
+
+
 def create_national_calculations_view(sender, **kwargs):
     """
     Creates DB view based on national calculations queries
@@ -1328,6 +1358,8 @@ class DataFeedback(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
+post_save.connect(set_department_region, sender=FireDepartment)
+post_save.connect(update_department, sender=FireDepartment)
 reversion.register(FireStation)
 reversion.register(FireDepartment)
 reversion.register(Staffing)

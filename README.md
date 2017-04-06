@@ -71,3 +71,16 @@ sudo su firecares
 workon firecares
 python manage.py shell_plus --notebook --no-browser  # follow the instructions that follow in your shell regarding logging into ipython with a token
 ```
+
+#### Symlinking Static Files
+
+When developing client-side functionality for FireCARES it is often helpful to symlink client-side assets so they refresh when the browser is refreshed.
+
+```shell
+vagrant ssh
+sudo sed -i '/location \/static/a sendfile off;' /etc/nginx/sites-enabled/firecares
+sudo service nginx restart
+sudo su firecares
+workon firecares
+python manage.py collectstatic --noinput -l --clear
+```

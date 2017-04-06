@@ -1,4 +1,5 @@
 import json
+import os
 import logging
 import requests
 import random
@@ -27,6 +28,7 @@ from firecares.firecares_core.ext.registration.views import SESSION_EMAIL_WHITEL
 from .forms import ContactForm
 from .models import PredeterminedUser, RegistrationWhitelist, DepartmentAssociationRequest
 from .mixins import LoginRequiredMixin
+from osgeo_importer.views import FileAddView
 
 logger = logging.getLogger(__name__)
 
@@ -444,3 +446,12 @@ class FAQView(TemplateView):
         context = super(FAQView, self).get_context_data(**kwargs)
         context['whitelisted_domains'] = RegistrationWhitelist.domain_whitelists()
         return context
+
+
+class TruncatedFileAddView(FileAddView):
+    def form_valid(self, form):
+        fname = form.instance.file.name
+        if len(fname) > 50:
+            _, ext = os.path.splitext(fname)
+            form.instance.file.name = fname[:46] + ext
+        return super(TruncatedFileAddView, self).form_valid(form)

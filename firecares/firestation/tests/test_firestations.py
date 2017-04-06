@@ -29,6 +29,44 @@ User = get_user_model()
 
 
 class FireStationTests(BaseFirecaresTestcase):
+    def test_fd_thumbnails(self):
+        """
+        Tests that thumbnails are automatically created for new departments.
+        """
+        fd = FireDepartment.objects.create(name="Thumbnail Test Department", state='VA', geom=MultiPolygon([Point(0, 0).buffer(.1)]))
+        fd.save()
+        self.assertTrue(os.path.exists("/home/firecares/department-thumbnails/us-va-thumbnail-test-department.jpg"))
+
+    def test_auto_region_setting(self):
+        """
+        Tests that regions are automatically set on new departments.
+        """
+        department1 = FireDepartment.objects.create(name='Virginia Test Department', state='VA')
+        department1.save()
+        self.assertEqual(department1.region, "South")
+
+        department2 = FireDepartment.objects.create(name='California Test Department', state='CA')
+        department2.save()
+        self.assertEqual(department2.region, "West")
+
+        department3 = FireDepartment.objects.create(name='New York Test Department', state='NY')
+        department3.save()
+        self.assertEqual(department3.region, "Northeast")
+
+        department4 = FireDepartment.objects.create(name='Illinois Test Department', state='IL')
+        department4.save()
+        self.assertEqual(department4.region, "Midwest")
+
+        # If a department doesn't have a state set, its region should be an empty string.
+        department5 = FireDepartment.objects.create(name='Null State Test Department')
+        department5.save()
+        self.assertEqual(department5.region, "")
+
+        # If a department is in a state that doesn't exist, its region should be an empty string.
+        department6 = FireDepartment.objects.create(name='Incorrectly Entered State Test Department', state='XX')
+        department6.save()
+        self.assertEqual(department6.region, "")
+
     def test_firestation_website_links(self):
         FireDepartment.objects.create(name='Good', website='http://www.google.com')
         test_all_departments_urls()
