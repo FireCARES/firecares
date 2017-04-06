@@ -362,6 +362,10 @@ class CoreTests(BaseFirecaresTestcase):
         self.assertEqual(RegistrationWhitelist.get_department_for_email('test@myfd.org'), fd)
         self.assertIsNone(RegistrationWhitelist.get_department_for_email('invalid@myfd.org'))
 
+        # Whitelist check should be case insensitive
+        self.assertTrue(RegistrationWhitelist.is_whitelisted('Joe@GMAIL.COM'))
+        self.assertTrue(RegistrationWhitelist.is_whitelisted('Test@MYFD.org'))
+
     def test_invite_workflow(self):
         fd = self.load_la_department()
         fd2 = self.load_arlington_department()

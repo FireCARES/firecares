@@ -264,6 +264,7 @@ class RegistrationWhitelist(models.Model):
     @classmethod
     def get_for_email(cls, email):
         if cls.is_whitelisted(email):
+            email = email.lower()
             email_whitelists = cls.objects.filter(email_or_domain__contains='@')
             domain_whitelists = cls.objects.exclude(email_or_domain__contains='@')
             domain = get_email_domain(email)
@@ -285,6 +286,8 @@ class RegistrationWhitelist(models.Model):
         if not email:
             return False
 
+        email = email.lower()
+
         whitelists = cls.objects.values_list('email_or_domain', flat=True)
         email_whitelists = filter(lambda x: '@' in x, whitelists)
         domain_whitelists = set(whitelists) ^ set(email_whitelists)
@@ -302,6 +305,8 @@ class RegistrationWhitelist(models.Model):
     def is_department_whitelisted(cls, email):
         if not email:
             return False
+
+        email = email.lower()
 
         domain_whitelists = cls.objects.filter(department__isnull=False).exclude(email_or_domain__contains='@').values_list('email_or_domain', flat=True)
         if cls._is_domain_only(email):
