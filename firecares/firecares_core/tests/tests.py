@@ -178,6 +178,20 @@ class CoreTests(BaseFirecaresTestcase):
             self.assertTrue(response.status_code, 200)
             self.assertEqual(response.request['PATH_INFO'], '/accounts/register/closed/')
 
+    def test_whitelisted_registration_with_account_request(self):
+        """
+        Ensure that whitelisted users with account requests are able to register.
+        """
+        c = Client()
+
+        AccountRequest.objects.create(email='test@example.com')
+        RegistrationWhitelist.objects.create(email_or_domain='test@example.com')
+
+        resp = c.post(reverse('account_request'), data={'email': 'test@example.com'})
+        self.assertTrue('email_whitelisted' in c.session)
+
+        self.assert_redirect_to(resp, 'registration_register')
+
     def test_password_reset(self):
         """
         Tests the forgotten/reset password workflow.

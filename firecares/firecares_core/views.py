@@ -145,6 +145,12 @@ class AccountRequestView(CreateView):
         If the form is invalid, re-render the context data with the
         data-filled form and errors.
         """
+
+        email = form.data.get('email')
+        if RegistrationWhitelist.is_whitelisted(email):
+            self.request.session[SESSION_EMAIL_WHITELISTED] = email
+            return redirect('registration_register')
+
         if form.errors.get('email'):
             self.request.session['message'] = form.errors['email'][0]
         else:
