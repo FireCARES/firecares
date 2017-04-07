@@ -32,6 +32,8 @@ can run collect static from the `firecares-ansible` directory on the host machin
 
 `ansible-playbook vagrant.yml -i vagrant_server --tags django.collectstatic`
 
+To make tileserver changes, see the Prominent Edge `tessera-ansible` repository, specifically the `firecares` branch
+
 ### Pre-commit configuration
 
 We use [pre-commit](http://pre-commit.com/), see how to [install](http://pre-commit.com/#install) in your local repository.

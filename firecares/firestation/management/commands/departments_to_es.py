@@ -1,10 +1,10 @@
 import json
-import elasticsearch
 from django.core.management.base import BaseCommand
 from firecares.firestation.models import FireDepartment
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
 from django.conf import settings
+
 
 class Command(BaseCommand):
     help = 'Loads all departments in ElasticSearch.'
