@@ -366,16 +366,33 @@
         };
 
         $scope.commitBoundary = function() {
-          var features = $scope.shp.getLayers()[0].toGeoJSON();
-          // Force multipolygon
-          if (features.geometry.type === "Polygon") {
-            features.geometry.coordinates = [features.geometry.coordinates];
-            features.geometry.type = "MultiPolygon";
+          var layers = $scope.shp.getLayers();
+
+          if (layers.length > 1) {
+            var features = $scope.shp.toGeoJSON();
+            var geom = {
+              coordinates: [[]],
+              type: "MultiPolygon"
+            };
+
+            if ($scope.shp.getLayers().length > 1) {
+              geom.coordinates = [[]];
+              _.each(features.features, function(e) {
+                _.each(e.geometry.coordinates, function(c) {
+                  geom.coordinates[0].push(c);
+                });
+              });
+            }
           }
+          else {
+            var geom = layers[0].toGeoJSON().geometry;
+          }
+
           var fd = new FireDepartment({
             id: config.id,
-            geom: features.geometry
+            geom: geom
           });
+
           fd.$update().then(function() {
             // Remove old jurisdiction boundary
             if (countyBoundary) {
