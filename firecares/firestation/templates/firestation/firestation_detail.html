@@ -197,7 +197,6 @@
                                         Tools
                                     </a>
                                     <ul class="dropdown-menu in-front" aria-labelledby="dropdownMenu1">
-                                        {% if user_can_change %}
                                         <li>
                                             <a href="{% url 'firestation_boundary_shapefile' object.id object.slug %}">
                                                 <i class="fa fa-download"></i>
@@ -205,6 +204,7 @@
                                                 <span class="format">(shp)</span>
                                             </a>
                                         </li>
+                                        {% if user.is_superuser %}
                                         <li>
                                             <a href="" ng-click="toggleBoundary()" ng-class="{active: shp !== null}">
                                                 <i class="fa fa-cloud-upload"></i>
@@ -217,7 +217,7 @@
                             {% endif %}
                         </div>
                     </div>
-                    {% if user_can_change %}
+                    {% if user.is_superuser %}
                         <div class="ng-cloak">
                             <div ng-show="shp">
                                 <form name="boundaryUpload">

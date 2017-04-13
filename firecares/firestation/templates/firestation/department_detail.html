@@ -161,7 +161,6 @@
                                     Tools
                                 </a>
                                 <ul class="dropdown-menu in-front" aria-labelledby="dropdownMenu1">
-                                    {% if user_can_change %}
                                     <li>
                                         <a href="{% url 'department_boundary_shapefile' object.id object.slug %}">
                                             <i class="fa fa-download"></i>
@@ -175,6 +174,7 @@
                                             Update government units
                                         </a>
                                     </li>
+                                    {% if user.is_superuser %}
                                     <li>
                                         <a href="" ng-click="toggleBoundary()" ng-class="{active: shp !== null}">
                                             <i class="fa fa-cloud-upload"></i>
@@ -187,13 +187,13 @@
                                             Update Data
                                         </a>
                                     </li>
+                                    {% endif %}
                                     <li>
                                         <a href="{% url 'remove_intersecting_departments' object.id %}">
                                             <i class="fa fa-scissors"></i>
                                             Remove Intersections
                                         </a>
                                     </li>
-                                    {% endif %}
                                 </ul>
                             </div>
                             {% endif %}
