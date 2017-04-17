@@ -125,8 +125,8 @@
 
                 // Don't show the heatmap layer option for a department with no heatmap data.
                 // HACK: A department with no heatmap data will still return the table header for the empty data, which
-                //       has a length of 45 bytes. Remember to change this value if the columns ever change in any way.
-                if (contentLength <= 45) {
+                //       has a length of 59 bytes. Remember to change this value if the columns ever change in any way.
+                if (contentLength <= 59) {
                     return;
                 }
 

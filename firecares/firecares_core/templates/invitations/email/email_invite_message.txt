@@ -9,6 +9,6 @@ You ({{ email }}) have been invited by {{ inviter }} to join {{ site_name }}.
 If you'd like to join, please go to {{ invite_url }} to accept the invite.
 
 {% blocktrans %}Best regards{% endblocktrans %},
-{{ site_name }} {% blocktrans %}Management{% endblocktrans %}
+The {{ site_name }} {% blocktrans %}team{% endblocktrans %}
 
 {% endautoescape %}

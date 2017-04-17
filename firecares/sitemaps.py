@@ -5,9 +5,10 @@ from django.core.urlresolvers import reverse
 
 
 class BaseSitemap(sitemaps.Sitemap):
+    protocol = 'https'
 
     def items(self):
-        return ['media', 'models_performance_score', 'models_community_risk', 'login', 'contact_us',
+        return ['media', 'models_performance_score', 'models_community_risk', 'safe_grades', 'login', 'contact_us',
                 'firedepartment_list']
 
     def priority(self, item):
@@ -18,10 +19,11 @@ class BaseSitemap(sitemaps.Sitemap):
 
 
 class DepartmentsSitemap(sitemaps.Sitemap):
+    protocol = 'https'
     max_population = 1
 
     def items(self):
-        queryset = FireDepartment.objects.filter(archived=False)
+        queryset = FireDepartment.objects.filter(archived=False).only('population', 'featured', 'name')
         self.max_population = queryset.aggregate(Max('population'))['population__max']
         return queryset
 

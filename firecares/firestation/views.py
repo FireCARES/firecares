@@ -9,7 +9,6 @@ from django.views.generic import DetailView, ListView, TemplateView, View, Creat
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth import get_user_model
-from django.contrib.auth.decorators import permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.contrib.sites.shortcuts import get_current_site
@@ -23,7 +22,6 @@ from django.db.models.fields import FieldDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http.response import HttpResponseBadRequest
 from django.template import loader
-from django.utils.decorators import method_decorator
 from django.utils.encoding import smart_str
 from firecares.tasks.email import send_mail
 from firecares.firecares_core.ext.invitations.views import send_invites
@@ -38,7 +36,7 @@ from firecares.tasks.cleanup import remove_file
 from .forms import DocumentUploadForm, DepartmentUserApprovalForm, DataFeedbackForm
 from django.views.generic.edit import FormView
 from .models import (
-    Document, FireStation, FireDepartment, Staffing, create_quartile_views, create_national_calculations_view)
+    Document, FireStation, FireDepartment, Staffing, refresh_quartile_view, refresh_national_calculations_view)
 from favit.models import Favorite
 from invitations.models import Invitation
 
@@ -129,9 +127,15 @@ class AdminDepartmentUsers(PermissionRequiredMixin, LoginRequiredMixin, DetailVi
                                    can_change=fd.is_curator(u),
                                    can_admin=fd.is_admin(u)))
         context['user_perms'] = user_perms
+        context['user_can_change'] = fd.is_curator(self.request.user)
+        context['user_can_admin'] = fd.is_admin(self.request.user)
         context['invites'] = Invitation.objects.filter(departmentinvitation__department=self.object).order_by('-sent')
-        context['whitelists'] = [dict(id=w.id, email_or_domain=w.email_or_domain, is_domain_whitelist=w.is_domain_whitelist)
-                                 for w in RegistrationWhitelist.objects.filter(department=self.object)]
+        context['whitelists'] = [dict(id=w.id,
+                                      email_or_domain=w.email_or_domain,
+                                      is_domain_whitelist=w.is_domain_whitelist,
+                                      give_curator='change_firedepartment' in (w.permission or ''),
+                                      give_admin='admin_firedepartment' in (w.permission or ''))
+                                 for w in RegistrationWhitelist.for_department(self.object)]
         return context
 
     def post(self, request, **kwargs):
@@ -139,14 +143,34 @@ class AdminDepartmentUsers(PermissionRequiredMixin, LoginRequiredMixin, DetailVi
         section = request.POST.get('form')
 
         if section == 'whitelist':
-            items = zip(request.POST.getlist('id'), request.POST.getlist('email_or_domain'))
+            items = zip(request.POST.getlist('id'),
+                        request.POST.getlist('email_or_domain'),
+                        request.POST.getlist('give_curator'),
+                        request.POST.getlist('give_admin'))
 
-            # Delete any whitelist items that don't exist anymore
+            # Delete any whitelist items that don't come back
             RegistrationWhitelist.for_department(self.object).exclude(id__in=[int(i[0]) for i in items if i[0]]).delete()
 
             # Create new items
             for i in filter(lambda x: x[0] == '', items):
-                RegistrationWhitelist.objects.create(department=self.object, email_or_domain=i[1], created_by=request.user)
+                give_curator = 'change_firedepartment' if i[2] == 'true' else ''
+                give_admin = 'admin_firedepartment' if i[3] == 'true' else ''
+                reg = RegistrationWhitelist.objects.create(department=self.object,
+                                                           email_or_domain=i[1],
+                                                           created_by=request.user,
+                                                           permission=','.join([give_curator, give_admin]))
+                # Also, send email IF it's an individual email address that is being whitelisted
+                if not reg.is_domain_whitelist:
+                    context = dict(whitelist=reg, site=get_current_site(request))
+                    body = loader.render_to_string('registration/email_has_been_whitelisted.txt', context)
+                    subject = 'Your email address is allowed to login to or register with FireCARES'
+                    email_message = EmailMultiAlternatives(
+                        subject,
+                        body,
+                        settings.DEFAULT_FROM_EMAIL,
+                        [reg.email_or_domain],
+                        reply_to=['contact@firecares.org'])
+                    send_mail.delay(email_message)
 
             messages.add_message(request, messages.SUCCESS, 'Updated whitelisted registration emails addresses/domains for this department in FireCARES.')
         elif section == 'users':
@@ -154,19 +178,30 @@ class AdminDepartmentUsers(PermissionRequiredMixin, LoginRequiredMixin, DetailVi
 
             can_admin_users = request.POST.getlist('can_admin')
             can_change_users = request.POST.getlist('can_change')
+            skipped = set([])
+
             for user in can_admin_users:
-                cur = User.objects.get(email=user)
+                cur = User.objects.filter(email=user).first()
+                if not cur:
+                    skipped.add(user)
+                    continue
                 self.object.add_admin(cur)
             for user in users:
                 if user.email not in can_admin_users:
                     self.object.remove_admin(user)
 
             for user in can_change_users:
-                cur = User.objects.get(email=user)
+                cur = User.objects.filter(email=user).first()
+                if not cur:
+                    skipped.add(user)
+                    continue
                 self.object.add_curator(cur)
             for user in users:
                 if user.email not in can_change_users:
                     self.object.remove_curator(user)
+
+            if skipped:
+                messages.add_message(request, messages.ERROR, 'Unable to find users with email addresses, skipping: {}'.format(', '.join(skipped)))
 
             messages.add_message(request, messages.SUCCESS, 'Updated department\'s authorized users.')
         else:
@@ -189,6 +224,9 @@ class DepartmentUpdateGovernmentUnits(PermissionRequiredMixin, LoginRequiredMixi
         context = super(DepartmentUpdateGovernmentUnits, self).get_context_data(**kwargs)
 
         geom = self.object.headquarters_geom.buffer(0.01)
+
+        context['user_can_change'] = self.object.is_curator(self.request.user)
+        context['user_can_admin'] = self.object.is_admin(self.request.user)
 
         context['current_incorporated_places'] = self._associated_government_unit_ids(IncorporatedPlace)
         context['incorporated_places'] = IncorporatedPlace.objects.filter(geom__intersects=geom)
@@ -238,8 +276,8 @@ class DepartmentUpdateGovernmentUnits(PermissionRequiredMixin, LoginRequiredMixi
         messages.add_message(request, messages.SUCCESS, 'Government unit associations updated')
 
         if self.get_object().get_population_class() != population_class:
-            create_quartile_views(None)
-            create_national_calculations_view(None)
+            refresh_quartile_view()
+            refresh_national_calculations_view()
 
         return redirect(self.object)
 
@@ -254,6 +292,9 @@ class RemoveIntersectingDepartments(PermissionRequiredMixin, LoginRequiredMixin,
 
     def get_context_data(self, **kwargs):
         context = super(RemoveIntersectingDepartments, self).get_context_data(**kwargs)
+
+        context['user_can_change'] = self.object.is_curator(self.request.user)
+        context['user_can_admin'] = self.object.is_admin(self.request.user)
 
         context['intersecting_departments'] = self.get_intersecting_departments()
 
@@ -277,8 +318,8 @@ class RemoveIntersectingDepartments(PermissionRequiredMixin, LoginRequiredMixin,
             self.object.remove_from_department(FireDepartment.objects.get(id=i))
 
         if self.get_object().get_population_class() != population_class:
-            create_quartile_views(None)
-            create_national_calculations_view(None)
+            refresh_quartile_view()
+            refresh_national_calculations_view()
 
         messages.add_message(request, messages.SUCCESS, 'Removed intersecting departments.')
 
@@ -412,7 +453,7 @@ class FireDepartmentListView(PaginationMixin, ListView, SafeSortMixin, LimitMixi
     def handle_search(self, queryset):
 
         # search in favorite departments only
-        if self.request.GET.get('favorites', 'false') == 'true':
+        if self.request.GET.get('favorites', 'false') == 'true' and self.request.user.is_authenticated():
             favorite_departments = map(lambda obj: obj.target.pk,
                                        Favorite.objects.for_user(self.request.user, model=FireDepartment))
             queryset = queryset.filter(pk__in=favorite_departments)
@@ -827,7 +868,7 @@ class DownloadShapefile(LoginRequiredMixin, View):
 
 
 class DocumentsView(LoginRequiredMixin, FormView):
-    template_name = 'firestation/documents.html'
+    template_name = 'firestation/department_documents.html'
     success_url = 'documents'
     form_class = DocumentUploadForm
     objects_per_page = 25
@@ -851,15 +892,21 @@ class DocumentsView(LoginRequiredMixin, FormView):
         context['documents'] = documents
         context['object'] = department
 
+        context['user_can_change'] = department.is_curator(self.request.user)
+        context['user_can_admin'] = department.is_admin(self.request.user)
+
         return context
 
-    @method_decorator(permission_required('firestation.can_create_document'))
     def post(self, request, *args, **kwargs):
-        form = DocumentUploadForm(department_pk=self.kwargs.get('pk'), **self.get_form_kwargs())
-        if form.is_valid():
-            return self.form_valid(form)
+        department = get_object_or_404(FireDepartment, pk=self.kwargs.get('pk'))
+        if department.is_curator(self.request.user):
+            form = DocumentUploadForm(department_pk=self.kwargs.get('pk'), **self.get_form_kwargs())
+            if form.is_valid():
+                return self.form_valid(form)
+            else:
+                return self.form_invalid(form)
         else:
-            return self.form_invalid(form)
+            return HttpResponse(status=401)
 
     def form_valid(self, form):
         document = form.save(commit=False)
@@ -871,13 +918,13 @@ class DocumentsView(LoginRequiredMixin, FormView):
         return super(DocumentsView, self).form_valid(form)
 
 
-class DocumentsDeleteView(LoginRequiredMixin, View):
+class DocumentsDeleteView(PermissionRequiredMixin, LoginRequiredMixin, DetailView):
+    model = FireDepartment
+    permission_required = 'change_firedepartment'
 
-    @method_decorator(permission_required('firestation.can_delete_document'))
     def post(self, request, *args, **kwargs):
-        department = get_object_or_404(FireDepartment, pk=kwargs.get('pk'))
         document = get_object_or_404(Document,
-                                     department=department,
+                                     department=self.get_object(),
                                      filename=request.POST.get('filename'))
         document.file.delete()
         document.delete()
@@ -885,7 +932,6 @@ class DocumentsDeleteView(LoginRequiredMixin, View):
 
 
 class DocumentsFileView(LoginRequiredMixin, View):
-
     def get(self, request, *args, **kwargs):
         response = HttpResponse()
         response['X-Accel-Redirect'] = '/files/%s/departments/%s/%s' % (settings.DOCUMENT_UPLOAD_BUCKET,
@@ -904,6 +950,10 @@ class AdminDepartmentAccountRequests(PermissionRequiredMixin, LoginRequiredMixin
         email = self.request.GET['email']
         context['form'] = DepartmentUserApprovalForm(initial=dict(email=email))
         context['existing'] = AccountRequest.objects.filter(Q(approved_by__isnull=False) | Q(denied_by__isnull=False), email=email).first()
+
+        context['user_can_change'] = self.object.is_curator(self.request.user)
+        context['user_can_admin'] = self.object.is_admin(self.request.user)
+
         return context
 
     def get(self, request, **kwargs):

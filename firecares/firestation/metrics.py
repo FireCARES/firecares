@@ -132,7 +132,7 @@ class FireDepartmentMetrics(object):
             self._get_peers()
 
         def get(df):
-            if df is not None:
+            if df is not None and not df.empty:
                 return df.dist_model_risk_model_greater_than_size_2_quartile.mean()
 
         return AttrDict({
@@ -149,7 +149,7 @@ class FireDepartmentMetrics(object):
             self._get_peers()
 
         def get(df):
-            if df is not None:
+            if df is not None and not df.empty:
                 return df.dist_model_risk_model_deaths_injuries_quartile_avg.mean()
 
         return AttrDict({
@@ -162,11 +162,14 @@ class FireDepartmentMetrics(object):
 
     @cached_property
     def dist_model_residential_fires_quartile_avg(self):
+        """
+        Used as the "Assessment of performance score based on the number of fires." Safe Grade
+        """
         if not self.peers:
             self._get_peers()
 
         def get(df):
-            if df is not None:
+            if df is not None and not df.empty:
                 return df.dist_model_residential_fires_quartile_avg.mean()
 
         return AttrDict({
@@ -179,11 +182,14 @@ class FireDepartmentMetrics(object):
 
     @cached_property
     def dist_model_risk_model_greater_than_size_2_quartile_breaks(self):
+        """
+        Used as the "Assessment of performance score based on fire spread risk." Safe Grade
+        """
         if not self.peers:
             self._get_peers()
 
         def get(df):
-            if df is not None:
+            if df is not None and not df.empty:
                 return df.groupby(['dist_model_risk_model_greater_than_size_2_quartile']).max()['dist_model_score'].tolist()
 
         return AttrDict({
@@ -196,11 +202,14 @@ class FireDepartmentMetrics(object):
 
     @cached_property
     def dist_model_risk_model_deaths_injuries_quartile_breaks(self):
+        """
+        Used as the "Assessment of performance score based on fire spread risk." Safe Grade
+        """
         if not self.peers:
             self._get_peers()
 
         def get(df):
-            if df is not None:
+            if df is not None and not df.empty:
                 return df.groupby(['dist_model_risk_model_deaths_injuries_quartile']).max()['dist_model_score'].tolist()
 
         return AttrDict({
@@ -217,7 +226,7 @@ class FireDepartmentMetrics(object):
             self._get_peers()
 
         def get(df):
-            if df is not None:
+            if df is not None and not df.empty:
                 return df.groupby(['dist_model_residential_fires_quartile']).max()['dist_model_score'].tolist()
 
         return AttrDict({
@@ -234,7 +243,7 @@ class FireDepartmentMetrics(object):
             self._get_peers()
 
         def get(df):
-            if df is not None:
+            if df is not None and not df.empty:
                 return df.loc[df['id'] == self.firedepartment.id].dist_model_residential_fires_quartile.values[0]
 
         return AttrDict({
@@ -251,7 +260,7 @@ class FireDepartmentMetrics(object):
             self._get_peers()
 
         def get(df):
-            if df is not None:
+            if df is not None and not df.empty:
                 return df.loc[df['id'] == self.firedepartment.id].dist_model_risk_model_greater_than_size_2_quartile.values[0]
 
         return AttrDict({
@@ -268,7 +277,7 @@ class FireDepartmentMetrics(object):
             self._get_peers()
 
         def get(df):
-            if df is not None:
+            if df is not None and not df.empty:
                 return df.loc[df['id'] == self.firedepartment.id].dist_model_risk_model_deaths_injuries_quartile.values[0]
 
         return AttrDict({
@@ -519,7 +528,10 @@ class FireDepartmentMetrics(object):
         object_values = self.population_metrics_rows
         for numlevel, level in self.RISK_LEVELS:
             if object_values[level]:
-                report_card_peers = self.quartile_class.objects.filter(population_class=self.firedepartment.population_class, level=numlevel)
+                similar_department_ids = self.firedepartment.similar_departments.values_list('id', flat=True)
+                similar_and_self = list(similar_department_ids)
+                similar_and_self.append(self.firedepartment.id)
+                report_card_peers = self.quartile_class.objects.filter(id__in=similar_and_self, level=numlevel)
                 report_card_peers = report_card_peers.annotate(dist_model_residential_fires_quartile=Case(When(
                     **{'dist_model_score__isnull': False,
                        'residential_fires_avg_3_years_quartile': object_values.get(level).residential_fires_avg_3_years_quartile,

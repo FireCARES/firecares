@@ -31,14 +31,22 @@ class CoreTests(BaseFirecaresTestcase):
         FireDepartment.objects.create(name='testy3', population=3)
         FireDepartment.objects.create(name='testy4', population=4)
 
+        call_command('refresh_sitemap')
+
         c = Client()
         response = c.get('/sitemap.xml')
+
         self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content, 'xml')
-        sitemap_list = soup.find_all('url')
-        self.assertEqual(len(sitemap_list), 3 + 6)  # 3 test departments and 6 set navigation pages
+        sitemap_list = soup.find_all('loc')
+        self.assertEqual(len(sitemap_list), 2)  # Should have 2 sitemap items
+
+        departments = BeautifulSoup(open('/tmp/sitemaps/sitemap-departments-1.xml'))
+        department_list = departments.find_all('url')
+
+        self.assertEqual(len(department_list), 3)  # 3 test departments
         # find the three elements
-        for testy in sitemap_list:
+        for testy in department_list:
             if 'testy2' in testy.loc.get_text():
                 testy2 = testy
             elif 'testy3' in testy.loc.get_text():
@@ -142,7 +150,7 @@ class CoreTests(BaseFirecaresTestcase):
             self.assertEqual(user.email, 'test_registration@example.com')
             self.assertFalse(user.registrationprofile.activation_key_expired())
             self.assertTrue(len(mail.outbox), 1)
-            print mail.outbox[0].message()
+            self.assert_email_appears_valid(mail.outbox[0])
 
             response = c.get(reverse('registration_activate', kwargs={'activation_key':
                                                                       user.registrationprofile.activation_key}))
@@ -170,6 +178,20 @@ class CoreTests(BaseFirecaresTestcase):
             self.assertTrue(response.status_code, 200)
             self.assertEqual(response.request['PATH_INFO'], '/accounts/register/closed/')
 
+    def test_whitelisted_registration_with_account_request(self):
+        """
+        Ensure that whitelisted users with account requests are able to register.
+        """
+        c = Client()
+
+        AccountRequest.objects.create(email='test@example.com')
+        RegistrationWhitelist.objects.create(email_or_domain='test@example.com')
+
+        resp = c.post(reverse('account_request'), data={'email': 'test@example.com'})
+        self.assertTrue('email_whitelisted' in c.session)
+
+        self.assert_redirect_to(resp, 'registration_register')
+
     def test_password_reset(self):
         """
         Tests the forgotten/reset password workflow.
@@ -184,6 +206,7 @@ class CoreTests(BaseFirecaresTestcase):
         self.assertEqual(resp.status_code, 302)
 
         self.assertEqual(len(mail.outbox), 1)
+        self.assert_email_appears_valid(mail.outbox[0])
 
         token = resp.context[0]['token']
         uid = resp.context[0]['uid']
@@ -218,6 +241,7 @@ class CoreTests(BaseFirecaresTestcase):
         self.assertEqual(resolve(urlsplit(resp.url).path).url_name, 'username_sent')
 
         self.assertEqual(len(mail.outbox), 1)
+        self.assert_email_appears_valid(mail.outbox[0])
         # Make sure that the username is actually in the email (otherwise what's the point?)
         self.assertTrue('tester_mcgee' in mail.outbox[0].body)
 
@@ -271,6 +295,7 @@ class CoreTests(BaseFirecaresTestcase):
 
             self.assertRedirects(resp, reverse('contact_thank_you'))
             self.assertEqual(len(mail.outbox), 1)
+            self.assert_email_appears_valid(mail.outbox[0])
 
     def test_display_404_page(self):
         c = Client()
@@ -295,7 +320,7 @@ class CoreTests(BaseFirecaresTestcase):
 
             # Make sure admin email is triggered.
             self.assertEqual(len(mail.outbox), 1)
-            print mail.outbox[0].message()
+            self.assert_email_appears_valid(mail.outbox[0])
 
     def test_signup_when_account_exists(self):
         """
@@ -337,20 +362,9 @@ class CoreTests(BaseFirecaresTestcase):
         self.assertEqual(RegistrationWhitelist.get_department_for_email('test@myfd.org'), fd)
         self.assertIsNone(RegistrationWhitelist.get_department_for_email('invalid@myfd.org'))
 
-    def test_permission_assignment(self):
-        """
-        Ensure that permission assignment is working as expected.
-        """
-
-        fd = self.load_la_department()
-        fd.add_curator(self.non_admin_user)
-        self.assertTrue(fd.is_curator(self.non_admin_user))
-
-        self.non_admin_user.is_active = False
-        self.non_admin_user.save()
-
-        # Non-activated users have no object-level permissions
-        self.assertFalse(fd.is_curator(self.non_admin_user))
+        # Whitelist check should be case insensitive
+        self.assertTrue(RegistrationWhitelist.is_whitelisted('Joe@GMAIL.COM'))
+        self.assertTrue(RegistrationWhitelist.is_whitelisted('Test@MYFD.org'))
 
     def test_invite_workflow(self):
         fd = self.load_la_department()
@@ -371,7 +385,7 @@ class CoreTests(BaseFirecaresTestcase):
         # Extract invite link from outbound email and start registration
         self.assertEqual(len(mail.outbox), 1)
         msg = mail.outbox[0]
-        print mail.outbox[0].message()
+        self.assert_email_appears_valid(mail.outbox[0])
         self.assertIn('non_admin@example.com', msg.body)
         self.assertIn('/invitations/accept-invite/', msg.body)
         url = re.findall('(https?://\S+)', msg.body)[0]
@@ -387,7 +401,8 @@ class CoreTests(BaseFirecaresTestcase):
         self.assertFalse(User.objects.get(username='inviteuser').is_active)
         msg = mail.outbox[1]
         url = re.findall('(https?://\S+)', msg.body)[0]
-        print mail.outbox[1].message()
+        self.assert_email_appears_valid(mail.outbox[0])
+        self.assert_email_appears_valid(mail.outbox[1])
 
         # Activate account
         anon_user.get(url)
@@ -442,6 +457,7 @@ class CoreTests(BaseFirecaresTestcase):
         # After deleting, invitation link should not be available
         # Extract invite link from outbound email
         msg = mail.outbox[0]
+        self.assert_email_appears_valid(mail.outbox[0])
         self.assertIn('non_admin@example.com', msg.body)
         self.assertIn('/invitations/accept-invite/', msg.body)
         url = re.findall('(https?://\S+)', msg.body)[0]
@@ -496,6 +512,7 @@ class CoreTests(BaseFirecaresTestcase):
             self.assertEqual(response.status_code, 302)
             # 1 activation email to user, 1 notification to admins that a department admin account was activated
             self.assertEqual(len(mail.outbox), 2)
+            map(self.assert_email_appears_valid, mail.outbox)
             msg = next(iter(filter(lambda x: 'admin@example.com' in x.recipients(), mail.outbox)), None)
             self.assertIsNotNone(msg)
 
@@ -514,7 +531,7 @@ class CoreTests(BaseFirecaresTestcase):
         fd, _ = FireDepartment.objects.get_or_create(name='FD1')
         fd2, _ = FireDepartment.objects.get_or_create(name='FD2')
         RegistrationWhitelist.objects.create(email_or_domain='myfd.org', department=fd)
-        RegistrationWhitelist.objects.create(email_or_domain='test@anotherfd.org', department=fd2)
+        RegistrationWhitelist.objects.create(email_or_domain='test@anotherfd.org', department=fd2, permission='admin_firedepartment,change_firedepartment')
 
         c = Client()
 
@@ -539,13 +556,46 @@ class CoreTests(BaseFirecaresTestcase):
             user.refresh_from_db()
             self.assertEqual(user.userprofile.department, fd)
             # Users might be associated with departments, but they will NOT get any department-related permissions
-            # when being added to the department email whitelist
+            # when being added to the department email whitelist unless explicitly indicated in the whitelisted entry
             self.assertFalse(fd.is_admin(user))
             self.assertFalse(fd.is_curator(user))
             # Ensure no permission crosstalk
             self.assertFalse(fd2.is_admin(user))
             self.assertFalse(fd2.is_curator(user))
             self.assertFalse(user.is_superuser)
+
+        c.logout()
+
+        # Ensure that permissions are assigned correctly when registering with a whitelisted address that has
+        # permissions indicated
+        resp = c.post(reverse('account_request'), dict(email='test@anotherfd.org'))
+        self.assert_redirect_to(resp, 'registration_register')
+
+        resp = c.post(reverse('registration_register'), data={'username': 'test_dept_whitelist2',
+                                                              'first_name': 'Joe',
+                                                              'last_name': 'Tester',
+                                                              'password1': 'test',
+                                                              'password2': 'test'})
+
+        user = User.objects.filter(username='test_dept_whitelist2').first()
+        self.assertIsNotNone(user)
+        self.assertFalse(user.is_active)
+        self.assertFalse(user.is_superuser)
+
+        # Make sure that account activation triggers the department association
+        response = c.get(reverse('registration_activate', kwargs={'activation_key':
+                                                                  user.registrationprofile.activation_key}))
+        # A 302 here means the activation succeeded
+        self.assertEqual(response.status_code, 302)
+        user.refresh_from_db()
+        self.assertEqual(user.userprofile.department, fd2)
+
+        self.assertTrue(fd2.is_admin(user))
+        self.assertTrue(fd2.is_curator(user))
+        # Ensure no permission crosstalk
+        self.assertFalse(fd.is_admin(user))
+        self.assertFalse(fd.is_curator(user))
+        self.assertFalse(user.is_superuser)
 
     def test_department_admin_requests(self):
         fd, _ = FireDepartment.objects.get_or_create(id=12345, name='FD1')
@@ -568,6 +618,7 @@ class CoreTests(BaseFirecaresTestcase):
 
             # Email for DEPARTMENT_ADMIN_VERIFIERS
             self.assertTrue(len(mail.outbox), 1)
+            self.assert_email_appears_valid(mail.outbox[0])
             self.assertEqual(mail.outbox[0].recipients(), ['admin@example.com'])
             self.assertTrue('/accounts/verify-association-request/?email=non_admin@example.com' in mail.outbox[0].body)
 
@@ -596,6 +647,7 @@ class CoreTests(BaseFirecaresTestcase):
 
         # Test denial
         self.assertEqual(len(mail.outbox), 2)
+        map(self.assert_email_appears_valid, mail.outbox)
         self.assertEqual(mail.outbox[1].recipients(), [req.user.email])
         self.assertTrue('DENIED!!!' in mail.outbox[1].body)
         self.non_admin_user.refresh_from_db()

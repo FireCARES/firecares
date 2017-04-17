@@ -287,7 +287,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
 
     created = models.DateTimeField(auto_now=True)
     modified = models.DateTimeField(auto_now=True)
-    fdid = models.CharField(max_length=10)
+    fdid = models.CharField(max_length=10, blank=True)
     name = models.CharField(max_length=100)
     headquarters_address = models.ForeignKey(Address, null=True, blank=True, related_name='firedepartment_headquarters')
     mail_address = models.ForeignKey(Address, null=True, blank=True)
@@ -297,14 +297,14 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
     department_type = models.CharField(max_length=20, choices=DEPARTMENT_TYPE_CHOICES, null=True, blank=True)
     organization_type = models.CharField(max_length=75, null=True, blank=True)
     website = models.URLField(null=True, blank=True)
-    state = models.CharField(max_length=2)
-    region = models.CharField(max_length=20, choices=REGION_CHOICES, null=True, blank=True)
+    state = models.CharField(max_length=2, db_index=True)
+    region = models.CharField(max_length=20, db_index=True, choices=REGION_CHOICES, null=True, blank=True)
     geom = models.MultiPolygonField(null=True, blank=True)
     objects = CalculationManager()
     priority_departments = PriorityDepartmentsManager()
     government_unit = RelatedObjectsDescriptor()
     population = models.IntegerField(null=True, blank=True)
-    population_class = models.IntegerField(null=True, blank=True, choices=POPULATION_CLASSES)
+    population_class = models.IntegerField(null=True, blank=True, choices=POPULATION_CLASSES, db_index=True)
     featured = models.BooleanField(default=False, db_index=True)
     iaff = models.CharField(max_length=25, blank=True, null=True)
     twitter_handle = models.CharField(max_length=255, blank=True, null=True)
@@ -616,7 +616,10 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
             print 'Stations:', station
 
     def __unicode__(self):
-        return self.name
+        if self.headquarters_address:
+            return u'{} - {}, {}'.format(self.name, self.headquarters_address.city, self.state)
+        else:
+            return u'{} - {}'.format(self.name, self.state)
 
     def remove_from_department(self, department):
         """
@@ -664,6 +667,9 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
 
 
 class FireDepartmentRiskModels(models.Model):
+    class Meta:
+        unique_together = ['level', 'department']
+
     level = models.IntegerField(choices=HazardLevels.choices(), default=1)
     department = models.ForeignKey(FireDepartment)
     dist_model_score = models.FloatField(null=True, blank=True, editable=False, db_index=True)
@@ -1089,6 +1095,11 @@ class PopulationClassQuartile(models.Model):
         db_table = 'population_quartiles'
 
 
+def refresh_quartile_view():
+    with connections['default'].cursor() as cursor:
+        cursor.execute('REFRESH MATERIALIZED VIEW population_quartiles;')
+
+
 def create_quartile_views(sender, **kwargs):
     """
     Creates DB view based on quartile queries.
@@ -1151,7 +1162,6 @@ def create_quartile_views(sender, **kwargs):
         WHERE archived=False
         """
     cursor = connections['default'].cursor()
-
     # Force materialied view recreation in case there are changes in the query
     print '(re)creating materialized view for "population_quartiles"'
     cursor.execute("DROP MATERIALIZED VIEW IF EXISTS population_quartiles;")
@@ -1171,6 +1181,11 @@ class NationalCalculations(models.Model):
     class Meta:
         managed = False
         db_table = 'national_calculations'
+
+
+def refresh_national_calculations_view():
+    with connections['default'].cursor() as cursor:
+        cursor.execute('REFRESH MATERIALIZED VIEW national_calculations;')
 
 
 def create_national_calculations_view(sender, **kwargs):

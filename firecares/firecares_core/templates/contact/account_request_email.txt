@@ -1,4 +1,24 @@
-An account request has been submitted:
+{% load i18n %}
+{% load staticfiles %}
+{% load url from future %}
 
-Email: {{ contact.email }}
-Created: {{ contact.created_at }}
+{% blocktrans %}Greetings{% endblocktrans %} {{ contact.email }},
+
+Unfortunately, your email address ({{ contact.email }}) is not currently approved for registration/login with FireCARES.
+
+However, if you are an IAFF Local Officer you may login to FireCARES using the IAFF single sign-on solution, IMIS:
+
+http://{{ site.domain }}{% url 'login' %}
+
+or if you're an IAFC member you may login to FireCARES using Helix:
+
+http://{{ site.domain }}{% url 'login' %}
+
+Additionally, you can request an account by contacting your local fire department chief.
+
+For more information, please see the access policy:
+
+{% static 'access_policy.pdf' %}
+
+{% blocktrans %}Best regards{% endblocktrans %},
+The {{ site.name }} {% blocktrans %}team{% endblocktrans %}

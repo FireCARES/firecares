@@ -1,6 +1,6 @@
 {% load humanize %}
 {% load firecares_tags %}
-{% load favit_tags %}
+
 <!DOCTYPE html>
 <!--[if IE 8 ]>
 <html class="no-js ie8" lang="en"> <![endif]-->
@@ -105,12 +105,7 @@
                     {% endif %}
                 </div>
                 <div class="ct-u-displayTableCell text-right">
-                    {% favorite_button object %}
-                    <a href="javascript:window.print()" title="Print this page" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-printer fa-2x"></i></a>
-                    <a href="{% url 'documents' object.id %}" title="View this department's documents" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-docs fa-2x"></i></a>
-                    {% if user_can_admin %}
-                        <a href="{% url 'admin_department_users' object.id %}" title="Manage department users" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-people fa-2x"></i></a>
-                    {% endif %}
+                    {% include 'firestation/_department_header.html' %}
                     {% if user.is_authenticated %}
                         <feedback
                             class="btn btn-sm btn-transparent–border"
@@ -575,7 +570,7 @@
                                        learn-more="{% url 'models_performance_score' %}"></gauge>
                                 <div class="gauge-description is-your-department">
                                     <p>
-                                        Is this your department? <a class="is-your-department" href="{% url 'registration_preregister' %}?department={{ object.id }}">Request access from your fire chief or local president.</a>
+                                        Is this your department? <a class="is-your-department" href="{% url 'registration_preregister' %}?department={{ object.id }}">Request access from your Fire Chief or Local Officer.</a>
                                     </p>
                                 </div>
                             </div>

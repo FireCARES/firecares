@@ -7,7 +7,7 @@ from django.db import connections
 from django.db.utils import ConnectionDoesNotExist
 from scipy.stats import lognorm
 from firecares.firestation.models import (
-    FireDepartment, create_quartile_views, HazardLevels, create_national_calculations_view)
+    FireDepartment, refresh_quartile_view, HazardLevels, refresh_national_calculations_view)
 from firecares.firestation.models import NFIRSStatistic as nfirs
 from fire_risk.models import DIST, DISTMediumHazard, DISTHighHazard, NotEnoughRecords
 from fire_risk.models.DIST.providers.ahs import ahs_building_areas
@@ -127,7 +127,7 @@ def update_performance_score(id, dry_run=False):
             dist = dist_model(floor_extent=False, **counts)
             record.dist_model_score = dist.gibbs_sample()
             record.dist_model_score_fire_count = dist.total_fires
-            print 'updating fdid: {2} - {3} risk level from: {0} to {1}.'.format(old_score, record.dist_model_score, fd.id, HazardLevels(record.level).name)
+            print 'updating fdid: {2} - {3} performance score from: {0} to {1}.'.format(old_score, record.dist_model_score, fd.id, HazardLevels(record.level).name)
 
         except (NotEnoughRecords, ZeroDivisionError):
             print 'Error updating DIST score: {}.'.format(traceback.format_exc())
@@ -160,7 +160,7 @@ def update_performance_score(id, dry_run=False):
 
         dist = dist_model(floor_extent=False, **all_counts)
         record.dist_model_score = dist.gibbs_sample()
-        print 'updating fdid: {2} - {3} risk level from: {0} to {1}.'.format(old_score, record.dist_model_score, fd.id, HazardLevels(record.level).name)
+        print 'updating fdid: {2} - {3} performance score from: {0} to {1}.'.format(old_score, record.dist_model_score, fd.id, HazardLevels(record.level).name)
 
     except (NotEnoughRecords, ZeroDivisionError):
         print 'Error updating DIST score: {}.'.format(traceback.format_exc())
@@ -298,19 +298,19 @@ def calculate_department_census_geom(fd_id):
 
 
 @app.task(queue='update')
-def create_quartile_views_task():
+def refresh_quartile_view_task():
     """
     Updates the Quartile Materialized Views.
     """
-    return create_quartile_views(None)
+    return refresh_quartile_view()
 
 
 @app.task(queue='update')
-def create_national_calculations_view_task():
+def refresh_national_calculations_view_task():
     """
     Updates the National Calculation View.
     """
-    return create_national_calculations_view(None)
+    return refresh_national_calculations_view()
 
 
 @app.task(queue='update')

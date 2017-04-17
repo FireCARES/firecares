@@ -11,6 +11,7 @@
     <meta name="author" content="Prominent Edge LLc">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="google-site-verification" content="k0qV9fCPtLcIsxHUlLQL6-ddKChpva4lY07UswGCe2I" />
 
     <title>FireCARES · The Community Assessment Response Evaluation System</title>
     {% include 'firestation/_favicon.html' %}
@@ -57,10 +58,7 @@
         </span>
         <span class="right-navbar">
             {% if not user.is_authenticated %}
-
-            <a href="#" class="text-uppercase sign-up-button" id="sign-up-popover" data-toggle="popover" title="Sign Up"
-               data-placement="bottom" tabindex="0" role="button">sign up</a>
-
+            <a href="{% url 'registration_register' %}" class="text-uppercase">request account</a>
             <a href="{% url 'login' %}?next={% url 'firedepartment_list' %}" class="text-uppercase">login</a>
             {% else %}
             <a href="{% url 'logout' %}" class="text-uppercase">logout</a>
@@ -68,17 +66,6 @@
         </span>
     </div>
 </section>
-
-
-<div id="popover_content_wrapper" style="display: none">
-    <form class="form-inline col-lg-12 ct-u-paddingBottom30 sign-up-popover-content" method="post" action="{% url 'account_request' %}">
-        {% csrf_token %}
-        <div class="text-center popup-content">Provide your email address and we will be in touch.</div>
-        <input id="contact_name_small" placeholder='example@domain.com' required name="email" type="email" class="form-control input-lg">
-        <div class="text-center">
-        <button type="submit" class="btn btn-primary">SIGN UP</button></div>
-    </form>
-</div>
 
 <div id="header"></div>
 <header class="home-header text-center ct-u-text--white header-gradient">
@@ -113,7 +100,7 @@
                    <div class="col-md-4">
                        <div class="ct-iconBox default-cursor">
                            <div class="ct-icon center-block ct-u-marginBottom10 marketing-icon">
-                               <i class="icon-location-pin ct-fw-600"></i>
+                               <a href="{% url 'models_community_risk' %}"><i class="icon-location-pin ct-fw-600"></i></a>
                            </div>
                            <div class="ct-iconBox--description">
                                <span class="ct-title ct-u-marginBottom20 ct-fw-600 text-uppercase">Identify Risks</span>
@@ -124,7 +111,7 @@
                    <div class="col-md-4">
                        <div class="ct-iconBox default-cursor">
                            <div class="ct-icon center-block ct-u-marginBottom10 marketing-icon">
-                               <i class="icon-speedometer ct-fw-600"></i>
+                               <a href="{% url 'models_performance_score' %}"><i class="icon-speedometer ct-fw-600"></i></a>
                            </div>
                            <div class="ct-iconBox--description">
                                <span class="ct-title ct-u-marginBottom20 ct-fw-600 text-uppercase">Analyze performance</span>
@@ -135,7 +122,7 @@
                    <div class="col-md-4">
                        <div class="ct-iconBox default-cursor">
                            <div class="ct-icon center-block ct-u-marginBottom10 marketing-icon">
-                               <i class="icon-badge ct-fw-600"></i>
+                               <a href="{% url 'safe_grades' %}"><i class="icon-badge ct-fw-600"></i></a>
                            </div>
                            <div class="ct-iconBox--description">
                                <span class="ct-title ct-u-marginBottom20 ct-fw-600 text-uppercase">Get your Safe Grade</span>
@@ -169,22 +156,6 @@
     {% include 'firestation/_partners.html' %}
 </div>
 
-<section class="ct-mediaSection account-request-section ct-u-paddingBoth90 ct-u-text--white text-center" id="signup">
-    <div class="container">
-        <div class="ct-u-marginBottom15 text-center">
-            <h2 class="text-center">Sign up</h2>
-        </div>
-        <form class="form-inline col-lg-12" method="post" action="{% url 'account_request' %}">
-            {% csrf_token %}
-            <div class="ct-u-paddingBottom30 account-request-section-content">Provide your email address and we will be in touch.</div>
-            <div class="ct-form--item ct-u-marginBottom20">
-                <input id="contact_name" placeholder='example@domain.com' required size="65" name="email" type="email" class="form-control input-lg">
-            </div>
-            <button type="submit" class="btn btn-primary">SIGN UP</button>
-        </form>
-    </div>
-</section>
-
 {% include 'firestation/_footer.html' %}
 
 {% include "firestation/_firecares_scripts.html" %}
@@ -193,10 +164,11 @@
 {
     "@context": "http://schema.org",
     "@type": "WebSite",
-    "url": "https://firecares.org/",
+    "url": "https://firecares.org",
+    "name": "FireCARES",
     "potentialAction": {
-    "@type": "SearchAction",
-        "target": "https://firecares.org/department/?q={search_term_string}",
+        "@type": "SearchAction",
+        "target": "https://firecares.org/departments/?q={search_term_string}",
         "query-input": "required name=search_term_string"
     }
 }
@@ -207,7 +179,7 @@
     "@context": "http://schema.org",
     "@type": "Organization",
     "url": "https://firecares.org",
-    "logo": "https://static.firecares.org/firecares-header-logo.png"
+    "logo": "https://firecares-static-prod.firecares.org/firecares-header-logo.png"
 }
 </script>
 

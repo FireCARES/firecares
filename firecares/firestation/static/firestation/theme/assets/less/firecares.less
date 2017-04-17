@@ -765,9 +765,24 @@ background:radial-gradient(ellipse at center, rgba(73,94,130,1) 0%, rgba(45,58,8
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#495E82', endColorstr='#2d3a51',GradientType=1 ); /* ie6-9 */
 }
 
-.marketing-icon i{
-  font-size: 60px !important;
-  color: @brand-primary;
+.quick-transition {
+  -moz-transition: all 0.2s;
+  -o-transition: all 0.2s;
+  -webkit-transition: all 0.2s;
+  transition: all 0.2s;
+}
+
+.marketing-icon {
+  a:hover i {
+    color: lighten(@brand-primary, 30%);
+    .quick-transition;
+  }
+
+  i {
+    font-size: 60px !important;
+    color: @brand-primary;
+    .quick-transition;
+  }
 }
 
 .ct-iconBox--2col .ct-iconBox--description,
@@ -1018,7 +1033,7 @@ form[name='boundaryUpload'] {
 .right-navbar {
   right: 45px;
   position: absolute;
-  width: 200px;
+  width: 300px;
 }
 
 
@@ -1130,7 +1145,7 @@ form[name='boundaryUpload'] {
   }
 
   td {
-    width: 33%;
+    width: 20%;
   }
 
   span.label.label-danger {

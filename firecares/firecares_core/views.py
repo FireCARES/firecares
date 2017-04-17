@@ -1,5 +1,8 @@
 import json
+import logging
 import requests
+import random
+import string
 from .forms import ForgotUsernameForm, AccountRequestForm
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -9,6 +12,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth.views import logout
 from django.contrib.sites.models import Site
+from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpResponseBadRequest
 from django.shortcuts import render, redirect, resolve_url
 from django.template import loader
@@ -23,6 +27,8 @@ from firecares.firecares_core.ext.registration.views import SESSION_EMAIL_WHITEL
 from .forms import ContactForm
 from .models import PredeterminedUser, RegistrationWhitelist, DepartmentAssociationRequest
 from .mixins import LoginRequiredMixin
+
+logger = logging.getLogger(__name__)
 
 
 class ForgotUsername(View):
@@ -39,7 +45,8 @@ class ForgotUsername(View):
             user = User.objects.filter(email=form.cleaned_data['email']).first()
             if user:
                 context = {'username': user.username,
-                           'login': request.build_absolute_uri(reverse('login'))}
+                           'login': request.build_absolute_uri(reverse('login')),
+                           'site': get_current_site(request)}
                 form.send_mail('Your FireCARES Username',
                                'registration/forgot_username_email.txt',
                                context,
@@ -115,8 +122,7 @@ class AccountRequestView(CreateView):
     template_name = 'firestation/home.html'
     form_class = AccountRequestForm
     http_method_names = ['post']
-    success_message = 'We will be in touch with you to verify your account. Please stay tuned to our partner websites'\
-                      ' and major fire service conferences for updates.'
+    success_message = 'You have been sent an email with the details of access policy, please contact your local fire department chief to allow you to register with FireCARES.'
 
     def form_valid(self, form):
         """
@@ -142,6 +148,12 @@ class AccountRequestView(CreateView):
         If the form is invalid, re-render the context data with the
         data-filled form and errors.
         """
+
+        email = form.data.get('email')
+        if RegistrationWhitelist.is_whitelisted(email):
+            self.request.session[SESSION_EMAIL_WHITELISTED] = email
+            return redirect('registration_register')
+
         if form.errors.get('email'):
             self.request.session['message'] = form.errors['email'][0]
         else:
@@ -163,13 +175,15 @@ class AccountRequestView(CreateView):
             body = loader.render_to_string('contact/account_request_department_admin_email.txt', dict(contact=self.object, site=Site.objects.get_current()))
             body_html = loader.render_to_string('contact/account_request_department_admin_email.html', dict(contact=self.object, site=Site.objects.get_current()))
         else:
-            to = [x[1] for x in settings.ADMINS]
-            body = loader.render_to_string('contact/account_request_email.txt', dict(contact=self.object))
+            to = [self.object.email]
+            body = loader.render_to_string('contact/account_request_email.txt', dict(STATIC_URL=settings.STATIC_URL, contact=self.object, site=Site.objects.get_current()))
             body_html = loader.render_to_string('contact/account_request_email.html', dict(contact=self.object))
-        email_message = EmailMultiAlternatives('{} - New account request received.'.format(Site.objects.get_current().name),
+        email_message = EmailMultiAlternatives('{} - Access.'.format(Site.objects.get_current().name),
                                                body,
                                                settings.DEFAULT_FROM_EMAIL,
-                                               to)
+                                               to,
+                                               cc=['contact@firecares.org'],
+                                               reply_to=['contact@firecares.org'])
         email_message.attach_alternative(body_html, "text/html")
         send_mail.delay(email_message)
 
@@ -211,6 +225,8 @@ def helix_token_compliance_hook(request):
 
 def get_functional_title(token):
     membershipid = token.get('membershipid')
+    if not membershipid:
+        return ''
     auth = {'Authorization': 'Bearer ' + token.get('access_token')}
     resp = requests.get(settings.HELIX_FUNCTIONAL_TITLE_URL + membershipid, headers=auth)
     return resp.content.strip('"')
@@ -221,10 +237,14 @@ class OAuth2Callback(View):
         return requests.get(settings.HELIX_WHOAMI, headers={'Authorization': 'Bearer ' + token.get('access_token')}).json()
 
     def _create_username(self, token):
-        return 'iafc-{}'.format(token['membershipid'])
+        rand_username = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
+        return 'iafc-{}'.format(token['membershipid'] or rand_username)
 
     def _allowed_in(self, token):
-        return token.get('membershipid') and get_functional_title(token) in settings.HELIX_ACCEPTED_CHIEF_ADMIN_TITLES
+        return token.get('membershipid')
+
+    def _will_be_admin(self, title):
+        return title in settings.HELIX_ACCEPTED_CHIEF_ADMIN_TITLES
 
     def _auth_user(self, token):
         user = authenticate(remote_user=self._create_username(token))
@@ -238,7 +258,7 @@ class OAuth2Callback(View):
 
     def _gate(self, request):
         request.session['message_title'] = 'Login error'
-        request.session['message'] = 'Only IAFC fire chiefs are allowed to login into FireCARES via the Helix authentication system'
+        request.session['message'] = 'Only IAFC members are allowed to login into FireCARES via the Helix authentication system'
         return redirect('show_message')
 
     def get(self, request):
@@ -257,31 +277,54 @@ class OAuth2Callback(View):
 
             email = token.get('email')
 
-            # If the user logs in through Helix AND they are in the perdetermined user list, then assign admin perms
+            title = get_functional_title(token)
+
+            logger.info(str(token))
+            logger.info(title)
+
+            # If the user logs in through Helix AND they are in the predetermined user list, then assign admin perms
             if email in PredeterminedUser.objects.values_list('email', flat=True):
                 user = self._auth_user(token)
                 if user:
                     login(request, user)
                     pdu = PredeterminedUser.objects.get(email=email)
                     pdu.department.add_admin(user)
+                    pdu.department.add_curator(user)
                     # Also, associate this department with the user explicitly in the user's profile
                     user.userprofile.department = pdu.department
+                    user.userprofile.functional_title = title
                     user.userprofile.save()
                     email_admins('Department admin user activated: {}'.format(user.username),
                                  'Admin permissions automatically granted for {} ({}) on {} ({})'.format(user.username, user.email, pdu.department.name, pdu.department.id))
                     # Send to associated department on login
                     return redirect(reverse('firedepartment_detail', args=[user.userprofile.department.id]))
+            elif RegistrationWhitelist.is_whitelisted(email):
+                user = self._auth_user(token)
+                if user:
+                    login(request, user)
+                    dept = RegistrationWhitelist.get_department_for_email(email)
+                    if dept:
+                        # Also, assign given permissions on department
+                        wht = RegistrationWhitelist.get_for_email(email)
+                        if wht:
+                            wht.process_permission_assignment(user)
+                        user.userprofile.department = dept
+                        user.userprofile.functional_title = title
+                        user.userprofile.save()
+                        return redirect(reverse('firedepartment_detail', args=[user.userprofile.department.id]))
+                    else:
+                        return redirect(reverse('firestation_home'))
             else:
                 if self._allowed_in(token):
                     user = self._auth_user(token)
                     if user:
                         login(request, user)
-                        user.userprofile.functional_title = get_functional_title(token)
+                        user.userprofile.functional_title = title
                         user.userprofile.save()
-                        if not DepartmentAssociationRequest.user_has_association_request(user):
-                            return redirect(reverse('registration_choose_department'))
-                        else:
-                            return redirect(request.GET.get('next') or reverse('firestation_home'))
+                        if self._will_be_admin(title):
+                            if not DepartmentAssociationRequest.user_has_association_request(user):
+                                return redirect(reverse('registration_choose_department'))
+                        return redirect(request.GET.get('next') or reverse('firestation_home'))
 
                 else:
                     return self._gate(request)
@@ -337,8 +380,6 @@ class IMISRedirect(View):
         if ext:
             return ext.get('firecares_id')
 
-        return None
-
     def _is_whitelisted(self, user_info):
         email = user_info.get('EmailAddress', None)
         return RegistrationWhitelist.is_whitelisted(email)
@@ -356,13 +397,16 @@ class IMISRedirect(View):
                 info = self.imis.service.FetchUserInfo(applicationInstance=self.application_instance, userToken=token)
                 user_info = self._extract_user_info(info)
 
-                if not self._is_whitelisted(user_info) and not self._should_be_department_admin(user_info):
-                    messages.add_message(request, messages.ERROR, 'Must be approved by a local officer to login to FireCARES using IMIS')
-                    return redirect(reverse('login'))
+                logging.info(str(user_info))
 
-                if not self._is_member(user_info):
-                    messages.add_message(request, messages.ERROR, 'Must be an approved IAFF member to login to FireCARES using IMIS')
-                    return redirect(reverse('login'))
+                if not self._is_whitelisted(user_info):
+                    if not self._should_be_department_admin(user_info):
+                        messages.add_message(request, messages.ERROR, 'Must be approved by a local officer to login to FireCARES using IMIS')
+                        return redirect(reverse('login'))
+
+                    if not self._is_member(user_info):
+                        messages.add_message(request, messages.ERROR, 'Must be an approved IAFF member to login to FireCARES using IMIS')
+                        return redirect(reverse('login'))
 
                 user = auth.authenticate(remote_user=self._create_username(user_info))
                 # Sync user information on every login
@@ -373,8 +417,13 @@ class IMISRedirect(View):
                     user.save()
 
                     deptid = self._get_firecares_id(user_info)
-                    user.userprofile.department = FireDepartment.objects.filter(id=deptid).first()
+                    dept = FireDepartment.objects.filter(id=deptid).first()
+                    user.userprofile.department = dept
                     user.userprofile.save()
+
+                    wht = RegistrationWhitelist.get_for_email(user.email)
+                    if wht:
+                        wht.process_permission_assignment(user)
 
                     if self._should_be_department_admin(user_info) and deptid:
                         # Remove existing department permissions
@@ -392,3 +441,12 @@ class IMISRedirect(View):
 
         messages.add_message(request, messages.ERROR, 'Invalid or missing IMIS session token')
         return redirect(reverse('login'))
+
+
+class FAQView(TemplateView):
+    template_name = 'faq.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(FAQView, self).get_context_data(**kwargs)
+        context['whitelisted_domains'] = RegistrationWhitelist.domain_whitelists()
+        return context

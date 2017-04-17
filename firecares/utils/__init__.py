@@ -44,7 +44,7 @@ class AttrDict(dict):
 
 
 def get_email_domain(email):
-    return re.match(r'(^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)$)', email).groups()[1]
+    return re.match(r'(^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)$)', email).groups()[1].lower()
 
 
 class IntChoiceEnum(IntEnum):

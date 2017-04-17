@@ -3,7 +3,7 @@ from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from django.utils import timezone
 from geopy.geocoders import GoogleV3
-from geopy.exc import GeocoderQuotaExceeded
+from geopy.exc import GeocoderQuotaExceeded, GeocoderTimedOut
 from jsonfield import JSONField
 from time import sleep
 from reversion import revisions as reversion
@@ -133,6 +133,9 @@ class Address(models.Model):
         except GeocoderQuotaExceeded:
             sleep(0.5)
             results = g.geocode(query=query_string)
+        except GeocoderTimedOut:
+            sleep(0.5)
+            results = g.geocode(query=query_string)
 
         if results and results.latitude and results.longitude:
             self.geom = Point(results.longitude, results.latitude)
@@ -146,8 +149,7 @@ class Address(models.Model):
             row.geocode()
 
     def __unicode__(self):
-        return "%s, %s %s" % (self.city, self.state_province,
-                              str(self.country))
+        return "%s, %s %s - %s" % (self.address_line1, self.city, self.state_province, self.country.iso_code)
 
     class Meta:
         verbose_name_plural = "Addresses"
@@ -162,6 +164,8 @@ class ContactRequest(models.Model):
     name = models.CharField(max_length=200)
     email = models.EmailField()
     message = models.TextField()
+    completed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
@@ -235,8 +239,10 @@ class RegistrationWhitelist(models.Model):
     email_or_domain = models.CharField(max_length=200)
     # For department-specific whitelists, the "department", "created_by" and "created_at" fields will be populated,
     # department whitelists are different from global whitelists in that they the incoming user will be tied (in his/her UserProfile)
-    # to the department after account activation.
+    # to the department after account activation and also assigned the permission if given on that specific department.
     department = models.ForeignKey('firestation.FireDepartment', null=True, blank=True)
+    permission = models.CharField(max_length=255, null=True, blank=True)
+    permissions_applied = models.BooleanField(default=False)
     # For anonymous-user-submitted whitelist requests, they need to be vetted by a department admin
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
@@ -256,9 +262,31 @@ class RegistrationWhitelist(models.Model):
         return '@' not in email
 
     @classmethod
+    def get_for_email(cls, email):
+        if cls.is_whitelisted(email):
+            email = email.lower()
+            email_whitelists = cls.objects.filter(email_or_domain__contains='@')
+            domain_whitelists = cls.objects.exclude(email_or_domain__contains='@')
+            domain = get_email_domain(email)
+            if email_whitelists.filter(email_or_domain=email).exists():
+                return email_whitelists.filter(email_or_domain=email).first()
+            else:
+                return domain_whitelists.filter(email_or_domain=domain).first()
+
+    def process_permission_assignment(self, user):
+        if self.permission and self.department and user and not self.permissions_applied:
+            for p in self.permission.split(','):
+                if p:
+                    assign_perm(p, user, self.department)
+            self.permissions_applied = True
+            self.save()
+
+    @classmethod
     def is_whitelisted(cls, email):
         if not email:
             return False
+
+        email = email.lower()
 
         whitelists = cls.objects.values_list('email_or_domain', flat=True)
         email_whitelists = filter(lambda x: '@' in x, whitelists)
@@ -277,6 +305,8 @@ class RegistrationWhitelist(models.Model):
     def is_department_whitelisted(cls, email):
         if not email:
             return False
+
+        email = email.lower()
 
         domain_whitelists = cls.objects.filter(department__isnull=False).exclude(email_or_domain__contains='@').values_list('email_or_domain', flat=True)
         if cls._is_domain_only(email):
@@ -306,6 +336,10 @@ class RegistrationWhitelist(models.Model):
 
             return by_email.department if by_email else by_domain.department
 
+    @classmethod
+    def domain_whitelists(cls):
+        return cls.objects.exclude(email_or_domain__contains='@')
+
 
 class DepartmentInvitation(models.Model):
     invitation = AutoOneToOneField(Invitation, on_delete=models.CASCADE)
@@ -319,6 +353,9 @@ class DepartmentInvitation(models.Model):
 
 
 class PredeterminedUser(models.Model):
+    """
+    PredeterminedUsers should be granted admin permissions on their associated department after their account has been created.
+    """
     email = models.EmailField(unique=True)
     department = models.ForeignKey('firestation.FireDepartment')
     first_name = models.CharField(max_length=30)

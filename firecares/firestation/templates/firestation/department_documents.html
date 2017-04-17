@@ -1,6 +1,6 @@
 {% load humanize %}
 {% load firecares_tags %}
-{% load favit_tags %}
+
 <!DOCTYPE html>
 <!--[if IE 8 ]>
 <html class="no-js ie8" lang="en"> <![endif]-->
@@ -65,9 +65,7 @@
                     </span>
                 </div>
                 <div class="ct-u-displayTableCell text-right">
-                    {% favorite_button object %}
-                    <a href="javascript:window.print()" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-printer fa-2x"></i></a>
-                    <a class="btn btn-sm btn-transparent–border ct-u-text--white disabled"><i class="icon-docs fa-2x"></i></a>
+                    {% include 'firestation/_department_header.html' %}
                 </div>
             </div>
         </div>
@@ -77,7 +75,7 @@
 <div class="container ct-u-paddingBoth30">
     <div class="row">
         <div class="col-md-12">
-            {% if perms.firestation.can_create_document %}
+            {% if user_can_change %}
             <div>
             <p class="upload-header">Upload New</p>
                 <div class="ct-u-marginBottom30 text-center">
@@ -103,15 +101,19 @@
                         <tr class="text-right">
                             <th class="documents-table-column-name">Name</th>
                             <th class="documents-table-column-created">Posted</th>
+                            {% if user_can_change %}
                             <th class="documents-table-column-remove">Remove</th>
+                            {% endif %}
                         </tr>
                         </thead>
                         <tbody>
-                        {%  for doc in documents %}
+                        {% for doc in documents %}
                         <tr>
                             <td class="documents-table-column-name"><a class="document-link" href="{% url 'documents_file' object.id doc.filename %}" target="_blank">{{ doc.filename }}</a></td>
                             <td class="documents-table-column-created">{{ doc.created|date:'m/d/y' }} at {{ doc.created|date:'h:iA'|lower }}</td>
+                            {% if user_can_change %}
                             <td class="documents-table-column-remove"><a class="cursor-pointer document-link" style="margin-right: 20px;" onclick="deleteDocument(this)" filename="{{ doc.filename }}"><i class="icon-trash"></i></a></td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                         </tbody>
@@ -181,20 +183,22 @@
     }
 
     function deleteDocument(el) {
-        $.ajax({
-            url: 'documents-delete',
-            type: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            dataType: 'json',
-            data: {
-                filename: el.getAttribute('filename')
-            },
-            success: function() {
-                location.reload();
-            }
-        });
+        if (confirm('Are you sure you want to permanently delete this document?')) {
+            $.ajax({
+                url: 'documents-delete',
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                dataType: 'json',
+                data: {
+                    filename: el.getAttribute('filename')
+                },
+                success: function() {
+                    location.reload();
+                }
+            });
+        }
     }
 </script>
 

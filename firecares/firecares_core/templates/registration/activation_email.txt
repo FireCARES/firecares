@@ -14,7 +14,7 @@ http://{{site.domain}}{% url 'registration_activate' activation_key %}
 
 {% blocktrans with site_name=site.name %}
 Sincerely,
-{{ site_name }} Management
+The {{ site_name }} team
 {% endblocktrans %}
 
 

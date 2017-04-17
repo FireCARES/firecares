@@ -38,11 +38,11 @@ Community risks for fire departments were determined via statistical regression 
                             number of reported structure fires,
                         </li>
                         <li>
-                            percentage of reported fires that spread beyond the room of origin (labelled &quot;size 2 fires&quot;),
+                            percentage of reported fires that spread beyond the room of origin,
                         </li>
                         <li>
                             percentage of reported fires that spread beyond the room of origin and spread beyond the structure of
-                            origin (labelled &quot;size 3 fires&quot;),
+                            origin,
                         </li>
                         <li>
                             number of reported injuries resulting from structure fires,
@@ -85,6 +85,14 @@ Community risks for fire departments were determined via statistical regression 
                         Note that because deaths are rare, many departments will be predicted to have only a fractional number
                         of deaths.
                     </p>
+
+                    <p>
+                        Community risks are not currently estimated for communities with populations less than 10,000 people
+                        because small departments are expected to behave different from larger departments. The model is under
+                        continued development to ensure all communities are captured in FireCAREs. The number of departments
+                        for which estimates are generated are listed below.
+                    </p>
+
                 </div>
 
                 <div style="width: 50%; margin: 0 auto; ">
@@ -119,90 +127,90 @@ Community risks for fire departments were determined via statistical regression 
                           <td>size_0</td>
                           <td>0</td>
                           <td>2,499</td>
-                          <td>20</td>
-                          <td>17</td>
-                          <td>5</td>
-                          <td>8</td>
-                          <td><b>50</b></td>
+                          <td> </td>
+                          <td> </td>
+                          <td> </td>
+                          <td> </td>
+                          <td><b> </b></td>
                        </tr>
                        <tr>
                           <td>size_1</td>
                           <td>2,500</td>
                           <td>4,999</td>
-                          <td>3</td>
-                          <td>8</td>
-                          <td>2</td>
-                          <td>8</td>
-                          <td><b>21</b></td>
+                          <td> </td>
+                          <td> </td>
+                          <td> </td>
+                          <td> </td>
+                          <td><b> </b></td>
                        </tr>
                        <tr>
                           <td>size_2</td>
                           <td>5,000</td>
                           <td>9,999</td>
-                          <td>17</td>
-                          <td>66</td>
-                          <td>30</td>
-                          <td>52</td>
-                          <td><b>165</b></td>
+                          <td> </td>
+                          <td> </td>
+                          <td> </td>
+                          <td> </td>
+                          <td><b> </b></td>
                        </tr>
                        <tr>
                           <td>size_3</td>
                           <td>10,000</td>
                           <td>24,999</td>
-                          <td>85</td>
-                          <td>316</td>
-                          <td>140</td>
-                          <td>275</td>
-                          <td><b>816</b></td>
+                          <td>99</td>
+                          <td>270</td>
+                          <td>136</td>
+                          <td>325</td>
+                          <td><b>830</b></td>
                        </tr>
                        <tr>
                           <td>size_4</td>
                           <td>25,000</td>
                           <td>49,999</td>
-                          <td>102</td>
-                          <td>200</td>
-                          <td>98</td>
-                          <td>177</td>
-                          <td><b>577</b></td>
+                          <td>100</td>
+                          <td>172</td>
+                          <td>92</td>
+                          <td>195</td>
+                          <td><b>559</b></td>
                        </tr>
                        <tr>
                           <td>size_5</td>
                           <td>50,000</td>
                           <td>99,999</td>
-                          <td>117</td>
-                          <td>126</td>
-                          <td>56</td>
-                          <td>90</td>
-                          <td><b>389</b></td>
+                          <td>118</td>
+                          <td>88</td>
+                          <td>53</td>
+                          <td>121</td>
+                          <td><b>380</b></td>
                        </tr>
                        <tr>
                           <td>size_6</td>
                           <td>100,000</td>
                           <td>249,999</td>
-                          <td>77</td>
-                          <td>90</td>
-                          <td>19</td>
+                          <td>76</td>
                           <td>36</td>
-                          <td><b>222</b></td>
+                          <td>17</td>
+                          <td>88</td>
+                          <td><b>217</b></td>
                        </tr>
                        <tr>
                           <td>size_7</td>
                           <td>250,000</td>
                           <td>499,999</td>
                           <td>25</td>
-                          <td>22</td>
+                          <td>11</td>
                           <td>3</td>
-                          <td>12</td>
-                          <td><b>62</b></td>
+                          <td>22</td>
+                          <td><b>61</b></td>
                        </tr>
                        <tr>
                           <td>size_8</td>
                           <td>500,000</td>
                           <td>999,999</td>
                           <td>13</td>
-                          <td>18</td>
-                          <td>1</td>
                           <td>5</td>
+                          <td>1</td>
+                          <td>18</td>
                           <td><b>37</b></td>
                        </tr>
                        <tr>
@@ -210,20 +218,20 @@ Community risks for fire departments were determined via statistical regression 
                           <td>1,000,000</td>
                           <td>up</td>
                           <td>5</td>
-                          <td>5</td>
-                          <td>3</td>
                           <td>1</td>
+                          <td>3</td>
+                          <td>5</td>
                           <td><b>14</b></td>
                        </tr>
                        <tr>
                           <td><b>Total</b></td>
                           <td></td>
                           <td></td>
-                          <td><b>464</b></td>
-                          <td><b>868</b></td>
-                          <td><b>357</b></td>
-                          <td><b>664</b></td>
-                          <td><b>2,353</b></td>
+                          <td><b>436</b></td>
+                          <td><b>583</b></td>
+                          <td><b>305</b></td>
+                          <td><b>774</b></td>
+                          <td><b>2,098</b></td>
                        </tr>
                     </table>
                 </div>

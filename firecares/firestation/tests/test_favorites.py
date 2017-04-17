@@ -56,3 +56,10 @@ class TestFavorites(BaseFirecaresTestcase):
         self.assertTrue(fd2 in response.context['object_list'])
         self.assertTrue(fd3 not in response.context['object_list'])
         self.assertEqual(response.status_code, 200)
+
+        c.logout()
+
+        try:
+            response = c.get(reverse('firedepartment_list') + '?favorites=true')
+        except:
+            self.fail('Logged-out user triggering favorites search should not throw exception')

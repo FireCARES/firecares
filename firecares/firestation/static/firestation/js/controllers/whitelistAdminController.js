@@ -15,7 +15,9 @@
     $scope.addWhitelist = function() {
       $scope.toAdd = {
         email_or_domain: '',
-        is_domain_whitelist: false
+        is_domain_whitelist: false,
+        give_curator: false,
+        give_admin: false
       };
       $timeout(function() {
         angular.element('input[name="email_or_domain"]').focus();

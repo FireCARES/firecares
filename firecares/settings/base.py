@@ -184,6 +184,8 @@ INSTALLED_APPS = (
     'guardian',
     'django_nose',
     'invitations',
+    'static_sitemaps',
+    'import_export',
 )
 
 OSGEO_IMPORTER = 'firecares.importers.GeoDjangoImport'
@@ -219,19 +221,19 @@ LOGGING = {
             'class': 'django.utils.log.AdminEmailHandler'
         },
         'slack_admins': {
-            'level': 'ERROR',
+            'level': 'INFO',
             'filters': ['require_debug_false'],
             'class': 'django_slack.log.SlackExceptionHandler'
         },
         'console': {
-            'level': 'ERROR',
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
         },
     },
     'loggers': {
         'django.request': {
-            'handlers': ['mail_admins', 'slack_admins'],
+            'handlers': ['console', 'mail_admins', 'slack_admins'],
             'level': 'ERROR',
             'propagate': True,
         },
@@ -240,14 +242,14 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-        'firecares.firecares_core.middleware': {
-            'handlers': [],
+        'firecares': {
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         },
-        'firecares': {
+        'firecares.firecares_core.views': {
             'handlers': ['console'],
-            'level': 'ERROR',
+            'level': 'INFO',
             'propagate': True,
         }
     }
@@ -287,7 +289,9 @@ HELIX_REDIRECT = 'https://192.168.33.15:8000/oauth'
 HELIX_LOGOUT_URL = HELIX_ROOT + '/App/logout/' + HELIX_CLIENT_ID
 HELIX_WHOAMI_URL = HELIX_ROOT + '/App/api/v2/Account/WhoAmI'
 HELIX_FUNCTIONAL_TITLE_URL = HELIX_ROOT + '/App/api/v2/Membership/FuncTitle/'
-HELIX_ACCEPTED_CHIEF_ADMIN_TITLES = ['FIRE_CHIEF']
+HELIX_ACCEPTED_CHIEF_ADMIN_TITLES = ['FIRE_CHIEF', 'DEPT_CHIEF', 'CEO', 'COMMISH', 'CHIEF_OFF', 'PRES']
+
+STATICSITEMAPS_ROOT_SITEMAP = 'firecares.urls.sitemaps'
 
 CELERY_DEFAULT_QUEUE = "default"
 CELERY_DEFAULT_EXCHANGE = "default"

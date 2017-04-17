@@ -32,10 +32,10 @@ class FireStationTests(BaseFirecaresTestcase):
     def test_firestation_website_links(self):
         FireDepartment.objects.create(name='Good', website='http://www.google.com')
         test_all_departments_urls()
-        self.assertTrue(len(mail.outbox) == 0, "email sent to admin with errors")
+        self.assertTrue(len(mail.outbox) == 0, "email not sent to admin with errors")
         FireDepartment.objects.create(name='Bad', website='www.mawebsith.com')
         test_all_departments_urls()
-        self.assertTrue(len(mail.outbox) == 1, "email not sent to admin with errors")
+        self.assertTrue(len(mail.outbox) == 1, "email sent to admin with errors")
 
     def test_api_authentication(self):
         """
@@ -885,15 +885,12 @@ class FireStationTests(BaseFirecaresTestcase):
 
     def test_documents(self):
         c = Client()
-        c.login(**self.admin_creds)
-        try:
-            fd = FireDepartment.objects.get(id=0)
-        except FireDepartment.DoesNotExist:
-            fd = FireDepartment.objects.create(id=0,
-                                               name='Test db',
-                                               population=0,
-                                               population_class=1,
-                                               department_type='test')
+        c.login(**self.non_admin_creds)
+        fd, _ = FireDepartment.objects.get_or_create(id=0,
+                                                     name='Test db',
+                                                     population=0,
+                                                     population_class=1,
+                                                     department_type='test')
 
         # Documents page
         response = c.get(reverse('documents', args=[fd.id]))
@@ -904,19 +901,33 @@ class FireStationTests(BaseFirecaresTestcase):
         file_content = 'file upload success'
         text_file = SimpleUploadedFile(filename, file_content, content_type='text/plain')
         response = c.post(reverse('documents', args=[fd.id]), {'file': text_file})
-        self.assertEqual(response.status_code, 302)
+        # Gated to only department data curators
+        self.assertEqual(response.status_code, 401)
+
+        fd.add_curator(self.non_admin_user)
+        text_file = SimpleUploadedFile(filename, file_content, content_type='text/plain')
+        response = c.post(reverse('documents', args=[fd.id]), {'file': text_file})
+        # Redirect == success
+        self.assert_redirect_to(response, 'documents_file')
+        fd.remove_curator(self.non_admin_user)
 
         # Ensure that the document is owned by the uploaded user
-        self.assertEqual(Document.objects.all().first().uploaded_by, self.admin_user)
+        self.assertEqual(Document.objects.all().first().uploaded_by, self.non_admin_user)
 
         # Download document
         response = c.get(reverse('documents_file', args=[fd.id, filename]))
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.has_header('X-Accel-Redirect'))
 
-        # Delete document
+        # Delete document, only available to curators
+        response = c.post(reverse('documents_delete', args=[fd.id]), {'filename': filename})
+        # Redirection to login == perm failure
+        self.assert_redirect_to_login(response)
+
+        fd.add_curator(self.non_admin_user)
         response = c.post(reverse('documents_delete', args=[fd.id]), {'filename': filename})
         self.assertEqual(response.status_code, 200)
+        fd.remove_curator(self.non_admin_user)
 
         c.logout()
         c.login(**self.non_admin_creds)
@@ -925,7 +936,7 @@ class FireStationTests(BaseFirecaresTestcase):
         self.assertEqual(response.status_code, 200)
 
         response = c.post(reverse('documents', args=[fd.id]), {'file': text_file})
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 401)
 
         response = c.get(reverse('documents_file', args=[fd.id, filename]))
         self.assertEqual(response.status_code, 200)
@@ -933,7 +944,7 @@ class FireStationTests(BaseFirecaresTestcase):
 
         # Delete document
         response = c.post(reverse('documents_delete', args=[fd.id]), {'filename': filename})
-        self.assertEqual(response.status_code, 302)
+        self.assert_redirect_to_login(response)
 
     def test_remove_intersecting_depts(self):
         us = Country.objects.create(iso_code='US', name='United States')
@@ -1097,11 +1108,12 @@ class FireStationTests(BaseFirecaresTestcase):
         resp = c.post(reverse('account_request'), data={'email': 'tester@mytest.com', 'department': fd.id})
         self.assert_redirect_to(resp, 'show_message')
         resp = c.get(resp['Location'])
-        self.assertContains(resp, 'We will be in touch with you to verify your account')
+        self.assertContains(resp, 'You have been sent an email with the details of access policy')
 
         # Email should be sent to this department's admins notifying them that an account request has been submitted...
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].recipients(), ['non_admin@example.com'])
+        self.assert_email_appears_valid(mail.outbox[0])
+        self.assertEqual(mail.outbox[0].recipients(), ['non_admin@example.com', 'contact@firecares.org'])
 
         # Only department admin and superusers can see this page
         resp = c.get(reverse('admin_department_account_requests', args=[fd.id]) + '?email=tester@mytest.com')
@@ -1119,6 +1131,7 @@ class FireStationTests(BaseFirecaresTestcase):
         self.assert_redirect_to(resp, 'firedepartment_detail_slug')
 
         self.assertEqual(len(mail.outbox), 2)
+        map(self.assert_email_appears_valid, mail.outbox)
         self.assertEqual(mail.outbox[1].recipients(), ['tester@mytest.com'])
         self.assertTrue('Need more information' in mail.outbox[1].body)
 
@@ -1136,6 +1149,8 @@ class FireStationTests(BaseFirecaresTestcase):
 
         # 1 email for the request to the department admin, 1 for the invite to the end user
         self.assertEqual(len(mail.outbox), 4)
+        self.assert_email_appears_valid(mail.outbox[2])
+        self.assert_email_appears_valid(mail.outbox[3])
         user_email = mail.outbox[3]
         self.assertEqual(user_email.recipients(), ['tester2@mytest.com'])
         self.assertTrue('accept the invite' in user_email.body)
@@ -1221,3 +1236,17 @@ class FireStationTests(BaseFirecaresTestcase):
         c.login(**self.admin_creds)
         response = c.put(url, data=new_geom, content_type='application/json')
         self.assertEqual(response.status_code, 204)
+
+    def test_local_number_loading(self):
+        for i in [95512, 95559, 95560, 97963]:
+            FireDepartment.objects.create(id=i, name='TEST-{}'.format(i))
+
+        try:
+            call_command('load-local-numbers', 'firecares/firestation/tests/mock/local_numbers.csv', stdout=StringIO())
+        except:
+            self.fail('Loading local #s that having a missing FireCARES department reference should NOT throw an exception')
+
+        self.assertEqual(FireDepartment.objects.get(id=95512).iaff, '2876,3817')
+        self.assertEqual(FireDepartment.objects.get(id=95559).iaff, '726')
+        self.assertEqual(FireDepartment.objects.get(id=95560).iaff, '726')
+        self.assertEqual(FireDepartment.objects.get(id=97963).iaff, '452,4378')

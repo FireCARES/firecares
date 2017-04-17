@@ -12,6 +12,7 @@
                 <li class="onepage"><a href="{% url 'contact_us' %}">Contact Us</a></li>
                 <li class="onepage"><a href="{% url 'faq.html' %}">FAQs</a></li>
                 {% if request.user.is_anonymous %}
+                    <li class="onepage"><a href="{% url 'registration_register' %}">Request Account</a></li>
                     <li class="onepage"><a href="{% url 'login' %}">Login</a></li>
                 {% else %}
                     <li class="onepage"><a href="{% url 'logout' %}">Logout</a></li>

@@ -4,7 +4,7 @@ import numpy as np
 from django.core.management.base import BaseCommand
 from firecares.firestation.models import FireDepartment
 from firecares.tasks.update import (
-    update_performance_score, create_quartile_views_task, create_national_calculations_view_task)
+    update_performance_score, refresh_quartile_view_task, refresh_national_calculations_view_task)
 from firecares.utils import lenient_summation
 
 
@@ -123,6 +123,6 @@ fd_id, state, lr_fire, mr_fire, h.fire, lr_inj, mr_inj, h.inj, lr_death, mr_deat
 
         if not dry_run:
             self.stdout.write('Creating/refreshing "population_quartiles" view')
-            create_quartile_views_task.delay()
+            refresh_quartile_view_task.delay()
             self.stdout.write('Creating/refreshing "national_calculations" view')
-            create_national_calculations_view_task.delay()
+            refresh_national_calculations_view_task.delay()

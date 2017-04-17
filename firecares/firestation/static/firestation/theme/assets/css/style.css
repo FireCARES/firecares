@@ -11510,9 +11510,26 @@ div.unauthenticated * div.gauge-inverse {
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#495E82', endColorstr='#2d3a51', GradientType=1);
   /* ie6-9 */
 }
+.quick-transition {
+  -moz-transition: all 0.2s;
+  -o-transition: all 0.2s;
+  -webkit-transition: all 0.2s;
+  transition: all 0.2s;
+}
+.marketing-icon a:hover i {
+  color: #ffd58c;
+  -moz-transition: all 0.2s;
+  -o-transition: all 0.2s;
+  -webkit-transition: all 0.2s;
+  transition: all 0.2s;
+}
 .marketing-icon i {
   font-size: 60px !important;
   color: #F29A00;
+  -moz-transition: all 0.2s;
+  -o-transition: all 0.2s;
+  -webkit-transition: all 0.2s;
+  transition: all 0.2s;
 }
 .ct-iconBox--2col .ct-iconBox--description,
 .ct-iconBox--2col .ct-icon {
@@ -11696,7 +11713,7 @@ form[name='boundaryUpload'] a.commit:hover {
 .right-navbar {
   right: 45px;
   position: absolute;
-  width: 200px;
+  width: 300px;
 }
 .partners .owl-pagination {
   display: none;
@@ -11786,7 +11803,7 @@ form[name='boundaryUpload'] a.commit:hover {
   color: red;
 }
 .whitelist-admin td {
-  width: 33%;
+  width: 20%;
 }
 .whitelist-admin span.label.label-danger {
   margin-right: 2em;

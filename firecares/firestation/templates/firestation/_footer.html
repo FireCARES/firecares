@@ -38,7 +38,7 @@
                                 <a class="text-capitalize" href="{% url 'media' %}">FireCARES in the Media</a>
                                 <a class="text-capitalize" target="_blank" href="{{ STATIC_URL }}access_policy.pdf">FireCARES Access Policy</a>
                                 {% if not user.is_authenticated %}
-                                <a href="{% url 'registration_register' %}" class="text-capitalize">sign up</a>
+                                <a href="{% url 'registration_register' %}" class="text-capitalize">request account</a>
                                 <a href="{% url 'login' %}?next={% url 'firedepartment_list' %}" class="text-capitalize">login</a>
                                 {% else %}
                                 <a href="{% url 'logout' %}" class="text-capitalize">logout</a>

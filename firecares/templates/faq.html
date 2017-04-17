@@ -1,6 +1,7 @@
 {% extends "firestation/_conservative_base.html" %}
 
 {% load compress %}
+{% load staticfiles %}
 
 {% block page_title %}
 FAQs
@@ -121,27 +122,39 @@ Frequently Asked Questions
                                     <i class="fa fa-link"></i>
                                 </a>
                             </h4>
-                            <ol class="faq-list">
-                                <li>
-                                    IAFF Local affiliate officers can use IMIS credentials to <a href="{% url 'login' %}">login</a> to FireCARES.
-                                    to FireCARES.
-                                </li>
-                                <li>
-                                    Fire Chiefs can <a href="{% url 'login' %}">login</a> via the IAFC's Helix single sign on service.
-                                </li>
-                                <li>
-                                    If you are a member of a specific organization that has been cleared for login, you can <a href="{% url 'registration_register' %}">register</a>
-                                    to get a FireCARES account using your email with the organizations email domain.
-                                </li>
-                                <li>
-                                    If you work at a fire department, you may be able to send an account request through FireCARES that will notify
-                                    your chief or IAFF local president of your account request.  request. Upon their approval, you will be provided
-                                    access.<a href="{% url 'firedepartment_list' %}">Search</a> for your department and click
-                                    <strong>&quot;Request access from your fire chief or local president.&quot;</strong> If your fire
-                                    chief or local president has registered with FireCARES for your department, then he/she will receive a
-                                    notification to approve your account request.
-                                </li>
-                            </ol>
+
+                            <p class="ct-u-marginTop10">
+                                <strong>Fire Chiefs/Department Chiefs/Chief Officers/Commissioners/CEOs/Presidents:</strong>
+                                <a href="{% static 'chief_login.pdf' %}">See detailed instructions about logging into FireCARES.</a>
+                            </p>
+
+                            <p>
+                                <strong>IAFF Officers:</strong>
+                                <a href="{% static 'iaff_login.pdf' %}">See detailed instructions about logging into FireCARES.</a>
+                            </p>
+
+                            <p>
+                                <strong>Others:</strong>
+                                If you are a member of a specific organization that has been cleared for login, you can <a href="{% url 'registration_register' %}">register</a>
+                                to get a FireCARES account using your email with the organizations email domain.  Currently, the following whitelisted
+                                email domains include:
+
+                                <ul>
+                                    {% for w in whitelisted_domains %}
+                                    <li>
+                                        {{ w.email_or_domain }}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+
+                                If you work at a fire department, you may be able to send an account request through FireCARES that will notify
+                                your chief or IAFF local president of your account request.  request. Upon their approval, you will be provided
+                                access.<a href="{% url 'firedepartment_list' %}">Search</a> for your department and click
+                                <strong>&quot;Request access from your Fire Chief or Local Officer.&quot;</strong> If your fire
+                                chief or local president has registered with FireCARES for your department, then he/she will receive a
+                                notification to approve your account request.
+                            </p>
+
                         </div>
 
                         <div class="ct-u-marginBottom50" id="trouble-logging-in">

@@ -1,0 +1,8 @@
+{% load favit_tags %}
+
+{% favorite_button object %}
+<a href="javascript:window.print()" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-printer fa-2x"></i></a>
+<a href="{% url 'documents' object.id %}" title="View this department's documents" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-docs fa-2x"></i></a>
+{% if user_can_admin %}
+<a href="{% url 'admin_department_users' object.id %}" title="Manage department users" class="btn btn-sm btn-transparent–border ct-u-text--white"><i class="icon-people fa-2x"></i></a>
+{% endif %}
