@@ -24,6 +24,7 @@ from django.http.response import HttpResponseBadRequest
 from django.template import loader
 from django.utils.encoding import smart_str
 from firecares.tasks.email import send_mail
+from firecares.utils import get_property
 from firecares.firecares_core.ext.invitations.views import send_invites
 from firecares.firecares_core.mixins import LoginRequiredMixin
 from firecares.firecares_core.models import RegistrationWhitelist, AccountRequest
@@ -677,6 +678,7 @@ class DownloadShapefile(LoginRequiredMixin, View):
         # Name, Type, Width
         fields = [
             ('id', ogr.OFTInteger, None),
+            ('station_id', ogr.OFTInteger, None),
             ('name', ogr.OFTString, 254),
             ('department', ogr.OFTInteger, None),
             ('station_nu', ogr.OFTInteger, None),
@@ -735,17 +737,28 @@ class DownloadShapefile(LoginRequiredMixin, View):
             feature = ogr.Feature(layer.GetLayerDefn())
 
             # Set the attributes using the values from the delimited text file
-            feature.SetField('id', row.id)
-            feature.SetField('name', str(row.name))
-            feature.SetField('department', row.department.id)
-            feature.SetField('station_nu', row.station_number)
 
-            feature.SetField('address_l1', str(getattr(row.station_address, 'address_line1', str)) or None)
-            feature.SetField('address_l2', str(getattr(row.station_address, 'address_line2', str)) or None)
-            feature.SetField('city', str(getattr(row.station_address, 'city', str)) or None)
-            feature.SetField('state', str(getattr(row.station_address, 'state_province', str)) or None)
-            feature.SetField('zipcode', str(getattr(row.station_address, 'postal_code', str)) or None)
-            feature.SetField('country', str(getattr(row.station_address, 'country_id', str)) or None)
+            field_mappings = {
+                'name': 'name',
+                'station_nu': 'station_number',
+                'department': 'department.id',
+                'station_nu': 'station_number',
+                'address_l1': 'station_address.address_line1',
+                'address_l2': 'station_address.address_line2',
+                'country': 'station_address.country_id',
+                'state': 'station_address.state_province',
+                'city': 'station_address.city',
+                'zipcode': 'station_address.postal_code',
+                'station_id': 'id',
+            }
+
+            for field, obj_prop in field_mappings.items():
+                value = get_property(row, obj_prop)
+                if value:
+                    if isinstance(value, basestring):
+                        feature.SetField(field, str(value))
+                    else:
+                        feature.SetField(field, value)
 
             # Populate staffing for each unit
             for apparatus, apparatus_alias in Staffing.APPARATUS_SHAPEFILE_CHOICES:

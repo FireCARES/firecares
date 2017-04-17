@@ -47,6 +47,21 @@ def get_email_domain(email):
     return re.match(r'(^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)$)', email).groups()[1].lower()
 
 
+def get_property(obj, prop):
+    dest_obj = prop.split('.')[:-1]
+    src_prop = prop.split('.')[-1]
+
+    for o in dest_obj:
+        obj = getattr(obj, o)
+
+    if obj:
+        a = getattr(obj, src_prop)
+        if callable(a):
+            return a()
+        else:
+            return a
+
+
 class IntChoiceEnum(IntEnum):
     @classmethod
     def choices(cls):

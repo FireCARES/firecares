@@ -30,7 +30,7 @@ LOGGING['loggers'] = {  # noqa
     },
     'osgeo_importer': {
         'handlers': ['console'],
-        'level': 'DEBUG',
+        'level': 'ERROR',
         'propagate': True,
     },
     'firecares': {

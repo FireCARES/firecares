@@ -718,18 +718,19 @@ class FireStationTests(BaseFirecaresTestcase):
         FireDepartment.objects.create(id=87255, name='Los Angeles County Fire Department')
 
         feats = {
-        "type": "FeatureCollection",  # noqa
-        "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },  # noqa
+            "type": "FeatureCollection",  # noqa
+            "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },  # noqa
 
-        "features": [
-        { "type": "Feature", "properties": { "id": 49620, "name": "Los Angeles County Fire Department Station 80", "department": 87255, "station_nu": 80, "address_l1": "1533 West Sierra Highway", "address_l2": None, "city": "Acton", "state": "CA", "zipcode": "93510-1894", "country": "US", "engine": 4, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": None, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.142042439999898, 34.487823576000039 ] } },  # noqa
-        { "type": "Feature", "properties": { "id": 16616, "name": "Los Angeles County Fire Department Station 65", "department": 87255, "station_nu": 65, "address_l1": "4206 North Cornell Road", "address_l2": None, "city": "Agoura", "state": "CA", "zipcode": "91301-2528", "country": "US", "engine": 3, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": None, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.753559992999897, 34.134420014000057 ] } },  # noqa
-        { "type": "Feature", "properties": { "id": 795, "name": "Los Angeles County Fire Department Station 89", "department": 87255, "station_nu": 89, "address_l1": "29575 Canwood Street", "address_l2": None, "city": "Agoura Hills", "state": "CA", "zipcode": "91301-1558", "country": "US", "engine": 3, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": 2, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.769329790999905, 34.147909454000057 ] } },  # noqa
-        { "type": "Feature", "properties": { "id": 1334, "name": "Los Angeles County Fire Department Station 11", "department": 87255, "station_nu": 11, "address_l1": "2521 North El Molino Avenue", "address_l2": None, "city": "Altadena", "state": "CA", "zipcode": "91001-2317", "country": "US", "engine": 4, "engine_1": 5, "truck":None, "quint": 4, "als_am": None, "bls_am": None, "rescue": None, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.132906841999898, 34.188535251000076 ] } },  # noqa
-        { "type": "Feature", "properties": { "id": 26322, "name": "Los Angeles County Fire Department Station 12", "department": 87255, "station_nu": 12, "address_l1": "2760 North Lincoln Avenue", "address_l2": None, "city": "Altadena", "state": "CA", "zipcode": "91001-4961", "country": "US", "engine": 4, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": None, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point","coordinates": [ -118.158457743999918, 34.192918916000053 ] } },  # noqa
-        { "type": "Feature", "properties": { "id": 35013, "name": "Los Angeles County Fire Department Station 55", "department": 87255, "station_nu": 55, "address_l1": "945 Avalon Canyon Road", "address_l2": None, "city": "Avalon", "state": "CA", "zipcode": "90704", "country": "US", "engine": 1, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": 1, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.33542908499993, 33.333073288000037 ] } },  # noqa
-        { "type": "Feature", "properties": { "id": 29712, "name": "Los Angeles County Fire Department Station 32", "department": 87255, "station_nu": 32, "address_l1": "605 North Angeleno Avenue", "address_l2": None, "city": "Azusa", "state": "CA", "zipcode": "91702-2904", "country": "US", "engine": 3, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": 3, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -117.910420849999923, 34.131861813000057 ] } }  # noqa
-        ]}
+            "features": [
+                { "type": "Feature", "properties": { "id": 49620, "name": "Los Angeles County Fire Department Station 80", "department": 87255, "station_nu": 80, "address_l1": "1533 West Sierra Highway", "address_l2": None, "city": "Acton", "state": "CA", "zipcode": "93510-1894", "country": "US", "engine": 4, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": None, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.142042439999898, 34.487823576000039 ] } },  # noqa
+                { "type": "Feature", "properties": { "id": 16616, "name": "Los Angeles County Fire Department Station 65", "department": 87255, "station_nu": 65, "address_l1": "4206 North Cornell Road", "address_l2": None, "city": "Agoura", "state": "CA", "zipcode": "91301-2528", "country": "US", "engine": 3, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": None, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.753559992999897, 34.134420014000057 ] } },  # noqa
+                { "type": "Feature", "properties": { "id": 795, "name": "Los Angeles County Fire Department Station 89", "department": 87255, "station_nu": 89, "address_l1": "29575 Canwood Street", "address_l2": None, "city": "Agoura Hills", "state": "CA", "zipcode": "91301-1558", "country": "US", "engine": 3, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": 2, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.769329790999905, 34.147909454000057 ] } },  # noqa
+                { "type": "Feature", "properties": { "id": 1334, "name": "Los Angeles County Fire Department Station 11", "department": 87255, "station_nu": 11, "address_l1": "2521 North El Molino Avenue", "address_l2": None, "city": "Altadena", "state": "CA", "zipcode": "91001-2317", "country": "US", "engine": 4, "engine_1": 5, "truck":None, "quint": 4, "als_am": None, "bls_am": None, "rescue": None, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.132906841999898, 34.188535251000076 ] } },  # noqa
+                { "type": "Feature", "properties": { "id": 26322, "name": "Los Angeles County Fire Department Station 12", "department": 87255, "station_nu": 12, "address_l1": "2760 North Lincoln Avenue", "address_l2": None, "city": "Altadena", "state": "CA", "zipcode": "91001-4961", "country": "US", "engine": 4, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": None, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point","coordinates": [ -118.158457743999918, 34.192918916000053 ] } },  # noqa
+                { "type": "Feature", "properties": { "id": 35013, "name": "Los Angeles County Fire Department Station 55", "department": 87255, "station_nu": 55, "address_l1": "945 Avalon Canyon Road", "address_l2": None, "city": "Avalon", "state": "CA", "zipcode": "90704", "country": "US", "engine": 1, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": 1, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.33542908499993, 33.333073288000037 ] } },  # noqa
+                { "type": "Feature", "properties": { "id": 29712, "name": "Los Angeles County Fire Department Station 32", "department": 87255, "station_nu": 32, "address_l1": "605 North Angeleno Avenue", "address_l2": None, "city": "Azusa", "state": "CA", "zipcode": "91702-2904", "country": "US", "engine": 3, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": 3, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -117.910420849999923, 34.131861813000057 ] } }  # noqa
+            ]
+        }
 
         staffing_fields = dict(Staffing.APPARATUS_SHAPEFILE_CHOICES)
         staffing_fields_aliases = dict((v, k) for k, v in staffing_fields.iteritems())
@@ -768,7 +769,7 @@ class FireStationTests(BaseFirecaresTestcase):
 
             if address_fields:
                 if address_fields['country']:
-                    country, created = Country.objects.get_or_create(name=address_fields['country'])
+                    country, created = Country.objects.get_or_create(iso_code=address_fields['country'])
                     address_fields['country'] = country
 
                     address, created = Address.objects.update_or_create(defaults=address_geom, **address_fields)
@@ -800,20 +801,20 @@ class FireStationTests(BaseFirecaresTestcase):
         self.create_la_data()
 
         feats = {
-        "type": "FeatureCollection",  # noqa
-        "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },  # noqa
+            "type": "FeatureCollection",  # noqa
+            "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },  # noqa
 
-        "features": [
-        { "type": "Feature", "properties": { "id": 49620, "name": "Los Angeles County Fire Department Station 3", "department": 87255, "station_nu": 3, "address_l1": "1534 West Sierra Highway", "address_l2": None, "city": "Acton", "state": "CA", "zipcode": "93510-1894", "country": "US", "engine": 4, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": None, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.145, 34.489 ] } },  # noqa
-        { "type": "Feature", "properties": { "id": 16616, "name": "Los Angeles County Fire Department Station 65", "department": 87255, "station_nu": 65, "address_l1": "4206 North Cornell Road", "address_l2": None, "city": "Agoura", "state": "CA", "zipcode": "91301-2528", "country": "US", "engine": 3, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": None, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.753559992999897, 34.134420014000057 ] } },  # noqa
-        { "type": "Feature", "properties": { "id": 795, "name": "Los Angeles County Fire Department Station 89", "department": 87255, "station_nu": 89, "address_l1": "29575 Canwood Street", "address_l2": "None", "city": "Agoura Hills", "state": "CA", "zipcode": "91301-1558", "country": "US", "engine": 3, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": 2, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.769329790999905, 34.147909454000057 ] } },  # noqa
-        { "type": "Feature", "properties": { "id": 1334, "name": "Los Angeles County Fire Department Station 11", "department": 87255, "station_nu": 11, "address_l1": "2521 North El Molino Avenue", "address_l2": None, "city": "Altadena", "state": "CA", "zipcode": "91001-2317", "country": "US", "engine": 4, "engine_1": 5, "truck":None, "quint": 4, "als_am": None, "bls_am": None, "rescue": None, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.132906841999898, 34.188535251000076 ] } },  # noqa
-        { "type": "Feature", "properties": { "id": 26322, "name": "Los Angeles County Fire Department Station 12", "department": 87255, "station_nu": 12, "address_l1": "2760 North Lincoln Avenue", "address_l2": None, "city": "Altadena", "state": "CA", "zipcode": "91001-4961", "country": "US", "engine": 4, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": None, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point","coordinates": [ -118.158457743999918, 34.192918916000053 ] } },  # noqa
-        { "type": "Feature", "properties": { "id": 35013, "name": "Los Angeles County Fire Department Station 55", "department": 87255, "station_nu": 55, "address_l1": "945 Avalon Canyon Road", "address_l2": None, "city": "Avalon", "state": "CA", "zipcode": "90704", "country": "US", "engine": 1, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": 1, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.33542908499993, 33.333073288000037 ] } },  # noqa
-        { "type": "Feature", "properties": { "id": 29712, "name": "Los Angeles County Fire Department Station 32", "department": 87255, "station_nu": 32, "address_l1": "605 North Angeleno Avenue", "address_l2": None, "city": "Azusa", "state": "CA", "zipcode": "91702-2904", "country": "US", "engine": 3, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": 3, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -117.910420849999923, 34.131861813000057 ] } },  # noqa
-        { "type": "Feature", "properties": { "name": "Los Angeles County Fire Department Station 56", "department": 87255, "station_nu": 56.0, "address_l1": "123 New Rd Canyon Road", "address_l2": None, "city": "Los Angeles", "state": "CA", "zipcode": "90210", "country": "US"}, "geometry": { "type": "Point", "coordinates": [ -118.45, 33.32 ] } },  # noqa
-
-        ]
+            "features": [
+                { "type": "Feature", "properties": { "station_id": 49620, "name": "Los Angeles County Fire Department Station 3", "department": 87255, "station_nu": 3, "address_l1": "1534 West Sierra Highway", "address_l2": None, "city": "Acton", "state": "CA", "zipcode": "93510-1894", "country": "US", "engine": 4, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": None, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.145, 34.489 ] } },  # noqa
+                { "type": "Feature", "properties": { "station_id": 16616, "name": "Los Angeles County Fire Department Station 65", "department": 87255, "station_nu": 65, "address_l1": "4206 North Cornell Road", "address_l2": None, "city": "Agoura", "state": "CA", "zipcode": "91301-2528", "country": "US", "engine": 3, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": None, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.753559992999897, 34.134420014000057 ] } },  # noqa
+                { "type": "Feature", "properties": { "station_id": 795, "name": "Los Angeles County Fire Department Station 89", "department": 87255, "station_nu": 89, "address_l1": "29575 Canwood Street", "address_l2": "None", "city": "Agoura Hills", "state": "CA", "zipcode": "91301-1558", "country": "US", "engine": 3, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": 2, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.769329790999905, 34.147909454000057 ] } },  # noqa
+                { "type": "Feature", "properties": { "station_id": 1334, "name": "Los Angeles County Fire Department Station 11", "department": 87255, "station_nu": 11, "address_l1": "2521 North El Molino Avenue", "address_l2": None, "city": "Altadena", "state": "CA", "zipcode": "91001-2317", "country": "US", "engine": 4, "engine_1": 5, "truck":None, "quint": 4, "als_am": None, "bls_am": None, "rescue": None, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.132906841999898, 34.188535251000076 ] } },  # noqa
+                { "type": "Feature", "properties": { "station_id": 26322, "name": "Los Angeles County Fire Department Station 12", "department": 87255, "station_nu": 12, "address_l1": "2760 North Lincoln Avenue", "address_l2": None, "city": "Altadena", "state": "CA", "zipcode": "91001-4961", "country": "US", "engine": 4, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": None, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point","coordinates": [ -118.158457743999918, 34.192918916000053 ] } },  # noqa
+                { "type": "Feature", "properties": { "station_id": 35013, "name": "Los Angeles County Fire Department Station 55", "department": 87255, "station_nu": 55, "address_l1": "945 Avalon Canyon Road", "address_l2": None, "city": "Avalon", "state": "CA", "zipcode": "90704", "country": "US", "engine": 1, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": 1, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -118.33542908499993, 33.333073288000037 ] } },  # noqa
+                { "type": "Feature", "properties": { "station_id": 29712, "name": "Los Angeles County Fire Department Station 32", "department": 87255, "station_nu": 32, "address_l1": "605 North Angeleno Avenue", "address_l2": None, "city": "Azusa", "state": "CA", "zipcode": "91702-2904", "engine": 3, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": 3, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -117.910420849999923, 34.131861813000057 ] } },  # noqa
+                { "type": "Feature", "properties": { "name": "Los Angeles County Fire Department Station 56", "department": 87255, "station_nu": 56.0, "address_l1": "123 New Rd Canyon Road", "address_l2": None, "city": "Los Angeles", "state": "CA", "zipcode": "90210", "country": "US"}, "geometry": { "type": "Point", "coordinates": [ -118.45, 33.32 ] } },  # noqa
+                { "type": "Feature", "properties": { "name": "Los Angeles County Fire Department Station 32", "department": 87255, "station_nu": 32, "address_l1": "605 North Angeleno Avenue", "address_l2": None, "city": "Azusa", "state": "CA", "zipcode": "91702-2904", "engine": 3, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": 3, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -117.910420849999923, 34.131861813000057 ] } },  # noqa
+            ]
         }
 
         sfu = SimpleUploadedFile("file.json", json.dumps(feats), content_type="application/json")
@@ -841,13 +842,15 @@ class FireStationTests(BaseFirecaresTestcase):
         self.assertEqual(case.station_address.address_line1, '1534 West Sierra Highway')
         self.assertEqual(case.geom.x, -118.145)
         self.assertEqual(case.geom.y, 34.489)
-        self.assertEqual(Address.objects.all().count(), len(feats['features']) + 2)
+        # We have 2 new stations, BUT station 32 is referred to twice in the dump (once w/o station_id), so we _shouldn't_ create
+        # a new record in this case
+        self.assertEqual(Address.objects.all().count(), len(feats['features']) + 1)
 
         new_station = FireStation.objects.get(station_address__city='Los Angeles')
         self.assertTrue(new_station.station_number, 56)
         self.assertTrue(new_station.department.id, 87255)
         self.assertEqual(reversion.get_for_object(new_station).count(), 1)
-        self.assertEqual(Revision.objects.count(), len(feats['features']) + 2 + Staffing.objects.count())
+        self.assertEqual(Revision.objects.count(), len(feats['features']) + 1 + Staffing.objects.count())
         self.assertEqual(reversion.get_for_object(case).count(), 2)
 
         self.assertEqual(2, Staffing.objects.filter(firestation_id=1334, apparatus='Engine').count())
@@ -888,7 +891,7 @@ class FireStationTests(BaseFirecaresTestcase):
 
         for layer in ds:
             self.assertEqual(layer.num_feat, 1)
-            expected_fields = ['id', 'name', 'department', 'station_nu', 'address_l1',
+            expected_fields = ['id', 'station_id', 'name', 'department', 'station_nu', 'address_l1',
                                'address_l2', 'city', 'state', 'zipcode', 'country', 'engine',
                                'engine_1', 'engine_2', 'truck', 'quint', 'als_am', 'bls_am', 'rescue', 'boat',
                                'hazmat', 'chief', 'other']
@@ -896,6 +899,7 @@ class FireStationTests(BaseFirecaresTestcase):
             self.assertListEqual(layer.fields, expected_fields)
 
             for feature in layer:
+                self.assertEqual(feature['station_id'].value, fs.id)
                 self.assertEqual(feature['engine'].value, 4)
                 self.assertEqual(feature['engine_1'].value, 3)
                 self.assertEqual(feature['engine_2'].value, 2)

@@ -1,5 +1,6 @@
 from osgeo_importer.importers import Import, GDALInspector
 from osgeo_importer.inspectors import NoDataSourceFound
+from django.core.exceptions import ValidationError
 from django.contrib.gis.gdal import DataSource
 from firecares.firestation.models import FireDepartment, FireStation, Staffing
 from firecares.firecares_core.models import Address, Country
@@ -13,10 +14,53 @@ class GeoDjangoInspector(GDALInspector):
         self.data = None
         super(GeoDjangoInspector, self).__init__(connection_string, *args, **kwargs)
 
+    def validate(self):
+        if self.data is None:
+            raise NoDataSourceFound
+
+        if len(self.data) != 1:
+            raise ValidationError('Expecting single layer, got {}'.format(len(self.data)))
+
+        layer = self.data[0]
+
+        # Ensure that all required columns are present
+        required_fields = ['name', 'station_id', 'department', 'station_nu', 'address_l1', 'address_l2', 'city', 'state', 'zipcode', 'country']
+
+        missing_fields = []
+        for req in required_fields:
+            if req not in layer.fields:
+                missing_fields.append(req)
+
+        if missing_fields:
+            raise ValidationError('Missing fields: {}'.format(', '.join(missing_fields)))
+
+        # All stations should have a department associated
+        missing_departments = []
+        for feature in layer:
+            d_id = feature.get('department')
+            if not FireDepartment.objects.filter(id=d_id).exists():
+                missing_departments.append(d_id)
+
+        if missing_departments:
+            raise ValidationError('Invalid or unspecified department references: {}'.format(', '.join(map(str, missing_departments))))
+
+        # All stations should either have an ID that exists or be zero
+        missing_stations = []
+        for feature in layer:
+            s_id = feature.get('station_id')
+            # DataSource automatically assigns an ID if the ID is missing based on the current row,
+            # so we need to use "station_id" instead :/
+            if not FireStation.objects.filter(id=s_id).exists() and s_id:
+                missing_stations.append(s_id)
+
+        if missing_stations:
+            raise ValidationError('Invalid station ID: {}'.format(', '.join(map(str, missing_stations))))
+
     def open(self, *args, **kwargs):
         """
         Opens the file.
         """
+
         filename = self.file
 
         prepare_method = 'prepare_{0}'.format(self.method_safe_filetype)
@@ -27,8 +71,7 @@ class GeoDjangoInspector(GDALInspector):
 
         self.data = DataSource(filename, *args, **kwargs)
 
-        if self.data is None:
-            raise NoDataSourceFound
+        self.validate()
 
         return self.data
 
@@ -77,10 +120,16 @@ class GeoDjangoImport(Import):
         self.file = filename
         self.upload_file = upload_file
 
+    def update_station(self, station, mapping):
+        for attr, value in mapping.items():
+            setattr(station, attr, value)
+        station.save()
+
     def import_stations(self, *args, **kwargs):
         """
         Parses incoming station records and updates internal objects.
         """
+
         data, _ = self.open_source_datastore(self.file, *args, **kwargs)
 
         field_mappings = {
@@ -93,7 +142,7 @@ class GeoDjangoImport(Import):
             'state': 'station_address__state_province',
             'city': 'station_address__city',
             'zipcode': 'station_address__postal_code',
-            'id': 'id',
+            'station_id': 'id',
         }
 
         results = []
@@ -121,7 +170,10 @@ class GeoDjangoImport(Import):
                 if address_fields:
                     address_geom = {'geom': feature.geom.geos}
                     if address_fields['country']:
-                        country, created = Country.objects.get_or_create(name=address_fields['country'])
+                        country, created = Country.objects.get_or_create(iso_code=address_fields['country'])
+                        if created:
+                            country.name = address_fields['country']
+                            country.save()
                         address_fields['country'] = country
                         address, created = Address.objects.update_or_create(defaults=address_geom, **address_fields)
                         mapping['station_address'] = address
@@ -130,11 +182,24 @@ class GeoDjangoImport(Import):
                         mapping['state'] = address.state_province
                         mapping['zipcode'] = address.postal_code
 
-                try:
-                    object = FireStation.objects.get(**mapping)
-                except FireStation.DoesNotExist:
-                    object, created = FireStation.objects.update_or_create(id=mapping['id'], defaults=mapping)
-                    results.append([object, {}])
+                # GDAL's DataSource appears to automatically assign an id when it's missing :/.  This could have
+                # unintended side-effects (eg. clobbering existing records) if not captured; however,
+                # there is also potential that perfectly valid records w/ valid ids could be skipped in this case
+                # as well (for low id numbers), so we need to use another column as the truth for station identifiers.
+                station_id = mapping.pop('id')
+                if station_id:
+                    object = FireStation.objects.get(id=station_id)
+                    self.update_station(object, mapping)
+                else:
+                    # One last sanity check, if the station_id is empty, but the station number exists, make sure that we update
+                    # versus create a new one
+                    st = FireStation.objects.filter(station_number=mapping.get('station_number'), department=mapping.get('department')).first()
+                    if st:
+                        object = st
+                        self.update_station(object, mapping)
+                    else:
+                        object = FireStation.objects.create(**mapping)
+                    results.append([str(object), {}])
 
                 self.populate_staffing(feature, object)
 

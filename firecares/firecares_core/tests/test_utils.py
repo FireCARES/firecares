@@ -1,5 +1,8 @@
+from django.contrib.gis.geos import Point
 from django.test import TestCase
-from firecares.utils import lenient_summation, lenient_mean
+from firecares.firecares_core.models import Address, Country
+from firecares.firestation.models import FireStation
+from firecares.utils import lenient_summation, lenient_mean, get_property
 
 
 class TestUtilityFunctions(TestCase):
@@ -22,3 +25,13 @@ class TestUtilityFunctions(TestCase):
         d = {'avg': 1.5}
         d2 = {'avg': 2.5}
         self.assertEqual(lenient_mean(None, d, d2, mapping=lambda x: x['avg'] if x else None), 2)
+
+    def test_nested_property_retrieval(self):
+        c = Country.objects.create(iso_code='US', name='\'Merica')
+        addr = Address.objects.create(address_line1='Line1', country=c, geom=Point(-118.42170426600454, 34.09700463377199))
+        fs = FireStation.objects.create(name='TEST FS', station_address=addr, geom=Point(-118.42170426600454, 34.09700463377199))
+
+        self.assertEqual(get_property(fs, 'name'), 'TEST FS')
+        self.assertEqual(get_property(fs, 'station_address.address_line1'), 'Line1')
+        self.assertEqual(get_property(fs, 'station_address.country.name'), '\'Merica')
+        self.assertEqual(get_property(fs, 'station_address.address_line1.upper'), 'LINE1')
