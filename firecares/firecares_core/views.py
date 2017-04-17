@@ -51,7 +51,8 @@ class ForgotUsername(View):
                                'registration/forgot_username_email.txt',
                                context,
                                settings.DEFAULT_FROM_EMAIL,
-                               user.email)
+                               user.email,
+                               html_email_template_name='registration/forgot_username_email.html')
             return redirect(reverse('username_sent'))
         return render(request, self.template_name, {'form': form})
 
@@ -61,11 +62,13 @@ class ContactUs(View):
 
     def send_email(self, contact):
         body = loader.render_to_string('contact/contact_admin_email.txt', dict(contact=contact))
+        body_html = loader.render_to_string('contact/contact_admin_email.html', dict(contact=contact))
 
         email_message = EmailMultiAlternatives('Contact request submitted',
                                                body,
                                                settings.DEFAULT_FROM_EMAIL,
                                                [x[1] for x in settings.ADMINS])
+        email_message.attach_alternative(body_html, "text/html")
         send_mail.delay(email_message)
 
     def _save_and_notify(self, form):
@@ -170,15 +173,18 @@ class AccountRequestView(CreateView):
         if self.object.department:
             to = [x.email for x in self.object.department.get_department_admins()]
             body = loader.render_to_string('contact/account_request_department_admin_email.txt', dict(contact=self.object, site=Site.objects.get_current()))
+            body_html = loader.render_to_string('contact/account_request_department_admin_email.html', dict(contact=self.object, site=Site.objects.get_current()))
         else:
             to = [self.object.email]
             body = loader.render_to_string('contact/account_request_email.txt', dict(STATIC_URL=settings.STATIC_URL, contact=self.object, site=Site.objects.get_current()))
+            body_html = loader.render_to_string('contact/account_request_email.html', dict(contact=self.object))
         email_message = EmailMultiAlternatives('{} - Access.'.format(Site.objects.get_current().name),
                                                body,
                                                settings.DEFAULT_FROM_EMAIL,
                                                to,
                                                cc=['contact@firecares.org'],
                                                reply_to=['contact@firecares.org'])
+        email_message.attach_alternative(body_html, "text/html")
         send_mail.delay(email_message)
 
 
