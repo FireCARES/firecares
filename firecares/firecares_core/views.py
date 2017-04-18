@@ -27,7 +27,7 @@ from firecares.firestation.models import FireDepartment
 from firecares.firecares_core.ext.registration.views import SESSION_EMAIL_WHITELISTED
 from .forms import ContactForm
 from .models import PredeterminedUser, RegistrationWhitelist, DepartmentAssociationRequest
-from .mixins import LoginRequiredMixin
+from .mixins import LoginRequiredMixin, SuperUserRequiredMixin
 from osgeo_importer.views import FileAddView
 
 logger = logging.getLogger(__name__)
@@ -448,7 +448,12 @@ class FAQView(TemplateView):
         return context
 
 
-class TruncatedFileAddView(FileAddView):
+class TruncatedFileAddView(SuperUserRequiredMixin, FileAddView):
+    def dispatch(self, *args, **kwargs):
+        ret = super(TruncatedFileAddView, self).dispatch(*args, **kwargs)
+        ret.set_cookie('sticky', '1')
+        return ret
+
     def form_valid(self, form):
         fname = form.instance.file.name
         if len(fname) > 50:

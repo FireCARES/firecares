@@ -14,7 +14,6 @@ from .firestation.api import StaffingResource, FireStationResource, FireDepartme
 from tastypie.api import Api
 from firestation.views import Home
 from osgeo_importer.urls import importer_api
-from django.contrib.auth.decorators import permission_required
 from sitemaps import BaseSitemap, DepartmentsSitemap
 
 admin.autodiscover()
@@ -67,8 +66,8 @@ urlpatterns = patterns('',
     url(r'^favit/', include('favit.urls')),
 
     # importer routes
-    url(r'^uploads/new$', permission_required('change_firestation')(TruncatedFileAddView.as_view()), name='uploads-new'),
-    url(r'^uploads/new/json$', permission_required('change_firestation')(TruncatedFileAddView.as_view(json=True)), name='uploads-new-json'),
+    url(r'^uploads/new$', TruncatedFileAddView.as_view(), name='uploads-new'),
+    url(r'^uploads/new/json$', TruncatedFileAddView.as_view(json=True), name='uploads-new-json'),
 
     # url(r'^uploads/?$', permission_required('change_firestation' UploadListView.as_view()), name='uploads-list'),
     url(r'', include(importer_api.urls)),
