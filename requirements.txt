@@ -45,6 +45,6 @@ requests-oauthlib==0.7.0
 coverage==4.2
 scipy==0.17.0
 pyasn1==0.2.3
-django-static-sitemaps==4.2.1
+django-static-sitemaps==4.2.0
 django-import-export==0.5.1
 pylibmc==1.5.2
