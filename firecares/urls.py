@@ -78,7 +78,5 @@ urlpatterns = patterns('',
     url(r'^imis/$', IMISRedirect.as_view(), name='imis')
 )
 
-# urlpatterns += importer_urlpatterns
-
 if settings.DEBUG:
     urlpatterns += patterns('', url(r'^.*/$', page_not_found),)
