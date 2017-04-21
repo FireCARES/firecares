@@ -296,6 +296,7 @@ class CoreTests(BaseFirecaresTestcase):
             self.assertRedirects(resp, reverse('contact_thank_you'))
             self.assertEqual(len(mail.outbox), 1)
             self.assert_email_appears_valid(mail.outbox[0])
+            self.assertItemsEqual(mail.outbox[0].reply_to, ['test@example.com'])
 
     def test_display_404_page(self):
         c = Client()

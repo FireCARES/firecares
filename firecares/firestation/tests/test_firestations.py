@@ -833,6 +833,7 @@ class FireStationTests(BaseFirecaresTestcase):
         payload = [{'index': 0}]
         response = c.post('/importer-api/data-layers/{0}/configure/'.format(js['id']), data=json.dumps(payload),
                           content_type='application/json')
+
         self.assertEqual(response.status_code, 200)
         case = FireStation.objects.get(id=49620)
 

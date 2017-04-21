@@ -67,7 +67,8 @@ class ContactUs(View):
         email_message = EmailMultiAlternatives('Contact request submitted',
                                                body,
                                                settings.DEFAULT_FROM_EMAIL,
-                                               [x[1] for x in settings.ADMINS])
+                                               [x[1] for x in settings.ADMINS],
+                                               reply_to=[contact.email])
         send_mail.delay(email_message)
 
     def _save_and_notify(self, form):
@@ -449,11 +450,6 @@ class FAQView(TemplateView):
 
 
 class TruncatedFileAddView(SuperUserRequiredMixin, FileAddView):
-    def dispatch(self, *args, **kwargs):
-        ret = super(TruncatedFileAddView, self).dispatch(*args, **kwargs)
-        ret.set_cookie('sticky', '1')
-        return ret
-
     def form_valid(self, form):
         fname = form.instance.file.name
         if len(fname) > 50:
