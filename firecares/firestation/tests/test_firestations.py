@@ -494,13 +494,19 @@ class FireStationTests(BaseFirecaresTestcase):
         rfd = FireDepartment.objects.create(name='Richmond', population=0, population_class=9, state='VA')
 
         c = Client()
-        c.login(**self.admin_creds)
+
         response = c.get(reverse('firedepartment_list'), {'q': 'Ca'})
         self.assertTrue(lafd in response.context['object_list'])
         self.assertFalse(rfd in response.context['object_list'])
 
         response = c.get(reverse('firedepartment_list'), {'q': '', 'state': 'CA'})
         self.assertTrue(lafd in response.context['object_list'])
+
+        # Ensure that syntax query errors don't raise 500
+        try:
+            response = c.get(reverse('firedepartment_list'), {'q': 'dept:1 \'& 1'})
+        except Exception as e:
+            self.fail(e)
 
     def test_generate_thumbnail_url(self):
         """

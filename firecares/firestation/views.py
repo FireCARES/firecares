@@ -1,4 +1,5 @@
 import json
+import logging
 import ogr
 import os
 import osr
@@ -16,9 +17,10 @@ from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.http.response import HttpResponseRedirect, HttpResponse, JsonResponse
-from django.db import connection
+from django.db import connection, transaction
 from django.db.models import Q
 from django.db.models.fields import FieldDoesNotExist
+from django.db.utils import ProgrammingError
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http.response import HttpResponseBadRequest
 from django.template import loader
@@ -43,6 +45,7 @@ from invitations.models import Invitation
 
 
 User = get_user_model()
+log = logging.getLogger(__name__)
 
 
 class FeaturedDepartmentsMixin(object):
@@ -492,8 +495,14 @@ class FireDepartmentListView(PaginationMixin, ListView, SafeSortMixin, LimitMixi
 
     def get_queryset(self):
         queryset = super(FireDepartmentListView, self).get_queryset()
-
         queryset = self.handle_search(queryset)
+
+        try:
+            with transaction.atomic():
+                queryset.count()
+        except ProgrammingError as e:
+            log.warning(e)
+            queryset = super(FireDepartmentListView, self).get_queryset()
 
         return queryset
 
