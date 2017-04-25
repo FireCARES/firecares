@@ -190,6 +190,7 @@ INSTALLED_APPS = (
 
 OSGEO_IMPORTER = 'firecares.importers.GeoDjangoImport'
 OSGEO_INSPECTOR = 'firecares.importers.GeoDjangoInspector'
+OSGEO_STORAGE_BUCKET_NAME = os.getenv('OSGEO_STORAGE_BUCKET_NAME', None)
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 

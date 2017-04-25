@@ -4,6 +4,9 @@ import logging
 import requests
 import random
 import string
+import boto
+import uuid
+from boto.s3.key import Key
 from .forms import ForgotUsernameForm, AccountRequestForm
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -29,6 +32,7 @@ from .forms import ContactForm
 from .models import PredeterminedUser, RegistrationWhitelist, DepartmentAssociationRequest
 from .mixins import LoginRequiredMixin, SuperUserRequiredMixin
 from osgeo_importer.views import FileAddView
+from osgeo_importer.models import UploadedData, UploadLayer, DEFAULT_LAYER_CONFIGURATION
 
 logger = logging.getLogger(__name__)
 
@@ -450,6 +454,44 @@ class FAQView(TemplateView):
 
 
 class TruncatedFileAddView(SuperUserRequiredMixin, FileAddView):
+    def create_upload_session(self, upload_file):
+        """
+        Creates an upload session from the file.
+        """
+        upload = UploadedData.objects.create(user=self.request.user, state='UPLOADED', complete=True)
+        upload_file.upload = upload
+        upload_file.save()
+        upload.size = upload_file.file.size
+        upload.name = upload_file.name
+        upload.file_type = self.get_file_type(upload_file.file.path)
+        upload.save()
+
+        bucket_name = getattr(settings, 'OSGEO_STORAGE_BUCKET_NAME', None)
+        if bucket_name:
+            conn = boto.connect_s3()
+            bucket = conn.get_bucket(bucket_name)
+            u = uuid.uuid4()
+            k = Key(bucket)
+            k.key = 'osgeo_importer/{}{}'.format(u, os.path.splitext(upload_file.file.path)[1])
+            k.set_contents_from_filename(upload_file.file.path)
+            conn.close()
+
+            upload.metadata = '{}:{}'.format(bucket_name, k.key)
+            upload.save()
+
+        description = self.get_fields(upload_file.file.path)
+
+        for layer in description:
+            configuration_options = DEFAULT_LAYER_CONFIGURATION.copy()
+            configuration_options.update({'index': layer.get('index')})
+            upload.uploadlayer_set.add(UploadLayer(name=layer.get('name'),
+                                                   fields=layer.get('fields', {}),
+                                                   index=layer.get('index'),
+                                                   feature_count=layer.get('feature_count'),
+                                                   configuration_options=configuration_options))
+        upload.save()
+        return upload
+
     def form_valid(self, form):
         fname = form.instance.file.name
         if len(fname) > 50:

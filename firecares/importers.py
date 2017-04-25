@@ -1,3 +1,5 @@
+import boto
+import os
 from osgeo_importer.importers import Import, GDALInspector
 from osgeo_importer.inspectors import NoDataSourceFound
 from django.core.exceptions import ValidationError
@@ -5,6 +7,7 @@ from django.contrib.gis.gdal import DataSource
 from firecares.firestation.models import FireDepartment, FireStation, Staffing
 from firecares.firecares_core.models import Address, Country
 from django.db import transaction
+from tempfile import NamedTemporaryFile
 
 
 class GeoDjangoInspector(GDALInspector):
@@ -109,6 +112,8 @@ class GeoDjangoInspector(GDALInspector):
 
     def close(self, *args, **kwargs):
         self.data = None
+        if hasattr(self, 'temp_path'):
+            os.unlink(self.temp_path)
 
 
 class GeoDjangoImport(Import):
@@ -118,7 +123,21 @@ class GeoDjangoImport(Import):
 
     def __init__(self, filename, upload_file=None, *args, **kwargs):
         self.file = filename
+        self.temp_file = None
         self.upload_file = upload_file
+
+        # If we're stored on S3, then pull down to local node
+        if self.upload_file and self.upload_file.upload.metadata:
+            bucket, keyname = self.upload_file.upload.metadata.split(':')
+            conn = boto.connect_s3()
+            key = conn.get_bucket(bucket).get_key(keyname)
+
+            with NamedTemporaryFile(delete=False, suffix=os.path.splitext(keyname)[1]) as tf:
+                self.temp_file = tf.name
+                key.get_contents_to_file(tf)
+                self.file = tf.name
+
+            conn.close()
 
     def update_station(self, station, mapping):
         for attr, value in mapping.items():
@@ -202,6 +221,9 @@ class GeoDjangoImport(Import):
                     results.append([str(object), {}])
 
                 self.populate_staffing(feature, object)
+
+            if self.temp_file:
+                os.unlink(self.temp_file)
 
             return results
 
