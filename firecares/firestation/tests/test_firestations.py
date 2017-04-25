@@ -1293,9 +1293,27 @@ class FireStationTests(BaseFirecaresTestcase):
         try:
             call_command('load-local-numbers', 'firecares/firestation/tests/mock/local_numbers.csv', stdout=StringIO())
         except:
-            self.fail('Loading local #s that having a missing FireCARES department reference should NOT throw an exception')
+            self.fail('Loading local #s that have a missing FireCARES department reference should NOT throw an exception')
 
         self.assertEqual(FireDepartment.objects.get(id=95512).iaff, '2876,3817')
         self.assertEqual(FireDepartment.objects.get(id=95559).iaff, '726')
         self.assertEqual(FireDepartment.objects.get(id=95560).iaff, '726')
         self.assertEqual(FireDepartment.objects.get(id=97963).iaff, '452,4378')
+
+    def test_station_pagination(self):
+        fd = FireDepartment.objects.create(name='TEST')
+        for i in range(40):
+            FireStation.objects.create(station_number=25, name='Test Station {}'.format(i), geom=Point(35, -77),
+                                       department=fd)
+
+        c = Client()
+        try:
+            c.get(reverse('firedepartment_detail', args=[fd.id]), {'page': '2\'A=0'})
+        except Exception as e:
+            self.fail(e)
+
+        resp = c.get(reverse('firedepartment_detail', args=[fd.id]), {'page': '2'})
+        self.assertEqual(resp.context['firestations'].number, 2)
+        self.assertEqual(resp.context['firestations'].paginator.num_pages, 4)
+        resp = c.get(reverse('firedepartment_detail', args=[fd.id]), {'page': '0'})
+        self.assertEqual(resp.context['firestations'].number, 4)

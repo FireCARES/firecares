@@ -100,9 +100,12 @@ class DepartmentDetailView(DetailView):
         except PageNotAnInteger:
             # If page is not an integer, deliver first page.
             stations = paginator.page(1)
+            page = 1
         except EmptyPage:
             # If page is out of range (e.g. 9999), deliver last page of results.
             stations = paginator.page(paginator.num_pages)
+            page = paginator.num_pages
+
         context['firestations'] = stations
         context['page_obj'] = stations
 
