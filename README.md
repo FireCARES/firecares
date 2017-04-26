@@ -90,3 +90,14 @@ python manage.py collectstatic --noinput -l --clear
 #### Testing osgeo importer within FireCARES
 
 In order to test the osgeo_importer functionality within FireCARES, specifically being able to step via debugger into specific celery processes, you will need to ensure that `CELERY_ALWAYS_EAGER = True`; however, this will not yield a resulting task state other than `PENDING` so items that depend on a celery result will never finish (eg. the osgeo upload dialog will never close on its own).  Additionally, in order to support a multi-node deployment, celery results are stored using the memcached backend and the actual uploaded file is pushed/pulled to/from an S3 bucket as specified by `OSGEO_STORAGE_BUCKET_NAME` before being acted-upon by GDAL, but specifying a bucket name is not necessary for local development as the FireCARES importer and inspector can handle these tasks using a local filesystem.
+
+#### Testing email sanity
+
+To view emails sent during tests, add the following settings to your django settings file.
+
+```python
+OUTPUT_EMAILS_TO_FILES = True
+EMAIL_FILE_PATH = '/tmp/testEmails' # change to any dir
+```
+
+This will cause emails to be written to files instead of printed to the console, allowing html messages to be viewed with an email client.
