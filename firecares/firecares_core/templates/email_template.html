@@ -19,6 +19,7 @@
   </tr>
   <tr style="background-color:#ffffff;">
     <td style="padding:20px; width:100%;">
+      {% filter urlize %}
       {% block email_message %}
     	Dear User,
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam viverra elementum nibh, ac elementum orci pretium a. Donec 		
@@ -28,6 +29,7 @@
         tempus dignissim vehicula.</p>
         <p>Sincerely, <br /> FireCares Personelle</p>
       {% endblock %}
+      {% endfilter %}
     </td>
     <td style="width:0%"></td>
   </tr>
