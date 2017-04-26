@@ -22,6 +22,11 @@ User = get_user_model()
 class CoreTests(BaseFirecaresTestcase):
     fixtures = ['test_forgot.json']
 
+    def setUp(self):
+        if settings.OUTPUT_EMAILS_TO_FILES:
+            settings.EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+            settings.EMAIL_FILE_PATH = '/tmp/testEmails'
+
     def test_sitemap(self):
         """
         Ensures the generated sitemap has correct priorities
