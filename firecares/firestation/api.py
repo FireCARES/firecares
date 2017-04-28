@@ -3,6 +3,7 @@ import logging
 from .forms import StaffingForm
 from .models import FireStation, Staffing, FireDepartment
 from django.core.serializers.json import DjangoJSONEncoder
+from django.contrib.gis import geos
 from tastypie import fields
 from tastypie.authentication import SessionAuthentication, ApiKeyAuthentication, MultiAuthentication, Authentication
 from tastypie.authorization import DjangoAuthorization
@@ -218,6 +219,13 @@ class FireDepartmentResource(JSONDefaultModelResourceMixin, ModelResource):
         super(FireDepartmentResource, self).__init__(**kwargs)
         for f in getattr(self.Meta, 'readonly_fields', []):
             self.fields[f].readonly = True
+
+    def hydrate_geom(self, bundle):
+        geom = bundle.data.get('geom')
+        boundary = geos.GEOSGeometry(json.dumps(geom))
+        if type(boundary) is geos.Polygon:
+            bundle.data['geom'] = json.loads(geos.MultiPolygon(boundary).json)
+        return bundle
 
     def dehydrate(self, bundle):
         """

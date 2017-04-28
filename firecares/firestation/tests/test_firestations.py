@@ -1097,6 +1097,33 @@ class FireStationTests(BaseFirecaresTestcase):
   }
 }
 """
+
+        single_poly = """
+{
+  "geom": {
+    "coordinates": [
+        [
+          [
+            0, 0
+          ],
+          [
+            1, 1
+          ],
+          [
+            2, 0
+          ],
+          [
+            1, -1
+          ],
+          [
+            0, 0
+          ]
+        ]
+    ],
+    "type": "Polygon"
+  }
+}"""
+
         c = Client()
         c.login(**self.non_admin_creds)
         url = '{root}{fd}/'.format(root=reverse('api_dispatch_list', args=[self.current_api_version, 'fire-departments']),
@@ -1115,6 +1142,13 @@ class FireStationTests(BaseFirecaresTestcase):
         c.login(**self.admin_creds)
         response = c.put(url, data=new_geom, content_type='application/json')
         self.assertEqual(response.status_code, 204)
+
+        # Be sure to ALSO support Polygon geometries in addition to MultiPolygon
+        response = c.put(url, data=single_poly, content_type='application/json')
+        self.assertEqual(response.status_code, 204)
+        response = c.get(url)
+        # Geometry will be converted to MultiPolygon
+        self.assertDictEqual(json.loads(response.content).get('geom'), json.loads(new_geom).get('geom'))
 
     def test_department_permissions(self):
         fd = FireDepartment.objects.create(name='Test')
