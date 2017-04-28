@@ -28,6 +28,36 @@ class FireDepartmentMetrics(object):
             'all': self.quartile_class.objects.filter(id=self.firedepartment.id, level=0).first()
         })
 
+    @property
+    def community_fire_risk(self):
+        return AttrDict({
+            'low': self.population_metrics_rows.low.risk_model_fires_quartile,
+            'medium': self.population_metrics_rows.medium.risk_model_fires_quartile,
+            'high': self.population_metrics_rows.high.risk_model_fires_quartile,
+            'unknown': self.population_metrics_rows.unknown.risk_model_fires_quartile,
+            'all': self.population_metrics_rows.all.risk_model_fires_quartile
+        })
+
+    @property
+    def community_fire_spread_risk(self):
+        return AttrDict({
+            'low': self.population_metrics_rows.low.risk_model_size1_percent_size2_percent_sum_quartile,
+            'medium': self.population_metrics_rows.medium.risk_model_size1_percent_size2_percent_sum_quartile,
+            'high': self.population_metrics_rows.high.risk_model_size1_percent_size2_percent_sum_quartile,
+            'unknown': self.population_metrics_rows.unknown.risk_model_size1_percent_size2_percent_sum_quartile,
+            'all': self.population_metrics_rows.all.risk_model_size1_percent_size2_percent_sum_quartile
+        })
+
+    @property
+    def community_death_and_injury_risk(self):
+        return AttrDict({
+            'low': self.population_metrics_rows.low.risk_model_deaths_injuries_sum_quartile,
+            'medium': self.population_metrics_rows.medium.risk_model_deaths_injuries_sum_quartile,
+            'high': self.population_metrics_rows.high.risk_model_deaths_injuries_sum_quartile,
+            'unknown': self.population_metrics_rows.unknown.risk_model_deaths_injuries_sum_quartile,
+            'all': self.population_metrics_rows.all.risk_model_deaths_injuries_sum_quartile
+        })
+
     @cached_property
     def population_class_stats(self):
         """
@@ -236,6 +266,18 @@ class FireDepartmentMetrics(object):
             'unknown': get(self.peers.unknown),
             'all': get(self.peers.all)
         })
+
+    @property
+    def assessment_of_performance_based_on_number_of_fires(self):
+        return self.dist_model_residential_fires_quartile
+
+    @property
+    def assessment_of_performance_based_on_fire_spread(self):
+        return self.dist_model_risk_model_greater_than_size_2_quartile
+
+    @property
+    def assessment_of_performance_based_on_death_and_injury_risk(self):
+        return self.dist_model_risk_model_deaths_injuries_quartile
 
     @cached_property
     def dist_model_residential_fires_quartile(self):
