@@ -40,6 +40,7 @@ class FeedbackTests(BaseFirecaresTestcase):
             self.assertEqual(DataFeedback.objects.filter(department=fd, firestation=fs).count(), 1)
             self.assertEqual(len(mail.outbox), 1)
             self.assert_email_appears_valid(mail.outbox[0])
+            self.assertListEqual(mail.outbox[0].reply_to, ['non_admin@example.com'])
             mail_body = mail.outbox[0].body
             self.assertTrue(fd.name in mail_body)
             self.assertTrue(fs.name in mail_body)

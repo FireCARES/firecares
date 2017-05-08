@@ -1030,7 +1030,8 @@ class DataFeedbackView(LoginRequiredMixin, CreateView):
         email_message = EmailMultiAlternatives('{} - New feedback received.'.format(Site.objects.get_current().name),
                                                body,
                                                settings.DEFAULT_FROM_EMAIL,
-                                               to)
+                                               to,
+                                               reply_to=[self.object.user.email])
         send_mail.delay(email_message)
 
     def _save_and_notify(self, form):
