@@ -1,3 +1,5 @@
+import mock
+import os
 from django.contrib.auth import get_user_model
 from django.test.client import Client
 from django.core.urlresolvers import reverse
@@ -10,11 +12,18 @@ User = get_user_model()
 
 
 class TestFavorites(BaseFirecaresTestcase):
-    def test_favorite_stations_list_view(self):
+    @mock.patch('geopy.geocoders.base.urllib_urlopen')
+    def test_favorite_stations_list_view(self, urllib_urlopen):
         """
         Tests the favorite stations list view.
         """
+
+        c = urllib_urlopen.return_value
+        c.read.return_value = open(os.path.join(os.path.dirname(__file__), 'mock/geocode.json')).read()
+        c.headers.getparam.return_value = 'utf-8'
+
         fd = FireDepartment.objects.create(name='Fire Department 1')
+
         fs1 = FireStation.create_station(department=fd, address_string='1', name='Fire Station 1')
         fs2 = FireStation.create_station(department=fd, address_string='1', name='Fire Station 2')
         fs3 = FireStation.create_station(department=fd, address_string='1', name='Fire Station 3')

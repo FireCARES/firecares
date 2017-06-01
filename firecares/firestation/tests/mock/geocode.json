@@ -1,0 +1,74 @@
+{
+   "results" : [
+      {
+         "address_components" : [
+            {
+               "long_name" : "9405",
+               "short_name" : "9405",
+               "types" : [ "street_number" ]
+            },
+            {
+               "long_name" : "Devlins Grove Place",
+               "short_name" : "Devlins Grove Pl",
+               "types" : [ "route" ]
+            },
+            {
+               "long_name" : "Linton Hall",
+               "short_name" : "Linton Hall",
+               "types" : [ "neighborhood", "political" ]
+            },
+            {
+               "long_name" : "Bristow",
+               "short_name" : "Bristow",
+               "types" : [ "locality", "political" ]
+            },
+            {
+               "long_name" : "Brentsville",
+               "short_name" : "Brentsville",
+               "types" : [ "administrative_area_level_3", "political" ]
+            },
+            {
+               "long_name" : "Prince William County",
+               "short_name" : "Prince William County",
+               "types" : [ "administrative_area_level_2", "political" ]
+            },
+            {
+               "long_name" : "Virginia",
+               "short_name" : "VA",
+               "types" : [ "administrative_area_level_1", "political" ]
+            },
+            {
+               "long_name" : "United States",
+               "short_name" : "US",
+               "types" : [ "country", "political" ]
+            },
+            {
+               "long_name" : "20136",
+               "short_name" : "20136",
+               "types" : [ "postal_code" ]
+            }
+         ],
+         "formatted_address" : "9405 Devlins Grove Pl, Bristow, VA 20136, USA",
+         "geometry" : {
+            "location" : {
+               "lat" : 38.7532202,
+               "lng" : -77.5730245
+            },
+            "location_type" : "ROOFTOP",
+            "viewport" : {
+               "northeast" : {
+                  "lat" : 38.7545691802915,
+                  "lng" : -77.57167551970851
+               },
+               "southwest" : {
+                  "lat" : 38.7518712197085,
+                  "lng" : -77.57437348029151
+               }
+            }
+         },
+         "place_id" : "ChIJW7BEVVtntokRxKRwmyuhQOU",
+         "types" : [ "street_address" ]
+      }
+   ],
+   "status" : "OK"
+}

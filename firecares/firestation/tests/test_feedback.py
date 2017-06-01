@@ -1,4 +1,6 @@
 import json
+import mock
+import os
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.core.urlresolvers import reverse
@@ -10,11 +12,16 @@ User = get_user_model()
 
 
 class FeedbackTests(BaseFirecaresTestcase):
-
-    def test_feedback_form(self):
+    @mock.patch('geopy.geocoders.base.urllib_urlopen')
+    def test_feedback_form(self, urllib_urlopen):
         """
         Test the feedback form submission
         """
+
+        c = urllib_urlopen.return_value
+        c.read.return_value = open(os.path.join(os.path.dirname(__file__), 'mock/geocode.json')).read()
+        c.headers.getparam.return_value = 'utf-8'
+
         c = Client()
         with self.settings(ADMINS=(('Test Admin', 'admin@example.com'),)):
             # Create fire department and fire station
