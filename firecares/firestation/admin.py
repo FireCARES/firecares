@@ -20,7 +20,12 @@ class FireStationAdmin(VersionAdmin, LocalOpenLayersAdmin):
     list_filter = ['state', 'ftype']
     search_fields = ['name', 'state', 'city', 'id']
     readonly_fields = ['permanent_identifier', 'source_featureid', 'source_datasetid', 'objectid', 'globalid',
-                       'gnis_id', 'foot_id', 'complex_id']
+                       'gnis_id', 'foot_id', 'complex_id', 'address_point']
+
+    def address_point(self, instance):
+        return str(instance.geom)
+
+    address_point.short_description = 'Address (lon, lat)'
 
 
 class FireStationInline(admin.TabularInline):
