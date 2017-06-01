@@ -345,6 +345,7 @@ class CoreTests(BaseFirecaresTestcase):
         PredeterminedUser.objects.create(email='predetermined_tester@myfd.org', department=fd)
         RegistrationWhitelist.objects.create(email_or_domain='department.gov', department=fd)
         RegistrationWhitelist.objects.create(email_or_domain='test@myfd.org', department=fd)
+        RegistrationWhitelist.objects.create(email_or_domain='MiXeDCaSe@myfd.org', department=fd)
 
         self.assertTrue(RegistrationWhitelist.is_whitelisted('joe@gmail.com'))
         self.assertTrue(RegistrationWhitelist.is_whitelisted('test@example.com'))
@@ -362,6 +363,8 @@ class CoreTests(BaseFirecaresTestcase):
         self.assertTrue(RegistrationWhitelist.is_department_whitelisted('test@myfd.org'))
         self.assertEqual(RegistrationWhitelist.get_department_for_email('test@myfd.org'), fd)
         self.assertIsNone(RegistrationWhitelist.get_department_for_email('invalid@myfd.org'))
+        self.assertTrue(RegistrationWhitelist.is_whitelisted('mixedcase@myfd.org'))
+        self.assertTrue(RegistrationWhitelist.is_whitelisted('mixedCASE@myfd.org'))
 
         # Whitelist check should be case insensitive
         self.assertTrue(RegistrationWhitelist.is_whitelisted('Joe@GMAIL.COM'))

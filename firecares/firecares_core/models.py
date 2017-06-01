@@ -268,10 +268,10 @@ class RegistrationWhitelist(models.Model):
             email_whitelists = cls.objects.filter(email_or_domain__contains='@')
             domain_whitelists = cls.objects.exclude(email_or_domain__contains='@')
             domain = get_email_domain(email)
-            if email_whitelists.filter(email_or_domain=email).exists():
-                return email_whitelists.filter(email_or_domain=email).first()
+            if email_whitelists.filter(email_or_domain__iexact=email).exists():
+                return email_whitelists.filter(email_or_domain__iexact=email).first()
             else:
-                return domain_whitelists.filter(email_or_domain=domain).first()
+                return domain_whitelists.filter(email_or_domain__iexact=domain).first()
 
     def process_permission_assignment(self, user):
         if self.permission and self.department and user and not self.permissions_applied:
@@ -288,14 +288,14 @@ class RegistrationWhitelist(models.Model):
 
         email = email.lower()
 
-        whitelists = cls.objects.values_list('email_or_domain', flat=True)
+        whitelists = map(lambda x: x.lower(), cls.objects.values_list('email_or_domain', flat=True))
         email_whitelists = filter(lambda x: '@' in x, whitelists)
         domain_whitelists = set(whitelists) ^ set(email_whitelists)
         if cls._is_domain_only(email):
             return email in domain_whitelists
 
         domain = get_email_domain(email)
-        pre_users = PredeterminedUser.objects.values_list('email', flat=True)
+        pre_users = map(lambda x: x.lower(), PredeterminedUser.objects.values_list('email', flat=True))
         if email in email_whitelists or domain in domain_whitelists or email in pre_users:
             return True
         else:
@@ -308,12 +308,12 @@ class RegistrationWhitelist(models.Model):
 
         email = email.lower()
 
-        domain_whitelists = cls.objects.filter(department__isnull=False).exclude(email_or_domain__contains='@').values_list('email_or_domain', flat=True)
+        domain_whitelists = map(lambda x: x.lower(), cls.objects.filter(department__isnull=False).exclude(email_or_domain__contains='@').values_list('email_or_domain', flat=True))
         if cls._is_domain_only(email):
             return email in domain_whitelists
 
         domain = get_email_domain(email)
-        email_whitelists = cls.objects.filter(department__isnull=False, email_or_domain__contains='@').values_list('email_or_domain', flat=True)
+        email_whitelists = map(lambda x: x.lower(), cls.objects.filter(department__isnull=False, email_or_domain__contains='@').values_list('email_or_domain', flat=True))
 
         if email in email_whitelists or domain in domain_whitelists:
             return True
@@ -328,11 +328,11 @@ class RegistrationWhitelist(models.Model):
     def get_department_for_email(cls, email):
         if cls.is_department_whitelisted(email):
             if cls._is_domain_only(email):
-                return cls.objects.filter(department__isnull=False, email_or_domain=email).first().department
+                return cls.objects.filter(department__isnull=False, email_or_domain__iexact=email).first().department
 
             domain = get_email_domain(email)
-            by_domain = cls.objects.filter(department__isnull=False, email_or_domain=domain).first()
-            by_email = cls.objects.filter(department__isnull=False, email_or_domain=email).first()
+            by_domain = cls.objects.filter(department__isnull=False, email_or_domain__iexact=domain).first()
+            by_email = cls.objects.filter(department__isnull=False, email_or_domain__iexact=email).first()
 
             return by_email.department if by_email else by_domain.department
 
