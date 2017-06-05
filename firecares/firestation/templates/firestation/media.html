@@ -20,6 +20,10 @@ FireCARES in the Media
     <a href="#">Media</a>
 {% endblock %}
 
+{% block extra_head %}
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+{% endblock %}
+
 
 {% block section %}
 <div class="media">
@@ -28,20 +32,35 @@ FireCARES in the Media
             <div class="row">
                 <div class="col-sm-12 col-md-12">
                     <div class="ct-u-marginBottom50">
-                          <div class="row ct-u-marginBottom50">
+                        <div class="row ct-u-marginBottom50">
                             <div class="col-md-6 col-md-push-6">
-                              <h3><a target="_blank" href="http://www.firehouse.com/news/12336295/fire-service-orgaizations-unveil-new-online-data-tool-firecares-to-assist-fire-departments-firefighter-news">Fire Service Organizations Develop System to Assess Risk, Grade Communities</a></h3>
-                              <p class="ct-u-paddingTop10" style="opacity: .6"><b>Published:</b> May 19th 2017</p>
-                              <p class="ct-u-paddingBottom10" style="opacity: .6"><b>Source:</b> <a class="read-more" href="http://www.firehouse.com/news/12336295/fire-service-orgaizations-unveil-new-online-data-tool-firecares-to-assist-fire-departments-firefighter-news" target="_blank">FIREHOUSE.COM</a></p>
-                              <p>In this episode: big news about two new data systems that provide updated, simple and easy to use interfaces for our members, the unique challenges facing our federal affiliates and the incredible success our great union achieves on our members’ behalf when our locals, state and provincial affiliates and our international offices are strong and unified.</p>
+                                <h3><a target="_blank" href="http://www.firehouse.com/news/12336295/fire-service-orgaizations-unveil-new-online-data-tool-firecares-to-assist-fire-departments-firefighter-news">Fire Service Organizations Develop System to Assess Risk, Grade Communities</a></h3>
+                                <p class="ct-u-paddingTop10" style="opacity: .6"><b>Published:</b> May 19th 2017</p>
+                                <p class="ct-u-paddingBottom10" style="opacity: .6"><b>Source:</b> <a class="read-more" href="http://www.firehouse.com/news/12336295/fire-service-orgaizations-unveil-new-online-data-tool-firecares-to-assist-fire-departments-firefighter-news" target="_blank">firehouse.com</a></p>
+                                <p>
+                                    A collaborative effort between several fire service organizations developed a new interactive online tool with the
+                                    goal of improving both public and firefighter safety by building better departments to serve their communities.
+                                </p>
+                                <p>
+                                    The Fire-Community Assessment/Response Evaluation System (FireCARES), which launched in April, relies heavily on
+                                    encouraging fire departments across the country to input data that will then be integrated inside scientific
+                                    models to assist with community risk assessment and best firefighting practices.
+                                </p>
+                                <p>
+                                    &quot;FireCARES includes more than a decade of research on structure fires and related injuries and death, as well as
+                                    community building footprints, housing and mobile home units, public health and census data, and vulnerable populations,&quot;
+                                    the International Association of Fire Fighters (IAFF) said in a release. &quot;This data 'tells the story' of a fire
+                                    department's risk environment, resource capacity and overall capability to respond to emergency incidents.&quot;
+                                    <a class="read-more" href="http://www.firehouse.com/news/12336295/fire-service-orgaizations-unveil-new-online-data-tool-firecares-to-assist-fire-departments-firefighter-news" target="_blank">read more...</a>
+                              </p>
                             </div>
                             <div class="col-md-6 col-md-pull-6">
                                 <a target="_blank" href="http://www.firehouse.com/news/12336295/fire-service-orgaizations-unveil-new-online-data-tool-firecares-to-assist-fire-departments-firefighter-news">
                                     <img src="{{ STATIC_URL}}firecares.591ef9be42b30.jpg" alt="FireCARES on firehouse.com" width="570" />
                                 </a>
                             </div>
-                          </div>
-                          <hr>
+                        </div>
+                        <hr>
                     </div>
                 </div>
             </div>
@@ -143,10 +162,35 @@ FireCARES in the Media
                             </div>
                           </div>
                     </div>
+                    <hr/>
                 </div>
             </div>
         </div>
     </section>
+
+    <section>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12 col-md-12">
+                    <div class="ct-u-marginBottom50">
+                          <div class="row ct-u-marginBottom50">
+                            <div class="col-md-6">
+                                <h3 name="twitter"><a href="https://twitter.com/firecares" target="_blank">FireCARES on Twitter</a></h3><br/>
+                                <p>
+                                    <a href="https://twitter.com/firecares" class="twitter-follow-button" data-size="large" data-show-count="false">Follow @FireCARES</a><br/>
+                                    For the latest updates and news, be sure to follow <a class="read-more" href="https://twitter.com/firecares">@FireCARES</a> on twitter!
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <a class="twitter-timeline" data-height="600" href="https://twitter.com/firecares"></a>
+                            </div>
+                          </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
 </div>
 
 {% endblock %}
