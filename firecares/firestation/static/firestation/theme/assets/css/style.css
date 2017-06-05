@@ -12131,6 +12131,14 @@ div.is-your-department {
 .community-risk h4 i {
   font-size: 14px;
 }
+.media a.read-more {
+  color: #F29A00;
+  border-bottom: 1px dotted white;
+}
+.media a.read-more:hover {
+  color: #F29A00;
+  border-bottom: 1px dotted;
+}
 .safe-grades a {
   color: #F29A00;
   border-bottom: 1px dotted white;
