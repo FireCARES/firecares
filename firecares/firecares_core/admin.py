@@ -50,16 +50,21 @@ class UserAdmin(ExportMixin, BaseUserAdmin):
 class DepartmentAssociationRequestAdmin(ExportMixin, admin.ModelAdmin):
     model = DepartmentAssociationRequest
     form = autocomplete_light.modelform_factory(DepartmentAssociationRequest, fields='__all__')
+    search_fields = ['user__username', 'user__email', 'approved_by__username', 'denied_by__username']
+    list_filter = ['approved_by', 'denied_by', 'approved_at', 'denied_at']
 
 
 class RegistrationWhitelistAdmin(ExportMixin, admin.ModelAdmin):
     model = RegistrationWhitelist
     form = autocomplete_light.modelform_factory(RegistrationWhitelist, fields='__all__')
+    search_fields = ['email_or_domain', 'department__name', 'created_by__username']
+    list_filter = ['created_by', 'created_at', 'department__state']
 
 
 class PredeterminedUserAdmin(ExportMixin, admin.ModelAdmin):
     model = PredeterminedUser
     form = autocomplete_light.modelform_factory(PredeterminedUser, fields='__all__')
+    search_fields = ['email', 'department__name']
 
 
 admin.site.register(Address, AddressAdmin)
