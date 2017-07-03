@@ -29,7 +29,7 @@ sitemaps = {
 
 urlpatterns = patterns('',
     url(r'^$', Home.as_view(), name='firestation_home'),  # noqa
-    url(r'^IAFF/?$', Home.as_view(), name='firestation_iaff_home'),
+    url(r'^(?i)IAFF/?$', Home.as_view(), name='firestation_iaff_home'),
     (r'^api/', include(v1_api.urls)),
     url(r'^', include('firecares.firestation.urls')),
     url(r'^contact-us/$', ContactUs.as_view(), name='contact_us'),
