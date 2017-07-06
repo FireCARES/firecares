@@ -210,14 +210,7 @@ class GeoDjangoImport(Import):
                     object = FireStation.objects.get(id=station_id)
                     self.update_station(object, mapping)
                 else:
-                    # One last sanity check, if the station_id is empty, but the station number exists, make sure that we update
-                    # versus create a new one
-                    st = FireStation.objects.filter(station_number=mapping.get('station_number'), department=mapping.get('department')).first()
-                    if st:
-                        object = st
-                        self.update_station(object, mapping)
-                    else:
-                        object = FireStation.objects.create(**mapping)
+                    object = FireStation.objects.create(**mapping)
                     results.append([str(object), {}])
 
                 self.populate_staffing(feature, object)
