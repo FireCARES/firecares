@@ -820,6 +820,7 @@ class FireStationTests(BaseFirecaresTestcase):
                 { "type": "Feature", "properties": { "station_id": 29712, "name": "Los Angeles County Fire Department Station 32", "department": 87255, "station_nu": 32, "address_l1": "605 North Angeleno Avenue", "address_l2": None, "city": "Azusa", "state": "CA", "zipcode": "91702-2904", "engine": 3, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": 3, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -117.910420849999923, 34.131861813000057 ] } },  # noqa
                 { "type": "Feature", "properties": { "name": "Los Angeles County Fire Department Station 56", "department": 87255, "station_nu": 56.0, "address_l1": "123 New Rd Canyon Road", "address_l2": None, "city": "Los Angeles", "state": "CA", "zipcode": "90210", "country": "US"}, "geometry": { "type": "Point", "coordinates": [ -118.45, 33.32 ] } },  # noqa
                 { "type": "Feature", "properties": { "name": "Los Angeles County Fire Department Station 32", "department": 87255, "station_nu": 32, "address_l1": "605 North Angeleno Avenue", "address_l2": None, "city": "Azusa", "state": "CA", "zipcode": "91702-2904", "engine": 3, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": 3, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -117.910420849999923, 34.131861813000057 ] } },  # noqa
+                { "type": "Feature", "properties": { "station_id": 29712, "name": "Los Angeles County Fire Department Station 32", "department": 87255, "station_nu": 32, "address_l1": "605 North Angeleno Avenue", "address_l2": None, "city": "Azusa", "state": "CA", "zipcode": "91702", "engine": 3, "engine_1": None, "truck": None, "quint": None, "als_am": None, "bls_am": None, "rescue": 3, "boat": None, "hazmat": None, "chief": None, "other": None }, "geometry": { "type": "Point", "coordinates": [ -117.910420849999923, 34.131861813000057 ] } },  # noqa
             ]
         }
 
@@ -849,16 +850,18 @@ class FireStationTests(BaseFirecaresTestcase):
         self.assertEqual(case.station_address.address_line1, '1534 West Sierra Highway')
         self.assertEqual(case.geom.x, -118.145)
         self.assertEqual(case.geom.y, 34.489)
-        # We have 2 new stations, BUT station 32 is referred to twice in the dump (once w/o station_id), so we _shouldn't_ create
-        # a new record in this case
-        self.assertEqual(Address.objects.all().count(), len(feats['features']) + 1)
+        # We have 2 new stations, BUT station 32 is referred to twice in the dump (once w/o station_id)
+        # so we will have 2 stations with nunmber = 32 in this case
+        self.assertEqual(Address.objects.all().count(), len(feats['features']))
+
+        self.assertEqual(FireStation.objects.count(), 10)
+        self.assertEqual(Revision.objects.count(), len(feats['features']) - 2 + Staffing.objects.count())
+        self.assertEqual(reversion.get_for_object(case).count(), 2)
 
         new_station = FireStation.objects.get(station_address__city='Los Angeles')
         self.assertTrue(new_station.station_number, 56)
         self.assertTrue(new_station.department.id, 87255)
         self.assertEqual(reversion.get_for_object(new_station).count(), 1)
-        self.assertEqual(Revision.objects.count(), len(feats['features']) + 1 + Staffing.objects.count())
-        self.assertEqual(reversion.get_for_object(case).count(), 2)
 
         self.assertEqual(2, Staffing.objects.filter(firestation_id=1334, apparatus='Engine').count())
         self.assertEqual(3, Staffing.objects.get(firestation_id=16616, apparatus='Engine').personnel)
