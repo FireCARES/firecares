@@ -31,7 +31,7 @@
       "models_performance_score": "{% url 'models_performance_score' %}"
     };
 
-    {% if display_metrics %}
+    {% if object.display_metrics %}
     var metrics = {
         "population_metrics_rows": {{ object.metrics.population_metrics_rows | jsonify }},
         "dist_model_risk_model_greater_than_size_2_quartile": {{ object.metrics.dist_model_risk_model_greater_than_size_2_quartile | jsonify }},
