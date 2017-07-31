@@ -29,7 +29,7 @@
 
   .filter('defaultValue', function() {
     return function(input, default_value) {
-      return (input !== null && input !== '') ? input : default_value;
+      return (!angular.isUndefined(input) && input !== null && input !== '') ? input : default_value;
     }
   })
   .filter('trimDecimal', function() {

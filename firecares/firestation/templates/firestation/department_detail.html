@@ -31,6 +31,7 @@
       "models_performance_score": "{% url 'models_performance_score' %}"
     };
 
+    {% if display_metrics %}
     var metrics = {
         "population_metrics_rows": {{ object.metrics.population_metrics_rows | jsonify }},
         "dist_model_risk_model_greater_than_size_2_quartile": {{ object.metrics.dist_model_risk_model_greater_than_size_2_quartile | jsonify }},
@@ -52,6 +53,13 @@
         "deaths_and_injuries_sum": {{ object.metrics.deaths_and_injuries_sum | jsonify }},
         "residential_structure_fire_counts": {{ object.metrics.residential_structure_fire_counts | jsonify }}
     };
+    {% else %}
+    var metrics = {
+        "nfirs_deaths_and_injuries_sum": {{ object.metrics.nfirs_deaths_and_injuries_sum | jsonify }},
+        "residential_fires_3_year_avg": {{ object.metrics.residential_fires_3_year_avg | jsonify }},
+        "residential_structure_fire_counts": {{ object.metrics.residential_structure_fire_counts | jsonify }}
+    };
+    {% endif %}
 
     var level = "all";
     </script>
