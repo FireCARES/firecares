@@ -56,6 +56,11 @@ class GeoDjangoInspector(GDALInspector):
             if not FireStation.objects.filter(id=s_id).exists() and s_id:
                 missing_stations.append(s_id)
 
+        for feature in layer:
+            country = feature.get('country')
+            if not country:
+                raise ValidationError('Missing country')
+
         if missing_stations:
             raise ValidationError('Invalid station ID: {}'.format(', '.join(map(str, missing_stations))))
 
