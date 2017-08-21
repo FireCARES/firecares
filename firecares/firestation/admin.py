@@ -2,6 +2,7 @@ import autocomplete_light
 from .models import FireStation, FireDepartment, Staffing, Document, IntersectingDepartmentLog, DataFeedback
 from firecares.firecares_core.models import Address
 from firecares.firecares_core.admin import LocalOpenLayersAdmin
+from firecares.celery import cache_thumbnail
 from django.contrib.gis import admin
 from autocomplete_light import ModelForm as AutocompleteModelForm
 from reversion.admin import VersionAdmin
@@ -48,11 +49,20 @@ class FireDepartmentAdminForm(AutocompleteModelForm):
         autocomplete_exclude = ('government_unit',)
 
 
+def generate_thumbnail(modeladmin, request, queryset):
+    for fd in queryset:
+        cache_thumbnail.delay(fd.id, upload_to_s3=True)
+
+
+generate_thumbnail.short_description = "Re-generate thumbnail for selected fire departments"
+
+
 class FireDepartmentAdmin(GuardedModelAdmin, VersionAdmin, LocalOpenLayersAdmin):
     form = FireDepartmentAdminForm
     search_fields = ['name']
     list_display = ['name', 'state', 'created', 'modified', 'archived', 'display_metrics']
     list_filter = ['state', 'archived', 'display_metrics']
+    actions = [generate_thumbnail]
 
 
 class ResponseCapabilityAdmin(LocalOpenLayersAdmin):
