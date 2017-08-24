@@ -37,6 +37,10 @@ class FireStationTests(BaseFirecaresTestcase):
         fd.save()
         self.assertTrue(os.path.exists("/home/firecares/department-thumbnails/us-va-thumbnail-test-department.jpg"))
 
+        fd.name = "Thumbnail test department 2"
+        fd.save()
+        self.assertTrue(os.path.exists("/home/firecares/department-thumbnails/us-va-thumbnail-test-department-2.jpg"))
+
     def test_auto_region_setting(self):
         """
         Tests that regions are automatically set on new departments.

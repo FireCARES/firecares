@@ -1099,7 +1099,7 @@ class PopulationClassQuartile(models.Model):
 
 def refresh_quartile_view():
     with connections['default'].cursor() as cursor:
-        cursor.execute('REFRESH MATERIALIZED VIEW population_quartiles;')
+        cursor.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY population_quartiles;')
 
 
 def create_quartile_views(sender, **kwargs):
@@ -1168,6 +1168,7 @@ def create_quartile_views(sender, **kwargs):
     print '(re)creating materialized view for "population_quartiles"'
     cursor.execute("DROP MATERIALIZED VIEW IF EXISTS population_quartiles;")
     cursor.execute("CREATE MATERIALIZED VIEW population_quartiles AS ({query});".format(query=query))
+    cursor.execute("CREATE UNIQUE INDEX on population_quartiles (id, level);")
 
 
 class NationalCalculations(models.Model):
@@ -1187,7 +1188,7 @@ class NationalCalculations(models.Model):
 
 def refresh_national_calculations_view():
     with connections['default'].cursor() as cursor:
-        cursor.execute('REFRESH MATERIALIZED VIEW national_calculations;')
+        cursor.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY national_calculations;')
 
 
 def set_department_region(sender, instance, **kwargs):
@@ -1210,13 +1211,10 @@ def update_department(sender, instance, **kwargs):
     """
     Creates an FD's thumbnail and updates its performance score and NFIRS counts when it is instantiated.
     """
-    if not kwargs.get('created'):
-        return
     from firecares.tasks import update
     from firecares import celery
     celery.cache_thumbnail.delay(instance.id, upload_to_s3=not(settings.TESTING))
-    update.update_performance_score.delay(instance.id, dry_run=False)
-    update.update_nfirs_counts.delay(instance.id)
+    update.update_department.delay(instance.id)
 
 
 def create_national_calculations_view(sender, **kwargs):
@@ -1316,6 +1314,7 @@ def create_national_calculations_view(sender, **kwargs):
         complete_query.append(query.format(selected_level=numlevel))
     query = ' union '.join(complete_query)
     cursor.execute("CREATE MATERIALIZED VIEW national_calculations AS ({query});".format(query=query))
+    cursor.execute("CREATE UNIQUE INDEX on national_calculations (id, level);")
 
 
 @deconstructible

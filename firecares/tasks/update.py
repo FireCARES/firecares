@@ -1,6 +1,7 @@
 import copy
 import numpy as np
 import traceback
+from celery import chain, group
 from firecares.celery import app
 from django.contrib.gis.geos import GEOSGeometry
 from django.db import connections
@@ -41,6 +42,8 @@ def update_performance_score(id, dry_run=False):
     """
     Updates department performance scores.
     """
+
+    print "updating performance score for {}".format(id)
 
     try:
         cursor = connections['nfirs'].cursor()
@@ -169,6 +172,8 @@ def update_performance_score(id, dry_run=False):
     if not dry_run:
         record.save()
 
+    print "...updated performance score for {}".format(id)
+
 
 CIVILIAN_CASUALTIES = """SELECT count(1) as count, extract(year from a.inc_date) as year, COALESCE(y.risk_category, 'N/A') as risk_level
 FROM civiliancasualty a
@@ -216,6 +221,15 @@ ORDER BY extract(year from a.inc_date) DESC"""
 
 
 @app.task(queue='update')
+def update_department(id):
+    print "updating department {}".format(id)
+    chain(update_nfirs_counts.si(id),
+          update_performance_score.si(id),
+          group(refresh_quartile_view_task.si(),
+          refresh_national_calculations_view_task.si())).delay()
+
+
+@app.task(queue='update')
 def update_nfirs_counts(id, year=None):
     """
     Queries the NFIRS database for statistics.
@@ -223,6 +237,8 @@ def update_nfirs_counts(id, year=None):
 
     if not id:
         return
+
+    print "updating NFIRS counts for {}".format(id)
 
     try:
         fd = FireDepartment.objects.get(id=id)
@@ -265,6 +281,8 @@ def update_nfirs_counts(id, year=None):
             total = lenient_summation(*map(lambda x: x[1], levels.items()))
             nfirs.objects.update_or_create(year=year, defaults={'count': total}, fire_department=fd, metric=statistic, level=0)
 
+    print "...updated NFIRS counts for {}".format(id)
+
 
 @app.task(queue='update')
 def calculate_department_census_geom(fd_id):
@@ -297,20 +315,24 @@ def calculate_department_census_geom(fd_id):
         print 'No census geom - {} ({})'.format(fd.name, fd.id)
 
 
-@app.task(queue='update')
-def refresh_quartile_view_task():
+@app.task(queue='update', rate_limit='5/h')
+def refresh_quartile_view_task(*args, **kwargs):
     """
     Updates the Quartile Materialized Views.
     """
-    return refresh_quartile_view()
+
+    print "updating quartile view"
+    refresh_quartile_view()
 
 
-@app.task(queue='update')
-def refresh_national_calculations_view_task():
+@app.task(queue='update', rate_limit='5/h')
+def refresh_national_calculations_view_task(*args, **kwargs):
     """
     Updates the National Calculation View.
     """
-    return refresh_national_calculations_view()
+
+    print "updating national calculations view"
+    refresh_national_calculations_view()
 
 
 @app.task(queue='update')
