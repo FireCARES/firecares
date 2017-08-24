@@ -1025,7 +1025,7 @@ class DataFeedbackView(LoginRequiredMixin, CreateView):
         """
         Email admins when new feedback are received
         """
-        to = [x[1] for x in settings.ADMINS]
+        to = [x[1] for x in settings.DATA_FEEDBACK_EMAILS]
         body = loader.render_to_string('contact/data_feedback.txt', dict(contact=self.object))
         email_message = EmailMultiAlternatives('{} - New feedback received.'.format(Site.objects.get_current().name),
                                                body,

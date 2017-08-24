@@ -23,7 +23,7 @@ class FeedbackTests(BaseFirecaresTestcase):
         c.headers.getparam.return_value = 'utf-8'
 
         c = Client()
-        with self.settings(ADMINS=(('Test Admin', 'admin@example.com'),)):
+        with self.settings(DATA_FEEDBACK_EMAILS=(('Test Admin', 'admin@example.com'),)):
             # Create fire department and fire station
             fd = FireDepartment.objects.create(name='Fire Department 1')
             fs = FireStation.create_station(department=fd, address_string='1', name='Fire Station 1')

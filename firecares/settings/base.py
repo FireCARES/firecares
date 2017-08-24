@@ -11,6 +11,8 @@ DEPARTMENT_ADMIN_VERIFIERS = (
     # ('Your Name', 'your_email@example.com'),
 )
 
+DATA_FEEDBACK_EMAILS = ()
+
 MANAGERS = ADMINS
 TESTING = sys.argv[1:2] == ['test']
 
