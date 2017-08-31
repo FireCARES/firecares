@@ -380,6 +380,7 @@ class DepartmentAssociationRequest(models.Model):
     approved_at = models.DateTimeField(null=True, blank=True)
     denied_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, related_name='denied_assocation_requests_set')
     denied_at = models.DateTimeField(null=True, blank=True)
+    is_reviewed = models.BooleanField(default=False)
     message = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -403,6 +404,7 @@ class DepartmentAssociationRequest(models.Model):
         self.denied_at = None
         self.approved_by = approving_user
         self.approved_at = timezone.now()
+        self.is_reviewed = True
         self.save()
         return self._apply()
 
@@ -411,6 +413,7 @@ class DepartmentAssociationRequest(models.Model):
         self.approved_at = None
         self.denied_by = denying_user
         self.denied_at = timezone.now()
+        self.is_reviewed = True
         self.save()
         return self._apply()
 

@@ -46,7 +46,7 @@ class DepartmentAssociationRequestAdmin(ExportMixin, admin.ModelAdmin):
     model = DepartmentAssociationRequest
     form = autocomplete_light.modelform_factory(DepartmentAssociationRequest, fields='__all__')
     search_fields = ['user__username', 'user__email', 'approved_by__username', 'denied_by__username']
-    list_filter = ['approved_by', 'denied_by', 'approved_at', 'denied_at']
+    list_filter = ['is_reviewed','approved_by', 'denied_by', 'approved_at', 'denied_at']
 
 
 class RegistrationWhitelistAdmin(ExportMixin, admin.ModelAdmin):
