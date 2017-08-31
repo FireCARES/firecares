@@ -1,0 +1,10 @@
+{% extends "email_template.html" %}
+
+{% block email_message %}
+
+An account request has been submitted:
+
+Email: {{ contact.email }}
+Created: {{ contact.created_at }}
+
+{% endblock %}

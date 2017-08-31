@@ -1,0 +1,25 @@
+{% extends "email_template.html" %}
+
+{% load i18n %}
+{% autoescape off %}
+
+{% block email_message %}
+
+Hello,
+
+We're sorry, but your request for a FireCARES account has been denied by an administrator on {{ account_request.department.name }}.
+
+If you'd like to contact FireCARES, please submit a contact request through http://{{ site.domain }}{% url 'contact_us' %}.
+
+{% if message %}
+Additionally, {{ account_request.department.name }}'s administrators included this message in the response to your request:
+
+{{ message }}
+{% endif %}
+
+{% blocktrans %}Best regards{% endblocktrans %},
+{{ site.name }} {% blocktrans %}Management{% endblocktrans %}
+
+{% endblock %}
+
+{% endautoescape %}
