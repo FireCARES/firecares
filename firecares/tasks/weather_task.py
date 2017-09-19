@@ -9,7 +9,7 @@ from django.db.utils import ConnectionDoesNotExist
 from firecares.weather.models import (WeatherWarnings, DepartmentWarnings, StationWarnings)
 
 
-@app.task(queue='weather-task', rate_limit='30/m')
+@app.task(queue='weather-task', rate_limit='1/m')
 def collect_weather_noaa_warnings(id, dry_run=False):
     """
     Updates department performance scores.
@@ -20,23 +20,20 @@ def collect_weather_noaa_warnings(id, dry_run=False):
 
  
 
-@app.task(queue='weather-task')
-def update_department_for_warning(id):
-
-    #TODO
-    print "updating department {}".format(id)
-    chain(update_nfirs_counts.si(id),
-          update_performance_score.si(id),
-          group(refresh_quartile_view_task.si(),
-          refresh_national_calculations_view_task.si())).delay()
-
-
-@app.task(queue='weather-task')
-def calculate_department_intersect_geom(fd_id):
+@app.task(queue='weather-task', rate_limit='1/d')
+def update_department_for_warnings(id):
     """
-    Calculate which Stations have weather updates
+     TODO Calculate which Deapartments have weather warnings
+   
+    """
+    print "updating department {}".format(id)
 
-    TODO
+
+@app.task(queue='weather-task', rate_limit='1/d')
+def update_station_for_warnings(fd_id):
+    """
+     TODO Calculate which Stations have weather warnings
+   
     """
 
     try:

@@ -5,6 +5,8 @@ import sys
 import us
 
 from django.conf import settings
+from django.db import connections
+from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point, MultiPolygon
 from django.contrib.gis.geos import LinearRing, Polygon
