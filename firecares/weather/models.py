@@ -13,41 +13,12 @@ from django.db.transaction import rollback
 from django.db.utils import IntegrityError
 from django.core.serializers import serialize
 
+from firecares.firestation.models import FireStation, FireDepartment
+
 from reversion import revisions as reversion
 
-DATA_SECURITY_CHOICES = [(0, 'Unknown'),
-                         (1, 'Top Secret'),
-                         (2, 'Secret'),
-                         (3, 'Confidential'),
-                         (4, 'Restricted'),
-                         (5, 'Unclassified'),
-                         (6, 'Sensitive')]
 
-DISTRIBUTION_POLICY_CHOICES = [('A1', 'Emergency Service Provider - Internal Use Only'),
-                               ('A2', 'Emergency Service Provider - Bitmap Display Via Web'),
-                               ('A3', 'Emergency Service Provider - Free Distribution to Third Parties'),
-                               ('A4', 'Emergency Service Provider - Free Distribution to Third Parties Via'
-                                      ' Internet'),
-                               ('B1', 'Government Agencies or Their Delegated Agents - Internal Use Only'),
-                               ('B2', 'Government Agencies or Their Delegated Agents - Bitmap Display Via Web'),
-                               ('B3', 'Government Agencies or Their Delegated Agents - Free Distribution to Third'
-                                      ' Parties'),
-                               ('B4', 'Government Agencies or Their Delegated Agents - Free Distribution to Third'
-                                      ' Parties Via Internet'),
-                               ('C1', 'Other Public or Educational Institutions - Internal Use Only'),
-                               ('C2', 'Other Public or Educational Institutions - Bitmap Display Via Web'),
-                               ('C3', 'Other Public or Educational Institutions - Free Distribution to Third'
-                                      ' Parties'),
-                               ('C4', 'Other Public or Educational Institutions - Free Distribution to Third'
-                                      ' Parties Via Internet'),
-                               ('D1', 'Data Contributors - Internal Use Only'), ('D2', 'Data Contributors - '
-                                                                                       'Bitmap Display Via Web'),
-                               ('D3', 'Data Contributors - Free Distribution to Third Parties'),
-                               ('D4', 'Data Contributors - Free Distribution to Third Parties Via Internet'),
-                               ('E1', 'Public Domain - Internal Use Only'), ('E2', 'Public Domain - Bitmap'
-                                                                                   ' Display Via Web'),
-                               ('E3', 'Public Domain - Free Distribution to Third Parties'),
-                               ('E4', 'Public Domain - Free Distribution to Third Parties Via Internet')]
+WEATHER_WARNING_SOURCE = [('deafult', 'default-provider')]
 
 
 class WeatherWarnings(models.Model):
@@ -57,16 +28,16 @@ class WeatherWarnings(models.Model):
     service_id_warnings = 0 #no data
     service_id_watches = 1 
 
-    prod_type = models.CharField(max_length=30, null=True, blank=True)
+    prod_type = models.CharField(max_length=200, null=True, blank=True)
     oid = models.CharField(max_length=38, null=True, blank=True)
-    idp_source = models.CharField(max_length=38, null=True, blank=True)
-    idp_subset = models.CharField(max_length=38, null=True, blank=True)
-    url = models.CharField(max_length=38, null=True, blank=True)
-    event = models.CharField(max_length=38, null=True, blank=True)
-    wfo = models.CharField(max_length=38, null=True, blank=True)
-    warnid = models.CharField(max_length=38, null=True, blank=True)
-    phenom = models.CharField(max_length=38, null=True, blank=True)
-    sig = models.CharField(max_length=38, null=True, blank=True)
+    idp_source = models.CharField(max_length=200, null=True, blank=True)
+    idp_subset = models.CharField(max_length=200, null=True, blank=True)
+    url = models.CharField(max_length=500, null=True, blank=True)
+    event = models.CharField(max_length=200, null=True, blank=True)
+    wfo = models.CharField(max_length=200, null=True, blank=True)
+    warnid = models.CharField(max_length=200, null=True, blank=True)
+    phenom = models.CharField(max_length=200, null=True, blank=True)
+    sig = models.CharField(max_length=200, null=True, blank=True)
     expiration = models.DateTimeField(null=True, blank=True)
     idp_ingestdate = models.DateTimeField(null=True, blank=True)
     issuance = models.DateTimeField(null=True, blank=True)
@@ -180,16 +151,32 @@ class WeatherWarnings(models.Model):
         verbose_name = 'Weather Warnings'
 
 
-class WarningData(WeatherWarnings):
+class DepartmentWarnings(models.Model):
 
-    #For additional warnings sources
-    warning_url = models.CharField(max_length=320, null=True, blank=True)
-    warning_vendor = models.CharField(max_length=120, null=True, blank=True)
-    warning_type = models.CharField(max_length=120, null=True, blank=True)
-    objectid = models.IntegerField(null=True, blank=True, unique=True)
-    name = models.CharField(max_length=120, null=True, blank=True)
-    admintype = models.IntegerField(choices=ownerclass_domain, null=True, blank=True)
-    geom = models.MultiPolygonField()
+    #For warnings related to departments
+    departmentfdid = models.CharField(max_length=10, blank=True)
+    departmentname = models.CharField(max_length=100)
+    warningfdid = models.CharField(max_length=10, blank=True)
+    warningname = models.CharField(max_length=200)
+    prod_type = models.CharField(max_length=100, null=True, blank=True)
+    expiredate = models.DateTimeField(null=True, blank=True)
+    issuedate = models.DateTimeField(null=True, blank=True)
+    warngeom = models.MultiPolygonField()
+
+class StationWarnings(models.Model):
+
+    #For warnings related to stations
+    stationfdid = models.CharField(max_length=10, blank=True)
+    stationname = models.CharField(max_length=200)
+    warningfdid = models.CharField(max_length=10, blank=True)
+    prod_type = models.CharField(max_length=200, null=True, blank=True)
+    warningname = models.CharField(max_length=200)
+    expiredate = models.DateTimeField(null=True, blank=True)
+    issuedate = models.DateTimeField(null=True, blank=True)
+    warngeom = models.MultiPolygonField()
+
 
 
 reversion.register(WeatherWarnings)
+reversion.register(StationWarnings)
+reversion.register(DepartmentWarnings)

@@ -42,7 +42,7 @@ from .models import (
     Document, FireStation, FireDepartment, Staffing, refresh_quartile_view, refresh_national_calculations_view)
 from favit.models import Favorite
 from invitations.models import Invitation
-
+from firecares.weather.models import (DepartmentWarnings, DepartmentWarnings, StationWarnings)
 
 User = get_user_model()
 log = logging.getLogger(__name__)
