@@ -9,18 +9,14 @@ from django.db.utils import ConnectionDoesNotExist
 from firecares.weather.models import (WeatherWarnings, DepartmentWarnings, StationWarnings)
 
 
-@app.task(queue='weather-task', rate_limit='1/m')
-def collect_weather_noaa_warnings(id, dry_run=False):
+@app.task(queue='weather-task', rate_limit='30/m')
+def collect_weather_noaa_warnings():
     """
-    Updates department performance scores.
+    Adds data to the Weather warning table every 30 minutes
     """
-
-    #cursor = connections['nfirs'].cursor()
     WeatherWarnings.load_data()
-
  
 
-@app.task(queue='weather-task', rate_limit='1/d')
 def update_department_for_warnings(id):
     """
      TODO Calculate which Deapartments have weather warnings
@@ -29,7 +25,6 @@ def update_department_for_warnings(id):
     print "updating department {}".format(id)
 
 
-@app.task(queue='weather-task', rate_limit='1/d')
 def update_station_for_warnings(fd_id):
     """
      TODO Calculate which Stations have weather warnings

@@ -1,4 +1,4 @@
-import datetime
+from dateutil.parser import parse as date_parse
 import json
 import requests
 import sys
@@ -10,6 +10,7 @@ from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point, MultiPolygon
 from django.contrib.gis.geos import LinearRing, Polygon
+from django.contrib.gis.geos import fromstr
 from django.contrib.gis.measure import D
 from django.db.transaction import rollback
 from django.db.utils import IntegrityError
@@ -37,7 +38,7 @@ class WeatherWarnings(models.Model):
     url = models.CharField(max_length=500, null=True, blank=True)
     event = models.CharField(max_length=200, null=True, blank=True)
     wfo = models.CharField(max_length=200, null=True, blank=True)
-    warnid = models.CharField(max_length=200, null=True, blank=True)
+    warnid = models.CharField(max_length=200, null=False, blank=True)
     phenom = models.CharField(max_length=200, null=True, blank=True)
     sig = models.CharField(max_length=200, null=True, blank=True)
     expiration = models.DateTimeField(null=True, blank=True)
@@ -71,81 +72,126 @@ class WeatherWarnings(models.Model):
     @property
     def origin_uri(self):
         """
-        This object's URI (from the national map).
+        This object's URI (from the NOAA map service )
+
+        #2017-09-18T01:00:00+00:00 time format
+        
         """
         return 'https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Forecasts_Guidance_Warnings/watch_warn_adv/MapServer/1/{0}?f=json' \
             .format(self.objectid)
 
     @classmethod
     def load_data(cls):
-        objects = requests.get('https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Forecasts_Guidance_Warnings/watch_warn_adv/MapServer/1/query?'
-            'where=1=1&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false'
-            '&returnTrueCurves=false&outSR=&returnIdsOnly=true&returnCountOnly=false&returnZ=false&returnM=false&returnDistinctValues=false&'
-            'false&parameterValues=&rangeValues=&f=json')
 
-        current_ids = set(WeatherWarnings.objects.all().values_list('objectid', flat=True))
-        object_ids = set(json.loads(objects.content)['objectIds']) - current_ids
+        objects = requests.get('https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Forecasts_Guidance_Warnings/watch_warn_adv/MapServer/1/query?'
+                  'where=objectId<5&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false'
+                  '&returnTrueCurves=false&outSR=&returnIdsOnly=true&returnCountOnly=false&returnZ=false&returnM=false&returnDistinctValues=false&f=json', timeout=10)
+
+
+        print objects.content
+
+        object_ids = set(json.loads(objects.content)['objectIds'])
+
         url = 'https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Forecasts_Guidance_Warnings/watch_warn_adv/MapServer/1/{0}?f=json'
         
         for object in object_ids:
-            try:
 
-                if WeatherWarnings.objects.filter(objectid=object):
-                    continue
+            #try:
 
-                obj = requests.get(url.format(object))
-                obj = json.loads(obj.content)
-                data = dict((k.lower(), v) for k, v in obj['feature']['attributes'].iteritems())
+            obj = requests.get(url.format(object))
+            obj = json.loads(obj.content)
+
+            data = dict((k.lower(), v) for k, v in obj['feature']['attributes'].iteritems())
+            warninggeom = ''; 
+            datapost = {}
+            
+            #Check if warning is already loaded and update as needed
+            if WeatherWarnings.objects.filter(warnid=data['warnid']):
+
+                datapost = WeatherWarnings.objects.filter(warnid=data['warnid'])
+                
+                feat = datapost[0]
+                
+                if data['expiration'] != " ":
+                    feat.expiration = date_parse(data['expiration'])
 
                 if obj['feature'].get('geometry'):
                     poly = map(LinearRing, obj['feature']['geometry']['rings'])
-                    data['warngeom'] = Polygon(*poly)
+                    feat.warngeom = MultiPolygon(fromstr(str(Polygon(*poly))),)  # not sure if data is multi poly
+                    warninggeom = MultiPolygon(fromstr(str(Polygon(*poly))),)
 
-                data['prod_type'] = data['prod_type'] 
-                data['idp_source'] = data['prod_type'] 
-                data['phenom'] = data['phenom'] 
+                feat.issuance = date_parse(data['issuance']) 
+                feat.idp_subset = data['idp_subset'] 
+
+                print data['warnid'] + " Updated"
+
+            else:
+
+                datapost['prod_type'] = data['prod_type'] 
+                datapost['idp_source'] = data['idp_source'] 
+                datapost['sig'] = data['sig']
+                datapost['wfo'] = data['wfo'] 
+                datapost['url'] = data['url'] 
+                datapost['phenom'] = data['phenom']  
                 
-                #2017-09-18T01:00:00+00:00
-                data['issuance'] = datetime.strptime(data['issuance'], '%Y-%d-%dT%H-%M-%S+00:00')
-                data['expiration'] = datetime.strptime(data['expiration'], '%Y-%d-%dT%H-%M-%S+00:00')
+                if data['expiration'] != " ":
+                    datapost['expiration'] = date_parse(data['issuance'])
 
-                data['idp_subset'] = data['idp_subset'] 
-                data['warnid'] = data['warnid'] 
+                if obj['feature'].get('geometry'):
+                    poly = map(LinearRing, obj['feature']['geometry']['rings'])
+                    datapost['warngeom'] = MultiPolygon(fromstr(str(Polygon(*poly))),)  # not sure if data is multi poly
+                    warninggeom = MultiPolygon(fromstr(str(Polygon(*poly))),)
 
-                feat = cls.objects.create(**data)
-                feat.save()
+                datapost['issuance'] = date_parse(data['issuance']) #datetime.datetime.strptime(data['issuance'].split('+')[0], '%Y-%m-%dT%H:%M:%S')
+                
+                datapost['idp_subset'] = data['idp_subset'] 
+                datapost['warnid'] = data['warnid'] 
 
-                print 'Saved object: {0}'.format(data.get('name'))
-                print '{0} Weather Warning loaded.'.format(WeatherWarnings.objects.all().count())
+                feat = cls.objects.create(**datapost)
+                print 'Warning created: {0}'.format(data.get('warnid'))
 
-            except KeyError:
-                print '{0} failed.'.format(object)
-                print url.format(object)
 
-            except IntegrityError:
-                print '{0} failed.'.format(object)
-                print url.format(object)
-                print sys.exc_info()
+            feat.save()
 
-                try:
-                    rollback()
-                except:
-                    pass
+            #Intersect with 
+            if(warninggeom != ''):
 
-            except:
-                print '{0} failed.'.format(object)
-                print url.format(object)
-                print sys.exc_info()
+                intersectDepartmentList = FireDepartment.objects.filter(geom__intersects=warninggeom)
+
+                if(intersectDepartmentList.count()> 0):
+                    print "Total intersecting Departments " + str(intersectDepartmentList.count())
+
+
+        print '{0} Weather total Warnings.'.format(WeatherWarnings.objects.all().count())
+
+          # except KeyError:
+          #     print '{0} failed.'.format(object)
+          #     print url.format(object)
+
+          # except IntegrityError:
+          #     print '{0} failed.'.format(object)
+          #     print url.format(object)
+          #     print sys.exc_info()
+
+          #     try:
+          #         rollback()
+          #     except:
+          #         pass
+
+          # except:
+          #     print '{0} failed.'.format(object)
+          #     print url.format(object)
+          #     print sys.exc_info()
+
 
     @property
     def warning_area(self):
         """
-        Project the district's geometry into US National Atlas Equal Area
-        Returns mi2
+        Project data as needed
         """
         if self.district:
             try:
-                return (self.district.transform(102009, clone=True).area / 1000000) * 0.38610
+                return (self.warngeom.transform(102009, clone=True).area / 1000000) * 0.38610
             except:
                 return
 
@@ -163,22 +209,9 @@ class DepartmentWarnings(models.Model):
     prod_type = models.CharField(max_length=100, null=True, blank=True)
     expiredate = models.DateTimeField(null=True, blank=True)
     issuedate = models.DateTimeField(null=True, blank=True)
+    url = models.CharField(max_length=500, null=True, blank=True)
     warngeom = models.MultiPolygonField()
-
-class StationWarnings(models.Model):
-
-    #For warnings related to stations
-    stationfdid = models.CharField(max_length=10, blank=True)
-    stationname = models.CharField(max_length=200)
-    warningfdid = models.CharField(max_length=10, blank=True)
-    prod_type = models.CharField(max_length=200, null=True, blank=True)
-    warningname = models.CharField(max_length=200)
-    expiredate = models.DateTimeField(null=True, blank=True)
-    issuedate = models.DateTimeField(null=True, blank=True)
-    warngeom = models.MultiPolygonField()
-
 
 
 reversion.register(WeatherWarnings)
-reversion.register(StationWarnings)
 reversion.register(DepartmentWarnings)

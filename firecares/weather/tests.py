@@ -1,6 +1,7 @@
 
 import mock
 import requests
+import json
 from StringIO import StringIO
 from django.contrib.gis.geos import Point, GEOSGeometry
 from django.db import connections
@@ -16,9 +17,12 @@ class WeatherWarningTests(TestCase):
         """
         Tests the weather URL
         """
-        WeatherWarnings.load_data()
+        response = requests.get('https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Forecasts_Guidance_Warnings/watch_warn_adv/MapServer/1/query?'
+                'where=objectId<5&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false'
+                '&returnTrueCurves=false&outSR=&returnIdsOnly=true&returnCountOnly=false&returnZ=false&returnM=false&returnDistinctValues=false&f=json')
 
-        #response = c.get(fd.get_absolute_url())
 
-        #self.assertEqual(response.status_code, 200)
-        self.assertEqual(1,1)
+        response = json.loads(objects.content)['objectIds']
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.is_valid())
