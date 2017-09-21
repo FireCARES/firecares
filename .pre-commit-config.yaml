@@ -1,5 +1,5 @@
 -   repo: git://github.com/pre-commit/pre-commit-hooks
-    sha: v0.6.1
+    sha: v0.9.4
     hooks:
     -   id: detect-aws-credentials
     -   id: detect-private-key
@@ -8,8 +8,6 @@
     -   id: check-merge-conflict
     -   id: check-json
     -   id: check-ast
-
-# NOTE: lessc must be in your system path
 -   repo: local
     hooks:
     -   id: compile-less-to-css
