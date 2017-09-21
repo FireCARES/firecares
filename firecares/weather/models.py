@@ -9,8 +9,7 @@ from django.conf import settings
 from django.db import connections
 from django.conf import settings
 from django.contrib.gis.db import models
-from django.contrib.gis.geos import Point, MultiPolygon
-from django.contrib.gis.geos import LinearRing, Polygon
+from django.contrib.gis.geos import Point, MultiPolygon,LinearRing, Polygon
 from django.contrib.gis.geos import fromstr
 from django.contrib.gis.measure import D
 from django.db.transaction import rollback
@@ -49,24 +48,18 @@ class WeatherWarnings(models.Model):
 
 
     @classmethod
-    def create_warning(cls, warning, **kwargs):
+    def create_warning(cls, warning):
         """
-        create warnings.
+        create a weather warning
         """
 
-        warn = WeatherWarnings(prod_type=warning.prod_type,
-                              idp_source=warning.idp_source,
-                              event=warning.event,
-                              phenom=warning.phenom,
-                              url=warning.url,
-                              issuance=warning.issuance,
-                              warngeom=warning.warngeom,
-                              idp_subset=warning.idp_subset,
-                              warnid=warning.warnid,
-                              expiration=warning.expiration,
-                              **kwargs)
+        warn = WeatherWarnings(prod_type=warning['prod_type'],
+                              url=warning['url'],
+                              warngeom=warning['warngeom'],
+                              warnid=warning['warnid'])
 
         warn.save()
+
         return warn
 
 
@@ -271,23 +264,19 @@ class DepartmentWarnings(models.Model):
 
 
     @classmethod
-    def create_dept_warning(cls, departmentarning, **kwargs):
+    def create_dept_warning(cls, departmentarning):
         """
         Create Departement warnings.
         """
 
-        deptwarn = DepartmentWarnings(departmentfdid=departmentarning.departmentfdid,
-                                      departmentname=departmentarning.departmentname,
-                                      warningfdid=departmentarning.warningfdid,
-                                      warningname=departmentarning.warningname,
-                                      url=departmentarning.url,
-                                      prod_type=departmentarning.prod_type,
-                                      warngeom=departmentarning.warngeom,
-                                      issuedate=departmentarning.issuedate,
-                                      expiration=departmentarning.expiration,
-                                      **kwargs)
+        deptwarn = DepartmentWarnings(departmentfdid=departmentarning['departmentfdid'],
+                                      warningfdid=departmentarning['warningfdid'],
+                                      warningname=departmentarning['warningname'],
+                                      url=departmentarning['url'],
+                                      warngeom=departmentarning['warngeom'])
 
         deptwarn.save()
+
         return deptwarn
 
 
