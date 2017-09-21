@@ -1,4 +1,5 @@
 from dateutil.parser import parse as date_parse
+import datetime
 import json
 import requests
 import sys
@@ -84,11 +85,11 @@ class WeatherWarnings(models.Model):
     def load_warning_data(cls):
 
         objects = requests.get('https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Forecasts_Guidance_Warnings/watch_warn_adv/MapServer/1/query?'
-                  'where=objectId<5&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false'
-                  '&returnTrueCurves=false&outSR=&returnIdsOnly=true&returnCountOnly=false&returnZ=false&returnM=false&returnDistinctValues=false&f=json', timeout=25)
+                  'where=1=1&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false'
+                  '&returnTrueCurves=false&outSR=&returnIdsOnly=true&returnCountOnly=false&returnZ=false&returnM=false&returnDistinctValues=false&f=json', timeout=20)
 
 
-        print objects.content
+        print objects.content  #sometimes error/empty 
 
         object_ids = set(json.loads(objects.content)['objectIds'])
 
@@ -96,102 +97,149 @@ class WeatherWarnings(models.Model):
         
         for object in object_ids:
 
-            #try:
+            try:
 
-            obj = requests.get(url.format(object), timeout=25 )
-            obj = json.loads(obj.content)
+              obj = requests.get(url.format(object), timeout=20 )
+              obj = json.loads(obj.content)
 
-            data = dict((k.lower(), v) for k, v in obj['feature']['attributes'].iteritems())
-            warninggeom = ''; 
-            datapost = {}
-            
-            #Check if warning is already loaded and update as needed
-            if WeatherWarnings.objects.filter(warnid=data['warnid']):
+              data = dict((k.lower(), v) for k, v in obj['feature']['attributes'].iteritems())
+              warninggeom = ''; 
+              datapost = {}
+              
+              #Check if warning is already loaded and update as needed
+              if WeatherWarnings.objects.filter(warnid=data['warnid']):
 
-                datapost = WeatherWarnings.objects.filter(warnid=data['warnid'])
-                
-                feature = datapost[0]
-                
-                if data['expiration'] != " ":
-                    feature.expiration = date_parse(data['expiration'])
+                  datapost = WeatherWarnings.objects.filter(warnid=data['warnid'])
+                  
+                  warningfeature = datapost[0]
+                  
+                  if data['expiration'] != " ":
+                      warningfeature.expiration = date_parse(data['expiration'])
 
-                if obj['feature'].get('geometry'):
-                    poly = map(LinearRing, obj['feature']['geometry']['rings'])
-                    feature.warngeom = MultiPolygon(fromstr(str(Polygon(*poly))),)  # not sure if data is multi poly
-                    warninggeom = MultiPolygon(fromstr(str(Polygon(*poly))),)
+                  if obj['feature'].get('geometry'):
+                      poly = map(LinearRing, obj['feature']['geometry']['rings'])
+                      warningfeature.warngeom = MultiPolygon(fromstr(str(Polygon(*poly))),)  # not sure if data is multi poly
+                      warninggeom = MultiPolygon(fromstr(str(Polygon(*poly))),)
 
-                feature.issuance = date_parse(data['issuance']) 
-                feature.idp_subset = data['idp_subset'] 
+                  warningfeature.issuance = date_parse(data['issuance']) 
+                  warningfeature.idp_subset = data['idp_subset'] 
 
-                print data['warnid'] + " Updated"
+                  print data['warnid'] + " Updated"
 
-            else:
+              else:
 
-                datapost['prod_type'] = data['prod_type'] 
-                datapost['idp_source'] = data['idp_source'] 
-                datapost['sig'] = data['sig']
-                datapost['wfo'] = data['wfo'] 
-                datapost['url'] = data['url'] 
-                datapost['phenom'] = data['phenom']  
-                
-                if data['expiration'] != " ":
-                    datapost['expiration'] = date_parse(data['issuance'])
+                  datapost['prod_type'] = data['prod_type'] 
+                  datapost['idp_source'] = data['idp_source'] 
+                  datapost['sig'] = data['sig']
+                  datapost['wfo'] = data['wfo'] 
+                  datapost['url'] = data['url'] 
+                  datapost['phenom'] = data['phenom']  
+                  
+                  if data['expiration'] != " ":
+                      datapost['expiration'] = date_parse(data['issuance'])
 
-                if obj['feature'].get('geometry'):
-                    poly = map(LinearRing, obj['feature']['geometry']['rings'])
-                    datapost['warngeom'] = MultiPolygon(fromstr(str(Polygon(*poly))),)  # not sure if data is multi poly
-                    warninggeom = MultiPolygon(fromstr(str(Polygon(*poly))),)
+                  if obj['feature'].get('geometry'):
+                      poly = map(LinearRing, obj['feature']['geometry']['rings'])
+                      datapost['warngeom'] = MultiPolygon(fromstr(str(Polygon(*poly))),)  # not sure if data is multi poly
+                      warninggeom = MultiPolygon(fromstr(str(Polygon(*poly))),)
 
-                datapost['issuance'] = date_parse(data['issuance']) #datetime.datetime.strptime(data['issuance'].split('+')[0], '%Y-%m-%dT%H:%M:%S')
-                
-                datapost['idp_subset'] = data['idp_subset'] 
-                datapost['warnid'] = data['warnid'] 
+                  datapost['issuance'] = date_parse(data['issuance']) #datetime.datetime.strptime(data['issuance'].split('+')[0], '%Y-%m-%dT%H:%M:%S')
+                  
+                  datapost['idp_subset'] = data['idp_subset'] 
+                  datapost['warnid'] = data['warnid'] 
 
-                feature = cls.objects.create(**datapost)
-                print 'Created Warning: {0}'.format(data.get('warnid'))
+                  warningfeature = cls.objects.create(**datapost)
+                  print 'Created Warning: {0}'.format(data.get('warnid'))
 
 
-            feature.save()
+              warningfeature.save()
 
-            #Intersect with 
-            if(warninggeom != ''):
+              #Intersect with Departments and update table if overlap
+              if(warninggeom != ''):
 
-                intersectDepartmentList = FireDepartment.objects.filter(geom__intersects=warninggeom)
+                  intersectDepartmentList = FireDepartment.objects.filter(geom__intersects=warninggeom)
 
-                if(intersectDepartmentList.count()> 0):
-                    cls.add_warnings_to_departments(intersectDepartmentList, feature)
-                    print "Total intersecting Departments " + str(intersectDepartmentList.count())
+                  if(intersectDepartmentList.count()> 0):
+
+                      WeatherWarnings.add_warnings_to_departments(intersectDepartmentList, warningfeature)
+                      print "Total intersecting Departments " + str(intersectDepartmentList.count())
+
+            except KeyError:
+                print '{0} failed.'.format(object)
+                print url.format(object)
+
+            except IntegrityError:
+                print '{0} failed.'.format(object)
+                print url.format(object)
+                print sys.exc_info()
+
+                try:
+                    rollback()
+                except:
+                    pass
+
+            except:
+                print '{0} failed.'.format(object)
+                print url.format(object)
+                print sys.exc_info()
 
 
         print '{0} Total Weather Warnings.'.format(WeatherWarnings.objects.all().count())
 
-          # except KeyError:
-          #     print '{0} failed.'.format(object)
-          #     print url.format(object)
-
-          # except IntegrityError:
-          #     print '{0} failed.'.format(object)
-          #     print url.format(object)
-          #     print sys.exc_info()
-
-          #     try:
-          #         rollback()
-          #     except:
-          #         pass
-
-          # except:
-          #     print '{0} failed.'.format(object)
-          #     print url.format(object)
-          #     print sys.exc_info()
-
     @classmethod
-    def add_warnings_to_departments(cls, departmentQuerySet, WeatherWarnings):
+    def add_warnings_to_departments(self, departmentQuerySet, weatherWarnings):
         """
         adds and updates departement weather warnings
         """
-        print 'adsf'
+
         for fireDept in departmentQuerySet:
-            print(fireDept.name)
+
+            try:
+
+                print(weatherWarnings.prod_type + " for " + fireDept.name)
+                print("Warning Expires " + str(weatherWarnings.expiration.strftime('%c')))
+
+                #Check if warning is already loaded and update as needed
+                if DepartmentWarnings.objects.filter(warningfdid=weatherWarnings.warnid, departmentfdid=fireDept.fdid):
+
+                    dataduplicate = DepartmentWarnings.objects.filter(warningfdid=weatherWarnings.warnid, departmentfdid=fireDept.fdid)
+                    
+                    deptupdate = dataduplicate[0]
+
+                    deptupdate.warningname = weatherWarnings.prod_type
+                    deptupdate.prod_type = weatherWarnings.prod_type
+                    deptupdate.expiredate = weatherWarnings.expiration
+                    deptupdate.issuedate = weatherWarnings.issuance
+                    deptupdate.url = weatherWarnings.url
+                    deptupdate.warngeom = weatherWarnings.warngeom
+
+                    deptupdate.save()
+
+                    print 'Department Warning Updated'
+
+                else:
+
+                    dataadd = {}
+
+                    dataadd['departmentfdid'] = fireDept.fdid
+                    dataadd['departmentname'] = fireDept.name
+                    dataadd['warningfdid'] = weatherWarnings.warnid
+                    dataadd['warningname'] = weatherWarnings.prod_type
+                    dataadd['prod_type'] = weatherWarnings.prod_type
+                    dataadd['expiredate'] = weatherWarnings.expiration
+                    dataadd['issuedate'] = weatherWarnings.issuance
+                    dataadd['url'] = weatherWarnings.url
+                    dataadd['warngeom'] = weatherWarnings.warngeom
+
+                    deptupdate = DepartmentWarnings.objects.create(**dataadd)
+                    deptupdate.save()
+
+                    print 'Department Warning Created'
+
+            except:
+                
+                print 'Error running Department Query'
+                return
     
     @property
     def warning_area(self):
@@ -213,7 +261,7 @@ class DepartmentWarnings(models.Model):
     #For warnings related to departments
     departmentfdid = models.CharField(max_length=10, blank=True)
     departmentname = models.CharField(max_length=100)
-    warningfdid = models.CharField(max_length=10, blank=True)
+    warningfdid = models.CharField(max_length=100, blank=True)
     warningname = models.CharField(max_length=200)
     prod_type = models.CharField(max_length=100, null=True, blank=True)
     expiredate = models.DateTimeField(null=True, blank=True)
@@ -222,5 +270,26 @@ class DepartmentWarnings(models.Model):
     warngeom = models.MultiPolygonField()
 
 
-#reversion.register(WeatherWarnings)
-#reversion.register(DepartmentWarnings)
+    @classmethod
+    def create_dept_warning(cls, departmentarning, **kwargs):
+        """
+        Create Departement warnings.
+        """
+
+        deptwarn = DepartmentWarnings(departmentfdid=departmentarning.departmentfdid,
+                                      departmentname=departmentarning.departmentname,
+                                      warningfdid=departmentarning.warningfdid,
+                                      warningname=departmentarning.warningname,
+                                      url=departmentarning.url,
+                                      prod_type=departmentarning.prod_type,
+                                      warngeom=departmentarning.warngeom,
+                                      issuedate=departmentarning.issuedate,
+                                      expiration=departmentarning.expiration,
+                                      **kwargs)
+
+        deptwarn.save()
+        return deptwarn
+
+
+reversion.register(WeatherWarnings)
+reversion.register(DepartmentWarnings)
