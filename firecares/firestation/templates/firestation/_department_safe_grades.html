@@ -117,38 +117,6 @@
 </div>
 
 <div class="metric-card">
-    <label class="control-label {{ metrics.population_metrics_rows[level].risk_model_size1_percent_size2_percent_sum_quartile ? metrics.national_risk_model_size1_percent_size2_percent_sum_quartile[level] : null | riskLevel:'unavailable' }}">
-        {{ metrics.population_metrics_rows[level].risk_model_size1_percent_size2_percent_sum_quartile ? metrics.national_risk_model_size1_percent_size2_percent_sum_quartile[level] : null | grade:'not available' }}
-    </label>
-    <div class="main-content">
-        <div class="main-text">
-            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
-                National assessment of performance score based on the fire spread.
-            </div>
-            <div class="description">
-                This department's performance score is {{ metrics.population_metrics_rows[level].risk_model_size1_percent_size2_percent_sum_quartile ? metrics.national_risk_model_size1_percent_size2_percent_sum_quartile[level] : null | grade:'not available' }} when compared to fire departments across the nation in the same fire spread risk category.
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="metric-card">
-    <label class="control-label {{ metrics.population_metrics_rows[level].risk_model_deaths_injuries_sum_quartile ? metrics.national_risk_model_deaths_injuries_sum_quartile[level] : null | riskLevel:'unavailable' }}">
-        {{ metrics.population_metrics_rows[level].risk_model_deaths_injuries_sum_quartile ? metrics.national_risk_model_deaths_injuries_sum_quartile[level] : null | grade:'not available' }}
-    </label>
-    <div class="main-content">
-        <div class="main-text">
-            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
-                National assessment of performance score based on the death and injury risk.
-            </div>
-            <div class="description">
-                This department's performance score is {{ metrics.population_metrics_rows[level].risk_model_deaths_injuries_sum_quartile ? metrics.national_risk_model_deaths_injuries_sum_quartile[level] : null | grade:'not available' }} when compared to fire departments across the nation in the same death and injury risk category.
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="metric-card">
     <div class="main-content">
         <div class="main-text container-fluid">
             <div class="row">
@@ -287,31 +255,5 @@
         </div>
     </div>
 </div>
-<div class="metric-card">
-    <label class="control-label unavailable">not available</label>
-    <div class="main-content">
-        <div class="main-text">
-            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
-                National assessment of performance score based on the fire spread.
-            </div>
-            <div class="description">
-              Please <a href="{% url 'login' %}?next={% url 'firedepartment_detail' pk=object.id %}">login</a> to see this information.
-            </div>
-        </div>
-    </div>
-</div>
 
-<div class="metric-card">
-    <label class="control-label unavailable">not available</label>
-    <div class="main-content">
-        <div class="main-text">
-            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
-                National assessment of performance score based on the death and injury risk.
-            </div>
-            <div class="description">
-              Please <a href="{% url 'login' %}?next={% url 'firedepartment_detail' pk=object.id %}">login</a> to see this information.
-            </div>
-        </div>
-    </div>
-</div>
 {% endif %}
