@@ -1,0 +1,317 @@
+<!-- Safe Grade Cards -->
+<div class="metric-cards-title">
+    <h4 class="learn-more-link-icon pull-left">
+        <a href="{% url 'safe_grades' %}" data-toggle="tooltip" data-title="Learn More" data-placement="bottom">
+            <i class="fa fa-info-circle"></i>
+        </a>
+    </h4>
+    <h4 style="display: inline;">Safe Grades</h4>
+    <selected-risk level="level"></selected-risk>
+</div>
+<div class="metric-card">
+    <div class="main-content">
+        <div class="main-text">
+            <div class="community-risk-legend safe-grade-legend">
+               <div>
+                <div class="safe-grade-legend-icon low"></div>
+                <span class="help-text"><span class="help-text-category">Good</span><span>: less than 25% of departments have an equal or better performance score.</span></span>
+               </div>
+               <div>
+                <div class="safe-grade-legend-icon medium"></div>
+                <span class="help-text"><span class="help-text-category">Fair</span><span>: 25-75% of departments have a better performance score.</span></span>
+                </div>
+               <div>
+                <div class="safe-grade-legend-icon high"></div>
+                <span class="help-text"><span class="help-text-category">Poor</span><span>: over 75% of departments have an equal or better performance score.</span></span>
+               </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- <div class="metric-card">
+  <div class="main-content">
+    <div class="main-text">
+      <div class="community-risk-legend safe-grade-legend">
+        <span class="help-text">
+          <a href="{% url 'safe_grades' %}">Learn more</a> about how these values are calculated.
+        </span>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+{% if user.is_authenticated %}
+{% verbatim %}
+<div class="metric-card">
+    <label class="control-label {{ metrics.population_metrics_rows[level].risk_model_fires_quartile ? metrics.dist_model_residential_fires_quartile[level] : null | riskLevel:'unavailable' }}">
+        {{ metrics.population_metrics_rows[level].risk_model_fires_quartile ? metrics.dist_model_residential_fires_quartile[level] : null | grade:"not available" }}
+    </label>
+    <div class="main-content">
+        <div class="main-text">
+            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                Assessment of performance score based on the number of fires.
+            </div>
+            <div class="description">
+                This department's performance score is {{ metrics.population_metrics_rows[level].risk_model_fires_quartile ? metrics.dist_model_residential_fires_quartile[level] : null | grade:"not available" }} when compared to other fire departments with communities of the same size classification and in the {{ metrics.population_metrics_rows[level].risk_model_fires_quartile | riskLevel:'unknown' }} risk category for the number of fires.
+            </div>
+
+            <!-- Dist Score compared against departments in the same population class with a similar fire risk -->
+            <!--
+            <div class="bullet-chart firecares-graph ct-u-marginBottom10 ct-u-marginTop40" id="dist_model_by_fires" style="height: 100%"
+                  ranges="{{dist_model_residential_fires_quartile_breaks }}"
+                  measures="[{{ object.dist_model_score}}]"
+                  markers="[{{ dist_model_residential_fires_quartile_avg }}]"
+                  description="POPULATE THIS DESCRIPTION"
+                  metric-title="Performance score comparison against departments in a similar risk category."></div>-->
+        </div>
+    </div>
+</div>
+
+<div class="metric-card">
+    <label class="control-label {{ metrics.population_metrics_rows[level].risk_model_size1_percent_size2_percent_sum_quartile ? metrics.dist_model_risk_model_greater_than_size_2_quartile[level] : null | riskLevel:'unavailable' }}">
+        {{ metrics.population_metrics_rows[level].risk_model_size1_percent_size2_percent_sum_quartile ? metrics.dist_model_risk_model_greater_than_size_2_quartile[level] : null | grade:'not available' }}
+    </label>
+    <div class="main-content">
+        <div class="main-text">
+            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                Assessment of performance score based on fire spread risk.
+            </div>
+            <div class="description">
+                This department's performance score is {{ metrics.population_metrics_rows[level].risk_model_size1_percent_size2_percent_sum_quartile ? metrics.dist_model_risk_model_greater_than_size_2_quartile[level] : null | grade:'not available' }} when compared to other fire departments with communities of the same size classification and in the {{ metrics.population_metrics_rows[level].risk_model_size1_percent_size2_percent_sum_quartile | riskLevel:'unknown' }} risk category for the portion of fires spread beyond room of origin.
+            </div>
+
+            <!-- Dist Score compared against departments in the same population class with the fire spread risk -->
+            <!--
+            <div class="bullet-chart firecares-graph ct-u-marginBottom10 ct-u-marginTop40" id="dist_model_by_fire_spread" style="height: 100%"
+                  ranges="{{dist_model_risk_model_greater_than_size_2_quartile_breaks }}"
+                  measures="[{{ object.dist_model_score}}]"
+                  markers="[{{ dist_model_risk_model_greater_than_size_2_quartile_avg }}]"
+                  description="POPULATE THIS DESCRIPTION"
+                  metric-title="Performance score comparison against departments with a similar fire-spread risk category."></div>-->
+        </div>
+    </div>
+</div>
+
+<div class="metric-card">
+    <label class="control-label {{ metrics.population_metrics_rows[level].risk_model_deaths_injuries_sum_quartile ? metrics.dist_model_risk_model_deaths_injuries_quartile[level] : null | riskLevel:'unavailable' }}">
+        {{ metrics.population_metrics_rows[level].risk_model_deaths_injuries_sum_quartile ? metrics.dist_model_risk_model_deaths_injuries_quartile[level] : null | grade:'not available' }}
+    </label>
+    <div class="main-content">
+        <div class="main-text">
+            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                Assessment of performance score based on the risk of death and injury.
+            </div>
+            <div class="description">
+                This department's performance score is {{ metrics.population_metrics_rows[level].risk_model_deaths_injuries_sum_quartile ? metrics.dist_model_risk_model_deaths_injuries_quartile[level] : null | grade:'not available' }} when compared to other fire departments with communities of the same size classification and in the {{ metrics.population_metrics_rows[level].risk_model_size1_percent_size2_percent_sum_quartile | riskLevel:'unknown' }} risk category for the number of fires spread beyond room of origin.
+            </div>
+            <!-- Dist Score compared against departments in the same population class with the same death and injury risk -->
+            <!--
+            <div class="bullet-chart firecares-graph ct-u-marginBottom10 ct-u-marginTop40" id="dist_model_by_death_injury" style="height: 100%"
+                  ranges="{{dist_model_risk_model_deaths_injuries_quartile_breaks }}"
+                  measures="[{{ object.dist_model_score}}]"
+                  markers="[{{ dist_model_risk_model_deaths_injuries_quartile_avg }}]"
+                  description="POPULATE THIS DESCRIPTION"
+                  metric-title="Performance score comparison against departments with a similar death and injury risk category."></div>-->
+        </div>
+    </div>
+</div>
+
+<div class="metric-card">
+    <label class="control-label {{ metrics.population_metrics_rows[level].risk_model_size1_percent_size2_percent_sum_quartile ? metrics.national_risk_model_size1_percent_size2_percent_sum_quartile[level] : null | riskLevel:'unavailable' }}">
+        {{ metrics.population_metrics_rows[level].risk_model_size1_percent_size2_percent_sum_quartile ? metrics.national_risk_model_size1_percent_size2_percent_sum_quartile[level] : null | grade:'not available' }}
+    </label>
+    <div class="main-content">
+        <div class="main-text">
+            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                National assessment of performance score based on the fire spread.
+            </div>
+            <div class="description">
+                This department's performance score is {{ metrics.population_metrics_rows[level].risk_model_size1_percent_size2_percent_sum_quartile ? metrics.national_risk_model_size1_percent_size2_percent_sum_quartile[level] : null | grade:'not available' }} when compared to fire departments across the nation in the same fire spread risk category.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="metric-card">
+    <label class="control-label {{ metrics.population_metrics_rows[level].risk_model_deaths_injuries_sum_quartile ? metrics.national_risk_model_deaths_injuries_sum_quartile[level] : null | riskLevel:'unavailable' }}">
+        {{ metrics.population_metrics_rows[level].risk_model_deaths_injuries_sum_quartile ? metrics.national_risk_model_deaths_injuries_sum_quartile[level] : null | grade:'not available' }}
+    </label>
+    <div class="main-content">
+        <div class="main-text">
+            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                National assessment of performance score based on the death and injury risk.
+            </div>
+            <div class="description">
+                This department's performance score is {{ metrics.population_metrics_rows[level].risk_model_deaths_injuries_sum_quartile ? metrics.national_risk_model_deaths_injuries_sum_quartile[level] : null | grade:'not available' }} when compared to fire departments across the nation in the same death and injury risk category.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="metric-card">
+    <div class="main-content">
+        <div class="main-text container-fluid">
+            <div class="row">
+                <div class="col-xs-12">
+                    <span class="ct-fw-600 text-left">Number of fires per year</span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-9">
+                    <span class="text-left ct-u-paddingLeft20">Average since 2010</span>
+                </div>
+                <div class="col-xs-3">
+                    <span class="text-right">{{ metrics.residential_fires_3_year_avg[level] | number:0 | defaultValue:"N/A" }}</span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-9">
+                    <span class="text-left ct-u-paddingLeft20">Predicted</span>
+                </div>
+                <div class="col-xs-3">
+                    <span class="text-right">{{ metrics.risk_model_fires[level] | number:0 | defaultValue:"N/A" }}</span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-9">
+                    <span class="text-left ct-u-paddingLeft40">Beyond room/floor</span>
+                </div>
+                <div class="col-xs-3">
+                    <span class="text-right">{{ metrics.risk_model_fires_size1[level] | number:0 | defaultValue:"N/A" }}</span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-9">
+                    <span class="text-left ct-u-paddingLeft40">Beyond structure</span>
+                </div>
+                <div class="col-xs-3">
+                    <span class="text-right">{{ metrics.risk_model_fires_size2[level] | number:0 | defaultValue:"N/A" }}</span>
+                </div>
+            </div>
+
+            <div class="row" style="margin-top: 20px;">
+                <div class="col-xs-12">
+                    <span class="ct-fw-600 text-left">Deaths &amp; injuries per year</span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-9">
+                    <span class="text-left ct-u-paddingLeft20">Average since 2010</span>
+                </div>
+                <div class="col-xs-3">
+                    <span class="text-right">{{ metrics.nfirs_deaths_and_injuries_sum[level] | number:0 | defaultValue:"N/A" }}</span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-9">
+                    <span class="text-left ct-u-paddingLeft20">Predicted</span>
+                </div>
+                <div class="col-xs-3">
+                    <span class="text-right">{{ metrics.deaths_and_injuries_sum[level] | number:0 | defaultValue:"N/A" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endverbatim %}
+<!-- End Safe Grade Cards -->
+{% comment %}
+<div class="line-chart firecares-graph ct-u-marginBottom10" id="dist"
+      data="{{ performance_data }}"
+      description="This department is {{ object.dist_model_score|floatformat|default:"an unknown number of" }} seconds over the industry standard."
+      metric-title="Performance Score"
+      value="{{ object.dist_model_score }}"
+      color="#F5C97E"></div>
+<div class="line-chart firecares-graph ct-u-marginBottom10" id="risk_deaths"
+      data="{{ risk_deaths_data }}"
+      description="This department is predicted to have {{ object.risk_model_deaths|floatformat|default:"an unknown number of" }} fire related deaths per year."
+      metric-title="Predicted Fire-Related Deaths"
+      value="{{ object.risk_model_deaths }}"
+      color="#F5C97E"></div>
+<div class="line-chart firecares-graph ct-u-marginBottom10" id="risk_injuries"
+      data="{{ risk_injuries_data }}"
+      description="This department is predicted to have {{ object.risk_model_injuries|floatformat|default:"an unknown number of" }} fire related injuries per year."
+      metric-title="Predicted Fire-Related Injuries"
+      value="{{ object.risk_model_injuries }}"
+      color="#F5C97E"></div>
+<div class="line-chart firecares-graph ct-u-marginBottom10" id="risk_fires"
+      data="{{ risk_model_fires }}"
+      description="This department is predicted to have {{ object.risk_model_fires|floatformat|default:"an unknown number of" }} fires per year."
+      metric-title="Predicted residential fires per year."
+      value="{{ object.risk_model_fires }}"
+      color="#F5C97E"></div>
+ {% endcomment %}
+{% else %}
+<div class="metric-card">
+    <label class="control-label unavailable">not available</label>
+    <div class="main-content">
+        <div class="main-text">
+            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                Assessment of performance score based on the number of fires.
+            </div>
+            <div class="description">
+              Please <a href="{% url 'login' %}?next={% url 'firedepartment_detail' pk=object.id %}">login</a> to see this information.
+            </div>
+        </div>
+    </div>
+</div>
+<div class="metric-card">
+    <label class="control-label unavailable">not available</label>
+    <div class="main-content">
+        <div class="main-text">
+            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                Assessment of performance score based on fire spread risk.
+            </div>
+            <div class="description">
+              Please <a href="{% url 'login' %}?next={% url 'firedepartment_detail' pk=object.id %}">login</a> to see this information.
+            </div>
+        </div>
+    </div>
+</div>
+<div class="metric-card">
+    <label class="control-label unavailable">not available</label>
+    <div class="main-content">
+        <div class="main-text">
+            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                Assessment of performance score based on the risk of death and injury.
+            </div>
+            <div class="description">
+              Please <a href="{% url 'login' %}?next={% url 'firedepartment_detail' pk=object.id %}">login</a> to see this information.
+            </div>
+        </div>
+    </div>
+</div>
+<div class="metric-card">
+    <label class="control-label unavailable">not available</label>
+    <div class="main-content">
+        <div class="main-text">
+            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                National assessment of performance score based on the fire spread.
+            </div>
+            <div class="description">
+              Please <a href="{% url 'login' %}?next={% url 'firedepartment_detail' pk=object.id %}">login</a> to see this information.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="metric-card">
+    <label class="control-label unavailable">not available</label>
+    <div class="main-content">
+        <div class="main-text">
+            <div class="ct-product--tilte ct-u-marginTop30 ct-u-marginBottom10">
+                National assessment of performance score based on the death and injury risk.
+            </div>
+            <div class="description">
+              Please <a href="{% url 'login' %}?next={% url 'firedepartment_detail' pk=object.id %}">login</a> to see this information.
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}

@@ -1,0 +1,27 @@
+{% if user.is_authenticated %}
+<div class="col-sm-6 col-md-12 ct-u-marginBottom30 ct-u-marginTop20">
+    {% verbatim %}
+    <gauge description="This department is {{ metrics.dist_model_score[level] | number:1 | trimDecimal | defaultValue:'N/A' }} seconds over the industry standard."
+           metric-title="Performance Score" min="{{ metrics.population_class_stats[level].dist_model_score__min | number:0 }}"
+           max="{{ metrics.population_class_stats[level].dist_model_score__max | number:0 }}" value="{{ metrics.dist_model_score[level] | number:1 | trimDecimal | defaultValue:'N/A' }}" inverse learn-more="{{ urls.models_performance_score }}"></gauge>
+    {% endverbatim %}
+    <div class="score-disclaimer ng-invalid ct-u-marginTop20 text-center" ng-if="metrics.dist_model_score_fire_count[level] < 100 && metrics.dist_model_score_fire_count[level] >= 75 && metrics.dist_model_score_fire_count[level] && metrics.dist_model_score[level]">
+        The Fire Department Performance Score is generated from a statistical model. There is the potential for high uncertainty in the model for communities with less than <strong>100</strong> aggregate fires.
+    </div>
+    <div class="score-disclaimer ng-invalid ct-u-marginTop20 text-center" ng-if="!metrics.dist_model_score[level]">
+        This Fire Department does not have the minimum number of incidents or does not have the minimum required data to calculate one or more of the scores in the model.
+        See the relevant <span class="learn-more-link"><a href="{% url 'faq.html' %}#scores-grayed-out">FAQ</a></span> for more information.
+    </div>
+</div>
+{% else %}
+<div class="col-sm-6 col-md-12 ct-u-marginBottom30 ct-u-marginTop20 unauthenticated">
+    <gauge description="Please <a href='{% url 'login' %}?next={% url 'firedepartment_detail' pk=object.id %}'>login</a> to see this department's performance score."
+           metric-title="" min="" max="" value="" inverse
+           learn-more="{% url 'models_performance_score' %}"></gauge>
+    <div class="gauge-description is-your-department">
+        <p>
+            Is this your department? <a class="is-your-department" href="{% url 'registration_preregister' %}?department={{ object.id }}">Request access from your Fire Chief or Local Officer.</a>
+        </p>
+    </div>
+</div>
+{% endif %}
