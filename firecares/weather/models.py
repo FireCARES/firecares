@@ -26,7 +26,7 @@ WEATHER_WARNING_SOURCE = [('deafult', 'default-provider')]
 
 class WeatherWarnings(models.Model):
     """
-    Weather Warnings from NOAA.
+    Weather Warnings from NOAA
     """
     service_id_warnings = 0 #no data
     service_id_watches = 1 
@@ -81,11 +81,11 @@ class WeatherWarnings(models.Model):
             .format(self.objectid)
 
     @classmethod
-    def load_data(cls):
+    def load_warning_data(cls):
 
         objects = requests.get('https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Forecasts_Guidance_Warnings/watch_warn_adv/MapServer/1/query?'
                   'where=objectId<5&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false'
-                  '&returnTrueCurves=false&outSR=&returnIdsOnly=true&returnCountOnly=false&returnZ=false&returnM=false&returnDistinctValues=false&f=json', timeout=10)
+                  '&returnTrueCurves=false&outSR=&returnIdsOnly=true&returnCountOnly=false&returnZ=false&returnM=false&returnDistinctValues=false&f=json', timeout=25)
 
 
         print objects.content
@@ -98,7 +98,7 @@ class WeatherWarnings(models.Model):
 
             #try:
 
-            obj = requests.get(url.format(object))
+            obj = requests.get(url.format(object), timeout=25 )
             obj = json.loads(obj.content)
 
             data = dict((k.lower(), v) for k, v in obj['feature']['attributes'].iteritems())
@@ -110,18 +110,18 @@ class WeatherWarnings(models.Model):
 
                 datapost = WeatherWarnings.objects.filter(warnid=data['warnid'])
                 
-                feat = datapost[0]
+                feature = datapost[0]
                 
                 if data['expiration'] != " ":
-                    feat.expiration = date_parse(data['expiration'])
+                    feature.expiration = date_parse(data['expiration'])
 
                 if obj['feature'].get('geometry'):
                     poly = map(LinearRing, obj['feature']['geometry']['rings'])
-                    feat.warngeom = MultiPolygon(fromstr(str(Polygon(*poly))),)  # not sure if data is multi poly
+                    feature.warngeom = MultiPolygon(fromstr(str(Polygon(*poly))),)  # not sure if data is multi poly
                     warninggeom = MultiPolygon(fromstr(str(Polygon(*poly))),)
 
-                feat.issuance = date_parse(data['issuance']) 
-                feat.idp_subset = data['idp_subset'] 
+                feature.issuance = date_parse(data['issuance']) 
+                feature.idp_subset = data['idp_subset'] 
 
                 print data['warnid'] + " Updated"
 
@@ -147,11 +147,11 @@ class WeatherWarnings(models.Model):
                 datapost['idp_subset'] = data['idp_subset'] 
                 datapost['warnid'] = data['warnid'] 
 
-                feat = cls.objects.create(**datapost)
-                print 'Warning created: {0}'.format(data.get('warnid'))
+                feature = cls.objects.create(**datapost)
+                print 'Created Warning: {0}'.format(data.get('warnid'))
 
 
-            feat.save()
+            feature.save()
 
             #Intersect with 
             if(warninggeom != ''):
@@ -159,10 +159,11 @@ class WeatherWarnings(models.Model):
                 intersectDepartmentList = FireDepartment.objects.filter(geom__intersects=warninggeom)
 
                 if(intersectDepartmentList.count()> 0):
+                    cls.add_warnings_to_departments(intersectDepartmentList, feature)
                     print "Total intersecting Departments " + str(intersectDepartmentList.count())
 
 
-        print '{0} Weather total Warnings.'.format(WeatherWarnings.objects.all().count())
+        print '{0} Total Weather Warnings.'.format(WeatherWarnings.objects.all().count())
 
           # except KeyError:
           #     print '{0} failed.'.format(object)
@@ -183,7 +184,15 @@ class WeatherWarnings(models.Model):
           #     print url.format(object)
           #     print sys.exc_info()
 
-
+    @classmethod
+    def add_warnings_to_departments(cls, departmentQuerySet, WeatherWarnings):
+        """
+        adds and updates departement weather warnings
+        """
+        print 'adsf'
+        for fireDept in departmentQuerySet:
+            print(fireDept.name)
+    
     @property
     def warning_area(self):
         """
@@ -213,5 +222,5 @@ class DepartmentWarnings(models.Model):
     warngeom = models.MultiPolygonField()
 
 
-reversion.register(WeatherWarnings)
-reversion.register(DepartmentWarnings)
+#reversion.register(WeatherWarnings)
+#reversion.register(DepartmentWarnings)

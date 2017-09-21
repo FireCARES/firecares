@@ -17,4 +17,22 @@
             </ul>
         </div>
     </div>
+    <div class="row weather-messages">
+        <div class="col-md-12 col-lg-12">
+            <ul>
+                {% for message in messages %}
+                <div class="alert {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}alert-success{% else %}alert-danger{% endif %}" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    {{ message }}
+                </div>
+                {% endfor %}
+                {% if use_angular %}
+                    <div class="alert" role="alert" ng-repeat="message in messages" ng-class="message.class">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <span ng-bind="message.text"/>
+                    </div>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
 </div>
