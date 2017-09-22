@@ -27,7 +27,7 @@
                 </div> 
             {% endfor %}
             {% if use_angular %}
-                <div class="alert" role="alert" ng-repeat="message in weather_messages" style="margin-top: 10px;max-height: 63px;margin-bottom: -4px" ng-class="message.class">
+                <div class="alert" role="alert" ng-repeat="message in weather_messages" style="margin-top: 9px;max-height: 38px;padding-top: 0px;margin-bottom: -2px" ng-class="message.class">
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <!-- <span ng-bind="message.url"/> -->
                     <span ng-bind-html="message.text"/>

@@ -11931,6 +11931,11 @@ input.no-invalid.ng-invalid:focus {
 .association-requests.panel-group .panel + .panel {
   margin-top: 2px;
 }
+
+.weather-messages a{
+  padding-left: 15px !important;
+  color: #428bca !important;
+}
 .ct-productMeta--single a.is-your-department {
   width: 250px;
   display: block;

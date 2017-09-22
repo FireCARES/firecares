@@ -316,9 +316,11 @@ class WeatherWarningResource(JSONDefaultModelResourceMixin, ModelResource):
 
 
         expired = datetime.now()
-        #queryset = DepartmentWarnings.objects.filter(expiredate__gte=expired)#only show valid warnings
+        #production when Task is running
+        queryset = DepartmentWarnings.objects.filter(expiredate__gte=expired)
 
-        queryset = DepartmentWarnings.objects.all()
+        #good for testing Warnings 
+        #queryset = DepartmentWarnings.objects.all()#only show all warnings
 
         authorization = GuardianAuthorization(delegate_to_property='department',
                                               view_permission_code=None,
