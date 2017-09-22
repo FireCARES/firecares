@@ -114,7 +114,7 @@
 
                 weatherPolygons.push(poly);
 
-                $scope.weather_messages.push({class: 'alert-danger', text: '' + warning.warningname + '  Until  ' + warningdate.toDateString() +',  '+ warningdate.toLocaleTimeString() + '  <a target="_blank" href='+warning.url+'>  Click for More Info</a>', url: '<a target="_blank" href='+warning.url+'>Click for More Info</a>'});
+                $scope.weather_messages.push({class: 'alert-danger', text: 'The Department is under ' + warning.warningname + '  Until  ' + warningdate.toDateString() +',  '+ warningdate.toLocaleTimeString() + '  <a target="_blank" href='+warning.url+'>  Click for More Info</a>', url: '<a target="_blank" href='+warning.url+'>Click for More Info</a>'});
         }
 
         if (numWarnings > 0) {
