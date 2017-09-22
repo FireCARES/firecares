@@ -1,0 +1,96 @@
+<div class="ct-heading ct-u-marginTop30 ct-u-marginBottom20">
+    <span class="learn-more-link-icon">
+        <a href="{% url 'models_community_risk' %}" data-toggle="tooltip" data-title="Learn More" data-placement="bottom">
+            <i class="fa fa-info-circle fa-2x"></i>
+        </a>
+    </span>
+    <h3>Community Risk Assessment</h3>
+    <selected-risk level="level"></selected-risk>
+</div>
+{% verbatim %}
+<div class="row ct-u-marginBottom30">
+    <div class="col-md-4">
+        <div class="row">
+            <div class="col-lg-2 col-md-12">
+                <div class="diamond-control-label diamond-{{ metrics.population_metrics_rows[level].risk_model_fires_quartile | riskLevel:'unavailable' }}">
+                    <div>{{ metrics.population_metrics_rows[level].risk_model_fires_quartile | riskLevel:'n/a' }}</div>
+                </div>
+            </div>
+            <div class="col-lg-10 col-md-12">
+                <div class="risk-card">
+                    <div class="main-content">
+                        <div class="main-text">
+                            <div class="ct-product--tilte">
+                                Fire Risk
+                            </div>
+                            <div class="description">
+                                This community falls into the {{ metrics.population_metrics_rows[level].risk_model_fires_quartile | riskLevel:'unknown' }} risk category for structure fires when compared to other communities of the same size classification.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="row">
+            <div class="col-lg-2 col-md-12">
+                <div class="diamond-control-label diamond-{{ metrics.population_metrics_rows[level].risk_model_size1_percent_size2_percent_sum_quartile | riskLevel:'unavailable' }}">
+                    <div>{{ metrics.population_metrics_rows[level].risk_model_size1_percent_size2_percent_sum_quartile | riskLevel:'n/a' }}</div>
+                </div>
+            </div>
+            <div class="col-lg-10 col-md-12">
+                <div class="risk-card">
+                    <div class="main-content">
+                        <div class="main-text">
+                            <div class="ct-product--tilte">
+                                Fire Spread Risk
+                            </div>
+                            <div class="description">
+                                This community falls into the {{ metrics.population_metrics_rows[level].risk_model_size1_percent_size2_percent_sum_quartile | riskLevel:'unknown' }} risk category for the number of fires spread beyond room of origin when compared to other communities of the same size classification.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="row">
+            <div class="col-lg-2 col-md-12">
+                <div class="diamond-control-label diamond-{{ metrics.population_metrics_rows[level].risk_model_deaths_injuries_sum_quartile | riskLevel:'unavailable'}}">
+                    <div>{{ metrics.population_metrics_rows[level].risk_model_deaths_injuries_sum_quartile | riskLevel:'n/a' }}</div>
+                </div>
+            </div>
+            <div class="col-lg-10 col-md-12">
+                <div class="risk-card">
+                    <div class="main-content">
+                        <div class="main-text">
+                            <div class="ct-product--tilte">
+                                Death and Injury Risk
+                            </div>
+                            <div class="description">
+                                This community falls into the {{ metrics.population_metrics_rows[level].risk_model_deaths_injuries_sum_quartile | riskLevel:'unknown' }} risk category for the number of fire-related deaths and injuries when compared to other communities of the same size classification.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endverbatim %}
+   <div class="community-risk-legend">
+       <div>
+        <div class="diamond-control-label diamond-low diamond-legend"></div>
+        <span class="help-text"><span class="help-text-category">Low</span><span>: less than 25% of departments have an equal or smaller risk value.</span></span>
+       </div>
+       <div>
+        <div class="diamond-control-label diamond-medium diamond-legend" style="opacity: .5; display: inline-block"></div>
+        <span class="help-text"><span class="help-text-category">Medium</span><span>: 25-75% of departments have a smaller risk value.</span></span>
+        </div>
+       <div>
+        <div class="diamond-control-label diamond-high diamond-legend" style="opacity: .5; display: inline-block"></div>
+        <span class="help-text"><span class="help-text-category">High</span><span>: over 75% of departments have an equal or smaller risk value.</span></span>
+       </div>
+    </div>
+</div>
