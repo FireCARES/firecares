@@ -41,7 +41,7 @@ class WeatherWarningTests(TestCase):
         departwarnobj['url'] = warningjson['feature']['attributes']['url']
         departwarnobj['warngeom'] = warninggeom
         departwarnobj['warningname'] = warningjson['feature']['attributes']['prod_type']
-        departwarnobj['departmentfdid'] = "23645",
+        departwarnobj['departmentfdid'] = "80343",
         departwarnobj['warningfdid'] = warningjson['feature']['attributes']['warnid']
 
         createwarning = WeatherWarnings.create_warning(warningobj)

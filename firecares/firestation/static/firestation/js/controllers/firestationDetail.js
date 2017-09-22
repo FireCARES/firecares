@@ -2,7 +2,7 @@
 
 (function() {
   angular.module('fireStation.firestationDetailController', ['xeditable', 'ui.bootstrap'])
-  .controller('fireStationController', function($scope, $window, $http, Staffing, $timeout, map, FireStation, $filter, $interpolate, $compile, $analytics) {
+  .controller('fireStationController', function($scope, $window, $http, Staffing, $timeout, map, FireStation, $filter, $interpolate, $compile, $analytics, WeatherWarning) {
     var thisFirestation = '/api/v1/firestations/' + config.id + '/';
     var serviceAreaData = null;
     var stationGeom = {
@@ -30,6 +30,7 @@
     $scope.forms = [];
     $scope.stations = [];
     $scope.message = {};
+    $scope.weather_messages = [];
     $scope.eventCategory = 'station detail';
     var fitBoundsOptions = {padding: [6, 6]};
 
@@ -94,6 +95,45 @@
     else {
       map.setView(stationGeom, 15);
     }
+
+    //
+    // Weather Warnings
+    //
+    WeatherWarning.query({departmentfdid: config.departmentId}).$promise.then(function(data) {
+
+        var weatherPolygons = [];
+        var numWarnings = data.objects.length;
+        
+        for (var i = 0; i < numWarnings; i++) {
+
+            var warning = data.objects[i];
+                var poly = L.multiPolygon(warning.warngeom.coordinates.map(function(d){return mapPolygon(d)}),{color: '#f00', weight:'1px'});
+                var warningdate = new Date(warning.expiredate);
+
+                poly.bindPopup('<b>' + warning.warningname + '</b><br/>Ending: ' + warningdate.toDateString() +' '+ warningdate.toLocaleTimeString() + '<br/><br/><a target="_blank" href='+warning.url+'>Click for More Info</a>');
+
+                weatherPolygons.push(poly);
+
+                $scope.weather_messages.push({class: 'alert-danger', text: warning.warningname + ' for the Department Until  ' + warningdate.toDateString() +',  '+ warningdate.toLocaleTimeString(), url: warning.url});
+        }
+
+        if (numWarnings > 0) {
+
+            var weatherLayer = L.featureGroup(weatherPolygons);
+
+            weatherLayer.addTo(map);
+            weatherLayer.bringToBack();
+            layersControl.addOverlay(weatherLayer, 'Weather Warnings');
+        }
+
+        function mapPolygon(poly){
+          return poly.map(function(line){return mapLineString(line)})
+        }
+
+        function mapLineString(line){
+          return line.map(function(d){return [d[1],d[0]]})  
+        }
+    });
 
     map.on('overlayadd', function(layer) {
       layer = layer.layer;

@@ -25,6 +25,16 @@
           });
     })
 
+    .factory('WeatherWarning', function ($resource) {
+        return $resource('/api/v1/weather-warning/:id/', {id: '@id'},
+          {
+            'query': {
+              'method': 'GET',
+              isArray: false
+            }
+          });
+    })
+
     .factory('USGSUnit', function ($resource) {
         return $resource('/api/v1/usgs/:id/', {}, {'query': {'method': 'GET', isArray: false}});
     })

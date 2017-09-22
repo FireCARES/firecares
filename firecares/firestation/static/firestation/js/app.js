@@ -13,6 +13,7 @@
       'fireStation.requestApproval',
       'fireStation.firestationDetailController',
       'fireStation.performanceScoreController',
+      'fireStation.weatherWarning',
       'fireStation.mapService',
       'fireStation.heatmapService',
       'fireStation.favoriteService',
