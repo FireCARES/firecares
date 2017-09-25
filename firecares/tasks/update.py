@@ -190,6 +190,21 @@ GROUP BY y.risk_category, extract(year from a.inc_date)
 ORDER BY extract(year from a.inc_date) DESC"""
 
 
+ALL_FIRE_CALLS = """SELECT count(1) as count, extract(year from b.inc_date) as year, COALESCE(y.risk_category, 'N/A') as risk_level
+FROM fireincident b
+LEFT JOIN
+    (SELECT state, fdid, inc_date, inc_no, exp_no, x.parcel_id, x.risk_category
+        FROM (SELECT *
+            FROM incidentaddress a
+            LEFT JOIN parcel_risk_category_local using (parcel_id)
+        ) AS x
+    ) AS y
+USING (state, fdid, inc_date, inc_no, exp_no)
+WHERE b.state = %(state)s AND b.fdid = %(fdid)s AND extract(year FROM b.inc_date) IN %(years)s
+GROUP BY y.risk_category, extract(year FROM b.inc_date)
+ORDER BY extract(year FROM b.inc_date) DESC"""
+
+
 STRUCTURE_FIRES = """SELECT count(1) as count, extract(year from a.alarm) as year, COALESCE(y.risk_category, 'N/A') as risk_level
 FROM buildingfires a
 LEFT JOIN
@@ -264,7 +279,8 @@ def update_nfirs_counts(id, year=None):
     queries = (
         ('civilian_casualties', CIVILIAN_CASUALTIES, params),
         ('residential_structure_fires', STRUCTURE_FIRES, params),
-        ('firefighter_casualties', FIREFIGHTER_CASUALTIES, params)
+        ('firefighter_casualties', FIREFIGHTER_CASUALTIES, params),
+        ('fire_calls', ALL_FIRE_CALLS, params)
     )
 
     for statistic, query, params in queries:
