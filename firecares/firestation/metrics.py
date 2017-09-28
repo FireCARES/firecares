@@ -532,10 +532,10 @@ class FireDepartmentMetrics(object):
         for numlevel, level in self.RISK_LEVELS:
             v = self.firedepartment.nfirsstatistic_set.filter(metric='residential_structure_fires', level=numlevel)\
                 .extra(select={
-                       'year_max': "SELECT MAX(COUNT) FROM firestation_nfirsstatistic b WHERE b.fire_department_id = firestation_nfirsstatistic.fire_department_id AND b.year = firestation_nfirsstatistic.year and b.metric='fire_calls' and b.level = firestation_nfirsstatistic.level"
+                       'year_max': "SELECT MAX(COUNT) FROM firestation_nfirsstatistic b WHERE b.year = firestation_nfirsstatistic.year and b.metric=firestation_nfirsstatistic.metric and b.level = firestation_nfirsstatistic.level"
                        })\
                 .extra(select={
-                       'year_min': "SELECT 0"
+                       'year_min': "SELECT MIN(COUNT) FROM firestation_nfirsstatistic b WHERE b.year = firestation_nfirsstatistic.year and b.metric=firestation_nfirsstatistic.metric and b.level = firestation_nfirsstatistic.level"
                        })
             ret[level] = [dict(year=i.year, count=i.count, year_max=i.year_max, year_min=i.year_min) for i in v]
 

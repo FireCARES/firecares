@@ -245,7 +245,7 @@ def update_department(id):
 
 
 @app.task(queue='update')
-def update_nfirs_counts(id, year=None):
+def update_nfirs_counts(id, year=None, stat=None):
     """
     Queries the NFIRS database for statistics.
     """
@@ -272,7 +272,7 @@ def update_nfirs_counts(id, year=None):
         # default years to None
         years = {x: {1: None, 2: None, 4: None, 5: None} for x in [int(n[0]) for n in cursor.fetchall()]}
     else:
-        years[year] = {1: None, 2: None, 4: None, 5: None}
+        years = {y: {1: None, 2: None, 4: None, 5: None} for y in year}
 
     params = dict(fdid=fd.fdid, state=fd.state, years=tuple(years.keys()))
 
@@ -282,6 +282,9 @@ def update_nfirs_counts(id, year=None):
         ('firefighter_casualties', FIREFIGHTER_CASUALTIES, params),
         ('fire_calls', ALL_FIRE_CALLS, params)
     )
+
+    if stat:
+        queries = filter(lambda x: x[0] == stat, queries)
 
     for statistic, query, params in queries:
         counts = copy.deepcopy(years)
