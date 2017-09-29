@@ -268,7 +268,17 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
                          (2L, 2011.0, u'N/A'),
                          (2L, 2010.0, u'Low'),
                          (1L, 2010.0, u'Medium'),
-                         (2L, 2010.0, u'N/A'))]
+                         (2L, 2010.0, u'N/A')),
+                        ((3L, 2014.0, u'N/A'),
+                         (4L, 2012.0, u'Low'),
+                         (4L, 2012.0, u'N/A'),
+                         (1L, 2011.0, u'Low'),
+                         (4L, 2011.0, u'Medium'),
+                         (5L, 2011.0, u'N/A'),
+                         (6L, 2010.0, u'Low'),
+                         (7L, 2010.0, u'Medium'),
+                         (6L, 2010.0, u'High'),
+                         (8L, 2010.0, u'N/A'))]
 
         self.assertEqual(lafd.nfirsstatistic_set.count(), 0)
 
@@ -278,7 +288,7 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         update_nfirs_counts(lafd.id)
 
         # Should have 1 for each of the 5 level buckets (including the N/As) per year (5) per statistic (3)
-        self.assertEqual(lafd.nfirsstatistic_set.count(), 3 * 5 * 5)
+        self.assertEqual(lafd.nfirsstatistic_set.count(), 4 * 5 * 5)
         self.assertEqual(lafd.nfirsstatistic_set.get(year=2014, level=0, metric='residential_structure_fires').count, 22L)
 
         # Ensure that even for years with no counts, a statistic row is in place
@@ -288,6 +298,8 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         self.assertIsNone(lafd.nfirsstatistic_set.get(year=2013, level=0, metric='firefighter_casualties').count)
 
         self.assertEqual(lafd.nfirsstatistic_set.get(year=2010, level=1, metric='civilian_casualties').count, 6L)
+
+        self.assertEqual(lafd.nfirsstatistic_set.get(year=2010, level=0, metric='fire_calls').count, 27L)
 
     @mock.patch('firecares.tasks.update.connections')
     def test_calculate_department_census_geom(self, mock_connections):
