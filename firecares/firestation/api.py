@@ -304,6 +304,36 @@ class StaffingResource(JSONDefaultModelResourceMixin, ModelResource):
         always_return_data = True
 
 
+class StaffingStationRollupResource(JSONDefaultModelResourceMixin, ModelResource):
+    """
+    Merges Staffing Data with the Station Data
+    """
+
+    department = fields.ForeignKey(FireDepartmentResource, 'department', null=True)
+    staffingdata = fields.ToManyField('firecares.firestation.api.StaffingResource', 'staffing_set', full=True)
+
+    class Meta:
+        resource_name = 'staffingstations'
+        queryset = FireStation.objects.all()
+
+        authorization = GuardianAuthorization(delegate_to_property='department',
+                                              view_permission_code=None,
+                                              update_permission_code='change_firedepartment',
+                                              create_permission_code='change_firedepartment',
+                                              delete_permission_code='admin_firedepartment')
+        authentication = MultiAuthentication(Authentication(), SessionAuthentication(), ApiKeyAuthentication())
+        list_allowed_methods = ['get']
+        detail_allowed_methods = ['get', 'put']
+        filtering = {'department': ('exact',), 'state': ('exact',), 'id': ('exact',)}
+        excludes = ['addressbuildingname', 'complex_id', 'data_security', 'distribution_policy', 'fcode', 'foot_id',
+                    'ftype', 'globalid', 'gnis_id', 'islandmark', 'loaddate', 'objectid', 'permanent_identifier',
+                    'pointlocationtype', 'source_datadesc', 'source_datasetid', 'source_featureid','zipcode','department',
+                    'source_originator', 'admintype', 'district', 'archived', 'modified', 'state', 'address', 'city'
+                    ]
+        serializer = PrettyJSONSerializer()
+        limit = 120
+
+
 class WeatherWarningResource(JSONDefaultModelResourceMixin, ModelResource):
     """
     The Weather API.
@@ -329,7 +359,7 @@ class WeatherWarningResource(JSONDefaultModelResourceMixin, ModelResource):
                                               delete_permission_code='change_firedepartment')
 
         authentication = MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
-        filtering = {'departmentfdid': ('exact',), 'state': ('exact',), 'id': ('exact',)}
+        filtering = {'departmentfdid': ('exact',), 'id': ('exact',)}
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get']
         serializer = PrettyJSONSerializer()

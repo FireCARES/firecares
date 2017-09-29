@@ -46,9 +46,9 @@
         })
     ;
 
-    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', '$filter', 'FireDepartment', '$analytics', 'WeatherWarning'];
+    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', '$filter', 'FireDepartment', '$analytics', 'WeatherWarning', '$interpolate'];
 
-    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter, FireDepartment, $analytics, WeatherWarning) {
+    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter, FireDepartment, $analytics, WeatherWarning, $interpolate) {
         var departmentMap = map.initMap('map', {scrollWheelZoom: false});
         var showStations = true;
         var stationIcon = L.FireCARESMarkers.firestationmarker();
@@ -56,6 +56,10 @@
         var fitBoundsOptions = {};
         var countyBoundary = null;
         var eventCategory = 'department detail';
+        
+        var serviceArea, max;
+        var serviceAreaData = null;
+        
         $scope.metrics = window.metrics;
         $scope.urls = window.urls;
         $scope.level = window.level;
@@ -375,6 +379,23 @@
         });
         layersControl.addOverlay(parcels, 'Parcels');
 
+        //
+        // Service Area
+        //
+        serviceArea = L.geoJson(null, {
+          onEachFeature: function(feature, layer) {
+              layer.bindPopup(feature.properties.Name + ' minutes');
+              layer.on('mouseover', function(e) {
+                 layer.setStyle({fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5) + mouseOverAddedOpacity, fillColor: highlightColor});
+              });
+              layer.on('mouseout', function(e) {
+                 layer.setStyle({weight: 0.8, fillOpacity:-(feature.properties.ToBreak * 0.8 - max) / (max * 1.5), fillColor: '#33cc33'});
+              });
+          }
+        });
+
+        layersControl.addOverlay(serviceArea, 'Service area');
+
         $scope.shp = null;
 
         $scope.toggleBoundary = function() {
@@ -463,6 +484,54 @@
           });
           $scope.level = level;
         };
+
+        //
+        //List for Service Area Layer
+        //
+        departmentMap.on('overlayadd', function(layer) {
+          layer = layer.layer;
+          if ( layer._leaflet_id === serviceArea._leaflet_id && !serviceAreaData) {
+            
+            departmentMap.spin(true);
+
+            FireStation.query({department: config.id}).$promise.then(function(data) {
+                $scope.stations = data.objects;
+
+                var numFireStations = $scope.stations.length;
+                for (var i = 0; i < numFireStations; i++) {
+                    var station = $scope.stations[i];
+                    var marker = L.marker(station.geom.coordinates.reverse(), {icon: stationIcon});
+                }
+            });
+            
+            var serviceAreaURL = $interpolate('https://geo.firecares.org/?f=json&Facilities={"features":[{"geometry":{"x":{{x}},"spatialReference":{"wkid":4326},"y":{{y}}}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4,4,4&Break_Values=4 6 8&returnZ=false&returnM=false')(stationGeom);
+
+            $http({
+              method: 'GET',
+              url: serviceAreaURL
+            }).then(function success(resp) {
+              esri2geo.toGeoJSON(resp.data.results[0].value, function(_, geojson) {
+                var values = geojson.features.map(function(val, idx) {
+                  return val.properties.ToBreak;
+                });
+                max = Math.max.apply(null, values);
+                serviceAreaData = geojson;
+                serviceArea.addData(geojson);
+                layer.setStyle(function(feature) {
+                  return {
+                    fillColor: '#33cc33',
+                    fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5),
+                    weight: 0.8
+                  };
+                });
+                departmentMap.fitBounds(serviceArea);
+                departmentMap.spin(false);
+              });
+            }, function error(err) {
+              departmentMap.spin(false);
+            });
+          }
+        });
 
         departmentMap.on('overlayadd', function(layer) {
           $analytics.eventTrack('enable layer', {
