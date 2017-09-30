@@ -46,9 +46,9 @@
         })
     ;
 
-    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', '$filter', 'FireDepartment', '$analytics', 'WeatherWarning', '$interpolate'];
+    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', '$filter', 'FireDepartment', '$analytics', 'WeatherWarning', '$interpolate', 'FireStationandStaffing'];
 
-    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter, FireDepartment, $analytics, WeatherWarning, $interpolate) {
+    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter, FireDepartment, $analytics, WeatherWarning, $interpolate, FireStationandStaffing) {
         var departmentMap = map.initMap('map', {scrollWheelZoom: false});
         var showStations = true;
         var stationIcon = L.FireCARESMarkers.firestationmarker();
@@ -59,6 +59,8 @@
         
         var serviceArea, max;
         var serviceAreaData = null;
+        var mouseOverAddedOpacity = 0.25;    
+        var highlightColor = 'blue';
         
         $scope.metrics = window.metrics;
         $scope.urls = window.urls;
@@ -494,41 +496,79 @@
             
             departmentMap.spin(true);
 
-            FireStation.query({department: config.id}).$promise.then(function(data) {
+            //First Get Stations to derive Response
+            FireStationandStaffing.query({department: config.id}).$promise.then(function(data) {
                 $scope.stations = data.objects;
 
                 var numFireStations = $scope.stations.length;
-                for (var i = 0; i < numFireStations; i++) {
-                    var station = $scope.stations[i];
-                    var marker = L.marker(station.geom.coordinates.reverse(), {icon: stationIcon});
-                }
-            });
-            
-            var serviceAreaURL = $interpolate('https://geo.firecares.org/?f=json&Facilities={"features":[{"geometry":{"x":{{x}},"spatialReference":{"wkid":4326},"y":{{y}}}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4,4,4&Break_Values=4 6 8&returnZ=false&returnM=false')(stationGeom);
+                var serviceAreaURL;
 
-            $http({
-              method: 'GET',
-              url: serviceAreaURL
-            }).then(function success(resp) {
-              esri2geo.toGeoJSON(resp.data.results[0].value, function(_, geojson) {
-                var values = geojson.features.map(function(val, idx) {
-                  return val.properties.ToBreak;
+                var deptGeom = {
+                  x: config.centroid[1],
+                  y: config.centroid[0]
+                };
+
+                //check to see if there are station geom if not use headquarters
+                if(numFireStations < 1){
+
+                    serviceAreaURL = $interpolate('https://geo.firecares.org/?f=json&Facilities={"features":[{"geometry":{"x":{{x}},"spatialReference":{"wkid":4326},"y":{{y}}}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4&Break_Values=4 6 8&returnZ=false&returnM=false')(deptGeom);
+                }
+                else{
+                    var totalAssetStationString = "";
+                    var assetStationGeom = [];
+
+                    //iterate through the station assets
+                    for (var i = 0; i < numFireStations; i++) {
+
+                        var station = $scope.stations[i];
+                        var totalAssets = 0;
+                        for (var asset = 0; asset < station.staffingdata.length; asset++) {
+
+                            totalAssets = totalAssets + Number(station.staffingdata[asset].personnel);
+                        }
+
+                        if(totalAssets>0){
+                            assetStationGeom.push({"geometry":{"x":Number(Number(station.geom.coordinates[0]).toPrecision(4)),"spatialReference":{"wkid":4326},"y":Number(Number(station.geom.coordinates[1]).toPrecision(4))}});
+                            totalAssetStationString = totalAssetStationString + String(totalAssets) + ',';
+                        }
+                    }
+
+                    totalAssetStationString = totalAssetStationString.substring(0, totalAssetStationString.length - 1);
+
+                    //Check if there is multiple stations but zero peronnel total -- use headquarters
+                    if(totalAssetStationString == ""){
+                        serviceAreaURL = $interpolate('https://geo.firecares.org/?f=json&Facilities={"features":[{"geometry":{"x":{{x}},"spatialReference":{"wkid":4326},"y":{{y}}}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4&Break_Values=4 6 8&returnZ=false&returnM=false')(deptGeom);
+                    }
+                    else{
+                        serviceAreaURL = 'https://geo.firecares.org/?f=json&Facilities={"features":'+JSON.stringify(assetStationGeom)+',"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input='+totalAssetStationString+'&Break_Values=4 6 8&returnZ=false&returnM=false';
+                    }
+                    
+                }
+
+                $http({
+                  method: 'GET',
+                  url: serviceAreaURL
+                }).then(function success(resp) {
+                  esri2geo.toGeoJSON(resp.data.results[0].value, function(_, geojson) {
+                    var values = geojson.features.map(function(val, idx) {
+                      return val.properties.ToBreak;
+                    });
+                    max = Math.max.apply(null, values);
+                    serviceAreaData = geojson;
+                    serviceArea.addData(geojson);
+                    layer.setStyle(function(feature) {
+                      return {
+                        fillColor: '#33cc33',
+                        fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5),
+                        weight: 0.8
+                      };
+                    });
+                    departmentMap.fitBounds(serviceArea);
+                    departmentMap.spin(false);
+                  });
+                }, function error(err) {
+                  departmentMap.spin(false);
                 });
-                max = Math.max.apply(null, values);
-                serviceAreaData = geojson;
-                serviceArea.addData(geojson);
-                layer.setStyle(function(feature) {
-                  return {
-                    fillColor: '#33cc33',
-                    fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5),
-                    weight: 0.8
-                  };
-                });
-                departmentMap.fitBounds(serviceArea);
-                departmentMap.spin(false);
-              });
-            }, function error(err) {
-              departmentMap.spin(false);
             });
           }
         });

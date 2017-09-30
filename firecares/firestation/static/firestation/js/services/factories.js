@@ -12,6 +12,14 @@
         });
     })
 
+    .factory('FireStationandStaffing', function ($resource) {
+        return $resource('/api/v1/staffingstations/:id/', {id: '@id'},
+            {
+                'query': {'method': 'GET', isArray: false}
+
+        });
+    })
+
     .factory('FireDepartment', function ($resource) {
         return $resource('/api/v1/fire-departments/:id/', {id: '@id'},
           {
