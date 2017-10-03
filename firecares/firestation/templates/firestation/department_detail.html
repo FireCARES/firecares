@@ -414,7 +414,7 @@
                                         <td align="left" ng-if="stat.count">{{ stat.count | number | defaultValue:"Not Available" }}</td>
                                         <td align="left" ng-if="!stat.count">Not Available</td>
                                         <td align="center" style="width: 70px">
-                                            <bar-gauge min="{{ stat.year_min }}" max="{{ stat.year_max }}" value="{{ stat.count }}" inverse></bar-gauge>
+                                            <bar-gauge min="{{ !stat.count ? 'N/A' : stat.year_min }}" max="{{ !stat.count ? 'N/A' : stat.year_max }}" value="{{ stat.count }}" inverse></bar-gauge>
                                         </td>
                                     </tr>
                                     <tr ng-show="!residential_structure_fire_counts[level].length">
