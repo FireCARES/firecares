@@ -2,7 +2,7 @@ import json
 import logging
 from .forms import StaffingForm
 from .models import FireStation, Staffing, FireDepartment
-from firecares.weather.models import WeatherWarnings, DepartmentWarnings
+from firecares.weather.models import DepartmentWarnings
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.gis import geos
 from tastypie import fields
@@ -15,7 +15,7 @@ from tastypie.exceptions import Unauthorized, TastypieError
 from tastypie.serializers import Serializer
 from tastypie.validation import FormValidation
 from guardian.core import ObjectPermissionChecker
-from datetime import datetime
+from django.utils import timezone
 
 
 logger = logging.getLogger(__name__)
@@ -306,29 +306,24 @@ class StaffingResource(JSONDefaultModelResourceMixin, ModelResource):
 
 class WeatherWarningResource(JSONDefaultModelResourceMixin, ModelResource):
     """
-    The Weather API.
+    The Weather API mege with department id.
     """
-
     department = fields.ForeignKey(FireDepartmentResource, 'department', null=True)
 
     class Meta:
         resource_name = 'weather-warning'
-
-
-        expired = datetime.now()
-        #production when Task is running
+        expired = timezone.now()
+        # production when Task is running
         queryset = DepartmentWarnings.objects.filter(expiredate__gte=expired)
-
-        #good for testing Warnings 
-        #queryset = DepartmentWarnings.objects.all()#only show all warnings
-
+        # only show all warnings #good for testing Warnings
+        # queryset = DepartmentWarnings.objects.all()
         authorization = GuardianAuthorization(delegate_to_property='department',
                                               view_permission_code=None,
                                               update_permission_code='change_firedepartment',
                                               create_permission_code='change_firedepartment',
                                               delete_permission_code='change_firedepartment')
-
-        filtering = {'departmentfdid': ('exact',), 'state': ('exact',), 'id': ('exact',)}
+        authentication = MultiAuthentication(Authentication(), SessionAuthentication(), ApiKeyAuthentication())
+        filtering = {'department': ('exact',), 'state': ('exact',), 'id': ('exact',)}
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get']
         serializer = PrettyJSONSerializer()
