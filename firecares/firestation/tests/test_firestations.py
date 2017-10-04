@@ -605,7 +605,6 @@ class FireStationTests(BaseFirecaresTestcase):
         response = c.get(reverse('firedepartment_update_government_units', args=[fd.pk]))
         self.assertEqual(response.status_code, 200)
 
-        old_point_count = fd.geom.num_points
         response = c.post(reverse('firedepartment_update_government_units', args=[fd.pk]), {'unincorporated_places': [place.pk]})
         self.assertRedirects(response, reverse('firedepartment_detail_slug', args=[fd.pk, fd.slug]), fetch_redirect_response=False)
         # Make sure that the UnincorporatedPlace is associated
@@ -614,9 +613,12 @@ class FireStationTests(BaseFirecaresTestcase):
         # Update the geom for the FD
         response = c.post(reverse('firedepartment_update_government_units', args=[fd.pk]), {'minor_civil_divisions': [div.pk], 'update_geom': [1]})
 
-        # Should have a different point count now that geometries are merged
+        # Should have the exact same geom as the MinorCivilDivision that we associated
         fd.refresh_from_db()
-        self.assertNotEqual(fd.geom.num_points, old_point_count)
+        self.assertEqual(fd.geom, div.geom)
+
+        # Should have a new population based on the government unit that we associated
+        self.assertEqual(div.population, fd.population)
 
         # Test for ability to create new geoms for FireDepartments that didn't previously have a geometry
         fd_null_geom = FireDepartment.objects.get(pk=96582)

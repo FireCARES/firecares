@@ -459,38 +459,10 @@
                             <div class="submission">
                                 <label class="pull-left">
                                     <input type="checkbox" name="update_geom" class="pull-left" value="1" checked="checked"/>
-                                    Update department geometry to include geometries of government units?
+                                    Update department geometry/population to combined geometries/summed population of government units?
                                 </label>
                                 <button class="btn btn-primary btn-xlarge pull-left ct-u-marginTop20" type="submit">Save</button>
                             </div>
-
-                            <!-- End Safe Grade Cards -->
-                          {% comment %}
-                          <div class="line-chart firecares-graph ct-u-marginBottom10" id="dist"
-                                  data="{{ performance_data }}"
-                                  description="This department is {{ object.dist_model_score|floatformat|default:"an unknown number of" }} seconds over the industry standard."
-                                  metric-title="Performance Score"
-                                  value="{{ object.dist_model_score }}"
-                                  color="#F5C97E"></div>
-                          <div class="line-chart firecares-graph ct-u-marginBottom10" id="risk_deaths"
-                                  data="{{ risk_deaths_data }}"
-                                  description="This department is predicted to have {{ object.risk_model_deaths|floatformat|default:"an unknown number of" }} fire related deaths per year."
-                                  metric-title="Predicted Fire-Related Deaths"
-                                  value="{{ object.risk_model_deaths }}"
-                                  color="#F5C97E"></div>
-                            <div class="line-chart firecares-graph ct-u-marginBottom10" id="risk_injuries"
-                                  data="{{ risk_injuries_data }}"
-                                  description="This department is predicted to have {{ object.risk_model_injuries|floatformat|default:"an unknown number of" }} fire related injuries per year."
-                                  metric-title="Predicted Fire-Related Injuries"
-                                  value="{{ object.risk_model_injuries }}"
-                                  color="#F5C97E"></div>
-                            <div class="line-chart firecares-graph ct-u-marginBottom10" id="risk_fires"
-                                  data="{{ risk_model_fires }}"
-                                  description="This department is predicted to have {{ object.risk_model_fires|floatformat|default:"an unknown number of" }} fires per year."
-                                  metric-title="Predicted residential fires per year."
-                                  value="{{ object.risk_model_fires }}"
-                                  color="#F5C97E"></div>
-                             {% endcomment %}
                         </div>
                     </form>
 
