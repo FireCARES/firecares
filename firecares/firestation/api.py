@@ -322,7 +322,6 @@ class WeatherWarningResource(JSONDefaultModelResourceMixin, ModelResource):
                                               update_permission_code='change_firedepartment',
                                               create_permission_code='change_firedepartment',
                                               delete_permission_code='change_firedepartment')
-        authentication = MultiAuthentication(Authentication(), SessionAuthentication(), ApiKeyAuthentication())
         filtering = {'department': ('exact',), 'state': ('exact',), 'id': ('exact',)}
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get']
