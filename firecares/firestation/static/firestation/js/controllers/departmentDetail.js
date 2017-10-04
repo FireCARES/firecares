@@ -41,7 +41,7 @@
             scope: {
               level: '='
             },
-            template: '<span ng-if="level !== \'all\'" class="selected-risk">&nbsp;{{ level }} Risk</span>',
+            template: '<span ng-if="level !== \'all\'" class="selected-risk">&nbsp;{{ level }} Hazard</span>',
           }
         })
     ;
