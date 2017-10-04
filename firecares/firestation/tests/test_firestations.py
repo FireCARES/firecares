@@ -1,4 +1,5 @@
 import json
+import mock
 import os
 import string
 from django.db import connections
@@ -672,10 +673,16 @@ class FireStationTests(BaseFirecaresTestcase):
         fs.name = 'Fremont County Fire Protection District Battalion 12 Fort Washakie Fire Department'
         self.assertEqual(fs.station_number_from_name(), None)
 
-    def test_create_station(self):
+    @mock.patch('geopy.geocoders.base.urllib_urlopen')
+    def test_create_station(self, urllib_urlopen):
         """
         Tests the create station convenience method on the FireStation class.
         """
+
+        c = urllib_urlopen.return_value
+        c.read.return_value = open(os.path.join(os.path.dirname(__file__), 'mock/geocode.json')).read()
+        c.headers.getparam.return_value = 'utf-8'
+
         fd = FireDepartment.objects.create(name='Test db', population=0)
 
         fs = FireStation.create_station(department=fd,
