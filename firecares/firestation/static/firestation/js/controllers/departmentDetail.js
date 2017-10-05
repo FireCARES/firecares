@@ -115,9 +115,25 @@
 
             if (numWarnings > 0) {
               var weatherLayer = L.featureGroup(weatherPolygons);
-              weatherLayer.addTo(departmentMap);//deafult on
+              weatherLayer.addTo(departmentMap); //deafult on
               weatherLayer.bringToBack();
               layersControl.addOverlay(weatherLayer, 'Weather Warnings');
+
+              // Hide layer when zoom gets to parcel layer z15
+              departmentMap.on('zoomend', function() {
+                if(departmentMap.hasLayer(weatherLayer)){
+                  if(departmentMap.getZoom() > 14){
+                    weatherLayer.eachLayer(function(layer){
+                        layer.setStyle({fillOpacity :0});
+                    });
+                  }
+                  else{
+                    weatherLayer.eachLayer(function(layer){
+                        layer.setStyle({fillOpacity :.2});
+                    });
+                  }
+                }
+              });
             }
 
             function mapPolygon(poly){
