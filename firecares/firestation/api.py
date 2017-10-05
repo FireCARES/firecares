@@ -330,7 +330,7 @@ class StaffingStationRollupResource(JSONDefaultModelResourceMixin, ModelResource
                     'source_originator', 'admintype', 'district', 'archived', 'modified', 'state', 'address', 'city'
                     ]
         serializer = PrettyJSONSerializer()
-        limit = 120
+        limit = 140
 
 
 class WeatherWarningResource(JSONDefaultModelResourceMixin, ModelResource):

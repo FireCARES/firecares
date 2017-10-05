@@ -231,7 +231,7 @@
           clickableLayers: null,
           mutexToggle: true,
           maxZoom: 18,
-          minZoom: 15,
+          minZoom: 10,
 
           getIDForLayerFeature: function(feature) {
             return feature.properties.parcel_id;
