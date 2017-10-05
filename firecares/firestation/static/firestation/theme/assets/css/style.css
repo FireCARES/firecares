@@ -11655,6 +11655,7 @@ form[name='boundaryUpload'] a.commit:hover {
 }
 .dropdown-menu {
   font-size: 14px;
+  z-index: 2000;
 }
 .wizard-modal-window {
   z-index: 9000 !important;

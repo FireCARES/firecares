@@ -1,4 +1,5 @@
 import json
+import mock
 import os
 import string
 from django.db import connections
@@ -605,7 +606,6 @@ class FireStationTests(BaseFirecaresTestcase):
         response = c.get(reverse('firedepartment_update_government_units', args=[fd.pk]))
         self.assertEqual(response.status_code, 200)
 
-        old_point_count = fd.geom.num_points
         response = c.post(reverse('firedepartment_update_government_units', args=[fd.pk]), {'unincorporated_places': [place.pk]})
         self.assertRedirects(response, reverse('firedepartment_detail_slug', args=[fd.pk, fd.slug]), fetch_redirect_response=False)
         # Make sure that the UnincorporatedPlace is associated
@@ -614,9 +614,12 @@ class FireStationTests(BaseFirecaresTestcase):
         # Update the geom for the FD
         response = c.post(reverse('firedepartment_update_government_units', args=[fd.pk]), {'minor_civil_divisions': [div.pk], 'update_geom': [1]})
 
-        # Should have a different point count now that geometries are merged
+        # Should have the exact same geom as the MinorCivilDivision that we associated
         fd.refresh_from_db()
-        self.assertNotEqual(fd.geom.num_points, old_point_count)
+        self.assertEqual(fd.geom, div.geom)
+
+        # Should have a new population based on the government unit that we associated
+        self.assertEqual(div.population, fd.population)
 
         # Test for ability to create new geoms for FireDepartments that didn't previously have a geometry
         fd_null_geom = FireDepartment.objects.get(pk=96582)
@@ -670,10 +673,16 @@ class FireStationTests(BaseFirecaresTestcase):
         fs.name = 'Fremont County Fire Protection District Battalion 12 Fort Washakie Fire Department'
         self.assertEqual(fs.station_number_from_name(), None)
 
-    def test_create_station(self):
+    @mock.patch('geopy.geocoders.base.urllib_urlopen')
+    def test_create_station(self, urllib_urlopen):
         """
         Tests the create station convenience method on the FireStation class.
         """
+
+        c = urllib_urlopen.return_value
+        c.read.return_value = open(os.path.join(os.path.dirname(__file__), 'mock/geocode.json')).read()
+        c.headers.getparam.return_value = 'utf-8'
+
         fd = FireDepartment.objects.create(name='Test db', population=0)
 
         fs = FireStation.create_station(department=fd,
