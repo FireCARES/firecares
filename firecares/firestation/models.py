@@ -476,13 +476,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
                                                                                     access_token=getattr(settings, 'MAPBOX_ACCESS_TOKEN', ''))
 
     def set_geometry_from_government_unit(self):
-        def _first(arr):
-            if arr and len(arr):
-                return arr[0]
-            else:
-                return None
-
-        geom_containers = self.government_unit_objects + [self]
+        geom_containers = self.government_unit_objects
         objs = [x.geom.buffer(0) for x in geom_containers if getattr(x, 'geom', None)]
 
         if objs:
@@ -490,7 +484,6 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
             for g in objs:
                 geom = geom.union(g)
             self.geom = MultiPolygon(geom) if geom.geom_type == 'Polygon' else geom
-            self.save()
 
     def set_population_from_government_unit(self):
         """
@@ -498,21 +491,15 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
         """
         objs = self.government_unit_objects
 
-        if objs:
+        population = 0
+        for gov_unit in objs:
+            pop = getattr(gov_unit, 'population', 0)
+            population += pop
 
-            for gov_unit in objs:
-                pop = getattr(gov_unit, 'population', None)
-
-                if pop is not None:
-                    if self.population is None:
-                        self.population = 0
-
-                    self.population += pop
-        else:
-            self.population = None
+        if population:
+            self.population = population
 
         self.population_class = self.get_population_class()
-        self.save()
 
     @classmethod
     def get_histogram(cls, field, bins=400):
@@ -638,7 +625,6 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
             self.population_class = self.get_population_class()
 
         IntersectingDepartmentLog.objects.create(parent=self, removed_department=department)
-        self.save()
 
     def get_department_admins(self):
         return filter(lambda x: x.has_perm('admin_firedepartment', self), get_users_with_perms(self))

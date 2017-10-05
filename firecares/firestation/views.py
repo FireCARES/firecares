@@ -38,8 +38,7 @@ from tempfile import mkdtemp
 from firecares.tasks.cleanup import remove_file
 from .forms import DocumentUploadForm, DepartmentUserApprovalForm, DataFeedbackForm
 from django.views.generic.edit import FormView
-from .models import (
-    Document, FireStation, FireDepartment, Staffing, refresh_quartile_view, refresh_national_calculations_view)
+from .models import (Document, FireStation, FireDepartment, Staffing)
 from favit.models import Favorite
 from invitations.models import Invitation
 
@@ -251,7 +250,6 @@ class DepartmentUpdateGovernmentUnits(PermissionRequiredMixin, LoginRequiredMixi
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        population_class = self.object.get_population_class()
         context = self.get_context_data()
 
         incorporated_places_selections = map(int, request.POST.getlist('incorporated_places'))
@@ -281,9 +279,7 @@ class DepartmentUpdateGovernmentUnits(PermissionRequiredMixin, LoginRequiredMixi
 
         messages.add_message(request, messages.SUCCESS, 'Government unit associations updated')
 
-        if self.get_object().get_population_class() != population_class:
-            refresh_quartile_view()
-            refresh_national_calculations_view()
+        self.object.save()
 
         return redirect(self.object)
 
@@ -317,15 +313,11 @@ class RemoveIntersectingDepartments(PermissionRequiredMixin, LoginRequiredMixin,
 
         departments = map(int, request.POST.getlist('departments'))
 
-        population_class = self.object.get_population_class()
-
         # Make sure POSTed departments are still intersecting.
         for i in set(departments).intersection(set(self.get_intersecting_departments().values_list('id', flat=True))):
             self.object.remove_from_department(FireDepartment.objects.get(id=i))
 
-        if self.get_object().get_population_class() != population_class:
-            refresh_quartile_view()
-            refresh_national_calculations_view()
+        self.object.save()
 
         messages.add_message(request, messages.SUCCESS, 'Removed intersecting departments.')
 

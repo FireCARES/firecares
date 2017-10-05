@@ -41,7 +41,7 @@
             scope: {
               level: '='
             },
-            template: '<span ng-if="level !== \'all\'" class="selected-risk">&nbsp;{{ level }} Risk</span>',
+            template: '<span ng-if="level !== \'all\'" class="selected-risk">&nbsp;{{ level }} Hazard</span>',
           }
         })
     ;
@@ -116,14 +116,30 @@
               var warningdate = new Date(warning.expiredate);
               poly.bindPopup('<b>' + warning.prod_type + '</b><br/>Ending: ' + warningdate.toDateString() +' '+ warningdate.toLocaleTimeString() + '<br/><br/><a target="_blank" href='+warning.url+'>Click for More Info</a>');
               weatherPolygons.push(poly);
-              $scope.weather_messages.push({class: 'alert-danger', text: '' + warning.prod_type + '  Until  ' + warningdate.toDateString() +',  '+ warningdate.toLocaleTimeString() + '  <a target="_blank" href='+warning.url+'>  Click for More Info</a>', url: '<a target="_blank" href='+warning.url+'>Click for More Info</a>'});
+              $scope.weather_messages.push({class: 'alert-warning', text: '<a class="alert-link" target="_blank" href='+warning.url+'>'+' ' + warning.prod_type + '  Until  ' + warningdate.toDateString() +',  '+ warningdate.toLocaleTimeString().replace(':00 ',' ') +'</a>'});
             }
 
             if (numWarnings > 0) {
               var weatherLayer = L.featureGroup(weatherPolygons);
-              weatherLayer.addTo(departmentMap);//deafult on
+              weatherLayer.addTo(departmentMap); //deafult on
               weatherLayer.bringToBack();
               layersControl.addOverlay(weatherLayer, 'Weather Warnings');
+
+              // Hide layer when zoom gets to parcel layer z15
+              departmentMap.on('zoomend', function() {
+                if(departmentMap.hasLayer(weatherLayer)){
+                  if(departmentMap.getZoom() > 14){
+                    weatherLayer.eachLayer(function(layer){
+                        layer.setStyle({fillOpacity :0});
+                    });
+                  }
+                  else{
+                    weatherLayer.eachLayer(function(layer){
+                        layer.setStyle({fillOpacity :.2});
+                    });
+                  }
+                }
+              });
             }
 
             function mapPolygon(poly){

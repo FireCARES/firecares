@@ -225,8 +225,8 @@
                             {% verbatim %}
                             <div class="dropdown">
                                 <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="riskLevelDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                    <span ng-if="level !== 'all'">Filter by {{ level }} risk level</span>
-                                    <span ng-if="level === 'all'">Display all risk levels</span>
+                                    <span ng-if="level !== 'all'">Filter by {{ level }} hazard level</span>
+                                    <span ng-if="level === 'all'">Display all hazard levels</span>
                                     <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="riskLevelDropdown">
@@ -256,7 +256,7 @@
                         <aster-chart filter-type="months" metric-title="MONTH" label-offset="5"></aster-chart>
                         <aster-chart filter-type="daysOfWeek" metric-title="DAY" label-offset="5"></aster-chart>
                         <aster-chart filter-type="hours" metric-title="HOUR"></aster-chart>
-                        <aster-chart filter-type="risk" metric-title="RISK"></aster-chart>
+                        <aster-chart filter-type="risk" metric-title="HAZARD"></aster-chart>
                     </div>
                     {% include 'firestation/_department_community_risk.html' %}
                     <div class="row">

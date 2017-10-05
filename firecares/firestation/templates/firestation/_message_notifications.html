@@ -19,18 +19,18 @@
     </div>
     <div class="row weather-messages">
         <div class="col-md-12 col-lg-12">
-            {% for message in weather_messages %}
-                <div class="alert" role="alert" ng-repeat="message in weather_messages" ng-class="message.class">
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <!-- <span ng-bind="message.url"/> -->
-                    <span ng-bind-html="message.text"/>
-                </div> 
-            {% endfor %}
             {% if use_angular %}
-                <div class="alert" role="alert" ng-repeat="message in weather_messages" style="margin-top: 9px;max-height: 38px;padding-top: 0px;margin-bottom: -2px" ng-class="message.class">
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <!-- <span ng-bind="message.url"/> -->
-                    <span ng-bind-html="message.text"/>
+                <div class="alert alert-warning" ng-if='weather_messages.length > 0'>
+                    <button type="button" data-dismiss="alert" class="close">&times;</span></button>
+                    <div class="alert-icon">
+                        <i style="color:white;" class="fa fa-warning"></i>
+                    </div>
+                    <div class="alert-text" style="">
+                        <h5>Warning</h5> 
+                        <ul ng-repeat="message in weather_messages">
+                            <li ng-bind-html="message.text"/>
+                        </ul> 
+                    </div>
                 </div>
             {% endif %}
         </div>
