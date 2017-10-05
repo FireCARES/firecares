@@ -1487,3 +1487,169 @@ div.is-your-department {
 .fire-station h2 {
   line-height: 30px;
 }
+
+//
+// Alerts
+// --------------------------------------------------
+
+
+// --------- Variables ---------
+@alert-help: #ffab00;
+@alert-warning: #ff5400;
+@alert-info: #3592ff;
+@alert-error: #d33534;
+@alert-success: #42ae42;
+
+//  --------- Alert Adjustments ---------
+.alert {
+  position: relative;
+  padding: 0;
+  min-width: 250px;
+}
+
+.alert button.close {
+  margin: 0.45rem 1rem;
+  opacity: 0.75;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.alert-icon,
+.alert-text {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.alert-icon {
+  min-width: 40px;
+  text-align: center;
+  font-size: 2.2rem;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.25);
+  padding: 1rem;
+}
+
+.alert-text {
+  //color: #2d3a51;  This should be whatever the defualt body copy color is for FIRECARES
+  padding-left: 2em;
+  padding-bottom: 1.1em;
+  width: 100%;
+}
+
+.alert-text > h5 {
+  margin-top: 0;
+  font-weight: 600;
+}
+
+.alert .alert-link {
+  font-weight: normal;
+  color: #4790e6;
+  font-size:14px;
+  margin-left:-16px;
+}
+
+.alert ul {
+  margin: 0;
+  li {
+    margin-top: -12px;
+    margin-bottom: 0.2rem;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+//  --------- Alert Types ---------
+
+// Warning
+.alert-warning {
+  background-color: lighten(@alert-warning, 48%);
+  border-color: lighten(@alert-warning, 35%);
+  margin-top:1.7em;
+
+  .alert-text h5 {
+    color: @alert-warning;
+  }
+
+  button.close {
+    color: @alert-warning;
+  }
+
+  .alert-icon {
+    background-color: @alert-warning;
+  }
+}
+
+// Help
+.alert-help {
+  background-color: lighten(@alert-help, 48%);
+  border-color: lighten(@alert-help, 34%);
+
+  .alert-text h5 {
+    color: @alert-help;
+  }
+
+  button.close {
+    color: @alert-help;
+  }
+
+  .alert-icon {
+    background-color: @alert-help;
+  }
+}
+
+// Info
+.alert-info {
+  background-color: lighten(@alert-info, 38%);
+  border-color: lighten(@alert-info, 30%);
+
+  .alert-text h5 {
+    color: @alert-info;
+  }
+
+  button.close {
+    color: @alert-info;
+  }
+
+  .alert-icon {
+    background-color: @alert-info;
+  }
+}
+
+// Error
+.alert-danger {
+  background-color: lighten(@alert-error, 46%);
+  border-color: lighten(@alert-error, 38%);
+
+  .alert-text h5 {
+    color: @alert-error;
+  }
+
+  button.close {
+    color: @alert-error;
+  }
+
+  .alert-icon {
+    background-color: @alert-error;
+  }
+}
+
+// Success
+.alert-success {
+  background-color: lighten(@alert-success, 48%);
+  border-color: lighten(@alert-success, 34%);
+
+  .alert-text h5 {
+    color: @alert-success;
+  }
+
+  button.close {
+    color: @alert-success;
+  }
+
+  .alert-icon {
+    background-color: @alert-success;
+  }
+}

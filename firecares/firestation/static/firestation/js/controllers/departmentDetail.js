@@ -110,7 +110,7 @@
               var warningdate = new Date(warning.expiredate);
               poly.bindPopup('<b>' + warning.prod_type + '</b><br/>Ending: ' + warningdate.toDateString() +' '+ warningdate.toLocaleTimeString() + '<br/><br/><a target="_blank" href='+warning.url+'>Click for More Info</a>');
               weatherPolygons.push(poly);
-              $scope.weather_messages.push({class: 'alert-danger', text: '' + warning.prod_type + '  Until  ' + warningdate.toDateString() +',  '+ warningdate.toLocaleTimeString() + '  <a target="_blank" href='+warning.url+'>  Click for More Info</a>', url: '<a target="_blank" href='+warning.url+'>Click for More Info</a>'});
+              $scope.weather_messages.push({class: 'alert-warning', text: '<a class="alert-link" target="_blank" href='+warning.url+'>'+' ' + warning.prod_type + '  Until  ' + warningdate.toDateString() +',  '+ warningdate.toLocaleTimeString().replace(':00 ',' ') +'</a>'});
             }
 
             if (numWarnings > 0) {
