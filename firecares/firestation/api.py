@@ -16,7 +16,7 @@ from tastypie.serializers import Serializer
 from tastypie.validation import FormValidation
 from guardian.core import ObjectPermissionChecker
 from django.utils import timezone
-
+from django.db import connections
 
 logger = logging.getLogger(__name__)
 
@@ -354,5 +354,32 @@ class WeatherWarningResource(JSONDefaultModelResourceMixin, ModelResource):
         filtering = {'department': ('exact',), 'state': ('exact',), 'id': ('exact',)}
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get']
+        serializer = PrettyJSONSerializer()
+        always_return_data = True
+
+class GetParcelsAPI(JSONDefaultModelResourceMixin, ModelResource):
+    """
+    The Weather API mege with department id.
+    """
+    department = fields.ForeignKey(FireDepartmentResource, 'department', null=True)
+
+    class Meta:
+        resource_name = 'getparcels'
+
+        authorization = GuardianAuthorization(delegate_to_property='department',
+                                              view_permission_code=None,
+                                              update_permission_code='change_firedepartment',
+                                              create_permission_code='change_firedepartment',
+                                              delete_permission_code='change_firedepartment')
+        queryset = self
+
+        fd = FireDepartment.objects.get(id=department)
+        cursor = connections['nfirs'].cursor()
+        xmin, ymin, xmax, ymax = fd.geom.extent
+
+        queryset = queryset.annotate(val=RawSQL("SELECT hazards FROM parcels  a inner join department b on st_coveredby(a.geom, b.geom)", ()))
+
+        list_allowed_methods = ['get', 'post']
+        detail_allowed_methods = ['get', 'post']
         serializer = PrettyJSONSerializer()
         always_return_data = True
