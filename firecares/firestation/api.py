@@ -411,7 +411,10 @@ class GetParcelsAPI(JSONDefaultModelResourceMixin, ModelResource):
         # """
         # cursor.execute(PARCEL_INTERSECT_DEPAREMENT, {'fdid': queryset[0].fdid})
         # results = dictfetchall(cursor)
+        
         bundle.data['parcels'] = bundle.data['geom']
+
+        #  set geom back to null because it is no longer needed
         bundle.data['geom'] = None
         
         return bundle

@@ -1,6 +1,8 @@
 from dateutil.parser import parse as date_parse
 import json
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 import sys
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import MultiPolygon, LinearRing, Polygon
@@ -63,9 +65,9 @@ class WeatherWarnings(models.Model):
     def load_warning_data(cls):
 
         #  sometimes error/empty
-        objects = requests.get('https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Forecasts_Guidance_Warnings/watch_warn_adv/MapServer/1/query?'
-                               'where=1=1&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false'
-                               '&returnTrueCurves=false&outSR=&returnIdsOnly=true&returnCountOnly=false&returnZ=false&returnM=false&returnDistinctValues=false&f=json', timeout=30)
+        objects = WeatherWarnings.requests_retry_session().get('https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Forecasts_Guidance_Warnings/watch_warn_adv/MapServer/1/query?'
+                                                               'where=1=1&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false'
+                                                               '&returnTrueCurves=false&outSR=&returnIdsOnly=true&returnCountOnly=false&returnZ=false&returnM=false&returnDistinctValues=false&f=json', timeout=25)
 
         print objects.content
 
@@ -73,7 +75,7 @@ class WeatherWarnings(models.Model):
         url = 'https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Forecasts_Guidance_Warnings/watch_warn_adv/MapServer/1/{0}?f=json'
         for object in object_ids:
             try:
-                obj = requests.get(url.format(object), timeout=20)
+                obj = WeatherWarnings.requests_retry_session().get(url.format(object), timeout=15)
                 obj = json.loads(obj.content)
 
                 data = dict((k.lower(), v) for k, v in obj['feature']['attributes'].iteritems())
@@ -215,6 +217,22 @@ class WeatherWarnings(models.Model):
                 return (self.warngeom.transform(102009, clone=True).area / 1000000) * 0.38610
             except:
                 return
+
+    @classmethod
+    def requests_retry_session(self, retries=2, backoff_factor=0.3, status_forcelist=(500, 502, 504), session=None):
+        session = session or requests.Session()
+        retry = Retry(
+            total=retries,
+            read=retries,
+            connect=retries,
+            backoff_factor=backoff_factor,
+            status_forcelist=status_forcelist,
+        )
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount('http://', adapter)
+        session.mount('https://', adapter)
+
+        return session
 
     class Meta:
         verbose_name = 'Weather Warnings'
