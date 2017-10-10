@@ -407,7 +407,7 @@
           }
         });
 
-        layersControl.addOverlay(serviceArea, 'Service area');
+        layersControl.addOverlay(serviceArea, 'Service Area');
 
         $scope.shp = null;
 

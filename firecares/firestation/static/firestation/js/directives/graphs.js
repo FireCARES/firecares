@@ -7,6 +7,7 @@
         .directive('barChart', BarChartDirective)
         .directive('bulletChart', BulletChartDirective)
         .directive('riskDistributionBarChart', RiskDistributionBarChartDirective)
+        .directive('riskServiceareaBarChart', RiskServiceareaBarChartDirective)        
     ;
 
     function LineChartDirective() {
@@ -442,6 +443,155 @@
                 });
             }
         };
+    }
+
+    function RiskServiceareaBarChartDirective() {
+      return {
+        restrict: 'CE',
+        replace: false,
+        scope: {
+          metricTitle: '@?',
+          width: '@',
+          height: '@',
+          low: '@',
+          medium: '@',
+          high: '@',
+          unknown: '@'
+        },
+        template: '<svg class="no-select"></svg>',
+        link: function(scope, element, attrs) {
+          element.find('svg').appear(function() {
+            var width = parseInt(attrs.width);
+            var height = parseInt(attrs.height);
+            var margins = {top: 5, left: 60, right: 45, bottom: 20};
+
+            var x0 = d3.scale.ordinal()
+                .rangeRoundBands([0, width], .1);
+
+            var x1 = d3.scale.ordinal();
+
+            var y = d3.scale.linear()
+                .range([height, 0]);
+
+            var colorRange = d3.scale.category20();
+            var color = d3.scale.ordinal()
+                .range(colorRange.range());
+
+            var xAxis = d3.svg.axis()
+                .scale(x0)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .tickFormat(d3.format(".2s"));
+
+            var svg = d3.select(element).selectAll('svg')
+              .attr("width", width + margins.left + margins.right)
+              .attr("height", height + margins.top + margins.bottom)
+              .append('g')
+              .attr('transform', 'translate(' + margins.left + ',' + margins.top + ')');
+
+            var svgBarGroup = svg.append('g').attr('class', 'bar-chart-bars').attr('transform', 'translate(5,0)');
+
+            var svgLabelGroup = svg.append('g').attr('class', 'bar-chart-labels');
+
+            var tip = d3.tip()
+              .attr('class', 'toolTip2');
+
+            svg.call(tip);
+
+            //var tip = d3.select("body").append("div").attr("class", "toolTip");
+
+            var dataset = [
+                {label:"0-4 Minutes", "High":20, "Medium":10, "Low": 50, "Unknown":20},
+                {label:"4-6 Minutes", "High":15, "Medium":30, "Low":40, "Unknown":15},
+                {label:"6-8 Minutes", "High":45, "Medium":70, "Low":140, "Unknown":15}
+            ];
+
+            var options = d3.keys(dataset[0]).filter(function(key) { return key !== "label"; });
+
+            dataset.forEach(function(d) {
+                d.valores = options.map(function(name) { return {name: name, value: +d[name]}; });
+            });
+
+            x0.domain(dataset.map(function(d) { return d.label; }));
+            x1.domain(options).rangeRoundBands([0, x0.rangeBand()]);
+            y.domain([0, d3.max(dataset, function(d) { return d3.max(d.valores, function(d) { return d.value; }); })]);
+
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Number of Parcels");
+
+            var bar = svg.selectAll(".bar")
+                .data(dataset)
+                .enter().append("g")
+                .attr("class", "rect")
+                .attr("transform", function(d) { return "translate(" + x0(d.label) + ",0)"; });
+
+            bar.selectAll("rect")
+                .data(function(d) { return d.valores; })
+                .enter().append("rect")
+                .on('mousemove', tip.show)
+                //.on('mouseout', tip.hide)
+                .attr("width", x1.rangeBand())
+                .attr("x", function(d) { return x1(d.name); })
+                .attr("y", function(d) { return y(d.value); })
+                .attr("value", function(d){return d.name;})
+                .attr("height", function(d) { return height - y(d.value); })
+                .style("fill", function(d) { return color(d.name); });
+
+            bar
+                .on("mouseover", function(d){
+                    tip.style("left", d3.event.pageX+10+"px");
+                    tip.style("top", d3.event.pageY-25+"px");
+                    tip.style("display", "inline-block");
+                    var x = d3.event.pageX, y = d3.event.pageY
+                    var elements = document.querySelectorAll(':hover');
+                    var l = elements.length
+                    l = l-1
+                    var elementData = elements[l].__data__
+                    tip.html("<strong>Drive Time: </strong>"+(d.label)+"<br><strong>Hazard Level: </strong>"+elementData.name+"<br><strong>Parcels affected: </strong>"+elementData.value);
+                });
+            bar
+                .on("mouseout", function(d){
+                    tip.style("display", "none");
+                });
+
+            var legend = svg.selectAll(".legend")
+                .data(options.slice())
+                .enter().append("g")
+                .attr("class", "legend")
+                .attr("transform", function(d, i) { return "translate(37," + i * 19 + ")"; });
+
+            legend.append("rect")
+                .attr("x", width - 18)
+                .attr("width", 18)
+                .attr("height", 18)
+                .style("fill", color);
+
+            legend.append("text")
+                .attr("x", width - 22)
+                .attr("y", 9)
+                .style("font-size", '70%')
+                .attr("dy", ".35em")
+                .style("text-anchor", "end")
+                .text(function(d) { return d; });
+
+            });
+        }
+      }
     }
 
     function RiskDistributionBarChartDirective() {

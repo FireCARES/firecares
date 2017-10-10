@@ -3,20 +3,23 @@ import logging
 from .forms import StaffingForm
 from .models import FireStation, Staffing, FireDepartment
 from firecares.weather.models import DepartmentWarnings
+from firecares.utils import dictfetchall
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.gis import geos
+from django.contrib.gis.db.models.query import GeoQuerySet
+from django.utils import timezone
+from django.db import connections
 from tastypie import fields
 from tastypie.authentication import SessionAuthentication, ApiKeyAuthentication, MultiAuthentication, Authentication
 from tastypie.authorization import DjangoAuthorization
 from tastypie.cache import SimpleCache
 from tastypie.constants import ALL
 from tastypie.contrib.gis.resources import ModelResource
+from tastypie.resources import Resource
 from tastypie.exceptions import Unauthorized, TastypieError
 from tastypie.serializers import Serializer
 from tastypie.validation import FormValidation
 from guardian.core import ObjectPermissionChecker
-from django.utils import timezone
-from django.db import connections
 
 logger = logging.getLogger(__name__)
 
@@ -357,29 +360,58 @@ class WeatherWarningResource(JSONDefaultModelResourceMixin, ModelResource):
         serializer = PrettyJSONSerializer()
         always_return_data = True
 
+
 class GetParcelsAPI(JSONDefaultModelResourceMixin, ModelResource):
     """
-    The Weather API mege with department id.
+    Get Parcels for Department ID
     """
-    department = fields.ForeignKey(FireDepartmentResource, 'department', null=True)
+    parcels = fields.ForeignKey(FireDepartmentResource, 'parcels', null=True, full=False, use_in = 'list')
 
     class Meta:
         resource_name = 'getparcels'
-
+        partial_fields = {'parcels': ['parcels', 'title']} # add partial_fields
         authorization = GuardianAuthorization(delegate_to_property='department',
                                               view_permission_code=None,
                                               update_permission_code='change_firedepartment',
                                               create_permission_code='change_firedepartment',
                                               delete_permission_code='change_firedepartment')
-        queryset = self
 
-        fd = FireDepartment.objects.get(id=department)
-        cursor = connections['nfirs'].cursor()
-        xmin, ymin, xmax, ymax = fd.geom.extent
+        #  Get the departement from the API string
+        queryset = FireDepartment.objects.all()
 
-        queryset = queryset.annotate(val=RawSQL("SELECT hazards FROM parcels  a inner join department b on st_coveredby(a.geom, b.geom)", ()))
-
+        filtering = {'id': ('exact',)}
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get', 'post']
+        excludes = ['website', 'created', 'owned_tracts_geom', 'region', 'state',
+                    'twitter_handle', 'organization_type', 'modified', 'headquarters_phone', 'headquarters_fax', 'featured', 'domain_name',
+                    'archived', 'department', 'department_type', 'display_metrics', 'iaff', 'population_class'
+                    ]
         serializer = PrettyJSONSerializer()
         always_return_data = True
+
+    def dehydrate(self, bundle):
+        """
+        Intersect Parcels with department
+        """
+        cursor = connections['nfirs'].cursor()
+
+        #  fd.geom intersect to return parcels
+        # PARCEL_INTERSECT_DEPAREMENT = """
+        #     SELECT p.risk_category, p.wkb_geometry
+        #     ,CASE
+        #     WHEN ST_CoveredBy(p.geom, n.geom)
+        #     THEN p.geom
+        #     ELSE
+        #         ST_Multi(
+        #           ST_Intersection(p.geom,n.geom)
+        #           ) END AS geom
+        #     FROM parcel_risk_category AS p
+        #        INNER JOIN firestation_firedepartment AS n
+        #         ON ST_Intersects(p.geom, n.geom) where n.fdid='%(fdid)s';
+        # """
+        # cursor.execute(PARCEL_INTERSECT_DEPAREMENT, {'fdid': queryset[0].fdid})
+        # results = dictfetchall(cursor)
+        bundle.data['parcels'] = bundle.data['geom']
+        bundle.data['geom'] = None
+        
+        return bundle
