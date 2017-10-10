@@ -6,7 +6,6 @@ from firecares.weather.models import DepartmentWarnings
 from firecares.utils import dictfetchall
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.gis import geos
-from django.contrib.gis.db.models.query import GeoQuerySet
 from django.utils import timezone
 from django.db import connections
 from tastypie import fields
@@ -15,7 +14,6 @@ from tastypie.authorization import DjangoAuthorization
 from tastypie.cache import SimpleCache
 from tastypie.constants import ALL
 from tastypie.contrib.gis.resources import ModelResource
-from tastypie.resources import Resource
 from tastypie.exceptions import Unauthorized, TastypieError
 from tastypie.serializers import Serializer
 from tastypie.validation import FormValidation
@@ -365,11 +363,10 @@ class GetParcelsAPI(JSONDefaultModelResourceMixin, ModelResource):
     """
     Get Parcels for Department ID
     """
-    parcels = fields.ForeignKey(FireDepartmentResource, 'parcels', null=True, full=False, use_in = 'list')
+    parcels = fields.ForeignKey(FireDepartmentResource, 'parcels', null=True, full=False, use_in='list')
 
     class Meta:
         resource_name = 'getparcels'
-        partial_fields = {'parcels': ['parcels', 'title']} # add partial_fields
         authorization = GuardianAuthorization(delegate_to_property='department',
                                               view_permission_code=None,
                                               update_permission_code='change_firedepartment',
@@ -411,10 +408,10 @@ class GetParcelsAPI(JSONDefaultModelResourceMixin, ModelResource):
         # """
         # cursor.execute(PARCEL_INTERSECT_DEPAREMENT, {'fdid': queryset[0].fdid})
         # results = dictfetchall(cursor)
-        
+
         bundle.data['parcels'] = bundle.data['geom']
 
         #  set geom back to null because it is no longer needed
         bundle.data['geom'] = None
-        
+
         return bundle
