@@ -450,13 +450,9 @@
         restrict: 'CE',
         replace: false,
         scope: {
-          metricTitle: '@?',
           width: '@',
-          height: '@',
-          low: '@',
-          medium: '@',
-          high: '@',
-          unknown: '@'
+          dataset: '@',
+          height: '@'
         },
         template: '<svg class="no-select"></svg>',
         link: function(scope, element, attrs) {
@@ -465,11 +461,11 @@
             var height = parseInt(attrs.height);
             var margins = {top: 5, left: 60, right: 45, bottom: 20};
 
+            var dataset = JSON.parse(attrs.dataset);
             var x0 = d3.scale.ordinal()
                 .rangeRoundBands([0, width], .1);
 
             var x1 = d3.scale.ordinal();
-
             var y = d3.scale.linear()
                 .range([height, 0]);
 
@@ -500,14 +496,6 @@
               .attr('class', 'toolTip2');
 
             svg.call(tip);
-
-            //var tip = d3.select("body").append("div").attr("class", "toolTip");
-
-            var dataset = [
-                {label:"0-4 Minutes", "High":20, "Medium":10, "Low": 50, "Unknown":20},
-                {label:"4-6 Minutes", "High":15, "Medium":30, "Low":40, "Unknown":15},
-                {label:"6-8 Minutes", "High":45, "Medium":70, "Low":140, "Unknown":15}
-            ];
 
             var options = d3.keys(dataset[0]).filter(function(key) { return key !== "label"; });
 

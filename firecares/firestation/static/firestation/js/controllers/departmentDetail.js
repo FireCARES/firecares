@@ -70,6 +70,7 @@
         $scope.stations = [];
         $scope.showServiceAreaChart = false;
         $scope.residential_structure_fire_counts = _.isUndefined(window.metrics) ? '' : window.metrics.residential_structure_fire_counts;
+        $scope.parcel_hazard_level_counts = "adfasdfasdfasdf";
         $scope.uploadBoundary = false;
         var layersControl = L.control.layers().addTo(departmentMap);
         var fires = L.featureGroup().addTo(departmentMap);
@@ -503,7 +504,10 @@
         //
         departmentMap.on('overlayadd', function(layer) {
           layer = layer.layer;
-          if ( layer._leaflet_id === serviceArea._leaflet_id && !serviceAreaData) {
+          if ( layer._leaflet_id === serviceArea._leaflet_id && serviceAreaData){
+              showServiceAreaChart(true);
+          }
+          else if ( layer._leaflet_id === serviceArea._leaflet_id && !serviceAreaData) {
             
             departmentMap.spin(true);
 
@@ -533,7 +537,6 @@
                         var station = $scope.stations[i];
                         var totalAssets = 0;
                         for (var asset = 0; asset < station.staffingdata.length; asset++) {
-
                             totalAssets = totalAssets + Number(station.staffingdata[asset].personnel);
                         }
 
@@ -573,27 +576,35 @@
                       };
                     });
                     departmentMap.fitBounds(serviceArea);
-                    departmentMap.spin(false);
+
+                    //Add Hazard Layer Info
+                    $scope.parcel_hazard_level_counts = [
+                        {label:"0-4 Minutes", "High":20, "Medium":10, "Low": 50, "Unknown":20},
+                        {label:"4-6 Minutes", "High":15, "Medium":30, "Low":40, "Unknown":15},
+                        {label:"6-8 Minutes", "High":45, "Medium":70, "Low":140, "Unknown":15}
+                    ];
+
                     showServiceAreaChart(true);
+                    departmentMap.spin(false);
                   });
 
                   departmentMap.on('overlayremove', function(layer) {
-                    if (layer.layer._leaflet_id === serviceArea.layer._leaflet_id) {
+                    if (layer.layer._leaflet_id === serviceArea._leaflet_id) {
                         showServiceAreaChart(false);
                     }
                   });
-
-                  function showServiceAreaChart(show) {
-                      $timeout(function() {
-                          $scope.showServiceAreaChart = show;
-                      });
-                  }
                 }, function error(err) {
                   departmentMap.spin(false);
                 });
             });
           }
         });
+
+        function showServiceAreaChart(show) {
+            $timeout(function() {
+                $scope.showServiceAreaChart = show;
+            });
+        }
 
         departmentMap.on('overlayadd', function(layer) {
           $analytics.eventTrack('enable layer', {

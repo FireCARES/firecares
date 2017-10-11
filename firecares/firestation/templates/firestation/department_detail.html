@@ -60,7 +60,7 @@
         "residential_structure_fire_counts": {{ object.metrics.residential_structure_fire_counts | jsonify }}
     };
     {% endif %}
-
+    var parcel_hazard_level_counts = 'asdffff'
     var level = "all";
     </script>
     {% include 'google_analytics.html' %}
@@ -249,21 +249,20 @@
                     <div class="ct-gallery">
                         <div id="map"></div>
                     </div>
+                    {% verbatim %}
                     <div class="text-center no-select ct-u-marginTop20" ng-if="showServiceAreaChart">
-                    <div class="metric-cards-title ct-u-marginTop20">
-                        <h5>Structure Hazard Level Distribution by Response Times</h5>
-                    </div>
-                    <div class="metric-card">
-                        <div class="main-text">
-                            <risk-servicearea-bar-chart width="605" height="150"
-                                low="{{ object.metrics.structure_counts_by_risk_category.low | default_if_none:'' }}"
-                                medium="{{ object.metrics.structure_counts_by_risk_category.medium | default_if_none:'' }}"
-                                high="{{ object.metrics.structure_counts_by_risk_category.high | default_if_none:'' }}"
-                                unknown="{{ object.metrics.structure_counts_by_risk_category.unknown | default_if_none:'' }}">
-                            </risk-servicearea-bar-chart>
+                        <div class="metric-cards-title ct-u-marginTop20">
+                            <h5>Structure Hazard Level Distribution by Response Times</h5>
+                        </div>
+                        <div class="metric-card">
+                            <div class="main-text" ng-if="showServiceAreaChart">
+                                <risk-servicearea-bar-chart width="605" height="150" 
+                                    dataset="{{ parcel_hazard_level_counts }}">
+                                </risk-servicearea-bar-chart>
+                            </div>
                         </div>
                     </div>
-                    </div>
+                    {% endverbatim %}
                     <div class="text-center no-select ct-u-marginTop20" ng-if="showHeatmapCharts">
                         <bar-chart class="hidden-xs" filter-type="yearsMonths" metric-title="HISTORY" width="800" height="150" max-years="8"></bar-chart>
                         <bar-chart class="visible-xs" filter-type="yearsMonths" metric-title="HISTORY" width="400" height="150" max-years="6"></bar-chart>
