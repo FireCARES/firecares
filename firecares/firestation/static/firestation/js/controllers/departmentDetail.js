@@ -46,9 +46,9 @@
         })
     ;
 
-    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', '$filter', 'FireDepartment', '$analytics'];
+    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', '$filter', 'FireDepartment', '$analytics', 'WeatherWarning'];
 
-    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter, FireDepartment, $analytics) {
+    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter, FireDepartment, $analytics, WeatherWarning) {
         var departmentMap = map.initMap('map', {scrollWheelZoom: false});
         var showStations = true;
         var stationIcon = L.FireCARESMarkers.firestationmarker();
@@ -60,6 +60,7 @@
         $scope.urls = window.urls;
         $scope.level = window.level;
         $scope.messages = [];
+        $scope.weather_messages = [];
         $scope.stations = [];
         $scope.residential_structure_fire_counts = _.isUndefined(window.metrics) ? '' : window.metrics.residential_structure_fire_counts;
         $scope.uploadBoundary = false;
@@ -94,6 +95,55 @@
                 }
             });
         }
+        
+        //
+        // Weather Warnings
+        //
+        WeatherWarning.query({department: config.id}).$promise.then(function(data) {
+
+            var weatherPolygons = [];
+            var numWarnings = data.objects.length;
+
+            for (var i = 0; i < numWarnings; i++) {
+              var warning = data.objects[i];
+              var poly = L.multiPolygon(warning.warngeom.coordinates.map(function(d){return mapPolygon(d)}),{color: '#f00', weight:'1px'});
+              var warningdate = new Date(warning.expiredate);
+              poly.bindPopup('<b>' + warning.prod_type + '</b><br/>Ending: ' + warningdate.toDateString() +' '+ warningdate.toLocaleTimeString() + '<br/><br/><a target="_blank" href='+warning.url+'>Click for More Info</a>');
+              weatherPolygons.push(poly);
+              $scope.weather_messages.push({class: 'alert-warning', text: '<a class="alert-link" target="_blank" href='+warning.url+'>'+' ' + warning.prod_type + '  Until  ' + warningdate.toDateString() +',  '+ warningdate.toLocaleTimeString().replace(':00 ',' ') +'</a>'});
+            }
+
+            if (numWarnings > 0) {
+              var weatherLayer = L.featureGroup(weatherPolygons);
+              weatherLayer.addTo(departmentMap); //deafult on
+              weatherLayer.bringToBack();
+              layersControl.addOverlay(weatherLayer, 'Weather Warnings');
+
+              // Hide layer when zoom gets to parcel layer z15
+              departmentMap.on('zoomend', function() {
+                if(departmentMap.hasLayer(weatherLayer)){
+                  if(departmentMap.getZoom() > 14){
+                    weatherLayer.eachLayer(function(layer){
+                        layer.setStyle({fillOpacity :0});
+                    });
+                  }
+                  else{
+                    weatherLayer.eachLayer(function(layer){
+                        layer.setStyle({fillOpacity :.2});
+                    });
+                  }
+                }
+              });
+            }
+
+            function mapPolygon(poly){
+              return poly.map(function(line){return mapLineString(line)})
+            }
+
+            function mapLineString(line){
+              return line.map(function(d){return [d[1],d[0]]})  
+            }
+        });
 
         if (config.centroid != null) {
             var headquarters = L.marker(config.centroid, {icon: headquartersIcon, zIndexOffset: 1000});

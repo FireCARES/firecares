@@ -42,7 +42,6 @@ from .models import (Document, FireStation, FireDepartment, Staffing)
 from favit.models import Favorite
 from invitations.models import Invitation
 
-
 User = get_user_model()
 log = logging.getLogger(__name__)
 
