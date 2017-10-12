@@ -169,9 +169,9 @@ class WeatherWarnings(models.Model):
                 print("Warning Expires " + str(weatherWarnings.expiration.strftime('%c')))
 
                 #  Check if warning is already loaded and update as needed
-                if DepartmentWarnings.objects.filter(warningname=weatherWarnings.warnid, departmentfdid=fireDept.id):
+                if DepartmentWarnings.objects.filter(warningname=weatherWarnings.warnid, departmentfdid=fireDept.fdid):
 
-                    dataduplicate = DepartmentWarnings.objects.filter(warningname=weatherWarnings.warnid, departmentfdid=fireDept.id)
+                    dataduplicate = DepartmentWarnings.objects.filter(warningname=weatherWarnings.warnid, departmentfdid=fireDept.fdid)
                     deptupdate = dataduplicate[0]
                     deptupdate.warningname = weatherWarnings.warnid
                     deptupdate.prod_type = weatherWarnings.prod_type
@@ -182,7 +182,7 @@ class WeatherWarnings(models.Model):
 
                     deptupdate.save()
 
-                    print weatherWarnings.warnid + 'Department Warning Updated for' + fireDept.name
+                    print weatherWarnings.warnid + ' Department Warning Updated for ' + fireDept.name
 
                 else:
 
