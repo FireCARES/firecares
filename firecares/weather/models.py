@@ -182,13 +182,13 @@ class WeatherWarnings(models.Model):
 
                     deptupdate.save()
 
-                    print weatherWarnings.warnid + 'Department Warning Updated for' + fireDept.name
+                    print weatherWarnings.warnid + ' Department Warning Updated for ' + fireDept.name
 
                 else:
 
                     dataadd = {}
                     dataadd['department'] = fireDept
-                    dataadd['departmentfdid'] = fireDept.fdid
+                    dataadd['departmentfdid'] = fireDept.id
                     dataadd['departmentname'] = fireDept.name
                     dataadd['warningfdid'] = weatherWarnings
                     dataadd['warningname'] = weatherWarnings.warnid
