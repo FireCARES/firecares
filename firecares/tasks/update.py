@@ -55,7 +55,7 @@ def update_performance_score(id, dry_run=False):
     SELECT *
     FROM crosstab(
       'select COALESCE(y.risk_category, ''N/A'') as risk_category, fire_sprd, count(*)
-        FROM buildingfires a left join (
+        FROM joint_buildingfires a left join (
           SELECT state,
             fdid,
             inc_date,
@@ -64,7 +64,7 @@ def update_performance_score(id, dry_run=False):
             geom,
             x.parcel_id,
             x.risk_category
-          FROM (select * from incidentaddress a
+          FROM (select * from joint_incidentaddress a
              left join parcel_risk_category_local b using (parcel_id)
              ) AS x
         ) AS y using (state, inc_date, exp_no, fdid, inc_no)
@@ -176,11 +176,11 @@ def update_performance_score(id, dry_run=False):
 
 
 CIVILIAN_CASUALTIES = """SELECT count(1) as count, extract(year from a.inc_date) as year, COALESCE(y.risk_category, 'N/A') as risk_level
-FROM civiliancasualty a
+FROM joint_civiliancasualty a
 LEFT JOIN
     (SELECT state, fdid, inc_date, inc_no, exp_no, x.parcel_id, x.risk_category
         FROM ( SELECT *
-            FROM incidentaddress a
+            FROM joint_incidentaddress a
             LEFT JOIN parcel_risk_category_local using (parcel_id)
         ) AS x
     ) AS y
@@ -191,11 +191,11 @@ ORDER BY extract(year from a.inc_date) DESC"""
 
 
 ALL_FIRE_CALLS = """SELECT count(1) as count, extract(year from b.inc_date) as year, COALESCE(y.risk_category, 'N/A') as risk_level
-FROM fireincident b
+FROM joint_fireincident b
 LEFT JOIN
     (SELECT state, fdid, inc_date, inc_no, exp_no, x.parcel_id, x.risk_category
         FROM (SELECT *
-            FROM incidentaddress a
+            FROM joint_incidentaddress a
             LEFT JOIN parcel_risk_category_local using (parcel_id)
         ) AS x
     ) AS y
@@ -206,11 +206,11 @@ ORDER BY extract(year FROM b.inc_date) DESC"""
 
 
 STRUCTURE_FIRES = """SELECT count(1) as count, extract(year from a.alarm) as year, COALESCE(y.risk_category, 'N/A') as risk_level
-FROM buildingfires a
+FROM joint_buildingfires a
 LEFT JOIN
     (SELECT state, fdid, inc_date, inc_no, exp_no, x.parcel_id, x.risk_category
         FROM ( SELECT *
-            FROM incidentaddress a
+            FROM joint_incidentaddress a
             LEFT JOIN parcel_risk_category_local using (parcel_id)
         ) AS x
     ) AS y
@@ -221,11 +221,11 @@ ORDER BY extract(year from a.alarm) DESC"""
 
 
 FIREFIGHTER_CASUALTIES = """SELECT count(1) as count, extract(year from a.inc_date) as year, COALESCE(y.risk_category, 'N/A') as risk_level
-FROM ffcasualty a
+FROM joint_ffcasualty a
 LEFT JOIN
     (SELECT state, fdid, inc_date, inc_no, exp_no, x.parcel_id, x.risk_category
         FROM ( SELECT *
-            FROM incidentaddress a
+            FROM joint_incidentaddress a
             LEFT JOIN parcel_risk_category_local using (parcel_id)
         ) AS x
     ) AS y
@@ -267,7 +267,7 @@ def update_nfirs_counts(id, year=None, stat=None):
     years = {}
     if not year:
         # get a list of years populated in the NFIRS database
-        years_query = "select distinct(extract(year from inc_date)) as year from buildingfires;"
+        years_query = "select distinct(extract(year from inc_date)) as year from joint_buildingfires;"
         cursor.execute(years_query)
         # default years to None
         years = {x: {1: None, 2: None, 4: None, 5: None} for x in [int(n[0]) for n in cursor.fetchall()]}
