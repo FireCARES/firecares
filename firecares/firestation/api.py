@@ -325,5 +325,6 @@ class WeatherWarningResource(JSONDefaultModelResourceMixin, ModelResource):
         filtering = {'department': ('exact',), 'state': ('exact',), 'id': ('exact',)}
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get']
+        cache = SimpleCache(timeout=120)
         serializer = PrettyJSONSerializer()
         always_return_data = True
