@@ -70,7 +70,8 @@
         $scope.stations = [];
         $scope.showServiceAreaChart = false;
         $scope.residential_structure_fire_counts = _.isUndefined(window.metrics) ? '' : window.metrics.residential_structure_fire_counts;
-        $scope.parcel_hazard_level_counts = "adfasdfasdfasdf";
+        $scope.parcel_hazard_level_counts = "";
+        $scope.department_personnel_counts = "0 Personnel/Assets Available";
         $scope.uploadBoundary = false;
         var layersControl = L.control.layers().addTo(departmentMap);
         var fires = L.featureGroup().addTo(departmentMap);
@@ -514,15 +515,14 @@
             // Get Service Area rollup data base on Department 
             ServiceAreaRollup.query({department: config.id}).$promise.then(function(data) {
                 
-                if(data.objects){
-                  // Add Hazard Layer Info
+                if(data.objects.length > 0){
+                  // Add Hazard Layer Info Template
                   $scope.parcel_hazard_level_counts = [
-                      {label:"0-4 Minutes", "High":data.objects[0].parcelcount_high_0_4, "Medium":data.objects[0].parcelcount_medium_0_4, "Low": data.objects[0].parcelcount_low_0_4, "Unknown":data.objects[0].parcelcount_unknown_0_4},
-                      {label:"4-6 Minutes", "High":data.objects[0].parcelcount_high_4_6, "Medium":data.objects[0].parcelcount_medium_4_6, "Low":data.objects[0].parcelcount_low_4_6, "Unknown":data.objects[0].parcelcount_unknown_4_6},
-                      {label:"6-8 Minutes", "High":data.objects[0].parcelcount_high_6_8, "Medium":data.objects[0].parcelcount_medium_6_8, "Low":data.objects[0].parcelcount_low_6_8, "Unknown":data.objects[0].parcelcount_unknown_6_8}
+                      {label:"0-4 Minutes", "High":data.objects[0].parcelcount_high_0_4, "Medium":data.objects[0].parcelcount_medium_0_4||0, "Low": data.objects[0].parcelcount_low_0_4||0, "Unknown":data.objects[0].parcelcount_unknown_0_4||0},
+                      {label:"4-6 Minutes", "High":data.objects[0].parcelcount_high_4_6||0, "Medium":data.objects[0].parcelcount_medium_4_6||0, "Low":data.objects[0].parcelcount_low_4_6||0, "Unknown":data.objects[0].parcelcount_unknown_4_6||0},
+                      {label:"6-8 Minutes", "High":data.objects[0].parcelcount_high_6_8||0, "Medium":data.objects[0].parcelcount_medium_6_8||0, "Low":data.objects[0].parcelcount_low_6_8||0, "Unknown":data.objects[0].parcelcount_unknown_6_8||0}
                   ];
                 }
-
                 showServiceAreaChart(true);
             });
 
@@ -562,6 +562,7 @@
                     }
 
                     totalAssetStationString = totalAssetStationString.substring(0, totalAssetStationString.length - 1);
+                    $scope.department_personnel_counts = totalAssets + " Personnel/Assets Available";
 
                     //Check if there is multiple stations but zero peronnel total -- use headquarters
                     if(totalAssetStationString == ""){

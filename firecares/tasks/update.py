@@ -454,12 +454,12 @@ def calculate_story_distribution(fd_id):
         rm.save()
 
 
+@app.task(queue='servicearea')
 def create_parcel_department_hazard_level_rollup_all():
     """
     Task for updating the servicearea table rolling up parcel hazard categories with departement drive time data
     """
     for fd in FireDepartment.objects.all():
-        print fd.name + " Service Area Created ID: " + str(fd.id)
         get_parcel_department_hazard_level_rollup(fd.id)
 
 
@@ -535,22 +535,41 @@ def update_parcel_department_hazard_level(drivetimegeom, department):
     cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': json.dumps(drivetimegeom6)})
     results6 = dictfetchall(cursor)
 
-    deptservicearea = {}
-    deptservicearea['department'] = department
-    deptservicearea['parcelcount_low_0_4'] = results0[0]['low']
-    deptservicearea['parcelcount_low_4_6'] = results4[0]['low']
-    deptservicearea['parcelcount_low_6_8'] = results6[0]['low']
-    deptservicearea['parcelcount_medium_0_4'] = results0[0]['medium']
-    deptservicearea['parcelcount_medium_4_6'] = results4[0]['medium']
-    deptservicearea['parcelcount_medium_6_8'] = results6[0]['medium']
-    deptservicearea['parcelcount_high_0_4'] = results0[0]['high']
-    deptservicearea['parcelcount_high_4_6'] = results4[0]['high']
-    deptservicearea['parcelcount_high_6_8'] = results6[0]['high']
-    deptservicearea['parcelcount_unknown_0_4'] = results0[0]['unknown']
-    deptservicearea['parcelcount_unknown_4_6'] = results4[0]['unknown']
-    deptservicearea['parcelcount_unknown_6_8'] = results6[0]['unknown']
+    # Overwrite/Update service area is already registered
+    if ParcelDepartmentHazardLevel.objects.filter(department_id=department.id):
+        existingrecord = ParcelDepartmentHazardLevel.objects.filter(department_id=department.id)
+        addhazardlevelfordepartment = existingrecord[0]
+        addhazardlevelfordepartment.parcelcount_low_0_4 = results0[0]['low']
+        addhazardlevelfordepartment.parcelcount_low_4_6 = results4[0]['low']
+        addhazardlevelfordepartment.parcelcount_low_6_8 = results6[0]['low']
+        addhazardlevelfordepartment.parcelcount_medium_0_4 = results0[0]['medium']
+        addhazardlevelfordepartment.parcelcount_medium_4_6 = results4[0]['medium']
+        addhazardlevelfordepartment.parcelcount_medium_6_8 = results6[0]['medium']
+        addhazardlevelfordepartment.parcelcount_high_0_4 = results0[0]['high']
+        addhazardlevelfordepartment.parcelcount_high_4_6 = results4[0]['high']
+        addhazardlevelfordepartment.parcelcount_high_6_8 = results6[0]['high']
+        addhazardlevelfordepartment.parcelcount_unknown_0_4 = results0[0]['unknown']
+        addhazardlevelfordepartment.parcelcount_unknown_4_6 = results4[0]['unknown']
+        addhazardlevelfordepartment.parcelcount_unknown_6_8 = results6[0]['unknown']
 
-    addhazardlevelfordepartment = ParcelDepartmentHazardLevel.objects.create(**deptservicearea)
+        print department.name + " Service Area Updated"
+    else:
+        deptservicearea = {}
+        deptservicearea['department'] = department
+        deptservicearea['parcelcount_low_0_4'] = results0[0]['low']
+        deptservicearea['parcelcount_low_4_6'] = results4[0]['low']
+        deptservicearea['parcelcount_low_6_8'] = results6[0]['low']
+        deptservicearea['parcelcount_medium_0_4'] = results0[0]['medium']
+        deptservicearea['parcelcount_medium_4_6'] = results4[0]['medium']
+        deptservicearea['parcelcount_medium_6_8'] = results6[0]['medium']
+        deptservicearea['parcelcount_high_0_4'] = results0[0]['high']
+        deptservicearea['parcelcount_high_4_6'] = results4[0]['high']
+        deptservicearea['parcelcount_high_6_8'] = results6[0]['high']
+        deptservicearea['parcelcount_unknown_0_4'] = results0[0]['unknown']
+        deptservicearea['parcelcount_unknown_4_6'] = results4[0]['unknown']
+        deptservicearea['parcelcount_unknown_6_8'] = results6[0]['unknown']
+
+        addhazardlevelfordepartment = ParcelDepartmentHazardLevel.objects.create(**deptservicearea)
+        print department.name + " Service Area Created"
+
     addhazardlevelfordepartment.save()
-
-    print department.name + " Service Area Created"

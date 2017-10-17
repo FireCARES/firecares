@@ -503,9 +503,17 @@
                 d.valores = options.map(function(name) { return {name: name, value: +d[name]}; });
             });
 
+            var maximumY = d3.max(dataset, function(d) { return d3.max(d.valores, function(d) { return d.value; }); });
+
             x0.domain(dataset.map(function(d) { return d.label; }));
             x1.domain(options).rangeRoundBands([0, x0.rangeBand()]);
-            y.domain([0, d3.max(dataset, function(d) { return d3.max(d.valores, function(d) { return d.value; }); })]);
+
+            if(maximumY == 0){
+                alert("No Data Available for Calculations");
+            }
+
+            // set min for bar scale
+            y.domain([-(maximumY * .02), maximumY]);
 
             svg.append("g")
                 .attr("class", "x axis")
@@ -622,6 +630,14 @@
               .append('g')
               .attr('transform', 'translate(' + margins.left + ',' + margins.top + ')');
 
+            d3.select('#chart svg').append("text")
+                .attr("x", "235")
+                .attr("y", "35")
+                .attr("dy", "-.7em")
+                .attr("class", "nvd3 nv-noData")
+                .style("text-anchor", "middle")
+                .text("My Custom No Data Message");
+
             var svgBarGroup = svg.append('g').attr('class', 'bar-chart-bars').attr('transform', 'translate(5,0)');
 
             var svgLabelGroup = svg.append('g').attr('class', 'bar-chart-labels');
@@ -646,7 +662,7 @@
 
             svgBarGroup.selectAll('.chart-section-data')
                 .data(data)
-              .enter()
+                .enter()
                 .append('rect')
                 .attr('class', 'chart-section-data')
                 .attr('x', function(d) { return x(d.level) - margins.left / 3; })

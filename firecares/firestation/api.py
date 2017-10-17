@@ -359,7 +359,7 @@ class WeatherWarningResource(JSONDefaultModelResourceMixin, ModelResource):
 
 class GetServiceAreaInfo(JSONDefaultModelResourceMixin, ModelResource):
     """
-    Get Parcels for Department ID
+    Get Service area info based on Drive Times for Department ID
     """
     department = fields.ForeignKey(FireDepartmentResource, 'department', null=True)
 
@@ -371,7 +371,7 @@ class GetServiceAreaInfo(JSONDefaultModelResourceMixin, ModelResource):
                                               create_permission_code='change_firedepartment',
                                               delete_permission_code='change_firedepartment')
 
-        #  Get the departement rollup info for service areas
+        #  Return the departement rollup info for service areas
         queryset = ParcelDepartmentHazardLevel.objects.all()
 
         filtering = {'department': ('exact',), 'id': ('exact',)}

@@ -60,7 +60,6 @@
         "residential_structure_fire_counts": {{ object.metrics.residential_structure_fire_counts | jsonify }}
     };
     {% endif %}
-    var parcel_hazard_level_counts = 'asdffff'
     var level = "all";
     </script>
     {% include 'google_analytics.html' %}
@@ -259,6 +258,9 @@
                                 <risk-servicearea-bar-chart width="605" height="150" 
                                     dataset="{{ parcel_hazard_level_counts }}">
                                 </risk-servicearea-bar-chart>
+                                <div class="description text-center">
+                                        {{ department_personnel_counts }}
+                                </div>
                             </div>
                         </div>
                     </div>
