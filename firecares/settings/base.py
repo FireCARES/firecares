@@ -322,6 +322,7 @@ CELERY_QUEUES = [
     Queue('quality-control', routing_key='quality-control'),
     Queue('slack', routing_key='slack'),
     Queue('weather-task', routing_key='weather-task'),
+    Queue('servicearea', routing_key='servicearea'),
 ]
 
 ACCOUNT_ACTIVATION_DAYS = 7

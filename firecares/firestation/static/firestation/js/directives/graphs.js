@@ -509,7 +509,7 @@
             x1.domain(options).rangeRoundBands([0, x0.rangeBand()]);
 
             if(maximumY == 0){
-                alert("No Data Available for Calculations");
+                element.append("label").text('No Data Available').attr("class", "control-label unavailable")
             }
 
             // set min for bar scale

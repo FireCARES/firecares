@@ -69,7 +69,6 @@ class WeatherWarningTests(TestCase):
 
         warningjson = json.loads(self.load_mock_warning('warningobjectIds.json'))
 
-        print warningjson
         warningobjectids = warningjson['objectIds']
 
         self.assertTrue(len(warningobjectids) > -1)
