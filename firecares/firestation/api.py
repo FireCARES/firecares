@@ -1,13 +1,11 @@
 import json
 import logging
 from .forms import StaffingForm
-from .models import FireStation, Staffing, FireDepartment
+from .models import FireStation, Staffing, FireDepartment, ParcelDepartmentHazardLevel
 from firecares.weather.models import DepartmentWarnings
-from firecares.utils import dictfetchall
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.gis import geos
 from django.utils import timezone
-from django.db import connections
 from tastypie import fields
 from tastypie.authentication import SessionAuthentication, ApiKeyAuthentication, MultiAuthentication, Authentication
 from tastypie.authorization import DjangoAuthorization
@@ -359,59 +357,25 @@ class WeatherWarningResource(JSONDefaultModelResourceMixin, ModelResource):
         always_return_data = True
 
 
-class GetParcelsAPI(JSONDefaultModelResourceMixin, ModelResource):
+class GetServiceAreaInfo(JSONDefaultModelResourceMixin, ModelResource):
     """
     Get Parcels for Department ID
     """
-    parcels = fields.ForeignKey(FireDepartmentResource, 'parcels', null=True, full=False, use_in='list')
+    department = fields.ForeignKey(FireDepartmentResource, 'department', null=True)
 
     class Meta:
-        resource_name = 'getparcels'
+        resource_name = 'getserviceareainfo'
         authorization = GuardianAuthorization(delegate_to_property='department',
                                               view_permission_code=None,
                                               update_permission_code='change_firedepartment',
                                               create_permission_code='change_firedepartment',
                                               delete_permission_code='change_firedepartment')
 
-        #  Get the departement from the API string
-        queryset = FireDepartment.objects.all()
+        #  Get the departement rollup info for service areas
+        queryset = ParcelDepartmentHazardLevel.objects.all()
 
-        filtering = {'id': ('exact',)}
+        filtering = {'department': ('exact',), 'id': ('exact',)}
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get', 'post']
-        excludes = ['website', 'created', 'owned_tracts_geom', 'region', 'state',
-                    'twitter_handle', 'organization_type', 'modified', 'headquarters_phone', 'headquarters_fax', 'featured', 'domain_name',
-                    'archived', 'department', 'department_type', 'display_metrics', 'iaff', 'population_class'
-                    ]
         serializer = PrettyJSONSerializer()
         always_return_data = True
-
-    def dehydrate(self, bundle):
-        """
-        Intersect Parcels with department
-        """
-        cursor = connections['nfirs'].cursor()
-
-        #  fd.geom intersect to return parcels
-        # PARCEL_INTERSECT_DEPAREMENT = """
-        #     SELECT p.risk_category, p.wkb_geometry
-        #     ,CASE
-        #     WHEN ST_CoveredBy(p.geom, n.geom)
-        #     THEN p.geom
-        #     ELSE
-        #         ST_Multi(
-        #           ST_Intersection(p.geom,n.geom)
-        #           ) END AS geom
-        #     FROM parcel_risk_category AS p
-        #        INNER JOIN firestation_firedepartment AS n
-        #         ON ST_Intersects(p.geom, n.geom) where n.fdid='%(fdid)s';
-        # """
-        # cursor.execute(PARCEL_INTERSECT_DEPAREMENT, {'fdid': queryset[0].fdid})
-        # results = dictfetchall(cursor)
-
-        bundle.data['parcels'] = bundle.data['geom']
-
-        #  set geom back to null because it is no longer needed
-        bundle.data['geom'] = None
-
-        return bundle

@@ -46,9 +46,9 @@
         })
     ;
 
-    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', '$filter', 'FireDepartment', '$analytics', 'WeatherWarning', '$interpolate', 'FireStationandStaffing'];
+    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', '$filter', 'FireDepartment', '$analytics', 'WeatherWarning', '$interpolate', 'FireStationandStaffing', 'ServiceAreaRollup'];
 
-    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter, FireDepartment, $analytics, WeatherWarning, $interpolate, FireStationandStaffing) {
+    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter, FireDepartment, $analytics, WeatherWarning, $interpolate, FireStationandStaffing, ServiceAreaRollup) {
         var departmentMap = map.initMap('map', {scrollWheelZoom: false});
         var showStations = true;
         var stationIcon = L.FireCARESMarkers.firestationmarker();
@@ -511,7 +511,22 @@
             
             departmentMap.spin(true);
 
-            //First Get Stations to derive Response
+            // Get Service Area rollup data base on Department 
+            ServiceAreaRollup.query({department: config.id}).$promise.then(function(data) {
+                
+                if(data.objects){
+                  // Add Hazard Layer Info
+                  $scope.parcel_hazard_level_counts = [
+                      {label:"0-4 Minutes", "High":data.objects[0].parcelcount_high_0_4, "Medium":data.objects[0].parcelcount_medium_0_4, "Low": data.objects[0].parcelcount_low_0_4, "Unknown":data.objects[0].parcelcount_unknown_0_4},
+                      {label:"4-6 Minutes", "High":data.objects[0].parcelcount_high_4_6, "Medium":data.objects[0].parcelcount_medium_4_6, "Low":data.objects[0].parcelcount_low_4_6, "Unknown":data.objects[0].parcelcount_unknown_4_6},
+                      {label:"6-8 Minutes", "High":data.objects[0].parcelcount_high_6_8, "Medium":data.objects[0].parcelcount_medium_6_8, "Low":data.objects[0].parcelcount_low_6_8, "Unknown":data.objects[0].parcelcount_unknown_6_8}
+                  ];
+                }
+
+                showServiceAreaChart(true);
+            });
+
+            // Get Stations to derive Drive Times and Asset number
             FireStationandStaffing.query({department: config.id}).$promise.then(function(data) {
                 $scope.stations = data.objects;
 
@@ -576,15 +591,6 @@
                       };
                     });
                     departmentMap.fitBounds(serviceArea);
-
-                    //Add Hazard Layer Info
-                    $scope.parcel_hazard_level_counts = [
-                        {label:"0-4 Minutes", "High":20, "Medium":10, "Low": 50, "Unknown":20},
-                        {label:"4-6 Minutes", "High":15, "Medium":30, "Low":40, "Unknown":15},
-                        {label:"6-8 Minutes", "High":45, "Medium":70, "Low":140, "Unknown":15}
-                    ];
-
-                    showServiceAreaChart(true);
                     departmentMap.spin(false);
                   });
 
