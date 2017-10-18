@@ -373,10 +373,20 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
 
         mockdrivetime = json.loads(self.load_mock_drivetime('/firecares/firecares/firestation/tests/mock/drivetimemock.json'))
         self.assertEqual(len(mockdrivetime['results'][0]['value']['features']), 3)
-        # mock_cur = mock_connections['nfirs'].cursor.return_value
 
-        get_parcel_department_hazard_level_rollup(73065L)
-        existingrecord = ParcelDepartmentHazardLevel.objects.filter(department_id=73065L)
+        ret = [(543338L, 236418L, 19695L, 1069L)]
+        mock_cur = mock_connections['nfirs'].cursor.return_value
+        mock_cur.description = [('low',), ('medium',), ('high',), ('unknown',)]
+        mock_cur.fetchall.return_value = ret
+
+        us = Country.objects.create(iso_code='US', name='United States')
+        address = Address.objects.create(address_line1='Test', country=us,
+                                         geom=Point(-118.42170426600454, 34.09700463377199))
+        lafd = FireDepartment.objects.create(name='Los Angeles', population=0, population_class=9, state='CA',
+                                             headquarters_address=address, featured=0, archived=0)
+
+        get_parcel_department_hazard_level_rollup(lafd.id)
+        existingrecord = ParcelDepartmentHazardLevel.objects.filter(department_id=lafd.id)
         addedhazardlevelfordepartment = existingrecord[0]
 
-        self.assertEqual(addedhazardlevelfordepartment.department_id, 73065L)
+        self.assertEqual(addedhazardlevelfordepartment.department_id, lafd.id)
