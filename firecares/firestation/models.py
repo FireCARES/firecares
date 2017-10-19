@@ -1203,6 +1203,14 @@ def update_department(sender, instance, **kwargs):
     update.update_department.delay(instance.id)
 
 
+def update_station(sender, instance, **kwargs):
+    """
+    Updates Drive time and service area calculations after Station change
+    """
+    from firecares.tasks import update
+    update.get_parcel_department_hazard_level_rollup(instance.department_id)
+
+
 def create_national_calculations_view(sender, **kwargs):
     """
     Creates DB view based on national calculations queries
@@ -1368,6 +1376,7 @@ class ParcelDepartmentHazardLevel(models.Model):
 
 post_save.connect(set_department_region, sender=FireDepartment)
 post_save.connect(update_department, sender=FireDepartment)
+post_save.connect(update_station, sender=FireStation)
 reversion.register(FireStation)
 reversion.register(FireDepartment)
 reversion.register(Staffing)

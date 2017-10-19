@@ -244,6 +244,7 @@ def update_department(id):
     print "updating department {}".format(id)
     chain(update_nfirs_counts.si(id),
           update_performance_score.si(id),
+          get_parcel_department_hazard_level_rollup.si(id),
           group(refresh_quartile_view_task.si(),
           refresh_national_calculations_view_task.si())).delay()
 
