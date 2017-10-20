@@ -11552,6 +11552,7 @@ div.unauthenticated * div.gauge-inverse {
 .usgs-messages .alert {
   margin-bottom: 0;
   margin-top: 1em;
+  height: 40px;
 }
 .usgs-update-link {
   display: inline-block;
@@ -12270,6 +12271,21 @@ div.is-your-department {
 }
 .alert-success .alert-icon {
   background-color: #42ae42;
+}
+.toolTip2 {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  position: absolute;
+  display: none;
+  width: auto;
+  height: auto;
+  background: none repeat scroll 0 0 white;
+  border: 0 none;
+  border-radius: 8px 8px 8px 8px;
+  box-shadow: -3px 3px 15px #888888;
+  color: black;
+  font: 12px sans-serif;
+  padding: 5px;
+  text-align: center;
 }
 .ct-pageWrapper {
   background-color: #ffffff;
@@ -16147,20 +16163,4 @@ header {
   position: absolute;
   right: 0;
   bottom: 27px;
-}
-
-.toolTip2 {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    position: absolute;
-    display: none;
-    width: auto;
-    height: auto;
-    background: none repeat scroll 0 0 white;
-    border: 0 none;
-    border-radius: 8px 8px 8px 8px;
-    box-shadow: -3px 3px 15px #888888;
-    color: black;
-    font: 12px sans-serif;
-    padding: 5px;
-    text-align: center;
 }

@@ -1208,7 +1208,8 @@ def update_station(sender, instance, **kwargs):
     Updates Drive time and service area calculations after Station change
     """
     from firecares.tasks import update
-    update.get_parcel_department_hazard_level_rollup(instance.department_id)
+    if(instance.department_id):
+        update.get_parcel_department_hazard_level_rollup(instance.department_id)
 
 
 def create_national_calculations_view(sender, **kwargs):
