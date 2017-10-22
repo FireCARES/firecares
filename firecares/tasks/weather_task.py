@@ -1,5 +1,4 @@
 from django.utils import timezone
-from django.contrib.gis.geos import GEOSGeometry
 from firecares.celery import app
 from firecares.weather.models import WeatherWarnings, DepartmentWarnings
 
@@ -20,7 +19,7 @@ def cleanup_dept_weather_noaa_warnings():
     """
     expired = timezone.now()
     print expired
-    queryset = DepartmentWarnings.objects.filter(expiredate__lte=expired)
+    queryset = DepartmentWarnings.objects.filter(expiredate__lte=expired).exclude(warngeom=None)
 
     for departmentWarning in queryset:
 
@@ -28,7 +27,7 @@ def cleanup_dept_weather_noaa_warnings():
             # set geomettry to a simple multipoloygon
             departmentWarning.warngeom = None
             departmentWarning.save()
-            print "Department Warning cleaned for " + departmentWarning.departmentname
+            print "Department Warning cleaned for " + departmentWarning.departmentname + " expired " + str(departmentWarning.expiredate)
 
         except:
             print "Error removing Department Warning"
