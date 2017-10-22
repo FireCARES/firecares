@@ -19,13 +19,14 @@ def cleanup_dept_weather_noaa_warnings():
     Remove geometry from expired warnings in the department warning table
     """
     expired = timezone.now()
-    queryset = DepartmentWarnings.objects.filter(expiredate__gte=expired)
+    print expired
+    queryset = DepartmentWarnings.objects.filter(expiredate__lte=expired)
 
     for departmentWarning in queryset:
 
         try:
             # set geomettry to a simple multipoloygon
-            departmentWarning.warngeom = GEOSGeometry('MULTIPOLYGON (((1 1, 5 1, 5 5, 1 5, 1 1), (2 2, 3 2, 3 3, 2 3, 2 2)), ((3 3, 6 2, 6 4, 3 3)))')
+            departmentWarning.warngeom = None
             departmentWarning.save()
             print "Department Warning cleaned for " + departmentWarning.departmentname
 
