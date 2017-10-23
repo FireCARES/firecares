@@ -36,7 +36,7 @@ class WeatherWarnings(models.Model):
     expiration = models.DateTimeField(null=True, blank=True)
     idp_ingestdate = models.DateTimeField(null=True, blank=True)
     issuance = models.DateTimeField(null=True, blank=True)
-    warngeom = models.MultiPolygonField()
+    warngeom = models.MultiPolygonField(null=True)
 
     @classmethod
     def create_warning(cls, warning):
@@ -250,7 +250,7 @@ class DepartmentWarnings(models.Model):
     expiredate = models.DateTimeField(null=True, blank=True)
     issuedate = models.DateTimeField(null=True, blank=True)
     url = models.CharField(max_length=500, null=True, blank=True)
-    warngeom = models.MultiPolygonField()
+    warngeom = models.MultiPolygonField(null=True)
 
     @classmethod
     def create_dept_warning(cls, departmentarning):
