@@ -1,10 +1,11 @@
 import json
 import logging
 from .forms import StaffingForm
-from .models import FireStation, Staffing, FireDepartment
+from .models import FireStation, Staffing, FireDepartment, ParcelDepartmentHazardLevel
 from firecares.weather.models import DepartmentWarnings
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.gis import geos
+from django.utils import timezone
 from tastypie import fields
 from tastypie.authentication import SessionAuthentication, ApiKeyAuthentication, MultiAuthentication, Authentication
 from tastypie.authorization import DjangoAuthorization
@@ -15,8 +16,6 @@ from tastypie.exceptions import Unauthorized, TastypieError
 from tastypie.serializers import Serializer
 from tastypie.validation import FormValidation
 from guardian.core import ObjectPermissionChecker
-from django.utils import timezone
-
 
 logger = logging.getLogger(__name__)
 
@@ -304,6 +303,35 @@ class StaffingResource(JSONDefaultModelResourceMixin, ModelResource):
         always_return_data = True
 
 
+class StaffingStationRollupResource(JSONDefaultModelResourceMixin, ModelResource):
+    """
+    Merges Staffing Data with the Station Data
+    """
+
+    department = fields.ForeignKey(FireDepartmentResource, 'department', null=True)
+    staffingdata = fields.ToManyField('firecares.firestation.api.StaffingResource', 'staffing_set', full=True)
+
+    class Meta:
+        resource_name = 'staffingstations'
+        queryset = FireStation.objects.all()
+
+        authorization = GuardianAuthorization(delegate_to_property='department',
+                                              view_permission_code=None,
+                                              update_permission_code='change_firedepartment',
+                                              create_permission_code='change_firedepartment',
+                                              delete_permission_code='admin_firedepartment')
+        list_allowed_methods = ['get']
+        detail_allowed_methods = ['get', 'put']
+        filtering = {'department': ('exact',), 'state': ('exact',), 'id': ('exact',)}
+        excludes = ['addressbuildingname', 'complex_id', 'data_security', 'distribution_policy', 'fcode', 'foot_id',
+                    'ftype', 'globalid', 'gnis_id', 'islandmark', 'loaddate', 'objectid', 'permanent_identifier',
+                    'pointlocationtype', 'source_datadesc', 'source_datasetid', 'source_featureid', 'zipcode', 'department',
+                    'source_originator', 'admintype', 'district', 'archived', 'modified', 'state', 'address', 'city'
+                    ]
+        serializer = PrettyJSONSerializer()
+        limit = 140
+
+
 class WeatherWarningResource(JSONDefaultModelResourceMixin, ModelResource):
     """
     The Weather API mege with department id.
@@ -326,5 +354,29 @@ class WeatherWarningResource(JSONDefaultModelResourceMixin, ModelResource):
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get']
         cache = SimpleCache(timeout=120)
+        serializer = PrettyJSONSerializer()
+        always_return_data = True
+
+
+class GetServiceAreaInfo(JSONDefaultModelResourceMixin, ModelResource):
+    """
+    Get Service area info based on Drive Times for Department ID
+    """
+    department = fields.ForeignKey(FireDepartmentResource, 'department', null=True)
+
+    class Meta:
+        resource_name = 'getserviceareainfo'
+        authorization = GuardianAuthorization(delegate_to_property='department',
+                                              view_permission_code=None,
+                                              update_permission_code='change_firedepartment',
+                                              create_permission_code='change_firedepartment',
+                                              delete_permission_code='change_firedepartment')
+
+        #  Return the departement rollup info for service areas
+        queryset = ParcelDepartmentHazardLevel.objects.all()
+
+        filtering = {'department': ('exact',), 'id': ('exact',)}
+        list_allowed_methods = ['get', 'post']
+        detail_allowed_methods = ['get', 'post']
         serializer = PrettyJSONSerializer()
         always_return_data = True

@@ -46,9 +46,9 @@
         })
     ;
 
-    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', '$filter', 'FireDepartment', '$analytics', 'WeatherWarning'];
+    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', '$filter', 'FireDepartment', '$analytics', 'WeatherWarning', '$interpolate', 'FireStationandStaffing', 'ServiceAreaRollup'];
 
-    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter, FireDepartment, $analytics, WeatherWarning) {
+    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter, FireDepartment, $analytics, WeatherWarning, $interpolate, FireStationandStaffing, ServiceAreaRollup) {
         var departmentMap = map.initMap('map', {scrollWheelZoom: false});
         var showStations = true;
         var stationIcon = L.FireCARESMarkers.firestationmarker();
@@ -56,13 +56,22 @@
         var fitBoundsOptions = {};
         var countyBoundary = null;
         var eventCategory = 'department detail';
+        
+        var serviceArea, max;
+        var serviceAreaData = null;
+        var mouseOverAddedOpacity = 0.25;    
+        var highlightColor = 'blue';
+        
         $scope.metrics = window.metrics;
         $scope.urls = window.urls;
         $scope.level = window.level;
         $scope.messages = [];
         $scope.weather_messages = [];
         $scope.stations = [];
+        $scope.showServiceAreaChart = false;
         $scope.residential_structure_fire_counts = _.isUndefined(window.metrics) ? '' : window.metrics.residential_structure_fire_counts;
+        $scope.parcel_hazard_level_counts = "";
+        $scope.department_personnel_counts = "0 Personnel/Assets Available";
         $scope.uploadBoundary = false;
         var layersControl = L.control.layers().addTo(departmentMap);
         var fires = L.featureGroup().addTo(departmentMap);
@@ -241,7 +250,7 @@
           clickableLayers: null,
           mutexToggle: true,
           maxZoom: 18,
-          minZoom: 15,
+          minZoom: 10,
 
           getIDForLayerFeature: function(feature) {
             return feature.properties.parcel_id;
@@ -385,6 +394,23 @@
         });
         layersControl.addOverlay(parcels, 'Parcels');
 
+        //
+        // Service Area
+        //
+        serviceArea = L.geoJson(null, {
+          onEachFeature: function(feature, layer) {
+              layer.bindPopup(feature.properties.Name + ' minutes');
+              layer.on('mouseover', function(e) {
+                 layer.setStyle({fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5) + mouseOverAddedOpacity, fillColor: highlightColor});
+              });
+              layer.on('mouseout', function(e) {
+                 layer.setStyle({weight: 0.8, fillOpacity:-(feature.properties.ToBreak * 0.8 - max) / (max * 1.5), fillColor: '#33cc33'});
+              });
+          }
+        });
+
+        layersControl.addOverlay(serviceArea, 'Service Area');
+
         $scope.shp = null;
 
         $scope.toggleBoundary = function() {
@@ -473,6 +499,129 @@
           });
           $scope.level = level;
         };
+
+        //
+        //List for Service Area Layer
+        //
+        departmentMap.on('overlayadd', function(layer) {
+          layer = layer.layer;
+          if ( layer._leaflet_id === serviceArea._leaflet_id && serviceAreaData){
+              showServiceAreaChart(true);
+          }
+          else if ( layer._leaflet_id === serviceArea._leaflet_id && !serviceAreaData) {
+            
+            departmentMap.spin(true);
+
+            // Get Service Area rollup data base on Department 
+            ServiceAreaRollup.query({department: config.id}).$promise.then(function(data) {
+                
+                if(data.objects.length > 0){
+                  // Add Hazard Layer Info Template
+                  $scope.parcel_hazard_level_counts = [
+                      {label:"0-4 Minutes", "High":data.objects[0].parcelcount_high_0_4||0, "Medium":data.objects[0].parcelcount_medium_0_4||0, "Low": data.objects[0].parcelcount_low_0_4||0, "Unknown":data.objects[0].parcelcount_unknown_0_4||0},
+                      {label:"4-6 Minutes", "High":data.objects[0].parcelcount_high_4_6||0, "Medium":data.objects[0].parcelcount_medium_4_6||0, "Low":data.objects[0].parcelcount_low_4_6||0, "Unknown":data.objects[0].parcelcount_unknown_4_6||0},
+                      {label:"6-8 Minutes", "High":data.objects[0].parcelcount_high_6_8||0, "Medium":data.objects[0].parcelcount_medium_6_8||0, "Low":data.objects[0].parcelcount_low_6_8||0, "Unknown":data.objects[0].parcelcount_unknown_6_8||0}
+                  ];
+                }
+                // Return no data if department hasn't been calculated yet 
+                else{
+                  $scope.parcel_hazard_level_counts = [
+                      {label:"0-4 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0},
+                      {label:"4-6 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0},
+                      {label:"6-8 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0}
+                  ];
+                }
+                showServiceAreaChart(true);
+            });
+
+            // Get Stations to derive Drive Times and Asset number
+            FireStationandStaffing.query({department: config.id}).$promise.then(function(data) {
+                $scope.stations = data.objects;
+
+                var numFireStations = $scope.stations.length;
+                var serviceAreaURL;
+
+                var deptGeom = {
+                  x: config.centroid[1],
+                  y: config.centroid[0]
+                };
+
+                //check to see if there are station geom if not use headquarters
+                if(numFireStations < 1){
+                    serviceAreaURL = $interpolate('https://geo.firecares.org/?f=json&Facilities={"features":[{"geometry":{"x":{{x}},"spatialReference":{"wkid":4326},"y":{{y}}}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4&Break_Values=4 6 8&returnZ=false&returnM=false')(deptGeom);
+                }
+                else{
+                    var totalAssetStationString = "";
+                    var totalAssetStationNumber = 0;
+                    var assetStationGeom = [];
+
+                    //iterate through the station assets
+                    for (var i = 0; i < numFireStations; i++) {
+
+                        var station = $scope.stations[i];
+                        var totalAssets = 0;
+                        for (var asset = 0; asset < station.staffingdata.length; asset++) {
+                            totalAssets = totalAssets + Number(station.staffingdata[asset].personnel);
+                        }
+
+                        if(totalAssets>0){
+                            assetStationGeom.push({"geometry":{"x":Number(Number(station.geom.coordinates[0]).toPrecision(4)),"spatialReference":{"wkid":4326},"y":Number(Number(station.geom.coordinates[1]).toPrecision(4))}});
+                            totalAssetStationString = totalAssetStationString + String(totalAssets) + ',';
+                            totalAssetStationNumber = totalAssetStationNumber + totalAssets;
+                        }
+                    }
+
+                    totalAssetStationString = totalAssetStationString.substring(0, totalAssetStationString.length - 1);
+                    $scope.department_personnel_counts = totalAssetStationNumber + " Personnel/Assets Available";
+
+                    //Check if there is multiple stations but zero peronnel total -- use headquarters
+                    if(totalAssetStationString == ""){
+                        serviceAreaURL = $interpolate('https://geo.firecares.org/?f=json&Facilities={"features":[{"geometry":{"x":{{x}},"spatialReference":{"wkid":4326},"y":{{y}}}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4&Break_Values=4 6 8&returnZ=false&returnM=false')(deptGeom);
+                    }
+                    else{
+                        serviceAreaURL = 'https://geo.firecares.org/?f=json&Facilities={"features":'+JSON.stringify(assetStationGeom)+',"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input='+totalAssetStationString+'&Break_Values=4 6 8&returnZ=false&returnM=false';
+                    }
+                }
+
+                $http({
+                  method: 'GET',
+                  url: serviceAreaURL
+                }).then(function success(resp) {
+                  esri2geo.toGeoJSON(resp.data.results[0].value, function(_, geojson) {
+                    var values = geojson.features.map(function(val, idx) {
+                      return val.properties.ToBreak;
+                    });
+                    max = Math.max.apply(null, values);
+                    serviceAreaData = geojson;
+                    serviceArea.addData(geojson);
+                    layer.setStyle(function(feature) {
+                      return {
+                        fillColor: '#33cc33',
+                        fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5),
+                        weight: 0.8
+                      };
+                    });
+                    departmentMap.fitBounds(serviceArea);
+                    departmentMap.spin(false);
+                  });
+
+                  departmentMap.on('overlayremove', function(layer) {
+                    if (layer.layer._leaflet_id === serviceArea._leaflet_id) {
+                        showServiceAreaChart(false);
+                    }
+                  });
+                }, function error(err) {
+                  departmentMap.spin(false);
+                });
+            });
+          }
+        });
+
+        function showServiceAreaChart(show) {
+            $timeout(function() {
+                $scope.showServiceAreaChart = show;
+            });
+        }
 
         departmentMap.on('overlayadd', function(layer) {
           $analytics.eventTrack('enable layer', {

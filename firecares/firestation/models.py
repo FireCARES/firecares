@@ -1203,6 +1203,15 @@ def update_department(sender, instance, **kwargs):
     update.update_department.delay(instance.id)
 
 
+def update_station(sender, instance, **kwargs):
+    """
+    Updates Drive time and service area calculations after Station change
+    """
+    from firecares.tasks import update
+    if(instance.department_id):
+        update.get_parcel_department_hazard_level_rollup(instance.department_id)
+
+
 def create_national_calculations_view(sender, **kwargs):
     """
     Creates DB view based on national calculations queries
@@ -1344,8 +1353,31 @@ class DataFeedback(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
+class ParcelDepartmentHazardLevel(models.Model):
+    """
+    Parcel Departement Hazard Level table from Drive Time Analysis Service Area
+    """
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    department = models.ForeignKey(FireDepartment, null=True, blank=True)
+    parcelcount_low_0_4 = models.IntegerField(null=True, blank=True)
+    parcelcount_low_4_6 = models.IntegerField(null=True, blank=True)
+    parcelcount_low_6_8 = models.IntegerField(null=True, blank=True)
+    parcelcount_medium_0_4 = models.IntegerField(null=True, blank=True)
+    parcelcount_medium_4_6 = models.IntegerField(null=True, blank=True)
+    parcelcount_medium_6_8 = models.IntegerField(null=True, blank=True)
+    parcelcount_high_0_4 = models.IntegerField(null=True, blank=True)
+    parcelcount_high_4_6 = models.IntegerField(null=True, blank=True)
+    parcelcount_high_6_8 = models.IntegerField(null=True, blank=True)
+    parcelcount_unknown_0_4 = models.IntegerField(null=True, blank=True)
+    parcelcount_unknown_4_6 = models.IntegerField(null=True, blank=True)
+    parcelcount_unknown_6_8 = models.IntegerField(null=True, blank=True)
+    drivetimegeom = models.MultiPolygonField(null=True, blank=True)
+
+
 post_save.connect(set_department_region, sender=FireDepartment)
 post_save.connect(update_department, sender=FireDepartment)
+post_save.connect(update_station, sender=FireStation)
 reversion.register(FireStation)
 reversion.register(FireDepartment)
 reversion.register(Staffing)

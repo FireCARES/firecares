@@ -1,6 +1,10 @@
 import copy
 import numpy as np
 import traceback
+import requests
+import json
+from django.db.utils import IntegrityError
+from firecares.utils.arcgis2geojson import arcgis2geojson
 from celery import chain, group
 from firecares.celery import app
 from django.contrib.gis.geos import GEOSGeometry
@@ -8,7 +12,7 @@ from django.db import connections
 from django.db.utils import ConnectionDoesNotExist
 from scipy.stats import lognorm
 from firecares.firestation.models import (
-    FireDepartment, refresh_quartile_view, HazardLevels, refresh_national_calculations_view)
+    FireStation, FireDepartment, ParcelDepartmentHazardLevel, refresh_quartile_view, HazardLevels, refresh_national_calculations_view)
 from firecares.firestation.models import NFIRSStatistic as nfirs
 from fire_risk.models import DIST, DISTMediumHazard, DISTHighHazard, NotEnoughRecords
 from fire_risk.models.DIST.providers.ahs import ahs_building_areas
@@ -240,6 +244,7 @@ def update_department(id):
     print "updating department {}".format(id)
     chain(update_nfirs_counts.si(id),
           update_performance_score.si(id),
+          get_parcel_department_hazard_level_rollup(id),
           group(refresh_quartile_view_task.si(),
           refresh_national_calculations_view_task.si())).delay()
 
@@ -448,3 +453,124 @@ def calculate_story_distribution(fd_id):
         rm = fd.firedepartmentriskmodels_set.get(level=nlevel)
         rm.floor_count_coefficients = {'shape': samp[0], 'loc': samp[1], 'scale': samp[2]}
         rm.save()
+
+
+@app.task(queue='servicearea')
+def create_parcel_department_hazard_level_rollup_all():
+    """
+    Task for updating the servicearea table rolling up parcel hazard categories with departement drive time data
+    """
+    for fd in FireDepartment.objects.all():
+        get_parcel_department_hazard_level_rollup(fd.id)
+
+
+def get_parcel_department_hazard_level_rollup(fd_id=100214):
+    """
+    Update for one department for the drive time hazard level
+    """
+    stationlist = FireStation.objects.filter(department_id=fd_id)
+    dept = FireDepartment.objects.filter(id=fd_id)
+
+    print "Calculating Drive times for:  " + dept[0].name
+
+    #  Use Headquarters geometry if there is no Statffing assets
+    if len(stationlist) < 1:
+        drivetimeurl = 'https://geo.firecares.org/?f=json&Facilities={"features":[{"geometry":{"x":' + str(dept[0].headquarters_geom.x) + ',"spatialReference":{"wkid":4326},"y":' + str(dept[0].headquarters_geom.y) + '}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4&Break_Values=4 6 8&returnZ=false&returnM=false'
+
+    else:
+        drivetimegeom = {}
+        for fireStation in stationlist:
+            stationasset = {}
+            stationasset["spatialReference"] = {"wkid": 4326}
+            stationasset["y"] = round(fireStation.geom.y, 5)
+            stationasset["x"] = round(fireStation.geom.x, 5)
+            stationgeom = {}
+            stationgeom["geometry"] = stationasset
+            drivetimegeom.update(stationgeom)
+
+        drivetimeurl = 'https://geo.firecares.org/?f=json&Facilities={"features":[' + json.dumps(drivetimegeom) + '],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4&Break_Values=4 6 8&returnZ=false&returnM=false'
+
+    try:
+        getdrivetime = requests.get(drivetimeurl)
+        update_parcel_department_hazard_level(json.loads(getdrivetime.content)['results'][0]['value']['features'], dept[0])
+
+    except KeyError:
+        print 'Drive Time Failed for ' + dept[0].name
+        print drivetimeurl
+
+    except IntegrityError:
+        print 'Drive Time Failed for ' + dept[0].name
+        print drivetimeurl
+
+    except:
+        print 'Drive Time Failed for ' + dept[0].name
+        print drivetimeurl
+
+
+def update_parcel_department_hazard_level(drivetimegeom, department):
+    """
+    Intersect with Parcel layer and update parcel_department_hazard_level table
+    0-4 minutes
+    4-6 minutes
+    6-8 minutes
+    """
+
+    drivetimegeom0 = arcgis2geojson(drivetimegeom[2]['geometry'])
+    drivetimegeom4 = arcgis2geojson(drivetimegeom[1]['geometry'])
+    drivetimegeom6 = arcgis2geojson(drivetimegeom[0]['geometry'])
+
+    cursor = connections['nfirs'].cursor()
+
+    QUERY_INTERSECT_FOR_PARCEL_DRIVETIME = """SELECT sum(case when l.risk_category = 'Low' THEN 1 ELSE 0 END) as low,
+        sum(CASE WHEN l.risk_category = 'Medium' THEN 1 ELSE 0 END) as medium,
+        sum(CASE WHEN l.risk_category = 'High' THEN 1 ELSE 0 END) high,
+        sum(CASE WHEN l.risk_category is null THEN 1 ELSE 0 END) as unknown
+        FROM parcel_risk_category_local l
+        WHERE ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON(%(drive_geom)s), 4326), l.wkb_geometry)
+        """
+
+    cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': json.dumps(drivetimegeom0)})
+    results0 = dictfetchall(cursor)
+    cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': json.dumps(drivetimegeom4)})
+    results4 = dictfetchall(cursor)
+    cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': json.dumps(drivetimegeom6)})
+    results6 = dictfetchall(cursor)
+
+    # Overwrite/Update service area is already registered
+    if ParcelDepartmentHazardLevel.objects.filter(department_id=department.id):
+        existingrecord = ParcelDepartmentHazardLevel.objects.filter(department_id=department.id)
+        addhazardlevelfordepartment = existingrecord[0]
+        addhazardlevelfordepartment.parcelcount_low_0_4 = results0[0]['low']
+        addhazardlevelfordepartment.parcelcount_low_4_6 = results4[0]['low']
+        addhazardlevelfordepartment.parcelcount_low_6_8 = results6[0]['low']
+        addhazardlevelfordepartment.parcelcount_medium_0_4 = results0[0]['medium']
+        addhazardlevelfordepartment.parcelcount_medium_4_6 = results4[0]['medium']
+        addhazardlevelfordepartment.parcelcount_medium_6_8 = results6[0]['medium']
+        addhazardlevelfordepartment.parcelcount_high_0_4 = results0[0]['high']
+        addhazardlevelfordepartment.parcelcount_high_4_6 = results4[0]['high']
+        addhazardlevelfordepartment.parcelcount_high_6_8 = results6[0]['high']
+        addhazardlevelfordepartment.parcelcount_unknown_0_4 = results0[0]['unknown']
+        addhazardlevelfordepartment.parcelcount_unknown_4_6 = results4[0]['unknown']
+        addhazardlevelfordepartment.parcelcount_unknown_6_8 = results6[0]['unknown']
+
+        print department.name + " Service Area Updated"
+    else:
+        deptservicearea = {}
+        deptservicearea['department'] = department
+        deptservicearea['parcelcount_low_0_4'] = results0[0]['low']
+        deptservicearea['parcelcount_low_4_6'] = results4[0]['low']
+        deptservicearea['parcelcount_low_6_8'] = results6[0]['low']
+        deptservicearea['parcelcount_medium_0_4'] = results0[0]['medium']
+        deptservicearea['parcelcount_medium_4_6'] = results4[0]['medium']
+        deptservicearea['parcelcount_medium_6_8'] = results6[0]['medium']
+        deptservicearea['parcelcount_high_0_4'] = results0[0]['high']
+        deptservicearea['parcelcount_high_4_6'] = results4[0]['high']
+        deptservicearea['parcelcount_high_6_8'] = results6[0]['high']
+        deptservicearea['parcelcount_unknown_0_4'] = results0[0]['unknown']
+        deptservicearea['parcelcount_unknown_4_6'] = results4[0]['unknown']
+        deptservicearea['parcelcount_unknown_6_8'] = results6[0]['unknown']
+
+        addhazardlevelfordepartment = ParcelDepartmentHazardLevel.objects.create(**deptservicearea)
+        print department.name + " Service Area Created"
+
+    addhazardlevelfordepartment.save()
