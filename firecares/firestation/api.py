@@ -2,10 +2,8 @@ import json
 import logging
 from .forms import StaffingForm
 from .models import FireStation, Staffing, FireDepartment, ParcelDepartmentHazardLevel
-from firecares.weather.models import DepartmentWarnings
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.gis import geos
-from django.utils import timezone
 from tastypie import fields
 from tastypie.authentication import SessionAuthentication, ApiKeyAuthentication, MultiAuthentication, Authentication
 from tastypie.authorization import DjangoAuthorization
@@ -330,32 +328,6 @@ class StaffingStationRollupResource(JSONDefaultModelResourceMixin, ModelResource
                     ]
         serializer = PrettyJSONSerializer()
         limit = 140
-
-
-class WeatherWarningResource(JSONDefaultModelResourceMixin, ModelResource):
-    """
-    The Weather API mege with department id.
-    """
-    department = fields.ForeignKey(FireDepartmentResource, 'department', null=True)
-
-    class Meta:
-        resource_name = 'weather-warning'
-        expired = timezone.now()
-        # production when Task is running
-        queryset = DepartmentWarnings.objects.filter(expiredate__gte=expired)
-        # only show all warnings #good for testing Warnings
-        # queryset = DepartmentWarnings.objects.all()
-        authorization = GuardianAuthorization(delegate_to_property='department',
-                                              view_permission_code=None,
-                                              update_permission_code='change_firedepartment',
-                                              create_permission_code='change_firedepartment',
-                                              delete_permission_code='change_firedepartment')
-        filtering = {'department': ('exact',), 'state': ('exact',), 'id': ('exact',)}
-        list_allowed_methods = ['get', 'post']
-        detail_allowed_methods = ['get']
-        cache = SimpleCache(timeout=120)
-        serializer = PrettyJSONSerializer()
-        always_return_data = True
 
 
 class GetServiceAreaInfo(JSONDefaultModelResourceMixin, ModelResource):

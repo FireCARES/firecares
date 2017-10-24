@@ -71,7 +71,7 @@
         $scope.showServiceAreaChart = false;
         $scope.residential_structure_fire_counts = _.isUndefined(window.metrics) ? '' : window.metrics.residential_structure_fire_counts;
         $scope.parcel_hazard_level_counts = "";
-        $scope.department_personnel_counts = "0 Personnel/Assets Available";
+        $scope.department_personnel_counts = " Personnel/Assets Available";
         $scope.uploadBoundary = false;
         var layersControl = L.control.layers().addTo(departmentMap);
         var fires = L.featureGroup().addTo(departmentMap);
@@ -579,7 +579,9 @@
                         serviceAreaURL = $interpolate('https://geo.firecares.org/?f=json&Facilities={"features":[{"geometry":{"x":{{x}},"spatialReference":{"wkid":4326},"y":{{y}}}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4&Break_Values=4 6 8&returnZ=false&returnM=false')(deptGeom);
                     }
                     else{
-                        serviceAreaURL = 'https://geo.firecares.org/?f=json&Facilities={"features":'+JSON.stringify(assetStationGeom)+',"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input='+totalAssetStationString+'&Break_Values=4 6 8&returnZ=false&returnM=false';
+                        // used for number of staffing but not used at the moment
+                        // serviceAreaURL = 'https://geo.firecares.org/?f=json&Facilities={"features":'+JSON.stringify(assetStationGeom)+',"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input='+totalAssetStationString+'&Break_Values=4 6 8&returnZ=false&returnM=false';
+                        serviceAreaURL = 'https://geo.firecares.org/?f=json&Facilities={"features":'+JSON.stringify(assetStationGeom)+',"geometryType":"esriGeometryPoint"}&env:outSR=4326&Break_Values=4 6 8&returnZ=false&returnM=false';
                     }
                 }
 

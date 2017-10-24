@@ -172,7 +172,6 @@ INSTALLED_APPS = (
     'firecares.firecares_core',
     'firecares.firestation',
     'firecares.usgs',
-    'firecares.weather',
     'jsonfield',
     'compressor',
     'storages',
@@ -310,7 +309,6 @@ CELERY_IMPORTS = (
     'firecares.tasks.cleanup',
     'firecares.tasks.quality_control',
     'firecares.tasks.slack',
-    'firecares.tasks.weather_task',
 )
 
 CELERY_QUEUES = [
@@ -321,7 +319,6 @@ CELERY_QUEUES = [
     Queue('cleanup', routing_key='cleanup'),
     Queue('quality-control', routing_key='quality-control'),
     Queue('slack', routing_key='slack'),
-    Queue('weather-task', routing_key='weather-task'),
     Queue('servicearea', routing_key='servicearea'),
 ]
 

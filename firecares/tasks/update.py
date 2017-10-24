@@ -464,7 +464,7 @@ def create_parcel_department_hazard_level_rollup_all():
         get_parcel_department_hazard_level_rollup(fd.id)
 
 
-def get_parcel_department_hazard_level_rollup(fd_id=100214):
+def get_parcel_department_hazard_level_rollup(fd_id):
     """
     Update for one department for the drive time hazard level
     """

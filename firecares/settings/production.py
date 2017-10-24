@@ -42,10 +42,6 @@ CELERYBEAT_SCHEDULE = {
     'update_sitemap_every_60_minutes': {
         'task': 'static_sitemaps.tasks.GenerateSitemap',
         'schedule': crontab(minute=0)
-    },
-    'update_warnings_every_60_minutes': {
-        'task': 'firecares.tasks.weather_task.collect_weather_noaa_warnings',
-        'schedule': crontab(minute=0)
     }
 }
 
