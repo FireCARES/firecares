@@ -2,3 +2,4 @@ django-extensions==1.5.9
 coverage==4.2
 locustio==0.7.5
 ipython[notebook]
+flake8==3.4.0
