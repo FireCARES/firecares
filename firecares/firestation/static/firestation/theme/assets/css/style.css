@@ -14446,6 +14446,10 @@ header {
 .weather-messages a {
   padding-left: 15px !important;
   color: #428bca !important;
+  cursor: pointer;
+}
+#weathersum {
+  font-weight: bold;
 }
 .ct-productMeta--single h1,
 .ct-productMeta--single h2,
