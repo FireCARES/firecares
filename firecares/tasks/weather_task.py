@@ -18,7 +18,6 @@ def cleanup_dept_weather_noaa_warnings():
     Remove geometry from expired warnings in the department warning table
     """
     expired = timezone.now()
-    print expired
     queryset = DepartmentWarnings.objects.filter(expiredate__lte=expired).exclude(warngeom=None)
 
     for departmentWarning in queryset:

@@ -61,6 +61,7 @@
         $scope.level = window.level;
         $scope.messages = [];
         $scope.weather_messages = [];
+        $scope.showDetails = false;
         $scope.stations = [];
         $scope.residential_structure_fire_counts = _.isUndefined(window.metrics) ? '' : window.metrics.residential_structure_fire_counts;
         $scope.uploadBoundary = false;

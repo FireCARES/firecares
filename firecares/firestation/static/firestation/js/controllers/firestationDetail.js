@@ -31,6 +31,7 @@
     $scope.stations = [];
     $scope.message = {};
     $scope.weather_messages = [];
+    $scope.showDetails = false;
     $scope.eventCategory = 'station detail';
     var fitBoundsOptions = {padding: [6, 6]};
 

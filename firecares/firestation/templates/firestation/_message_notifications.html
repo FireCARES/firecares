@@ -25,11 +25,21 @@
                     <div class="alert-icon">
                         <i style="color:white;" class="fa fa-warning"></i>
                     </div>
-                    <div class="alert-text" style="">
-                        <h5>Warning</h5> 
-                        <ul ng-repeat="message in weather_messages">
-                            <li ng-bind-html="message.text"/>
-                        </ul> 
+                    <div class="alert-text">
+                        <h5>Weather Warning</h5>
+                        <div id="weathersum">                    
+                            <div ng-show="showDetails" ng-click="showDetails = false">
+                                <span ng-bind-html="weather_messages.length + ' weather related warnings <u><a>Hide</a></u>'"/>
+                            </div>
+                            <div ng-show="!showDetails" ng-click="showDetails = true">
+                                <span ng-bind-html="weather_messages.length + ' weather related warnings <u><a>Show</a></u>'"/>
+                            </div>
+                        </div>
+                        <div id="weatherwarnlist" ng-show="showDetails==true">
+                            <ul ng-repeat="message in weather_messages">
+                                <li ng-bind-html="message.text"/>
+                            </ul> 
+                        </div>
                     </div>
                 </div>
             {% endif %}
