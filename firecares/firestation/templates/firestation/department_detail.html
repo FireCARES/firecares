@@ -446,6 +446,21 @@
                                     <li><a href="{% url 'department_districts_shapefile' object.id object.slug %}">Download Districts <span class="format">(shp)</span></a></li>
                                   </ul>
                                 </div>
+                                {% if user.is_superuser %}
+                                <div class="dropdown pull-right">
+                                    <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenuStation" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                        <i class="fa fa-cog"></i>
+                                      </button>
+                                    <ul class="dropdown-menu in-front" aria-labelledby="dropdownMenuStation">
+                                        <li>
+                                            <a href="{% url 'remove_intersecting_departments' object.id %}">
+                                                <i class="fa fa-plus"></i>
+                                                Add New Station
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                {% endif %}
                             </div>
                             {% include "firestation/_fire_station_table.html" %}
                             <div class="ct-u-marginBottom30">
