@@ -518,9 +518,9 @@
                 if(data.objects.length > 0){
                   // Add Hazard Layer Info Template
                   $scope.parcel_hazard_level_counts = [
-                      {label:"0-4 Minutes", "High":data.objects[0].parcelcount_high_0_4||0, "Medium":data.objects[0].parcelcount_medium_0_4||0, "Low": data.objects[0].parcelcount_low_0_4||0, "Unknown":data.objects[0].parcelcount_unknown_0_4||0},
-                      {label:"4-6 Minutes", "High":data.objects[0].parcelcount_high_4_6||0, "Medium":data.objects[0].parcelcount_medium_4_6||0, "Low":data.objects[0].parcelcount_low_4_6||0, "Unknown":data.objects[0].parcelcount_unknown_4_6||0},
-                      {label:"6-8 Minutes", "High":data.objects[0].parcelcount_high_6_8||0, "Medium":data.objects[0].parcelcount_medium_6_8||0, "Low":data.objects[0].parcelcount_low_6_8||0, "Unknown":data.objects[0].parcelcount_unknown_6_8||0}
+                      {label:"0-4 Minutes", "Low":data.objects[0].parcelcount_low_0_4||0, "Medium":data.objects[0].parcelcount_medium_0_4||0, "High":data.objects[0].parcelcount_high_0_4||0, "Unknown":data.objects[0].parcelcount_unknown_0_4||0},
+                      {label:"4-6 Minutes", "Low":data.objects[0].parcelcount_low_4_6||0, "Medium":data.objects[0].parcelcount_medium_4_6||0, "High":data.objects[0].parcelcount_high_4_6||0, "Unknown":data.objects[0].parcelcount_unknown_4_6||0},
+                      {label:"6-8 Minutes", "Low":data.objects[0].parcelcount_low_6_8||0, "Medium":data.objects[0].parcelcount_medium_6_8||0, "High":data.objects[0].parcelcount_high_6_8||0, "Unknown":data.objects[0].parcelcount_unknown_6_8||0}
                   ];
                 }
                 // Return no data if department hasn't been calculated yet 

@@ -469,9 +469,11 @@
             var y = d3.scale.linear()
                 .range([height, 0]);
 
-            var colorRange = d3.scale.category20();
-            var color = d3.scale.ordinal()
-                .range(colorRange.range());
+            var color = {};
+            color['Low'] = 'rgba(116,172,73,0.6)';
+            color['Medium'] = 'rgba(250,142,21,0.4)';
+            color['High'] = 'rgba(248,153,131,0.9)';
+            color['Unknown'] = 'rgba(50%,50%,50%,0.6)';
 
             var xAxis = d3.svg.axis()
                 .scale(x0)
@@ -546,7 +548,7 @@
                 .attr("y", function(d) { return y(d.value); })
                 .attr("value", function(d){return d.name;})
                 .attr("height", function(d) { return height - y(d.value); })
-                .style("fill", function(d) { return color(d.name); });
+                .style("fill", function(d) { return color[d.name]; });
 
             bar
                 .on("mouseover", function(d){
@@ -575,7 +577,9 @@
                 .attr("x", width - 18)
                 .attr("width", 18)
                 .attr("height", 18)
-                .style("fill", color);
+                .style("fill", function(d) { 
+                    return color[d]; 
+                });
 
             legend.append("text")
                 .attr("x", width - 22)
