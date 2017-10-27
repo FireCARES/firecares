@@ -1,0 +1,153 @@
+{% load humanize %}
+{% load firecares_tags %}
+{% load widget_tweaks %}
+
+<!DOCTYPE html>
+<!--[if IE 8 ]>
+<html class="no-js ie8" lang="en"> <![endif]-->
+<!--[if IE 9 ]>
+<html class="no-js ie9" lang="en"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="description" content="{{ object.description }} Learn more about this community's risks.">
+    <meta name="author" content="Prominent Edge LLC">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <title>Add Station: {{ object.name }}</title>
+    {% include 'firestation/_favicon.html' %}
+    {% include "firestation/_firecares_style.html" %}
+    {% include 'google_analytics.html' %}
+    {% include 'google_analytics.html' %}
+</head>
+
+<body class="ct-headroom--fixedTopBar cssAnimate" ng-app="fireStation">
+
+{% include 'firestation/_mobile_navbar.html' %}
+{% include 'firestation/_mobile_search.html' %}
+
+<div id="ct-js-wrapper" class="ct-pageWrapper">
+
+<div class="ct-navbarMobile">
+    <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand logo" href="{% url 'firestation_home' %}"><h1>FireCARES</h1></a>
+    <button type="button" class="searchForm-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span><i class="fa fa-search"></i></span>
+    </button>
+</div>
+
+{% include "firestation/_navbar.html" %}
+
+<div class="ct-site--map">
+    <div class="container">
+        <a href="{% url 'firestation_home' %}">Home</a>
+        <a href="{% url 'firedepartment_list' %}">Departments</a>
+        <a href="{% url 'firedepartment_detail' object.id %}">{{ object.name }}</a>
+        <a href="{% url 'documents' object.id %}">Documents</a>
+    </div>
+</div>
+<header class="ct-mediaSection">
+    <div class="ct-mediaSection-inner">
+        <div class="container">
+            <div class="ct-u-displayTableVertical">
+                <div class="ct-textBox ct-u-text--white ct-u-displayTableCell text-left">
+                    <h2>{{ object.name }}</h2>
+                    <h4>{{ object.headquarters_address.get_row_display }}</h4>
+                    <span class="ct-productID ct-fw-300">
+                        FDID: <span>{{ object.fdid }}</span>
+                    </span>
+                </div>
+                <div class="ct-u-displayTableCell text-right">
+                    {% include 'firestation/_department_header.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<div class="container ct-u-paddingBoth30">
+    <div class="row">
+        <div class="col-md-12">
+            <div>
+            <p class="upload-header">Add New Station to {{ object.name }}</p>
+                <br>
+                {% block form %}
+                <div class="ct-u-marginBottom30 text-center">
+                    {% with WIDGET_ERROR_CLASS='form-error' %}
+                    <form class="text-left" action="addstation" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="ct-form--item ct-u-marginBottom10 form-group">
+                            <label>Station Name</label>
+                            {% render_field form.name type="text" required=true class+="form input-sm" %}
+                            {{ form.name.errors }}
+                        </div>
+                        <div class="ct-form--item ct-u-marginBottom10 form-group">
+                            <label>Station Number</label>
+                            {% render_field form.station_number type="number" required=true class+="form input-sm" %}
+                            {{ form.station_number.errors }}
+                        </div>
+                        <div class="ct-form--item ct-u-marginBottom10 form-group">
+                            <label>Address</label>
+                            {% render_field form.address type="text" required=true class+="form input-sm" %}
+                            {{ form.address.errors }}
+                        </div>
+                        <div class="ct-form--item ct-u-marginBottom10 form-group">
+                            <label>City</label>
+                            {% render_field form.city type="text" required=true class+="form input-sm" %}
+                            {{ form.city.errors }}
+                        </div>
+                        <div class="ct-form--item ct-u-marginBottom10 form-group">
+                            <label>State</label>
+                            <select name="state">
+                            {% for x in form.fields.state.choices %}
+                                <option value="{{ x.abbreviation }}">{{ x.name }}</option>
+                            {% endfor %}
+                            </select>
+                        </div>
+                        <div class="ct-form--item ct-u-marginBottom10 form-group">
+                            <label>Zipcode</label>
+                            {% render_field form.zipcode type="number" required=true max="100000" class+="form input-sm" %}
+                            {{ form.zipcode.errors }}
+                        </div>
+                        <div class="ct-form--item">
+                            <button class="btn btn-primary upload-button" type="submit">Add Station</button>
+                        </div>
+                        {% endwith %}
+                    </form>
+                </div>
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'firestation/_footer.html' %}
+</div>
+
+{% include "firestation/_firecares_scripts.html" %}
+
+<script>
+
+    init();
+        
+    function init() {
+        // map ?
+    }
+
+    function submitClicked(el) {
+        $(el).prop('disabled', true);
+        $(el).html('Adding Station...');
+        $(el).closest('form').submit();
+    }
+
+</script>
+
+</body>
+</html>

@@ -11,7 +11,6 @@ User = get_user_model()
 
 
 class LocalOpenLayersAdmin(admin.OSMGeoAdmin):
-        
     default_lon = -9713752.796
     default_lat = 4212093.223
     openlayers_url = settings.STATIC_URL + 'openlayers/OpenLayers.js'

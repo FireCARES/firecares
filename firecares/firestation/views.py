@@ -36,7 +36,7 @@ from firecares.usgs.models import (StateorTerritoryHigh, CountyorEquivalent,
 from guardian.mixins import PermissionRequiredMixin
 from tempfile import mkdtemp
 from firecares.tasks.cleanup import remove_file
-from .forms import DocumentUploadForm, DepartmentUserApprovalForm, DataFeedbackForm
+from .forms import DocumentUploadForm, DepartmentUserApprovalForm, DataFeedbackForm, AddStationForm
 from django.views.generic.edit import FormView
 from .models import (Document, FireStation, FireDepartment, Staffing)
 from favit.models import Favorite
@@ -524,6 +524,47 @@ class SimilarDepartmentsListView(FireDepartmentListView):
         queryset = department.similar_departments
         queryset = self.handle_search(queryset)
         return queryset
+
+
+class AddStationView(LoginRequiredMixin, FormView):
+    """
+    Implements the Add Station View
+    """
+    template_name = 'firestation/firestation_add.html'
+    success_url = 'addstation'
+    form_class = AddStationForm
+
+    def get_context_data(self, **kwargs):
+        department = get_object_or_404(FireDepartment, pk=self.kwargs.get('pk'))
+
+        context = super(AddStationView, self).get_context_data(**kwargs)
+        context['object'] = department
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        department = get_object_or_404(FireDepartment, pk=self.kwargs.get('pk'))
+        if department.is_curator(self.request.user):
+            form = AddStationForm(department=self.kwargs.get('pk'), **self.get_form_kwargs())
+            if form.is_valid():
+                return self.form_valid(form)
+            else:
+                return self.form_invalid(form)
+        else:
+            return HttpResponse(status=401)
+
+    def form_valid(self, form):
+        station = form.save(commit=False)
+        station.department = FireDepartment.objects.get(pk=self.kwargs.get('pk'))
+        station.name = form.name
+        station.station_number = form.station_number
+        station.address = form.address
+        station.state = form.state
+        station.city = form.city
+        station.zipcode = form.zipcode
+        station.save()
+
+        return super(AddStationView, self).form_valid(form)
 
 
 class FireStationFavoriteListView(LoginRequiredMixin, PaginationMixin, ListView, SafeSortMixin, LimitMixin):

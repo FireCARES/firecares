@@ -1,6 +1,6 @@
 from .views import (DepartmentDetailView, Stats, FireDepartmentListView, FireStationFavoriteListView,
                     SimilarDepartmentsListView, DepartmentUpdateGovernmentUnits, FireStationDetailView,
-                    DownloadShapefile, DocumentsView, DocumentsFileView, DocumentsDeleteView,
+                    DownloadShapefile, DocumentsView, DocumentsFileView, DocumentsDeleteView, AddStationView,
                     RemoveIntersectingDepartments, AdminDepartmentUsers, AdminDepartmentAccountRequests,
                     DataFeedbackView)
 from .slack import FireCARESSlack
@@ -9,6 +9,7 @@ from django.conf.urls import patterns, url
 
 urlpatterns = patterns('',
                        url(r'^departments/(?P<pk>\d+)/documents-delete$', DocumentsDeleteView.as_view(), name='documents_delete'),
+                       url(r'^departments/(?P<pk>\d+)/addstation$', AddStationView.as_view(), name='addstation'),
                        url(r'^departments/(?P<pk>\d+)/documents/(?P<filename>[^/]*)$', DocumentsFileView.as_view(), name='documents_file'),
                        url(r'^departments/(?P<pk>\d+)/documents$', DocumentsView.as_view(), name='documents'),
                        url(r'^departments/(?P<pk>\d+)/(?P<slug>[\w-]+)/similar-departments/?$', SimilarDepartmentsListView.as_view(template_name='firestation/firedepartment_list.html'), name='similar_departments_slug'),
