@@ -543,26 +543,24 @@ class AddStationView(LoginRequiredMixin, FormView):
         return context
 
     def post(self, request, *args, **kwargs):
-        department = get_object_or_404(FireDepartment, pk=self.kwargs.get('pk'))
-        if department.is_curator(self.request.user):
-            form = AddStationForm(department=self.kwargs.get('pk'), **self.get_form_kwargs())
+        form = AddStationForm(department_pk=self.kwargs.get('pk'), **self.get_form_kwargs())
+
+        print form.errors
+        if request.method == 'POST':
+
             if form.is_valid():
+                messages.success(request, 'Station Created successfully')
                 return self.form_valid(form)
             else:
+                messages.add_message(request, messages.ERROR, 'An error has occured creating the Station location')
                 return self.form_invalid(form)
-        else:
-            return HttpResponse(status=401)
 
     def form_valid(self, form):
+
         station = form.save(commit=False)
-        station.department = FireDepartment.objects.get(pk=self.kwargs.get('pk'))
-        station.name = form.name
-        station.station_number = form.station_number
-        station.address = form.address
-        station.state = form.state
-        station.city = form.city
-        station.zipcode = form.zipcode
-        station.save()
+        fd = FireDepartment.objects.get(pk=self.kwargs.get('pk'))
+        addresss_str = station.address + "" + station.state + "" + station.city + "" + station.zipcode
+        station.create_station(department=fd, address_string=addresss_str, name=station.name)
 
         return super(AddStationView, self).form_valid(form)
 

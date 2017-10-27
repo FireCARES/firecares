@@ -72,7 +72,8 @@
         </div>
     </div>
 </header>
-<div class="container ct-u-paddingBoth30">
+<div class="container ct-u-paddingBoth20">
+    {% include 'firestation/_message_notifications.html' with use_angular=True %}
     <div class="row">
         <div class="col-md-12">
             <div>
@@ -81,7 +82,7 @@
                 {% block form %}
                 <div class="ct-u-marginBottom30 text-center">
                     {% with WIDGET_ERROR_CLASS='form-error' %}
-                    <form class="text-left" action="addstation" method="post" enctype="multipart/form-data">
+                    <form id="addstaionform" class="text-left" action="addstation" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="ct-form--item ct-u-marginBottom10 form-group">
                             <label>Station Name</label>
@@ -105,11 +106,9 @@
                         </div>
                         <div class="ct-form--item ct-u-marginBottom10 form-group">
                             <label>State</label>
-                            <select name="state">
-                            {% for x in form.fields.state.choices %}
-                                <option value="{{ x.abbreviation }}">{{ x.name }}</option>
-                            {% endfor %}
+                            <select id="statedropdown" name="state">
                             </select>
+                            {{ form.state.errors }}
                         </div>
                         <div class="ct-form--item ct-u-marginBottom10 form-group">
                             <label>Zipcode</label>
@@ -117,6 +116,7 @@
                             {{ form.zipcode.errors }}
                         </div>
                         <div class="ct-form--item">
+                            {{ form.errors }}
                             <button class="btn btn-primary upload-button" type="submit">Add Station</button>
                         </div>
                         {% endwith %}
@@ -135,17 +135,17 @@
 
 <script>
 
-    init();
-        
-    function init() {
-        // map ?
-    }
+    var stateList = [{"name": "Alabama", "abbreviation": "AL"}, {"name": "Alaska", "abbreviation": "AK"}, {"name": "American Samoa", "abbreviation": "AS"}, {"name": "Arizona", "abbreviation": "AZ"}, {"name": "Arkansas", "abbreviation": "AR"}, {"name": "California", "abbreviation": "CA"}, {"name": "Colorado", "abbreviation": "CO"}, {"name": "Connecticut", "abbreviation": "CT"}, {"name": "Delaware", "abbreviation": "DE"}, {"name": "District Of Columbia", "abbreviation": "DC"}, {"name": "Florida", "abbreviation": "FL"}, {"name": "Georgia", "abbreviation": "GA"}, {"name": "Guam", "abbreviation": "GU"}, {"name": "Hawaii", "abbreviation": "HI"}, {"name": "Idaho", "abbreviation": "ID"}, {"name": "Illinois", "abbreviation": "IL"}, {"name": "Indiana", "abbreviation": "IN"}, {"name": "Iowa", "abbreviation": "IA"}, {"name": "Kansas", "abbreviation": "KS"}, {"name": "Kentucky", "abbreviation": "KY"}, {"name": "Louisiana", "abbreviation": "LA"}, {"name": "Maine", "abbreviation": "ME"}, {"name": "Maryland", "abbreviation": "MD"}, {"name": "Massachusetts", "abbreviation": "MA"}, {"name": "Michigan", "abbreviation": "MI"}, {"name": "Minnesota", "abbreviation": "MN"}, {"name": "Mississippi", "abbreviation": "MS"}, {"name": "Missouri", "abbreviation": "MO"}, {"name": "Montana", "abbreviation": "MT"}, {"name": "Nebraska", "abbreviation": "NE"}, {"name": "Nevada", "abbreviation": "NV"}, {"name": "New Hampshire", "abbreviation": "NH"}, {"name": "New Jersey", "abbreviation": "NJ"}, {"name": "New Mexico", "abbreviation": "NM"}, {"name": "New York", "abbreviation": "NY"}, {"name": "North Carolina", "abbreviation": "NC"}, {"name": "North Dakota", "abbreviation": "ND"}, {"name": "Ohio", "abbreviation": "OH"}, {"name": "Oklahoma", "abbreviation": "OK"}, {"name": "Oregon", "abbreviation": "OR"}, {"name": "Pennsylvania", "abbreviation": "PA"}, {"name": "Puerto Rico", "abbreviation": "PR"}, {"name": "Rhode Island", "abbreviation": "RI"}, {"name": "South Carolina", "abbreviation": "SC"}, {"name": "South Dakota", "abbreviation": "SD"}, {"name": "Tennessee", "abbreviation": "TN"}, {"name": "Texas", "abbreviation": "TX"}, {"name": "Utah", "abbreviation": "UT"}, {"name": "Vermont", "abbreviation": "VT"}, {"name": "Virginia", "abbreviation": "VA"}, {"name": "Washington", "abbreviation": "WA"}, {"name": "West Virginia", "abbreviation": "WV"}, {"name": "Wisconsin", "abbreviation": "WI"}, {"name": "Wyoming", "abbreviation": "WY"}]
 
-    function submitClicked(el) {
-        $(el).prop('disabled', true);
-        $(el).html('Adding Station...');
-        $(el).closest('form').submit();
+    var option = '';
+    for (var i=0;i<stateList.length;i++){
+       option += '<option value="'+ stateList[i]['abbreviation'] + '">' + stateList[i]['name'] + '</option>';
     }
+    $('#statedropdown').append(option);
+
+    // Clear form
+    $('#addstaionform input[type="text"]').val('');
+    $('#addstaionform input[type="number"]').val('');
 
 </script>
 
