@@ -91,7 +91,7 @@ class WeatherWarnings(models.Model):
 
                     if obj['feature'].get('geometry'):
                         poly = map(LinearRing, obj['feature']['geometry']['rings'])
-                        warningfeature.warngeom = MultiPolygon(fromstr(str(Polygon(*poly))),)  # not sure if data is multi poly
+                        warningfeature.warngeom = MultiPolygon(fromstr(str(Polygon(*poly).simplify(0.0001))),)
                         warninggeom = MultiPolygon(fromstr(str(Polygon(*poly))),)
 
                     warningfeature.issuance = date_parse(data['issuance'])
@@ -112,8 +112,7 @@ class WeatherWarnings(models.Model):
 
                     if obj['feature'].get('geometry'):
                         poly = map(LinearRing, obj['feature']['geometry']['rings'])
-                        # not sure if data is multi poly
-                        datapost['warngeom'] = MultiPolygon(fromstr(str(Polygon(*poly))),)
+                        datapost['warngeom'] = MultiPolygon(fromstr(str(Polygon(*poly).simplify(0.0003))),)
                         warninggeom = MultiPolygon(fromstr(str(Polygon(*poly))),)
 
                     datapost['issuance'] = date_parse(data['issuance'])

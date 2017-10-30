@@ -15,7 +15,7 @@ from tastypie.exceptions import Unauthorized, TastypieError
 from tastypie.serializers import Serializer
 from tastypie.validation import FormValidation
 from guardian.core import ObjectPermissionChecker
-import datetime
+from django.utils import timezone
 
 
 logger = logging.getLogger(__name__)
@@ -326,4 +326,4 @@ class WeatherWarningResource(JSONDefaultModelResourceMixin, ModelResource):
         always_return_data = True
 
     def get_object_list(self, request):
-        return super(WeatherWarningResource, self).get_object_list(request).filter(expiredate__gte=datetime.datetime.now)
+        return super(WeatherWarningResource, self).get_object_list(request).filter(expiredate__gte=timezone.now())
