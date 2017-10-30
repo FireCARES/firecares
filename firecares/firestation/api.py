@@ -15,7 +15,7 @@ from tastypie.exceptions import Unauthorized, TastypieError
 from tastypie.serializers import Serializer
 from tastypie.validation import FormValidation
 from guardian.core import ObjectPermissionChecker
-from django.utils import timezone
+import datetime
 
 
 logger = logging.getLogger(__name__)
@@ -312,11 +312,7 @@ class WeatherWarningResource(JSONDefaultModelResourceMixin, ModelResource):
 
     class Meta:
         resource_name = 'weather-warning'
-        expired = timezone.now()
-        # production when Task is running
-        queryset = DepartmentWarnings.objects.filter(expiredate__gte=expired)
-        # only show all warnings #good for testing Warnings
-        # queryset = DepartmentWarnings.objects.all()
+        queryset = DepartmentWarnings.objects.all()
         authorization = GuardianAuthorization(delegate_to_property='department',
                                               view_permission_code=None,
                                               update_permission_code='change_firedepartment',
@@ -328,3 +324,6 @@ class WeatherWarningResource(JSONDefaultModelResourceMixin, ModelResource):
         cache = SimpleCache(timeout=120)
         serializer = PrettyJSONSerializer()
         always_return_data = True
+
+    def get_object_list(self, request):
+        return super(WeatherWarningResource, self).get_object_list(request).filter(expiredate__gte=datetime.datetime.now)
