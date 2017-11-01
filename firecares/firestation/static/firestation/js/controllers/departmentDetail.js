@@ -116,6 +116,7 @@
 
             if (numWarnings > 0) {
               var weatherLayer = L.featureGroup(weatherPolygons);
+              weatherLayer.id = 'weather';
               weatherLayer.addTo(departmentMap); //deafult on
               weatherLayer.bringToBack();
               layersControl.addOverlay(weatherLayer, 'Weather Warnings');
@@ -134,6 +135,11 @@
                     });
                   }
                 }
+              });
+
+              // Remove layer when Weather messages are hidden
+              $('.weather-messages').on('weatherWarningsHidden', function () {
+                  departmentMap.removeLayer(weatherLayer);
               });
             }
 
@@ -187,7 +193,10 @@
 
                 layersControl.addOverlay(heatmap.layer, 'Fires Heatmap');
                 departmentMap.on('overlayadd', function(layer) {
-                    if (layer.layer._leaflet_id === heatmap.layer._leaflet_id) {
+                    if(layer.layer.id === 'weather'){
+                        $('.weather-messages').fadeIn('slow'); 
+                    }
+                    else if (layer.layer._leaflet_id === heatmap.layer._leaflet_id) {
                         if (heatmap.heat) {
                             showHeatmapCharts(true);
                         } else {
@@ -208,7 +217,10 @@
                 });
 
                 departmentMap.on('overlayremove', function(layer) {
-                    if (layer.layer._leaflet_id === heatmap.layer._leaflet_id) {
+                    if(layer.layer.id === 'weather'){
+                        $('.weather-messages').fadeOut('slow'); 
+                    }
+                    else if (layer.layer._leaflet_id === heatmap.layer._leaflet_id) {
                         showHeatmapCharts(false);
                     }
                 });
