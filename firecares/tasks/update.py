@@ -7,7 +7,7 @@ from django.db.utils import IntegrityError
 from firecares.utils.arcgis2geojson import arcgis2geojson
 from celery import chain, group
 from firecares.celery import app
-from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.geos import GEOSGeometry, MultiPolygon, LinearRing, Polygon
 from django.db import connections
 from django.db.utils import ConnectionDoesNotExist
 from scipy.stats import lognorm
@@ -476,9 +476,10 @@ def get_parcel_department_hazard_level_rollup(fd_id):
     #  Use Headquarters geometry if there is no Statffing assets
     if len(stationlist) < 1:
         drivetimeurl = 'https://geo.firecares.org/?f=json&Facilities={"features":[{"geometry":{"x":' + str(dept[0].headquarters_geom.x) + ',"spatialReference":{"wkid":4326},"y":' + str(dept[0].headquarters_geom.y) + '}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4&Break_Values=4 6 8&returnZ=false&returnM=false'
+        getdrivetime = requests.get(drivetimeurl)
 
     else:
-        drivetimegeom = {}
+        drivetimegeom = []
         for fireStation in stationlist:
             stationasset = {}
             stationasset["spatialReference"] = {"wkid": 4326}
@@ -486,25 +487,34 @@ def get_parcel_department_hazard_level_rollup(fd_id):
             stationasset["x"] = round(fireStation.geom.x, 5)
             stationgeom = {}
             stationgeom["geometry"] = stationasset
-            drivetimegeom.update(stationgeom)
+            drivetimegeom.append(stationgeom)
 
-        drivetimeurl = 'https://geo.firecares.org/?f=json&Facilities={"features":[' + json.dumps(drivetimegeom) + '],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4&Break_Values=4 6 8&returnZ=false&returnM=false'
+        drivepostdata = {}
+        drivepostdata['f'] = 'pjson'
+        drivepostdata['returnZ'] = False
+        drivepostdata['returnM'] = False
+        drivepostdata['env:outSR'] = 4326
+        drivepostdata['Break_Values'] = '4 6 8'
+        drivepostfeatures = {}
+        drivepostfeatures['features'] = drivetimegeom
+        drivepostfeatures['geometryType'] = "esriGeometryPoint"
+        drivepostdata['Facilities'] = json.dumps(drivepostfeatures)
 
-    try:
-        getdrivetime = requests.get(drivetimeurl)
-        update_parcel_department_hazard_level(json.loads(getdrivetime.content)['results'][0]['value']['features'], dept[0])
+        # GET URL 
+        # drivetimeurl = 'https://geo.firecares.org/?f=json&Facilities={"features":' + json.dumps(drivetimegeom) + ',"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4&Break_Values=4 6 8&returnZ=false&returnM=false'
+        getdrivetime = requests.post("http://firecares.org/service-area/?", data=drivepostdata)
 
-    except KeyError:
-        print 'Drive Time Failed for ' + dept[0].name
-        print drivetimeurl
+    #try:
+    update_parcel_department_hazard_level(json.loads(getdrivetime.content)['results'][0]['value']['features'], dept[0])
 
-    except IntegrityError:
-        print 'Drive Time Failed for ' + dept[0].name
-        print drivetimeurl
+    # except KeyError:
+    #     print 'Drive Time Failed for ' + dept[0].name
 
-    except:
-        print 'Drive Time Failed for ' + dept[0].name
-        print drivetimeurl
+    # except IntegrityError:
+    #     print 'Drive Time Failed for ' + dept[0].name
+
+    # except:
+    #     print 'Drive Time Failed for ' + dept[0].name
 
 
 def update_parcel_department_hazard_level(drivetimegeom, department):
@@ -519,6 +529,8 @@ def update_parcel_department_hazard_level(drivetimegeom, department):
     drivetimegeom4 = arcgis2geojson(drivetimegeom[1]['geometry'])
     drivetimegeom6 = arcgis2geojson(drivetimegeom[0]['geometry'])
 
+    drivepoly = arcgis2geojson(drivetimegeom)#map(LinearRing, drivetimegeom['feature']['geometry']['rings'])
+
     cursor = connections['nfirs'].cursor()
 
     QUERY_INTERSECT_FOR_PARCEL_DRIVETIME = """SELECT sum(case when l.risk_category = 'Low' THEN 1 ELSE 0 END) as low,
@@ -526,15 +538,28 @@ def update_parcel_department_hazard_level(drivetimegeom, department):
         sum(CASE WHEN l.risk_category = 'High' THEN 1 ELSE 0 END) high,
         sum(CASE WHEN l.risk_category is null THEN 1 ELSE 0 END) as unknown
         FROM parcel_risk_category_local l
-        WHERE ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON(%(drive_geom)s), 4326), l.wkb_geometry)
+        JOIN (SELECT ST_SetSRID(ST_GeomFromGeoJSON(%(drive_geom)s), 4326) as drive_geom) x
+        ON drive_geom && l.wkb_geometry
+        WHERE ST_CoveredBy(l.wkb_geometry, drive_geom)
         """
 
+
+    #FROM parcel_risk_category_local l
+    #WHERE ST_Intersects(ST_SetSRID(ST_GeomFromGeoJSON(%(drive_geom)s), 4326), l.wkb_geometry)
+
+    #print json.dumps(drivetimegeom0)
+
+    #test = "SELECT ST_IsValid(ST_GeomFromGeoJSON(%(drive_geom)s)) As good_line"
+    
     cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': json.dumps(drivetimegeom0)})
     results0 = dictfetchall(cursor)
+    print '0'
     cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': json.dumps(drivetimegeom4)})
     results4 = dictfetchall(cursor)
+    print '4'
     cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': json.dumps(drivetimegeom6)})
     results6 = dictfetchall(cursor)
+    print '6'
 
     # Overwrite/Update service area is already registered
     if ParcelDepartmentHazardLevel.objects.filter(department_id=department.id):
@@ -552,6 +577,7 @@ def update_parcel_department_hazard_level(drivetimegeom, department):
         addhazardlevelfordepartment.parcelcount_unknown_0_4 = results0[0]['unknown']
         addhazardlevelfordepartment.parcelcount_unknown_4_6 = results4[0]['unknown']
         addhazardlevelfordepartment.parcelcount_unknown_6_8 = results6[0]['unknown']
+        addhazardlevelfordepartment.drivetimegeom = GEOSGeometry(drivepoly)#MultiPolygon(fromstr(str(Polygon(*drivepoly).simplify(0.00001))),)
 
         print department.name + " Service Area Updated"
     else:
@@ -569,6 +595,7 @@ def update_parcel_department_hazard_level(drivetimegeom, department):
         deptservicearea['parcelcount_unknown_0_4'] = results0[0]['unknown']
         deptservicearea['parcelcount_unknown_4_6'] = results4[0]['unknown']
         deptservicearea['parcelcount_unknown_6_8'] = results6[0]['unknown']
+        deptservicearea['drivetimegeom'] = GEOSGeometry(drivepoly)#MultiPolygon(fromstr(str(Polygon(*drivepoly).simplify(0.00001))),)
 
         addhazardlevelfordepartment = ParcelDepartmentHazardLevel.objects.create(**deptservicearea)
         print department.name + " Service Area Created"
