@@ -57,7 +57,8 @@
         var countyBoundary = null;
         var eventCategory = 'department detail';
         
-        var serviceArea, max;
+        var serviceArea
+        var max = 8;
         var serviceAreaData = null;
         var mouseOverAddedOpacity = 0.25;    
         var highlightColor = 'blue';
@@ -531,6 +532,36 @@
                       {label:"6-8 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0}
                   ];
                 }
+
+                if(data.objects[0].drivetimegeom_0_4){
+
+                    //merge geometries
+                    var traveltime0 = { "type": "Feature",
+                        "properties": {"Name": "Travel Time: 0 - 4", "ToBreak":4},
+                        "geometry": data.objects[0].drivetimegeom_0_4
+                    }
+                    var traveltime4 = { "type": "Feature",
+                        "properties": {"Name": "Travel Time: 4 - 6", "ToBreak":6},
+                        "geometry": data.objects[0].drivetimegeom_4_6
+                    }
+                    var traveltime6 = { "type": "Feature",
+                        "properties": {"Name": "Travel Time: 6 - 8", "ToBreak":8},
+                        "geometry": data.objects[0].drivetimegeom_6_8
+                    }
+                    var travelTimeGeom = [traveltime0, traveltime4, traveltime6];
+                    
+                    serviceAreaData = travelTimeGeom;
+                    serviceArea.addData(travelTimeGeom);
+                    layer.setStyle(function(feature) {
+                      return {
+                        fillColor: '#33cc33',
+                        fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5),
+                        weight: 0.8
+                      };
+                    });
+                    departmentMap.fitBounds(serviceArea);
+                }
+                departmentMap.spin(false);
                 showServiceAreaChart(true);
             });
 
@@ -545,12 +576,8 @@
                   x: config.centroid[1],
                   y: config.centroid[0]
                 };
+                if(numFireStations > 1){
 
-                //check to see if there are station geom if not use headquarters
-                if(numFireStations < 1){
-                    serviceAreaURL = $interpolate('https://geo.firecares.org/?f=json&Facilities={"features":[{"geometry":{"x":{{x}},"spatialReference":{"wkid":4326},"y":{{y}}}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4&Break_Values=4 6 8&returnZ=false&returnM=false')(deptGeom);
-                }
-                else{
                     var totalAssetStationString = "";
                     var totalAssetStationNumber = 0;
                     var assetStationGeom = [];
@@ -573,48 +600,7 @@
 
                     totalAssetStationString = totalAssetStationString.substring(0, totalAssetStationString.length - 1);
                     $scope.department_personnel_counts = totalAssetStationNumber + " Personnel/Assets Available";
-
-                    //Check if there is multiple stations but zero peronnel total -- use headquarters
-                    if(totalAssetStationString == ""){
-                        serviceAreaURL = $interpolate('https://geo.firecares.org/?f=json&Facilities={"features":[{"geometry":{"x":{{x}},"spatialReference":{"wkid":4326},"y":{{y}}}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4&Break_Values=4 6 8&returnZ=false&returnM=false')(deptGeom);
-                    }
-                    else{
-                        // used for number of staffing but not used at the moment
-                        // serviceAreaURL = 'https://geo.firecares.org/?f=json&Facilities={"features":'+JSON.stringify(assetStationGeom)+',"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input='+totalAssetStationString+'&Break_Values=4 6 8&returnZ=false&returnM=false';
-                        serviceAreaURL = 'https://geo.firecares.org/?f=json&Facilities={"features":'+JSON.stringify(assetStationGeom)+',"geometryType":"esriGeometryPoint"}&env:outSR=4326&Break_Values=4 6 8&returnZ=false&returnM=false';
-                    }
                 }
-
-                $http({
-                  method: 'GET',
-                  url: serviceAreaURL
-                }).then(function success(resp) {
-                  esri2geo.toGeoJSON(resp.data.results[0].value, function(_, geojson) {
-                    var values = geojson.features.map(function(val, idx) {
-                      return val.properties.ToBreak;
-                    });
-                    max = Math.max.apply(null, values);
-                    serviceAreaData = geojson;
-                    serviceArea.addData(geojson);
-                    layer.setStyle(function(feature) {
-                      return {
-                        fillColor: '#33cc33',
-                        fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5),
-                        weight: 0.8
-                      };
-                    });
-                    departmentMap.fitBounds(serviceArea);
-                    departmentMap.spin(false);
-                  });
-
-                  departmentMap.on('overlayremove', function(layer) {
-                    if (layer.layer._leaflet_id === serviceArea._leaflet_id) {
-                        showServiceAreaChart(false);
-                    }
-                  });
-                }, function error(err) {
-                  departmentMap.spin(false);
-                });
             });
           }
         });
@@ -637,6 +623,9 @@
             category: eventCategory + ': map',
             label: layer.name
           });
+          if (layer.layer._leaflet_id === serviceArea._leaflet_id) {
+              showServiceAreaChart(false);
+          }
         });
 
         departmentMap.on('fullscreenchange', function(e) {

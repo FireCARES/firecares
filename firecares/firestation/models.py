@@ -1372,7 +1372,9 @@ class ParcelDepartmentHazardLevel(models.Model):
     parcelcount_unknown_0_4 = models.IntegerField(null=True, blank=True)
     parcelcount_unknown_4_6 = models.IntegerField(null=True, blank=True)
     parcelcount_unknown_6_8 = models.IntegerField(null=True, blank=True)
-    drivetimegeom = models.MultiPolygonField(null=True, blank=True)
+    drivetimegeom_0_4 = models.MultiPolygonField(null=True, blank=True)
+    drivetimegeom_4_6 = models.MultiPolygonField(null=True, blank=True)
+    drivetimegeom_6_8 = models.MultiPolygonField(null=True, blank=True)
 
 
 post_save.connect(set_department_region, sender=FireDepartment)
