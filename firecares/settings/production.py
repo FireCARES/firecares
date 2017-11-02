@@ -46,6 +46,10 @@ CELERYBEAT_SCHEDULE = {
     'update_warnings_every_60_minutes': {
         'task': 'firecares.tasks.weather_task.collect_weather_noaa_warnings',
         'schedule': crontab(minute=0)
+    },
+    'update_warning_geometry_every_midnight': {
+        'task': 'firecares.tasks.weather_task.cleanup_dept_weather_noaa_warnings',
+        'schedule': crontab(minute=0, hour=0)
     }
 }
 

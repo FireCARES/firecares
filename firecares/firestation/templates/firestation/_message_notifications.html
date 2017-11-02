@@ -28,14 +28,14 @@
                     <div class="alert-text">
                         <h5>Weather Warning</h5>
                         <div id="weathersum">                    
-                            <div ng-show="showDetails" ng-click="showDetails = false">
+                            <div ng-show="$parent.showDetails" ng-click="$parent.showDetails = false">
                                 <span ng-bind-html="weather_messages.length + ' weather related warnings <u><a>Hide</a></u>'"/>
                             </div>
-                            <div ng-show="!showDetails" ng-click="showDetails = true">
+                            <div ng-show="!$parent.showDetails" ng-click="$parent.showDetails = true">
                                 <span ng-bind-html="weather_messages.length + ' weather related warnings <u><a>Show</a></u>'"/>
                             </div>
                         </div>
-                        <div id="weatherwarnlist" ng-show="showDetails==true">
+                        <div id="weatherwarnlist" ng-show="$parent.showDetails==true">
                             <ul ng-repeat="message in weather_messages">
                                 <li ng-bind-html="message.text"/>
                             </ul> 

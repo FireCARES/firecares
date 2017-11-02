@@ -194,7 +194,8 @@
                 layersControl.addOverlay(heatmap.layer, 'Fires Heatmap');
                 departmentMap.on('overlayadd', function(layer) {
                     if(layer.layer.id === 'weather'){
-                        $('.weather-messages').fadeIn('slow'); 
+                        $('.weather-messages').fadeIn('slow');
+                        $scope.showDetails = false;
                     }
                     else if (layer.layer._leaflet_id === heatmap.layer._leaflet_id) {
                         if (heatmap.heat) {
@@ -218,7 +219,7 @@
 
                 departmentMap.on('overlayremove', function(layer) {
                     if(layer.layer.id === 'weather'){
-                        $('.weather-messages').fadeOut('slow'); 
+                        $('.weather-messages').fadeOut('slow');
                     }
                     else if (layer.layer._leaflet_id === heatmap.layer._leaflet_id) {
                         showHeatmapCharts(false);

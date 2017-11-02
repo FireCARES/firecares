@@ -155,7 +155,8 @@
     map.on('overlayadd', function(layer) {
       layer = layer.layer;
       if(layer.id === 'weather'){
-        $('.weather-messages').fadeIn('slow'); 
+        $('.weather-messages').fadeIn('slow');
+        $scope.showDetails = false;
       }
       else if ( layer._leaflet_id === serviceArea._leaflet_id && !serviceAreaData) {
         map.spin(true);
