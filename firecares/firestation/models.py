@@ -1377,6 +1377,23 @@ class ParcelDepartmentHazardLevel(models.Model):
     drivetimegeom_6_8 = models.MultiPolygonField(null=True, blank=True)
 
 
+class EffectiveFireFightingForceLevel(models.Model):
+    """
+    Parcel Count for how many assets can respond
+    """
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    department = models.ForeignKey(FireDepartment, null=True, blank=True)
+    parcelcount_low_15_26 = models.IntegerField(null=True, blank=True)
+    parcelcount_medium_27_42 = models.IntegerField(null=True, blank=True)
+    parcelcount_high_43_plus = models.IntegerField(null=True, blank=True)
+    parcelcount_unknown_15_26 = models.IntegerField(null=True, blank=True)
+    drivetimegeom_014 = models.MultiPolygonField(null=True, blank=True)
+    drivetimegeom_15_26 = models.MultiPolygonField(null=True, blank=True)
+    drivetimegeom_27_42 = models.MultiPolygonField(null=True, blank=True)
+    drivetimegeom_43_plus = models.MultiPolygonField(null=True, blank=True)
+
+
 post_save.connect(set_department_region, sender=FireDepartment)
 post_save.connect(update_department, sender=FireDepartment)
 post_save.connect(update_station, sender=FireStation)

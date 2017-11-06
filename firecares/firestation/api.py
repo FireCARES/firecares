@@ -1,7 +1,7 @@
 import json
 import logging
 from .forms import StaffingForm
-from .models import FireStation, Staffing, FireDepartment, ParcelDepartmentHazardLevel
+from .models import FireStation, Staffing, FireDepartment, ParcelDepartmentHazardLevel, EffectiveFireFightingForceLevel
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.gis import geos
 from tastypie import fields
@@ -346,6 +346,30 @@ class GetServiceAreaInfo(JSONDefaultModelResourceMixin, ModelResource):
 
         #  Return the departement rollup info for service areas
         queryset = ParcelDepartmentHazardLevel.objects.all()
+
+        filtering = {'department': ('exact',), 'id': ('exact',)}
+        list_allowed_methods = ['get', 'post']
+        detail_allowed_methods = ['get', 'post']
+        serializer = PrettyJSONSerializer()
+        always_return_data = True
+
+
+class GetEFFFInfo(JSONDefaultModelResourceMixin, ModelResource):
+    """
+    Get effective fire fighting force info based on Drive Times for Department ID
+    """
+    department = fields.ForeignKey(FireDepartmentResource, 'department', null=True)
+
+    class Meta:
+        resource_name = 'getefffinfo'
+        authorization = GuardianAuthorization(delegate_to_property='department',
+                                              view_permission_code=None,
+                                              update_permission_code='change_firedepartment',
+                                              create_permission_code='change_firedepartment',
+                                              delete_permission_code='change_firedepartment')
+
+        #  Return the departement rollup info for effective fire fighting force
+        queryset = EffectiveFireFightingForceLevel.objects.all()
 
         filtering = {'department': ('exact',), 'id': ('exact',)}
         list_allowed_methods = ['get', 'post']

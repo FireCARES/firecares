@@ -46,9 +46,9 @@
         })
     ;
 
-    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', '$filter', 'FireDepartment', '$analytics', 'WeatherWarning', '$interpolate', 'FireStationandStaffing', 'ServiceAreaRollup'];
+    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', '$filter', 'FireDepartment', '$analytics', 'WeatherWarning', '$interpolate', 'FireStationandStaffing', 'ServiceAreaRollup', 'EfffChartRollup'];
 
-    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter, FireDepartment, $analytics, WeatherWarning, $interpolate, FireStationandStaffing, ServiceAreaRollup) {
+    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter, FireDepartment, $analytics, WeatherWarning, $interpolate, FireStationandStaffing, ServiceAreaRollup, EfffChartRollup) {
         var departmentMap = map.initMap('map', {scrollWheelZoom: false});
         var showStations = true;
         var stationIcon = L.FireCARESMarkers.firestationmarker();
@@ -57,7 +57,7 @@
         var countyBoundary = null;
         var eventCategory = 'department detail';
         
-        var serviceArea
+        var serviceArea,efffArea;
         var max = 8;
         var serviceAreaData = null;
         var mouseOverAddedOpacity = 0.25;    
@@ -70,6 +70,7 @@
         $scope.weather_messages = [];
         $scope.stations = [];
         $scope.showServiceAreaChart = false;
+        $scope.showEFFFChart = false;
         $scope.residential_structure_fire_counts = _.isUndefined(window.metrics) ? '' : window.metrics.residential_structure_fire_counts;
         $scope.parcel_hazard_level_counts = "";
         $scope.department_personnel_counts = " Personnel/Assets Available";
@@ -96,7 +97,6 @@
 
                     // Uncomment to show Fire Stations by default
                     // stationLayer.addTo(departmentMap);
-
                     layersControl.addOverlay(stationLayer, 'Fire Stations');
 
                     if (config.geom === null) {
@@ -502,6 +502,85 @@
         };
 
         //
+        // Add layer for Effective Fire Fighting Force
+        //
+        departmentMap.on('overlayadd', function(layer) {
+          layer = layer.layer;
+          if ( layer._leaflet_id === efffArea._leaflet_id){
+              showEFFFChart(true);
+          }
+          else if ( layer._leaflet_id === efffArea._leaflet_id) {
+            
+            departmentMap.spin(true);
+
+            // Get Efff rollup data base on Department 
+            EfffChartRollup.query({department: config.id}).$promise.then(function(data) {
+                
+                if(data.objects.length > 0){
+                  // Add Efff Layer and graphic chart
+                  $scope.parcel_efff_counts = [
+                      {label:"0-4 Minutes", "Low":data.objects[0].parcelcount_low_0_4||0, "Medium":data.objects[0].parcelcount_medium_0_4||0, "High":data.objects[0].parcelcount_high_0_4||0, "Unknown":data.objects[0].parcelcount_unknown_0_4||0},
+                      {label:"4-6 Minutes", "Low":data.objects[0].parcelcount_low_4_6||0, "Medium":data.objects[0].parcelcount_medium_4_6||0, "High":data.objects[0].parcelcount_high_4_6||0, "Unknown":data.objects[0].parcelcount_unknown_4_6||0},
+                      {label:"6-8 Minutes", "Low":data.objects[0].parcelcount_low_6_8||0, "Medium":data.objects[0].parcelcount_medium_6_8||0, "High":data.objects[0].parcelcount_high_6_8||0, "Unknown":data.objects[0].parcelcount_unknown_6_8||0}
+                  ];
+
+                  if(data.objects[0].drivetimegeom_15_26){
+
+                    //merge geometries
+                    var traveltime0 = { "type": "Feature",
+                        "properties": {"Name": "Travel Time: 0 - 4", "ToBreak":4},
+                        "geometry": data.objects[0].drivetimegeom_15_26
+                    }
+                    var traveltime4 = { "type": "Feature",
+                        "properties": {"Name": "Travel Time: 4 - 6", "ToBreak":6},
+                        "geometry": data.objects[0].drivetimegeom_27_42
+                    }
+                    var traveltime6 = { "type": "Feature",
+                        "properties": {"Name": "Travel Time: 6 - 8", "ToBreak":8},
+                        "geometry": data.objects[0].drivetimegeom_43_plus
+                    }
+                    var travelTimeGeom = [traveltime0, traveltime4, traveltime6];
+                    
+                    efffArea.addData(travelTimeGeom);
+                    layer.setStyle(function(feature) {
+                      return {
+                        fillColor: '#33cc33',
+                        fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5),
+                        weight: 0.8
+                      };
+                    });
+                    departmentMap.fitBounds(efffArea);
+                  }
+                }
+                // Return no data if department hasn't been calculated yet 
+                else{
+                  $scope.parcel_hazard_level_counts = [
+                      {label:"0-4 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0},
+                      {label:"4-6 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0},
+                      {label:"6-8 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0}
+                  ];
+                }
+                departmentMap.spin(false);
+                showEFFFChart(true);
+            });
+          }
+        });
+
+        efffArea = L.geoJson(null, {
+          onEachFeature: function(feature, layer) {
+              layer.bindPopup(feature.properties.Name + ' minutes');
+              layer.on('mouseover', function(e) {
+                 layer.setStyle({fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5) + mouseOverAddedOpacity, fillColor: highlightColor});
+              });
+              layer.on('mouseout', function(e) {
+                 layer.setStyle({weight: 0.8, fillOpacity:-(feature.properties.ToBreak * 0.8 - max) / (max * 1.5), fillColor: '#33cc33'});
+              });
+          }
+        });
+        
+        layersControl.addOverlay(efffArea, 'Effective Fire Fighting Force');
+
+        //
         //List for Service Area Layer
         //
         departmentMap.on('overlayadd', function(layer) {
@@ -598,8 +677,6 @@
                         }
                     }
 
-                    serviceAreaURL = 'http://gis.iaff.org/arcgis/rest/services/Production/PeopleCountOct2012/GPServer/PeopleCountOct2012/execute?f=json&Facilities={"features":'+JSON.stringify(assetStationGeom)+',"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input='+totalAssetStationString+'&&returnZ=false&returnM=false';
-                    console.log(serviceAreaURL)
                     totalAssetStationString = totalAssetStationString.substring(0, totalAssetStationString.length - 1);
                     $scope.department_personnel_counts = totalAssetStationNumber + " Personnel/Assets Available";
                 }
@@ -610,6 +687,12 @@
         function showServiceAreaChart(show) {
             $timeout(function() {
                 $scope.showServiceAreaChart = show;
+            });
+        }
+
+        function showEFFFChart(show) {
+            $timeout(function() {
+                $scope.showEFFFChart = show;
             });
         }
 
@@ -627,6 +710,9 @@
           });
           if (layer.layer._leaflet_id === serviceArea._leaflet_id) {
               showServiceAreaChart(false);
+          }
+          else if (layer.layer._leaflet_id === efffArea._leaflet_id) {
+              showEFFFChart(false);
           }
         });
 

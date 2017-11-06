@@ -265,6 +265,23 @@
                         </div>
                     </div>
                     {% endverbatim %}
+                    {% verbatim %}
+                    <div class="text-center no-select ct-u-marginTop20" ng-if="showEFFFChart">
+                        <div class="metric-cards-title ct-u-marginTop20">
+                            <h5>Effective Firefighting Force Response Times</h5>
+                        </div>
+                        <div class="metric-card">
+                            <div class="main-text" ng-if="showEFFFChart">
+                                <risk-efff-bar-chart width="605" height="150" 
+                                    dataset="{{ parcel_hazard_level_counts }}">
+                                </risk-efff-bar-chart>
+                                <div class="description text-center">
+                                        {{ department_personnel_counts }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endverbatim %}
                     <div class="text-center no-select ct-u-marginTop20" ng-if="showHeatmapCharts">
                         <bar-chart class="hidden-xs" filter-type="yearsMonths" metric-title="HISTORY" width="800" height="150" max-years="8"></bar-chart>
                         <bar-chart class="visible-xs" filter-type="yearsMonths" metric-title="HISTORY" width="400" height="150" max-years="6"></bar-chart>
