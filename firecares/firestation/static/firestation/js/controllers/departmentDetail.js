@@ -523,17 +523,8 @@
                       {label:"4-6 Minutes", "Low":data.objects[0].parcelcount_low_4_6||0, "Medium":data.objects[0].parcelcount_medium_4_6||0, "High":data.objects[0].parcelcount_high_4_6||0, "Unknown":data.objects[0].parcelcount_unknown_4_6||0},
                       {label:"6-8 Minutes", "Low":data.objects[0].parcelcount_low_6_8||0, "Medium":data.objects[0].parcelcount_medium_6_8||0, "High":data.objects[0].parcelcount_high_6_8||0, "Unknown":data.objects[0].parcelcount_unknown_6_8||0}
                   ];
-                }
-                // Return no data if department hasn't been calculated yet 
-                else{
-                  $scope.parcel_hazard_level_counts = [
-                      {label:"0-4 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0},
-                      {label:"4-6 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0},
-                      {label:"6-8 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0}
-                  ];
-                }
 
-                if(data.objects[0].drivetimegeom_0_4){
+                  if(data.objects[0].drivetimegeom_0_4){
 
                     //merge geometries
                     var traveltime0 = { "type": "Feature",
@@ -560,6 +551,15 @@
                       };
                     });
                     departmentMap.fitBounds(serviceArea);
+                  }
+                }
+                // Return no data if department hasn't been calculated yet 
+                else{
+                  $scope.parcel_hazard_level_counts = [
+                      {label:"0-4 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0},
+                      {label:"4-6 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0},
+                      {label:"6-8 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0}
+                  ];
                 }
                 departmentMap.spin(false);
                 showServiceAreaChart(true);
@@ -598,6 +598,8 @@
                         }
                     }
 
+                    serviceAreaURL = 'http://gis.iaff.org/arcgis/rest/services/Production/PeopleCountOct2012/GPServer/PeopleCountOct2012/execute?f=json&Facilities={"features":'+JSON.stringify(assetStationGeom)+',"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input='+totalAssetStationString+'&&returnZ=false&returnM=false';
+                    console.log(serviceAreaURL)
                     totalAssetStationString = totalAssetStationString.substring(0, totalAssetStationString.length - 1);
                     $scope.department_personnel_counts = totalAssetStationNumber + " Personnel/Assets Available";
                 }

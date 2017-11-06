@@ -502,7 +502,8 @@ def get_parcel_department_hazard_level_rollup(fd_id):
 
         # GET URL (timing out)
         # drivetimeurl = 'https://geo.firecares.org/?f=json&Facilities={"features":' + json.dumps(drivetimegeom) + ',"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4&Break_Values=4 6 8&returnZ=false&returnM=false'
-        getdrivetime = requests.post("http://test.firecares.org/service-area/?", data=drivepostdata)
+        # getdrivetime = requests.post("http://test.firecares.org/service-area/?", data=drivepostdata)
+        getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/101ServerServiceAreaOct2012/GPServer/101ServerServiceAreaOct2012/execute", data=drivepostdata)
 
     try:
         update_parcel_department_hazard_level(json.loads(getdrivetime.content)['results'][0]['value']['features'], dept[0])
