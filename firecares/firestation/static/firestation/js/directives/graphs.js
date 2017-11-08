@@ -8,7 +8,7 @@
         .directive('bulletChart', BulletChartDirective)
         .directive('riskDistributionBarChart', RiskDistributionBarChartDirective)
         .directive('riskServiceareaBarChart', RiskServiceareaBarChartDirective)
-        .directive('riskEfffBarChart', RiskEfffBarChartDirective)    
+        .directive('riskEfffareaBarChart', RiskEfffareaBarChartDirective)    
     ;
 
     function LineChartDirective() {
@@ -595,7 +595,7 @@
       }
     }
 
-    function RiskEfffBarChartDirective() {
+    function RiskEfffareaBarChartDirective() {
       return {
         restrict: 'CE',
         replace: false,
@@ -624,6 +624,11 @@
             color['Medium'] = 'rgba(250,142,21,0.4)';
             color['High'] = 'rgba(248,153,131,0.9)';
             color['Unknown'] = 'rgba(50%,50%,50%,0.6)';
+            var nametitle = {};
+            nametitle['15+ Low Hazards (8min)'] = 'Low';
+            nametitle['27+ Medium Hazards (8min)'] = 'Medium';
+            nametitle['42+ High Hazards (10.17min)'] = 'High';
+            nametitle['15+ Unknown Hazards (8min)'] = 'Unknown';
 
             var xAxis = d3.svg.axis()
                 .scale(x0)
@@ -649,8 +654,7 @@
 
             svg.call(tip);
 
-            var options = d3.keys(dataset[0]).filter(function(key) { return key !== "label"; });
-
+            var options =["15+ Low Hazards (8min)", '27+ Medium Hazards (8min)', '42+ High Hazards (10.17min)', '15+ Unknown Hazards (8min)'];
             dataset.forEach(function(d) {
                 d.valores = options.map(function(name) { return {name: name, value: +d[name]}; });
             });
@@ -665,8 +669,9 @@
             }
 
             // set min for bar scale
+            //y.domain([0, maximumY]);
             y.domain([-(maximumY * .02), maximumY]);
-
+            
             svg.append("g")
                 .attr("class", "x axis")
                 .attr("transform", "translate(0," + height + ")")
@@ -694,11 +699,19 @@
                 .on('mousemove', tip.show)
                 //.on('mouseout', tip.hide)
                 .attr("width", x1.rangeBand())
+                /*function(d) { 
+                    if(d.value == 0){
+                        return 0;
+                    }
+                    else{
+                        return x1.rangeBand()*1.5; 
+                    }
+                    }) */
                 .attr("x", function(d) { return x1(d.name); })
                 .attr("y", function(d) { return y(d.value); })
                 .attr("value", function(d){return d.name;})
                 .attr("height", function(d) { return height - y(d.value); })
-                .style("fill", function(d) { return color[d.name]; });
+                .style("fill", function(d) { return color[nametitle[d.name]]; });
 
             bar
                 .on("mouseover", function(d){
@@ -710,7 +723,7 @@
                     var l = elements.length
                     l = l-1
                     var elementData = elements[l].__data__
-                    tip.html("<strong>Reponse Time: </strong>"+(d.label)+"<br><strong>Hazard Level: </strong>"+elementData.name+"<br><strong>Parcels affected: </strong>"+elementData.value);
+                    tip.html("<strong>Personnel: </strong>"+elementData.name+"<br><strong>Hazard Level: </strong>"+nametitle[elementData.name]+"<br><strong>Parcels affected: </strong>"+elementData.value);
                 });
             bar
                 .on("mouseout", function(d){
@@ -721,14 +734,14 @@
                 .data(options.slice())
                 .enter().append("g")
                 .attr("class", "legend")
-                .attr("transform", function(d, i) { return "translate(37," + i * 19 + ")"; });
+                .attr("transform", function(d, i) { return "translate(52," + i * 19 + ")"; });
 
             legend.append("rect")
                 .attr("x", width - 18)
                 .attr("width", 18)
                 .attr("height", 18)
                 .style("fill", function(d) { 
-                    return color[d]; 
+                    return color[nametitle[d]]; 
                 });
 
             legend.append("text")

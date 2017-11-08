@@ -659,7 +659,6 @@ def update_parcel_department_effectivefirefighting_rollup(fd_id):
             stationgeom["geometry"] = stationasset
             drivetimegeom.append(stationgeom)
             staffingtotal = staffingtotal + str(stationstafftotal) + ','
-            print staffingtotal
 
         drivepostdata = {}
         drivepostdata['f'] = 'pjson'
@@ -672,6 +671,8 @@ def update_parcel_department_effectivefirefighting_rollup(fd_id):
         drivepostfeatures['geometryType'] = "esriGeometryPoint"
         drivepostdata['Facilities'] = json.dumps(drivepostfeatures)
 
+        print drivepostdata
+        print staffingtotal
         getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCountOct2012/GPServer/PeopleCountOct2012/execute", data=drivepostdata)
 
     try:
@@ -709,24 +710,23 @@ def update_parcel_effectivefirefighting_table(drivetimegeom, department):
                 drivetimegeomLT15 = responsegeom
             else:
                 drivetimegeomLT15 = drivetimegeomLT15.union(responsegeom)
-        elif(responseJSON['attributes']['SUM_StaffLong'] > 14 and responseJSON['attributes']['SUM_StaffLong'] < 27):
+        if(responseJSON['attributes']['SUM_StaffLong'] > 14):
             if drivetimegeomLT27 is None:
                 drivetimegeomLT27 = responsegeom
             else:
-                drivetimegeomLT27.union(responsegeom)
-        elif(responseJSON['attributes']['SUM_StaffLong'] > 26 and responseJSON['attributes']['SUM_StaffLong'] > 42):
+                drivetimegeomLT27 = drivetimegeomLT27.union(responsegeom)
+        if(responseJSON['attributes']['SUM_StaffLong'] > 26):
             if drivetimegeomLT42 is None:
                 drivetimegeomLT42 = responsegeom
             else:
-                drivetimegeomLT42.union(responsegeom)
-        elif(responseJSON['attributes']['SUM_StaffLong'] > 41):
+                drivetimegeomLT42 = drivetimegeomLT42.union(responsegeom)
+        if(responseJSON['attributes']['SUM_StaffLong'] > 41):
             if drivetimegeomGT41 is None:
                 drivetimegeomGT41 = responsegeom
             else:
-                drivetimegeomGT41.union(responsegeom)
+                drivetimegeomGT41 = drivetimegeomGT41.union(responsegeom)
 
     cursor = connections['nfirs'].cursor()
-
     QUERY_INTERSECT_FOR_PARCEL_DRIVETIME = """SELECT sum(case when l.risk_category = 'Low' THEN 1 ELSE 0 END) as low,
         sum(CASE WHEN l.risk_category = 'Medium' THEN 1 ELSE 0 END) as medium,
         sum(CASE WHEN l.risk_category = 'High' THEN 1 ELSE 0 END) high,
@@ -757,34 +757,58 @@ def update_parcel_effectivefirefighting_table(drivetimegeom, department):
         existingrecord = EffectiveFireFightingForceLevel.objects.filter(department_id=department.id)
         addefffdepartment = existingrecord[0]
         if drivetimegeomLT15:
-            addefffdepartment.drivetimegeom_014 = drivetimegeomLT15
+            if isinstance(drivetimegeomLT15, MultiPolygon):
+                addefffdepartment.drivetimegeom_014 = drivetimegeomLT15
+            else:
+                addefffdepartment.drivetimegeom_014 = MultiPolygon(drivetimegeomLT15)
         if drivetimegeomLT27:
             addefffdepartment.parcelcount_low_15_26 = results15[0]['low']
             addefffdepartment.parcelcount_unknown_15_26 = results15[0]['unknown']
-            addefffdepartment.drivetimegeom_15_26 = drivetimegeomLT27
+            if isinstance(drivetimegeomLT27, MultiPolygon):
+                addefffdepartment.drivetimegeom_15_26 = drivetimegeomLT27
+            else:
+                addefffdepartment.drivetimegeom_15_26 = MultiPolygon(drivetimegeomLT27)
         if drivetimegeomLT42:
             addefffdepartment.parcelcount_medium_27_42 = results27[0]['medium']
-            addefffdepartment.drivetimegeom_27_42 = drivetimegeomLT42
+            if isinstance(drivetimegeomLT42, MultiPolygon):
+                addefffdepartment.drivetimegeom_27_42 = drivetimegeomLT42
+            else:
+                addefffdepartment.drivetimegeom_27_42 = MultiPolygon(drivetimegeomLT42)
         if drivetimegeomGT41:
             addefffdepartment.parcelcount_high_43_plus = results42[0]['high']
-            addefffdepartment.drivetimegeom_43_plus = drivetimegeomGT41
+            if isinstance(drivetimegeomGT41, MultiPolygon):
+                addefffdepartment.drivetimegeom_43_plus = drivetimegeomGT41
+            else:
+                addefffdepartment.drivetimegeom_43_plus = MultiPolygon(drivetimegeomGT41)
 
-        print department.name + " EFFF Updated"
+        print department.name + " EFFF Area Updated"
     else:
         deptefffarea = {}
         deptefffarea['department'] = department
         if drivetimegeomLT15:
-            deptefffarea['drivetimegeom_014'] = drivetimegeomLT15
+            if isinstance(drivetimegeomLT15, MultiPolygon):
+                deptefffarea['drivetimegeom_014'] = drivetimegeomLT15
+            else:
+                deptefffarea['drivetimegeom_014'] = MultiPolygon(drivetimegeomLT15)
         if drivetimegeomLT27:
             deptefffarea['parcelcount_low_15_26'] = results15[0]['low']
             deptefffarea['parcelcount_unknown_15_26'] = results15[0]['unknown']
-            deptefffarea['drivetimegeom_15_26'] = drivetimegeomLT27
+            if isinstance(drivetimegeomLT27, MultiPolygon):
+                deptefffarea['drivetimegeom_15_26'] = drivetimegeomLT27
+            else:
+                deptefffarea['drivetimegeom_15_26'] = MultiPolygon(drivetimegeomLT27)
         if drivetimegeomLT42:
-            deptefffarea['parcelcount_high_43_plus'] = results42[0]['high']
             deptefffarea['parcelcount_medium_27_42'] = results27[0]['medium']
+            if isinstance(drivetimegeomLT42, MultiPolygon):
+                deptefffarea['drivetimegeom_27_42'] = drivetimegeomLT42
+            else:
+                deptefffarea['drivetimegeom_27_42'] = MultiPolygon(drivetimegeomLT42)
         if drivetimegeomGT41:
             deptefffarea['parcelcount_high_43_plus'] = results42[0]['high']
-            deptefffarea['drivetimegeom_43_plus'] = drivetimegeomGT41
+            if isinstance(drivetimegeomGT41, MultiPolygon):
+                deptefffarea['drivetimegeom_43_plus'] = drivetimegeomGT41
+            else:
+                deptefffarea['drivetimegeom_43_plus'] = MultiPolygon(drivetimegeomGT41)
 
         addefffdepartment = EffectiveFireFightingForceLevel.objects.create(**deptefffarea)
         print department.name + " EFFF Area Created"
