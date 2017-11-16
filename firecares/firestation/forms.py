@@ -70,3 +70,9 @@ class AddStationForm(forms.ModelForm):
         # Catch a passed in department pk that this document is associated with.
         self.department_pk = kwargs.pop('department_pk', None)
         super(AddStationForm, self).__init__(*args, **kwargs)
+
+    def clean_name(self):
+        des = self.cleaned_data['name']
+        if not des:
+            raise forms.ValidationError("name cannot be empty")
+        return des

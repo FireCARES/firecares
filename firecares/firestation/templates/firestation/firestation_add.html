@@ -80,42 +80,42 @@
             <p class="upload-header">Add New Station to {{ object.name }}</p>
                 <br>
                 {% block form %}
-                <div class="ct-u-marginBottom30 text-center">
+                <div class="ct-u-marginBottom30 text-center" style="margin-top:-20px;">
                     {% with WIDGET_ERROR_CLASS='form-error' %}
                     <form id="addstaionform" class="text-left" action="addstation" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
-                        <div class="ct-form--item ct-u-marginBottom10 form-group">
+                        <div style="padding-top:23px;width: 30%">
                             <label>Station Name</label>
                             {% render_field form.name type="text" required=true class+="form input-sm" %}
                             {{ form.name.errors }}
                         </div>
-                        <div class="ct-form--item ct-u-marginBottom10 form-group">
+                        <div style="padding-top:23px;width: 10%">
                             <label>Station Number</label>
                             {% render_field form.station_number type="number" required=true class+="form input-sm" %}
                             {{ form.station_number.errors }}
                         </div>
-                        <div class="ct-form--item ct-u-marginBottom10 form-group">
+                        <div style="padding-top:23px;width: 30%">
                             <label>Address</label>
                             {% render_field form.address type="text" required=true class+="form input-sm" %}
                             {{ form.address.errors }}
                         </div>
-                        <div class="ct-form--item ct-u-marginBottom10 form-group">
+                        <div style="padding-top:23px;width: 30%">
                             <label>City</label>
                             {% render_field form.city type="text" required=true class+="form input-sm" %}
                             {{ form.city.errors }}
                         </div>
-                        <div class="ct-form--item ct-u-marginBottom10 form-group">
+                        <div style="padding-top:23px;width: 10%">
                             <label>State</label>
                             <select id="statedropdown" name="state">
                             </select>
                             {{ form.state.errors }}
                         </div>
-                        <div class="ct-form--item ct-u-marginBottom10 form-group">
+                        <div style="padding-top:23px;width: 10%">
                             <label>Zipcode</label>
                             {% render_field form.zipcode type="number" required=true max="100000" class+="form input-sm" %}
                             {{ form.zipcode.errors }}
                         </div>
-                        <div class="ct-form--item">
+                        <div style="padding-top:23px;width: 10%">
                             {{ form.errors }}
                             <button class="btn btn-primary upload-button" type="submit">Add Station</button>
                         </div>

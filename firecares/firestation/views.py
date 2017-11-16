@@ -560,7 +560,7 @@ class AddStationView(LoginRequiredMixin, FormView):
         station = form.save(commit=False)
         fd = FireDepartment.objects.get(pk=self.kwargs.get('pk'))
         addresss_str = station.address + "" + station.state + "" + station.city + "" + station.zipcode
-        station.create_station(department=fd, address_string=addresss_str, name=station.name)
+        station.create_station(department=fd, address_string=addresss_str, name=station.name, station_number=station.station_number)
 
         return super(AddStationView, self).form_valid(form)
 
