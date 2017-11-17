@@ -671,8 +671,6 @@ def update_parcel_department_effectivefirefighting_rollup(fd_id):
         drivepostfeatures['geometryType'] = "esriGeometryPoint"
         drivepostdata['Facilities'] = json.dumps(drivepostfeatures)
 
-        print drivepostdata
-        print staffingtotal
         getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCountOct2012/GPServer/PeopleCountOct2012/execute", data=drivepostdata)
 
     try:

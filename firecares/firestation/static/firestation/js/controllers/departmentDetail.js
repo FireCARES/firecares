@@ -426,7 +426,7 @@
           }
         });
         
-        layersControl.addOverlay(efffArea, 'Effective Fire Fighting Force');
+        layersControl.addOverlay(efffArea, 'Effective Response Force');
 
         $scope.shp = null;
 
@@ -569,10 +569,7 @@
                 // Return no data if department hasn't been calculated yet 
                 else{
                   $scope.parcel_efff_counts = [
-                      {label:"15+ at 8min for Low Hazard", text:"Low", "value": 0},
-                      {label:"27+ at 8min for Medium Hazard", text:"Medium", "value": 0},
-                      {label:"42+ at 10.17min for High Hazard", text:"High", "value": 0},
-                      {label:"15+ at 8min for Unknown Hazard", text:"Unknown", "value": 0}
+                      {label:"Personnel Coverage", "42+ High Hazards (10.17min)": 0, "15+ Unknown Hazards (8min)": 0, "27+ Medium Hazards (8min)": 0, "15+ Low Hazards (8min)": 0}
                   ];
                 }
                 departmentMap.spin(false);
