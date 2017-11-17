@@ -1375,12 +1375,12 @@ class FireStationTests(BaseFirecaresTestcase):
         fd = FireDepartment.objects.create(name='Test db', population=0)
 
         form = AddStationForm({
-            'station_number': 123, 
-            'address'       : '9405 Devlins Grove Pl', 
-            'city'          : 'Bristow',
-            'name'          : 'Fire Station 25',
-            'state'         : 'VA', 
-            'zipcode'       : 20136
+            'station_number': 123,
+            'address': '9405 Devlins Grove Pl',
+            'city': 'Bristow',
+            'name': 'Fire Station 25',
+            'state': 'VA',
+            'zipcode': 20136
         }, department_pk=fd.id)
         self.assertTrue(form.is_valid())
 
@@ -1405,11 +1405,11 @@ class FireStationTests(BaseFirecaresTestcase):
         resp = c.get(url)
         self.assertEqual(resp.status_code, 200)
 
-        capability = dict(station_number=123, 
-                          address='9405 Devlins Grove Pl', 
+        capability = dict(station_number=123,
+                          address='9405 Devlins Grove Pl',
                           city='Bristow',
                           name='Fire Station 25',
-                          state='VA', 
+                          state='VA',
                           zipcode=20136
                           )
 
