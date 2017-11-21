@@ -112,7 +112,7 @@
                         </div>
                         <div style="padding-top:23px;width: 10%">
                             <label>Zipcode</label>
-                            {% render_field form.zipcode type="number" required=true max="100000" class+="form input-sm" %}
+                            {% render_field form.zipcode type="number" required=true max="100000" min="10000" class+="form input-sm" %}
                             {{ form.zipcode.errors }}
                         </div>
                         <div style="padding-top:23px;width: 10%">

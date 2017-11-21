@@ -720,22 +720,26 @@ class FireStation(USGSStructureData, Archivable):
         """
         addy = Address.create_from_string(address_string)
 
-        station = FireStation(department=department,
-                              station_address=addy,
-                              address=addy.address_line1,
-                              state=addy.state_province,
-                              city=addy.city,
-                              zipcode=addy.postal_code,
-                              geom=addy.geom,
-                              **kwargs)
+        if addy:
+            station = FireStation(department=department,
+                                  station_address=addy,
+                                  address=addy.address_line1,
+                                  state=addy.state_province,
+                                  city=addy.city,
+                                  zipcode=addy.postal_code,
+                                  geom=addy.geom,
+                                  **kwargs)
 
-        if not kwargs.get('station_number'):
-            station.station_number = station.station_number_from_name()
+            if not kwargs.get('station_number'):
+                station.station_number = station.station_number_from_name()
 
-            if station.station_number:
-                station.station_number = int(station.station_number)
+                if station.station_number:
+                    station.station_number = int(station.station_number)
 
-        station.save()
+            station.save()
+        else:
+            station = None
+
         return station
 
     def station_number_from_name(self):

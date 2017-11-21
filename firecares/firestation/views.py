@@ -549,8 +549,12 @@ class AddStationView(LoginRequiredMixin, FormView):
         if request.method == 'POST':
 
             if form.is_valid():
-                messages.success(request, 'Station Created successfully')
-                return self.form_valid(form)
+                if self.form_valid(form) == 'Geocode Error':
+                    messages.add_message(request, messages.ERROR, 'An error has occured finding the Station location.  Please check the address.')
+                    return super(AddStationView, self).form_valid(form)
+                else:
+                    messages.success(request, 'Station Created successfully')
+                    return super(AddStationView, self).form_valid(form)
             else:
                 messages.add_message(request, messages.ERROR, 'An error has occured creating the Station location')
                 return self.form_invalid(form)
@@ -560,9 +564,12 @@ class AddStationView(LoginRequiredMixin, FormView):
         station = form.save(commit=False)
         fd = FireDepartment.objects.get(pk=self.kwargs.get('pk'))
         addresss_str = station.address + "" + station.state + "" + station.city + "" + station.zipcode
-        station.create_station(department=fd, address_string=addresss_str, name=station.name, station_number=station.station_number)
+        station = station.create_station(department=fd, address_string=addresss_str, name=station.name, station_number=station.station_number)
 
-        return super(AddStationView, self).form_valid(form)
+        if station is None:
+            return "Geocode Error"
+        else:
+            return super(AddStationView, self).form_valid(form)
 
 
 class FireStationFavoriteListView(LoginRequiredMixin, PaginationMixin, ListView, SafeSortMixin, LimitMixin):
