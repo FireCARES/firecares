@@ -116,6 +116,7 @@
 
         if (numWarnings > 0) {
           var weatherLayer = L.featureGroup(weatherPolygons);
+          weatherLayer.id = 'weather';
           weatherLayer.addTo(map);
           weatherLayer.bringToBack();
           layersControl.addOverlay(weatherLayer, 'Weather Warnings');
@@ -135,6 +136,11 @@
               }
             }
           });
+
+          // Remove layer when Weather messages are hidden
+          $('.weather-messages').on('weatherWarningsHidden', function () {
+              map.removeLayer(weatherLayer);
+          });
         }
 
         function mapPolygon(poly){
@@ -148,7 +154,11 @@
 
     map.on('overlayadd', function(layer) {
       layer = layer.layer;
-      if ( layer._leaflet_id === serviceArea._leaflet_id && !serviceAreaData) {
+      if(layer.id === 'weather'){
+        $('.weather-messages').fadeIn('slow');
+        $scope.showDetails = false;
+      }
+      else if ( layer._leaflet_id === serviceArea._leaflet_id && !serviceAreaData) {
         map.spin(true);
         $http({
           method: 'GET',
@@ -192,6 +202,9 @@
     });
 
     map.on('overlayremove', function(layer) {
+      if(layer.layer.id === 'weather'){
+          $('.weather-messages').fadeOut('slow'); 
+      }
       $analytics.eventTrack('disable layer', {
         category: $scope.eventCategory + ': map',
         label: layer.name

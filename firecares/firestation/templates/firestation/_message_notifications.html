@@ -21,21 +21,21 @@
         <div class="col-md-12 col-lg-12">
             {% if use_angular %}
                 <div ng-cloak class="alert alert-warning" ng-if='weather_messages.length > 0'>
-                    <button type="button" data-dismiss="alert" class="close">&times;</span></button>
+                    <button type="button"  onclick="$('.weather-messages').fadeOut('slow');$(this).trigger('weatherWarningsHidden');" class="close">&times;</span></button>
                     <div class="alert-icon">
                         <i style="color:white;" class="fa fa-warning"></i>
                     </div>
                     <div class="alert-text">
                         <h5>Weather Warning</h5>
                         <div id="weathersum">                    
-                            <div ng-show="showDetails" ng-click="showDetails = false">
+                            <div ng-show="$parent.showDetails" ng-click="$parent.showDetails = false">
                                 <span ng-bind-html="weather_messages.length + ' weather related warnings <u><a>Hide</a></u>'"/>
                             </div>
-                            <div ng-show="!showDetails" ng-click="showDetails = true">
+                            <div ng-show="!$parent.showDetails" ng-click="$parent.showDetails = true">
                                 <span ng-bind-html="weather_messages.length + ' weather related warnings <u><a>Show</a></u>'"/>
                             </div>
                         </div>
-                        <div id="weatherwarnlist" ng-show="showDetails==true">
+                        <div id="weatherwarnlist" ng-show="$parent.showDetails==true">
                             <ul ng-repeat="message in weather_messages">
                                 <li ng-bind-html="message.text"/>
                             </ul> 
