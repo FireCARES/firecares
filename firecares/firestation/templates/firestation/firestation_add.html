@@ -51,7 +51,7 @@
         <a href="{% url 'firestation_home' %}">Home</a>
         <a href="{% url 'firedepartment_list' %}">Departments</a>
         <a href="{% url 'firedepartment_detail' object.id %}">{{ object.name }}</a>
-        <a href="{% url 'documents' object.id %}">Documents</a>
+        <a href="{% url 'addstation' object.id %}">Add Station</a>
     </div>
 </div>
 <header class="ct-mediaSection">
@@ -112,7 +112,7 @@
                         </div>
                         <div style="padding-top:23px;width: 10%">
                             <label>Zipcode</label>
-                            {% render_field form.zipcode type="number" required=true max="100000" min="10000" class+="form input-sm" %}
+                            {% render_field form.zipcode type="number" required=true max="100000" min="1000" class+="form input-sm" %}
                             {{ form.zipcode.errors }}
                         </div>
                         <div style="padding-top:23px;width: 10%">

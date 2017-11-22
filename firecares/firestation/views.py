@@ -531,7 +531,7 @@ class AddStationView(LoginRequiredMixin, FormView):
     Implements the Add Station View
     """
     template_name = 'firestation/firestation_add.html'
-    success_url = 'addstation'
+    station = 0
     form_class = AddStationForm
 
     def get_context_data(self, **kwargs):
@@ -545,18 +545,17 @@ class AddStationView(LoginRequiredMixin, FormView):
     def post(self, request, *args, **kwargs):
         form = AddStationForm(department_pk=self.kwargs.get('pk'), **self.get_form_kwargs())
 
-        print form.errors
         if request.method == 'POST':
 
             if form.is_valid():
                 if self.form_valid(form) == 'Geocode Error':
                     messages.add_message(request, messages.ERROR, 'An error has occured finding the Station location.  Please check the address.')
-                    return super(AddStationView, self).form_valid(form)
+                    return super(AddStationView, self).form_invalid(form)
                 else:
                     messages.success(request, 'Station Created successfully')
                     return super(AddStationView, self).form_valid(form)
             else:
-                messages.add_message(request, messages.ERROR, 'An error has occured creating the Station location')
+                messages.add_message(request, messages.ERROR, 'The address submitted is not valid.  Please try again.')
                 return self.form_invalid(form)
 
     def form_valid(self, form):
@@ -569,7 +568,11 @@ class AddStationView(LoginRequiredMixin, FormView):
         if station is None:
             return "Geocode Error"
         else:
+            self.station = station
             return super(AddStationView, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse('firestation_detail_slug', kwargs=dict(pk=self.station.id, slug=self.station.name))
 
 
 class FireStationFavoriteListView(LoginRequiredMixin, PaginationMixin, ListView, SafeSortMixin, LimitMixin):
