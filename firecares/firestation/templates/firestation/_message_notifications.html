@@ -1,5 +1,5 @@
 <div class="ct-productMeta--single">
-    <div class="row usgs-messages">
+    <div ng-cloak class="row usgs-messages">
         <div class="col-md-12 col-lg-12">
             <ul>
                 {% for message in messages %}
@@ -17,10 +17,10 @@
             </ul>
         </div>
     </div>
-    <div class="row weather-messages">
+    <div ng-cloak class="row weather-messages">
         <div class="col-md-12 col-lg-12">
             {% if use_angular %}
-                <div class="alert alert-warning" ng-if='weather_messages.length > 0'>
+                <div ng-cloak class="alert alert-warning" ng-if='weather_messages.length > 0'>
                     <button type="button"  onclick="$('.weather-messages').fadeOut('slow');$(this).trigger('weatherWarningsHidden');" class="close">&times;</span></button>
                     <div class="alert-icon">
                         <i style="color:white;" class="fa fa-warning"></i>

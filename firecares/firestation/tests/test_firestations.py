@@ -14,7 +14,7 @@ from django.contrib.auth import get_user_model
 from StringIO import StringIO
 from firecares.usgs.models import UnincorporatedPlace, MinorCivilDivision
 from firecares.firecares_core.models import Address, Country
-from firecares.firestation.forms import StaffingForm
+from firecares.firestation.forms import StaffingForm, AddStationForm
 from firecares.firestation.models import (Document, FireDepartment, FireStation,
                                           Staffing, IntersectingDepartmentLog)
 from firecares.firestation.managers import CalculationsQuerySet
@@ -1367,3 +1367,57 @@ class FireStationTests(BaseFirecaresTestcase):
         self.assertEqual(resp.context['firestations'].paginator.num_pages, 4)
         resp = c.get(reverse('firedepartment_detail', args=[fd.id]), {'page': '0'})
         self.assertEqual(resp.context['firestations'].number, 4)
+
+    def test_superuser_addstation_form(self):
+        """
+        Tests capability validation via a AddStationForm object.
+        """
+        fd = FireDepartment.objects.create(name='Test db', population=0)
+
+        form = AddStationForm({
+            'station_number': 123,
+            'address': '9405 Devlins Grove Pl',
+            'city': 'Bristow',
+            'name': 'Fire Station 25',
+            'state': 'VA',
+            'zipcode': 20136
+        }, department_pk=fd.id)
+        self.assertTrue(form.is_valid())
+
+        emptyform = AddStationForm({})
+        self.assertEqual(emptyform.errors, {
+            'name': ['name cannot be empty'],
+        })
+        self.assertFalse(emptyform.is_valid())
+
+    def test_superuser_addstation_page(self):
+        """
+        Tests capability for superuser to see addstation page
+        """
+        c = Client()
+        fd = FireDepartment.objects.create(name='Test db', population=0)
+        url = reverse('addstation', args=[fd.id])
+
+        resp = c.get(url)
+        self.assert_redirect_to_login(resp)
+
+        c.login(**self.admin_creds)
+        resp = c.get(url)
+        self.assertEqual(resp.status_code, 200)
+
+        capability = dict(station_number=123,
+                          address='9405 Devlins Grove Pl',
+                          city='Bristow',
+                          name='Fire Station 25',
+                          state='VA',
+                          zipcode=20136
+                          )
+
+        response = c.post(url, data=json.dumps(capability), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(FireStation.objects.all().count(), 1)
+        c.logout()
+
+        # Anonymous users unable to add capabilities
+        response = c.post(url, data=json.dumps(capability), content_type='application/json')
+        self.assertEqual(response.status_code, 302)
