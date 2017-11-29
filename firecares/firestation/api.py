@@ -268,8 +268,8 @@ class FireStationResource(JSONDefaultModelResourceMixin, ModelResource):
                                               create_permission_code='change_firedepartment',
                                               delete_permission_code='admin_firedepartment')
         authentication = MultiAuthentication(Authentication(), SessionAuthentication(), ApiKeyAuthentication())
-        list_allowed_methods = ['get', 'post']
-        detail_allowed_methods = ['get', 'put', 'post']
+        list_allowed_methods = ['get']
+        detail_allowed_methods = ['get', 'put']
         filtering = {'department': ('exact',), 'state': ('exact',), 'id': ('exact',)}
         excludes = ['addressbuildingname', 'complex_id', 'data_security', 'distribution_policy', 'fcode', 'foot_id',
                     'ftype', 'globalid', 'gnis_id', 'islandmark', 'loaddate', 'objectid', 'permanent_identifier',
