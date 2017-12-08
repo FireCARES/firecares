@@ -72,10 +72,10 @@
       onEachFeature: function(feature, layer) {
           layer.bindPopup(feature.properties.Name + ' minutes');
           layer.on('mouseover', function(e) {
-             layer.setStyle({fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5) + mouseOverAddedOpacity, fillColor: highlightColor});
+             layer.setStyle({fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5) + mouseOverAddedOpacity, fillColor: highlightColor, weight: 4});
           });
           layer.on('mouseout', function(e) {
-             layer.setStyle({weight: 0.8, fillOpacity:-(feature.properties.ToBreak * 0.8 - max) / (max * 1.5), fillColor: '#33cc33'});
+             layer.setStyle({weight: 0.8, fillOpacity:-(feature.properties.ToBreak * 0.8 - max) / (max * 1.5), fillColor: '#33cc33', weight: 1});
           });
       }
     });

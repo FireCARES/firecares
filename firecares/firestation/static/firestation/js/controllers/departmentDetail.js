@@ -417,11 +417,12 @@
         efffArea = L.geoJson(null, {
           onEachFeature: function(feature, layer) {
               layer.bindPopup(feature.properties.Name + '<br>'+ feature.properties.ToBreak);
+              layer.bindLabel(feature.properties.Name + '<br>'+ feature.properties.ToBreak);
               layer.on('mouseover', function(e) {
-                 layer.setStyle({weight: 1,fillOpacity: .9, fillColor: feature.properties.tocolor});
+                 layer.setStyle({weight: 1,fillOpacity: .9, fillColor: feature.properties.tocolor, weight:3, color:'#4286f4', opacity:.8});
               });
               layer.on('mouseout', function(e) {
-                 layer.setStyle({weight: 0.2, fillOpacity:.4, fillColor: feature.properties.tocolor});
+                 layer.setStyle({weight: 0.2, fillOpacity:.4, fillColor: feature.properties.tocolor, weight:1, color:'#4286f4', opacity:.8});
               });
           }
         });
