@@ -50,6 +50,7 @@
 
     function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter, FireDepartment, $analytics, WeatherWarning) {
         var departmentMap = map.initMap('map', {scrollWheelZoom: false});
+        var messagebox = L.control.messagebox({ timeout: 9000, position:'bottomleft' }).addTo(departmentMap);
         var showStations = true;
         var stationIcon = L.FireCARESMarkers.firestationmarker();
         var headquartersIcon = L.FireCARESMarkers.headquartersmarker();
@@ -67,6 +68,8 @@
         $scope.uploadBoundary = false;
         var layersControl = L.control.layers().addTo(departmentMap);
         var fires = L.featureGroup().addTo(departmentMap);
+        var activeFires,activeFiresData;
+        var activefireURL = 'https://wildfire.cr.usgs.gov/arcgis/rest/services/geomac_fires/FeatureServer/3/query?outFields=*&f=json&outSR=4326&inSR=4326&geometryType=esriGeometryEnvelope&geometry=';
 
         if (showStations) {
             FireStation.query({department: config.id}).$promise.then(function(data) {
@@ -173,65 +176,163 @@
         };
 
         //
+        // Active Fires
+        //
+        var activeFirelegend = L.control({position: 'bottomleft'});
+
+        activeFirelegend.onAdd = function (map) {
+
+            var div = L.DomUtil.create('div', 'info legend');
+            div.innerHTML = '<i style="background:#f4f4f4;border-color:#e2301f;border-style:dashed;"></i> Active Burning Fires<br>';
+            div.innerHTML += '<i style="background:#f4f4f4;border-color:#f28715;border-style:dashed;"></i> Last 12-24 hrs<br>';
+            div.innerHTML += '<i style="background:#f4f4f4b;border-color:#353433;border-style:dashed;"></i> Last 24-48 hrs<br>';
+            return div;
+        };
+
+        activeFires = L.geoJson(null, {
+          onEachFeature: function(feature, layer) {
+              layer.bindPopup("Reported: " + feature.properties.date_ + "<br>Active Fire: " + feature.properties.load_stat);
+              layer.on('mouseover', function(e) {
+                 layer.setStyle({fillOpacity: 1});
+              });
+              layer.on('mouseout', function(e) {
+                 layer.setStyle({fillOpacity:.2});
+              });
+          }
+        });
+        
+        layersControl.addOverlay(activeFires, 'Active Fires');
+
+        departmentMap.on('overlayadd', function(layer) {
+          layer = layer.layer;
+          if ( layer._leaflet_id === activeFires._leaflet_id && !activeFiresData) {
+            departmentMap.spin(true);
+            var deptbbox = countyBoundary.getBounds().toBBoxString();
+            $http({
+              method: 'GET',
+              url: activefireURL+deptbbox
+            }).then(function success(resp) {
+              esri2geo.toGeoJSON(resp.data, function(_, geojson) {
+                
+                if(geojson.features.length > 0){
+                  activeFiresData = geojson;
+                  activeFires.addData(geojson);
+                  layer.setStyle(function(feature) {
+                    var activeFiresstyle = {};
+                    if(feature.properties.load_stat == "Active Burning"){
+                      activeFiresstyle = {
+                        fillColor: '#f4f4f4',
+                        fillOpacity: .1,
+                        weight: 3,
+                        opacity: 1,
+                        dashArray: '5,10',
+                        color: '#e2301f'
+                      };
+                    }
+                    else if(feature.properties.load_stat == "Last 24-48 hrs"){
+                      activeFiresstyle = {
+                        fillColor: '#f4f4f4',
+                        fillOpacity: .1,
+                        weight: 3,
+                        opacity: 1,
+                        dashArray: '5,10',
+                        color: '#f28715'
+                      };
+                    }
+                    else {
+                      activeFiresstyle = {
+                        fillColor: '#f4f4f4',
+                        fillOpacity: .1,
+                        weight: 3,
+                        opacity: 1,
+                        dashArray: '5,10',
+                        color: '#353433'
+                      };
+                    }
+                    return activeFiresstyle;
+                  });
+                  departmentMap.fitBounds(activeFires);
+                  departmentMap.spin(false);
+                  messagebox.show(geojson.features.length + ' total Active Fires in this department');
+                }
+                else{
+                  messagebox.show('There are no Active Fires in this department');
+                  departmentMap.spin(false);
+                }
+              });
+            }, function error(err) {
+              departmentMap.spin(false);
+            });
+          }
+
+          if(layer._leaflet_id === activeFires._leaflet_id){
+            departmentMap.addControl(activeFirelegend);
+          }
+        });
+
+        //
         // Heatmap
         //
         var heatmapDataUrl = 'https://s3.amazonaws.com/firecares-test/' + config.id + '-building-fires.csv';
         $http.head(heatmapDataUrl)
-            .then(function(response) {
-                var contentLength = Number(response.headers('Content-Length'));
+          .then(function(response) {
+              var contentLength = Number(response.headers('Content-Length'));
 
-                // Don't show the heatmap layer option for a department with no heatmap data.
-                // HACK: A department with no heatmap data will still return the table header for the empty data, which
-                //       has a length of 59 bytes. Remember to change this value if the columns ever change in any way.
-                if (contentLength <= 59) {
-                    return;
-                }
+              // Don't show the heatmap layer option for a department with no heatmap data.
+              // HACK: A department with no heatmap data will still return the table header for the empty data, which
+              //       has a length of 59 bytes. Remember to change this value if the columns ever change in any way.
+              if (contentLength <= 59) {
+                  return;
+              }
 
-                heatmap.init(departmentMap);
-                $scope.heatmap = heatmap;
-                $scope.showHeatmapCharts = false;
+              heatmap.init(departmentMap);
+              $scope.heatmap = heatmap;
+              $scope.showHeatmapCharts = false;
 
-                layersControl.addOverlay(heatmap.layer, 'Fires Heatmap');
-                departmentMap.on('overlayadd', function(layer) {
-                    if(layer.layer.id === 'weather'){
-                        $('.weather-messages').fadeIn('slow');
-                        $scope.showDetails = false;
-                    }
-                    else if (layer.layer._leaflet_id === heatmap.layer._leaflet_id) {
-                        if (heatmap.heat) {
-                            showHeatmapCharts(true);
-                        } else {
-                            departmentMap.spin(true);
-                            heatmap.download(heatmapDataUrl)
-                                .then(function() {
-                                    showHeatmapCharts(true);
-                                }, function(err) {
-                                    alert(err.message);
-                                    layersControl.removeLayer(heatmap.layer);
-                                })
-                                .finally(function() {
-                                    departmentMap.spin(false);
-                                })
-                            ;
-                        }
-                    }
-                });
+              layersControl.addOverlay(heatmap.layer, 'Fires Heatmap');
+              departmentMap.on('overlayadd', function(layer) {
+                  if(layer.layer.id === 'weather'){
+                      $('.weather-messages').fadeIn('slow');
+                      $scope.showDetails = false;
+                  }
+                  else if (layer.layer._leaflet_id === heatmap.layer._leaflet_id) {
+                      if (heatmap.heat) {
+                          showHeatmapCharts(true);
+                      } else {
+                          departmentMap.spin(true);
+                          heatmap.download(heatmapDataUrl)
+                              .then(function() {
+                                  showHeatmapCharts(true);
+                              }, function(err) {
+                                  alert(err.message);
+                                  layersControl.removeLayer(heatmap.layer);
+                              })
+                              .finally(function() {
+                                  departmentMap.spin(false);
+                              })
+                          ;
+                      }
+                  }
+              });
 
-                departmentMap.on('overlayremove', function(layer) {
-                    if(layer.layer.id === 'weather'){
-                        $('.weather-messages').fadeOut('slow');
-                    }
-                    else if (layer.layer._leaflet_id === heatmap.layer._leaflet_id) {
-                        showHeatmapCharts(false);
-                    }
-                });
+              departmentMap.on('overlayremove', function(layer) {
+                  if(layer.layer.id === 'weather'){
+                      $('.weather-messages').fadeOut('slow');
+                  }
+                  else if (layer.layer._leaflet_id === heatmap.layer._leaflet_id) {
+                      showHeatmapCharts(false);
+                  }
+                  if(layer.name === "Active Fires"){
+                      departmentMap.removeControl(activeFirelegend);
+                  }
+              });
 
-                function showHeatmapCharts(show) {
-                    $timeout(function() {
-                        $scope.showHeatmapCharts = show;
-                    });
-                }
-            });
+              function showHeatmapCharts(show) {
+                  $timeout(function() {
+                      $scope.showHeatmapCharts = show;
+                  });
+              }
+        });
 
         //
         // Parcels
