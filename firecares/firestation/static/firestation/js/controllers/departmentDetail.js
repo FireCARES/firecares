@@ -50,7 +50,7 @@
 
     function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter, FireDepartment, $analytics, WeatherWarning) {
         var departmentMap = map.initMap('map', {scrollWheelZoom: false});
-        var messagebox = L.control.messagebox({ timeout: 9000, position:'bottomleft' }).addTo(departmentMap);
+        var messagebox = L.control.messagebox({ timeout: 12000, position:'bottomleft' }).addTo(departmentMap);
         var showStations = true;
         var stationIcon = L.FireCARESMarkers.firestationmarker();
         var headquartersIcon = L.FireCARESMarkers.headquartersmarker();
@@ -183,9 +183,9 @@
         activeFirelegend.onAdd = function (map) {
 
             var div = L.DomUtil.create('div', 'info legend');
-            div.innerHTML = '<i style="background:#f4f4f4;border-color:#e2301f;border-style:dashed;"></i> Active Burning Fires<br>';
-            div.innerHTML += '<i style="background:#f4f4f4;border-color:#f28715;border-style:dashed;"></i> Last 12-24 hrs<br>';
-            div.innerHTML += '<i style="background:#f4f4f4b;border-color:#353433;border-style:dashed;"></i> Last 24-48 hrs<br>';
+            div.innerHTML = '<i style="background:#f4f4f4;border-color:#e2301f;border-width:2.5px;border-style:dashed;"></i> Active Burning Fires<br>';
+            div.innerHTML += '<i style="background:#f4f4f4;border-color:#f28715;border-width:2.5px;border-style:dashed;"></i> Last 12-24 hrs<br>';
+            div.innerHTML += '<i style="background:#f4f4f4b;border-color:#353433;border-width:2.5px;border-style:dashed;"></i> Last 24-48 hrs<br>';
             return div;
         };
 
@@ -207,7 +207,7 @@
           layer = layer.layer;
           if ( layer._leaflet_id === activeFires._leaflet_id && !activeFiresData) {
             departmentMap.spin(true);
-            var deptbbox = countyBoundary.getBounds().toBBoxString();
+            var deptbbox = countyBoundary.getBounds().pad(1).toBBoxString();//1 % bigger bbox
             $http({
               method: 'GET',
               url: activefireURL+deptbbox
@@ -253,10 +253,10 @@
                   });
                   departmentMap.fitBounds(activeFires);
                   departmentMap.spin(false);
-                  messagebox.show(geojson.features.length + ' total Active Fires in this department');
+                  messagebox.show(geojson.features.length + ' total Active Fires in the vicinity of this department');
                 }
                 else{
-                  messagebox.show('There are no Active Fires in this department');
+                  messagebox.show('There are no Active Fires in the vicinity of this department');
                   departmentMap.spin(false);
                 }
               });

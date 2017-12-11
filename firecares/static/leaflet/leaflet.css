@@ -486,14 +486,14 @@
 }
 
 .legend {
-    line-height: 19px;
-    width: 100px;
+    line-height: 20px;
+    width: 152px !important;
     color: #555;
-    border-radius: 12px;
+    border-radius: 5px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.4);
     background-color: white;
-    opacity: .8;
     width: 150px;
-    padding: 5px;
+    padding: 9px;
 }
 .legend i {
     width: 18px;
