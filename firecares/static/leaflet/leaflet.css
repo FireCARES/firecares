@@ -477,3 +477,28 @@
 	background: #fff;
 	border: 1px solid #666;
 	}
+
+.leaflet-control-messagebox {
+	display: none; /* Initially hidden */
+	border: 2px solid #f29a00;
+	background-color: white;
+	padding: 3px 10px;
+}
+
+.legend {
+    line-height: 19px;
+    width: 100px;
+    color: #555;
+    border-radius: 12px;
+    background-color: white;
+    opacity: .8;
+    width: 150px;
+    padding: 5px;
+}
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.8;
+}
