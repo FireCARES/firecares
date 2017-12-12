@@ -3,6 +3,7 @@ import numpy as np
 import traceback
 import requests
 import json
+import time
 from django.db.utils import IntegrityError
 from firecares.utils.arcgis2geojson import arcgis2geojson
 from celery import chain, group
@@ -501,7 +502,6 @@ def get_parcel_department_hazard_level_rollup(fd_id):
         drivepostdata['Facilities'] = json.dumps(drivepostfeatures)
 
         # GET URL (timing out)
-        # drivetimeurl = 'https://geo.firecares.org/?f=json&Facilities={"features":' + json.dumps(drivetimegeom) + ',"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4&Break_Values=4 6 8&returnZ=false&returnM=false'
         # getdrivetime = requests.post("http://test.firecares.org/service-area/?", data=drivepostdata)
         getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/101ServerServiceAreaOct2012/GPServer/101ServerServiceAreaOct2012/execute", data=drivepostdata)
 
@@ -625,6 +625,26 @@ def create_effective_firefighting_rollup_all():
         update_parcel_department_effectivefirefighting_rollup(fd.id)
 
 
+def get_async_efff_service_status(jobid, dept_name):
+    """
+    Check status for Drive Time Asynchronous Webservice until there is a results value then call the results url to get json geom
+    results: {
+        PeopleCount: {
+        paramUrl: "results/PeopleCount
+    """
+    getdrivetimejobstatus = requests.get("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCount2017_V2/GPServer/PeopleCount2017/jobs/" + jobid + "?f=json")
+
+    if 'results' in json.loads(getdrivetimejobstatus.content):
+        print "Drive Time Analysis finished for " + dept_name.name
+        drivetimejobfinished = requests.get("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCount2017_V2/GPServer/PeopleCount2017/jobs/" + jobid + "/results/PeopleCount?f=pjson")
+        update_parcel_effectivefirefighting_table(json.loads(drivetimejobfinished.content)['value']['features'], dept_name)
+
+    else:
+        print "Drive Time Analysis processing for " + dept_name.name
+        time.sleep(20)
+        get_async_efff_service_status(jobid, dept_name)
+
+
 def update_parcel_department_effectivefirefighting_rollup(fd_id):
     """
     Update for one department for the effective fire fighting force
@@ -633,7 +653,7 @@ def update_parcel_department_effectivefirefighting_rollup(fd_id):
     dept = FireDepartment.objects.filter(id=fd_id)
     staffingtotal = "1"
 
-    print "Calculating Response times and staffing for:  " + dept[0].name
+    print "Calculating Response times and staffing for:  " + dept[0].name + ' at ' + time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
 
     #  Use Headquarters geometry if there is no Statffing assets
     if len(stationlist) < 1:
@@ -671,10 +691,12 @@ def update_parcel_department_effectivefirefighting_rollup(fd_id):
         drivepostfeatures['geometryType'] = "esriGeometryPoint"
         drivepostdata['Facilities'] = json.dumps(drivepostfeatures)
 
-        getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCountOct2012/GPServer/PeopleCountOct2012/execute", data=drivepostdata)
+        # need to run async so it doesn't time out
+        # getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCountOct2012/GPServer/PeopleCountOct2012/execute", data=drivepostdata)
+        getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCount2017_V2/GPServer/PeopleCount2017/submitJob", data=drivepostdata)
 
     try:
-        update_parcel_effectivefirefighting_table(json.loads(getdrivetime.content)['results'][0]['value']['features'], dept[0])
+        get_async_efff_service_status(json.loads(getdrivetime.content)['jobId'], dept[0])
 
     except KeyError:
         print 'Drive Time Failed for ' + dept[0].name
@@ -779,7 +801,7 @@ def update_parcel_effectivefirefighting_table(drivetimegeom, department):
             else:
                 addefffdepartment.drivetimegeom_43_plus = MultiPolygon(drivetimegeomGT41)
 
-        print department.name + " EFFF Area Updated"
+        print department.name + " EFFF Area Updated" + ' at ' + time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
     else:
         deptefffarea = {}
         deptefffarea['department'] = department

@@ -407,7 +407,7 @@
                  layer.setStyle({fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5) + mouseOverAddedOpacity, fillColor: highlightColor});
               });
               layer.on('mouseout', function(e) {
-                 layer.setStyle({weight: 0.8, fillOpacity:-(feature.properties.ToBreak * 0.8 - max) / (max * 1.5), fillColor: '#33cc33'});
+                 layer.setStyle({weight: 0.8, fillOpacity:-(feature.properties.ToBreak * 0.8 - max) / (max * 1.3), fillColor: '#33cc33'});
               });
           }
         });
@@ -560,8 +560,7 @@
                     layer.setStyle(function(feature) {
                       return {
                         fillColor: feature.properties.tocolor,
-                        fillOpacity: .4,
-                        weight: 0.2
+                        fillOpacity: .4, weight:1, color:'#fff', opacity:.8
                       };
                     });
                     departmentMap.fitBounds(efffArea);
@@ -624,8 +623,8 @@
                     layer.setStyle(function(feature) {
                       return {
                         fillColor: '#33cc33',
-                        fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5),
-                        weight: 0.8
+                        fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.2),
+                        weight: 0.8,color:'#003300'
                       };
                     });
                     departmentMap.fitBounds(serviceArea);
