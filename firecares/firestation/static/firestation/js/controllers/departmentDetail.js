@@ -201,7 +201,7 @@
           }
         });
         
-        layersControl.addOverlay(activeFires, 'Active Fires');
+        layersControl.addOverlay(activeFires, 'Active Wildland Fires');
 
         departmentMap.on('overlayadd', function(layer) {
           layer = layer.layer;
@@ -253,10 +253,10 @@
                   });
                   departmentMap.fitBounds(activeFires);
                   departmentMap.spin(false);
-                  messagebox.show(geojson.features.length + ' total Active Fires in the vicinity of this department');
+                  messagebox.show(geojson.features.length + ' total Active Wildland Fires in the vicinity of this department');
                 }
                 else{
-                  messagebox.show('There are no Active Fires in the vicinity of this department');
+                  messagebox.show('There are no Active Wildland Fires in the vicinity of this department');
                   departmentMap.spin(false);
                 }
               });
