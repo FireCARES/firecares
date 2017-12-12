@@ -322,7 +322,7 @@
                   else if (layer.layer._leaflet_id === heatmap.layer._leaflet_id) {
                       showHeatmapCharts(false);
                   }
-                  if(layer.name === "Active Fires"){
+                  if(layer.layer._leaflet_id === activeFires._leaflet_id){
                       departmentMap.removeControl(activeFirelegend);
                   }
               });
