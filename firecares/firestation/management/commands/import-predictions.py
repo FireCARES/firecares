@@ -54,23 +54,27 @@ fd_id, lr.fire, mr.fire, hr.fires, lr.injuries, mr.injuries, hr.injuries, lr.dea
         items = df[cols]
 
         def valid(num):
-            return not np.isnan(num)
+            return not np.isnan(num) and num != 0
 
         for idx, i in enumerate(items.iterrows()):
             cur_id = int(i[1]['fd_id'])
             row = i[1]
+
             if ids is None or cur_id in ids:
 
-                row = df[df.fd_id == cur_id]
+                row = df[df.fd_id == cur_id].to_dict(orient='row')[0]
 
-                lr_beyond_room = row['lr_beyond_room'][0]
-                lr_beyond_structure = row['lr_beyond_structure'][0]
-                mr_beyond_room = row['mr_beyond_room'][0]
-                mr_beyond_structure = row['mr_beyond_structure'][0]
-                hr_beyond_room = row['hr_beyond_room'][0]
-                hr_beyond_structure = row['hr_beyond_structure'][0]
+                lr_beyond_room = row['lr_beyond_room']
+                lr_beyond_structure = row['lr_beyond_structure']
+                mr_beyond_room = row['mr_beyond_room']
+                mr_beyond_structure = row['mr_beyond_structure']
+                hr_beyond_room = row['hr_beyond_room']
+                hr_beyond_structure = row['hr_beyond_structure']
 
                 fd = FireDepartment.objects.filter(id=cur_id).first()
+                if fd is None:
+                    continue
+
                 low, _ = fd.firedepartmentriskmodels_set.get_or_create(level=1)
                 medium, _ = fd.firedepartmentriskmodels_set.get_or_create(level=2)
                 high, _ = fd.firedepartmentriskmodels_set.get_or_create(level=4)
@@ -112,8 +116,6 @@ fd_id, lr.fire, mr.fire, hr.fires, lr.injuries, mr.injuries, hr.injuries, lr.dea
                 self.calculate_derived_values(all_level)
 
                 # No data for "unknown" risk level in terms of predictions...
-
-                # TODO: Add nifrsstatistic "all" level calculations
 
                 if not dry_run:
                     count = count + 1
