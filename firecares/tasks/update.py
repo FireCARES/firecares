@@ -651,61 +651,66 @@ def update_parcel_department_effectivefirefighting_rollup(fd_id):
     """
     stationlist = FireStation.objects.filter(department_id=fd_id)
     dept = FireDepartment.objects.filter(id=fd_id)
-    staffingtotal = "1"
+    staffingtotal = "1"  # assume staffing minimum of 1 for now
 
-    print "Calculating Response times and staffing for:  " + dept[0].name + ' at ' + time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+    if dept[0].geom is None:
 
-    #  Use Headquarters geometry if there is no Statffing assets
-    if len(stationlist) < 1:
-        drivetimeurl = 'http://gis.iaff.org/arcgis/rest/services/Production/PeopleCountOct2012/GPServer/PeopleCountOct2012/execute?f=json&Facilities={"features":[{"geometry":{"x":' + str(dept[0].headquarters_geom.x) + ',"spatialReference":{"wkid":4326},"y":' + str(dept[0].headquarters_geom.y) + '}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=' + staffingtotal + '&returnZ=false&returnM=false'
-        getdrivetime = requests.get(drivetimeurl)
+        print "No geometry for the department " + dept[0].name
 
     else:
-        drivetimegeom = []
-        staffingtotal = ""
-        for fireStation in stationlist:
-            # staffing
-            assetlist = Staffing.objects.filter(firestation_id=fireStation.id)
-            stationstafftotal = 0
-            for staff in assetlist:
-                stationstafftotal = stationstafftotal + staff.personnel
+        print "Calculating Response times and staffing for:  " + dept[0].name + ' at ' + time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
 
-            # geometry
-            stationasset = {}
-            stationasset["spatialReference"] = {"wkid": 4326}
-            stationasset["y"] = round(fireStation.geom.y, 5)
-            stationasset["x"] = round(fireStation.geom.x, 5)
-            stationgeom = {}
-            stationgeom["geometry"] = stationasset
-            drivetimegeom.append(stationgeom)
-            staffingtotal = staffingtotal + str(stationstafftotal) + ','
+        #  Use Headquarters geometry if there is no Statffing assets
+        if len(stationlist) < 1:
+            drivetimeurl = 'http://gis.iaff.org/arcgis/rest/services/Production/PeopleCountOct2012/GPServer/PeopleCountOct2012/execute?f=json&Facilities={"features":[{"geometry":{"x":' + str(dept[0].headquarters_geom.x) + ',"spatialReference":{"wkid":4326},"y":' + str(dept[0].headquarters_geom.y) + '}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=' + staffingtotal + '&returnZ=false&returnM=false'
+            getdrivetime = requests.get(drivetimeurl)
 
-        drivepostdata = {}
-        drivepostdata['f'] = 'pjson'
-        drivepostdata['returnZ'] = False
-        drivepostdata['returnM'] = False
-        drivepostdata['env:outSR'] = 4326
-        drivepostdata['text_input'] = staffingtotal[:-1]
-        drivepostfeatures = {}
-        drivepostfeatures['features'] = drivetimegeom
-        drivepostfeatures['geometryType'] = "esriGeometryPoint"
-        drivepostdata['Facilities'] = json.dumps(drivepostfeatures)
+        else:
+            drivetimegeom = []
+            staffingtotal = ""
+            for fireStation in stationlist:
+                # staffing
+                assetlist = Staffing.objects.filter(firestation_id=fireStation.id)
+                stationstafftotal = 0
+                for staff in assetlist:
+                    stationstafftotal = stationstafftotal + staff.personnel
 
-        # need to run async so it doesn't time out
-        # getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCountOct2012/GPServer/PeopleCountOct2012/execute", data=drivepostdata)
-        getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCount2017_V2/GPServer/PeopleCount2017/submitJob", data=drivepostdata)
+                # geometry
+                stationasset = {}
+                stationasset["spatialReference"] = {"wkid": 4326}
+                stationasset["y"] = round(fireStation.geom.y, 5)
+                stationasset["x"] = round(fireStation.geom.x, 5)
+                stationgeom = {}
+                stationgeom["geometry"] = stationasset
+                drivetimegeom.append(stationgeom)
+                staffingtotal = staffingtotal + str(stationstafftotal) + ','
 
-    try:
-        get_async_efff_service_status(json.loads(getdrivetime.content)['jobId'], dept[0])
+            drivepostdata = {}
+            drivepostdata['f'] = 'pjson'
+            drivepostdata['returnZ'] = False
+            drivepostdata['returnM'] = False
+            drivepostdata['env:outSR'] = 4326
+            drivepostdata['text_input'] = staffingtotal[:-1]
+            drivepostfeatures = {}
+            drivepostfeatures['features'] = drivetimegeom
+            drivepostfeatures['geometryType'] = "esriGeometryPoint"
+            drivepostdata['Facilities'] = json.dumps(drivepostfeatures)
 
-    except KeyError:
-        print 'Drive Time Failed for ' + dept[0].name
+            # need to run async so it doesn't time out
+            # getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCountOct2012/GPServer/PeopleCountOct2012/execute", data=drivepostdata)
+            getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCount2017_V2/GPServer/PeopleCount2017/submitJob", data=drivepostdata)
 
-    except IntegrityError:
-        print 'Drive Time Failed for ' + dept[0].name
+        try:
+            get_async_efff_service_status(json.loads(getdrivetime.content)['jobId'], dept[0])
 
-    except:
-        print 'Drive Time Failed for ' + dept[0].name
+        except KeyError:
+            print 'Drive Time Failed for ' + dept[0].name
+
+        except IntegrityError:
+            print 'Drive Time Failed for ' + dept[0].name
+
+        except:
+            print 'Drive Time Failed for ' + dept[0].name
 
 
 def update_parcel_effectivefirefighting_table(drivetimegeom, department):
@@ -716,6 +721,7 @@ def update_parcel_effectivefirefighting_table(drivetimegeom, department):
     drivetimegeomLT15 = None
     drivetimegeomLT27 = None
     drivetimegeomLT42 = None
+    drivetimegeomGT38 = None
     drivetimegeomGT41 = None
 
     for responseJSON in drivetimegeom:
@@ -725,11 +731,11 @@ def update_parcel_effectivefirefighting_table(drivetimegeom, department):
             responsegeom = GEOSGeometry(MultiPolygon(fromstr(str(arcgis2geojson(responseJSON['geometry']))),))
 
         # Dissolve/Union Geometry
-        if(responseJSON['attributes']['SUM_StaffLong'] < 15):
-            if drivetimegeomLT15 is None:
-                drivetimegeomLT15 = responsegeom
-            else:
-                drivetimegeomLT15 = drivetimegeomLT15.union(responsegeom)
+        # if(responseJSON['attributes']['SUM_StaffLong'] < 15):
+        #     if drivetimegeomLT15 is None:
+        #         drivetimegeomLT15 = responsegeom
+        #     else:
+        #         drivetimegeomLT15 = drivetimegeomLT15.union(responsegeom)
         if(responseJSON['attributes']['SUM_StaffLong'] > 14):
             if drivetimegeomLT27 is None:
                 drivetimegeomLT27 = responsegeom
@@ -740,11 +746,21 @@ def update_parcel_effectivefirefighting_table(drivetimegeom, department):
                 drivetimegeomLT42 = responsegeom
             else:
                 drivetimegeomLT42 = drivetimegeomLT42.union(responsegeom)
+        if(responseJSON['attributes']['SUM_StaffLong'] > 38):
+            if drivetimegeomGT38 is None:
+                drivetimegeomGT38 = responsegeom
+            else:
+                drivetimegeomGT38 = drivetimegeomGT38.union(responsegeom)
         if(responseJSON['attributes']['SUM_StaffLong'] > 41):
             if drivetimegeomGT41 is None:
                 drivetimegeomGT41 = responsegeom
             else:
                 drivetimegeomGT41 = drivetimegeomGT41.union(responsegeom)
+
+    drivetimegeomLT27 = drivetimegeomLT27.intersection(department.geom)
+    drivetimegeomLT42 = drivetimegeomLT27.intersection(department.geom)
+    drivetimegeomGT38 = drivetimegeomLT27.intersection(department.geom)
+    drivetimegeomGT41 = drivetimegeomLT27.intersection(department.geom)
 
     cursor = connections['nfirs'].cursor()
     QUERY_INTERSECT_FOR_PARCEL_DRIVETIME = """SELECT sum(case when l.risk_category = 'Low' THEN 1 ELSE 0 END) as low,
@@ -763,13 +779,16 @@ def update_parcel_effectivefirefighting_table(drivetimegeom, department):
     #   cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomLT15.json, 'owned_geom': department.owned_tracts_geom.wkb})
     #   results0 = dictfetchall(cursor)
     if drivetimegeomLT27:
-        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomLT27.json, 'owned_geom': department.owned_tracts_geom.wkb})
+        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomLT27.json, 'owned_geom': department.geom.wkb})
         results15 = dictfetchall(cursor)
     if drivetimegeomLT42:
-        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomLT42.json, 'owned_geom': department.owned_tracts_geom.wkb})
+        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomLT42.json, 'owned_geom': department.geom.wkb})
         results27 = dictfetchall(cursor)
+    if drivetimegeomGT38:
+        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomGT38.json, 'owned_geom': department.geom.wkb})
+        results38 = dictfetchall(cursor)
     if drivetimegeomGT41:
-        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomGT41.json, 'owned_geom': department.owned_tracts_geom.wkb})
+        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomGT41.json, 'owned_geom': department.geom.wkb})
         results42 = dictfetchall(cursor)
 
     # Overwrite/Update efff area if already loaded
@@ -794,6 +813,12 @@ def update_parcel_effectivefirefighting_table(drivetimegeom, department):
                 addefffdepartment.drivetimegeom_27_42 = drivetimegeomLT42
             else:
                 addefffdepartment.drivetimegeom_27_42 = MultiPolygon(drivetimegeomLT42)
+        if drivetimegeomGT38:
+            addefffdepartment.parcelcount_high38_plus = results38[0]['high']
+            if isinstance(drivetimegeomGT38, MultiPolygon):
+                addefffdepartment.drivetimegeom_38_plus = drivetimegeomGT38
+            else:
+                addefffdepartment.drivetimegeom_38_plus = MultiPolygon(drivetimegeomGT38)
         if drivetimegeomGT41:
             addefffdepartment.parcelcount_high_43_plus = results42[0]['high']
             if isinstance(drivetimegeomGT41, MultiPolygon):
@@ -802,6 +827,7 @@ def update_parcel_effectivefirefighting_table(drivetimegeom, department):
                 addefffdepartment.drivetimegeom_43_plus = MultiPolygon(drivetimegeomGT41)
 
         print department.name + " EFFF Area Updated" + ' at ' + time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+
     else:
         deptefffarea = {}
         deptefffarea['department'] = department
@@ -823,6 +849,12 @@ def update_parcel_effectivefirefighting_table(drivetimegeom, department):
                 deptefffarea['drivetimegeom_27_42'] = drivetimegeomLT42
             else:
                 deptefffarea['drivetimegeom_27_42'] = MultiPolygon(drivetimegeomLT42)
+        if drivetimegeomGT38:
+            deptefffarea['parcelcount_high38_plus'] = results38[0]['high']
+            if isinstance(drivetimegeomGT38, MultiPolygon):
+                deptefffarea['drivetimegeom_38_plus'] = drivetimegeomGT38
+            else:
+                deptefffarea['drivetimegeom_38_plus'] = MultiPolygon(drivetimegeomGT38)
         if drivetimegeomGT41:
             deptefffarea['parcelcount_high_43_plus'] = results42[0]['high']
             if isinstance(drivetimegeomGT41, MultiPolygon):

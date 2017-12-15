@@ -1386,11 +1386,18 @@ class EffectiveFireFightingForceLevel(models.Model):
     department = models.ForeignKey(FireDepartment, null=True, blank=True)
     parcelcount_low_15_26 = models.IntegerField(null=True, blank=True)
     parcelcount_medium_27_42 = models.IntegerField(null=True, blank=True)
+    parcelcount_high38_plus = models.IntegerField(null=True, blank=True)
     parcelcount_high_43_plus = models.IntegerField(null=True, blank=True)
     parcelcount_unknown_15_26 = models.IntegerField(null=True, blank=True)
+    perc_covered_low_15_26 = models.FloatField(null=True, blank=True)
+    perc_covered_medium_27_42 = models.FloatField(null=True, blank=True)
+    perc_covered_high38_plus = models.FloatField(null=True, blank=True)
+    perc_covered_high_43_plus = models.FloatField(null=True, blank=True)
+    perc_covered_unknown_15_26 = models.FloatField(null=True, blank=True)
     drivetimegeom_014 = models.MultiPolygonField(null=True, blank=True)
     drivetimegeom_15_26 = models.MultiPolygonField(null=True, blank=True)
     drivetimegeom_27_42 = models.MultiPolygonField(null=True, blank=True)
+    drivetimegeom_38_plus = models.MultiPolygonField(null=True, blank=True)
     drivetimegeom_43_plus = models.MultiPolygonField(null=True, blank=True)
 
 
