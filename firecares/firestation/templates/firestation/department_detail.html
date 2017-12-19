@@ -24,7 +24,8 @@
       geom: {{ object.geom.json|safe|default:"null" }},
       centroid: [{{ object.headquarters_address.geom.centroid.y }}, {{ object.headquarters_address.geom.centroid.x }}],
       id: {{object.id}},
-      showParcels: {{ user.is_authenticated|yesno:"true,false"}}
+      showParcels: {{ user.is_authenticated|yesno:"true,false"}},
+      cfai_accredited:{{object.cfai_accredited|yesno:"true,false"}}
     };
 
     var urls = {
@@ -106,6 +107,12 @@
                     <span class="ct-productID ct-fw-300">
                         FDID: <span>{{ object.fdid }}</span>
                     </span>
+                    {% if object.cfai_accredited %}
+                    <span class="ct-productID ct-fw-300" style='margin-left: 2px;'>
+                        <a href="http://www.cpse.org/agency-accreditation/about-accreditation-cfai.aspx" target="_blank" style="color:#F29A00"><i class="fa fa-info-circle"></i> CFAI Accredited </a>
+                            <!-- <img src="{{STATIC_URL}}/partners/cfai.png" alt="CFAI" height="30px"> -->
+                    </span>
+                    {% endif %}
                     {% if object.archived %}
                         <span class="ct-productID ct-fw-300" style="margin-left: 10px">
                             <span>ARCHIVED</span>

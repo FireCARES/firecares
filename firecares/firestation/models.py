@@ -3,6 +3,7 @@ import json
 import requests
 import sys
 import csv
+import codecs
 import os
 import re
 from .managers import PriorityDepartmentsManager, CalculationManager
@@ -311,6 +312,8 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
     twitter_handle = models.CharField(max_length=255, blank=True, null=True)
     owned_tracts_geom = models.MultiPolygonField(null=True, blank=True)
     display_metrics = models.BooleanField(default=True)
+    boundary_verified = models.BooleanField(default=False)
+    cfai_accredited = models.BooleanField(default=False)
 
     class Meta:
         ordering = ('name',)
@@ -582,6 +585,40 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
                     counter += 1
 
                 assert counter == cls.objects.all().count()
+
+    @classmethod
+    def load_from_cfai_csv(cls):
+        """
+        Loads cfai accreditation from http://www.cpse.org/agency-accreditation/about-accreditation-cfai.aspx
+        """
+
+        fdqs = FireDepartment.objects.all()
+        fdqs.update(cfai_accredited=False)
+
+        with codecs.open(os.path.join(os.path.dirname(__file__), 'data/accrediteagenciescfai.csv'), mode='rb', encoding='utf-8-sig') as csvfile:
+
+            # iterate through list
+            reader = csv.DictReader(csvfile)
+            depterrorlist = 'Departments not found:  '
+
+            for row in reader:
+
+                try:
+                    dept = FireDepartment.objects.get(name=row['AgencyName'], state=row['State'])
+                    dept.cfai_accredited = True
+                    dept.save()
+                    print '\nSaved Count ' + dept.name
+
+                except FireDepartment.DoesNotExist:
+                    print row['AgencyName'] + ' does not exist\n'
+                    depterrorlist = depterrorlist + row['AgencyName'] + ','
+                    continue
+
+                except FireDepartment.MultipleObjectsReturned:
+                    depterrorlist = depterrorlist + row['AgencyName'] + ','
+                    print '\nMultiple objects returned for: ', row['AgencyName'], row['State']
+
+            print depterrorlist
 
     @cached_property
     def slug(self):
