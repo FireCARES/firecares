@@ -9,7 +9,7 @@ from .firecares_core.forms import FirecaresPasswordResetForm
 from .firecares_core.views import (ForgotUsername, ContactUs, AccountRequestView,
                                    ShowMessage, Disclaimer, OAuth2Callback,
                                    OAuth2Redirect, sso_logout_then_login, IMISRedirect,
-                                   FAQView, TruncatedFileAddView)
+                                   FAQView, VideoView, TruncatedFileAddView)
 from .firestation.api import StaffingResource, FireStationResource, FireDepartmentResource, WeatherWarningResource
 from tastypie.api import Api
 from firestation.views import Home
@@ -65,6 +65,7 @@ urlpatterns = patterns('',
     url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain'), name='robots.txt'),
     url(r'^faq/$', FAQView.as_view(), name='faq.html'),
     url(r'^sitemap\.xml$', include('static_sitemaps.urls')),
+    url(r'^videos/$', VideoView.as_view(), name='videos.html'),
 
     url(r'^favit/', include('favit.urls')),
 

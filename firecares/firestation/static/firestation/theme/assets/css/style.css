@@ -11486,6 +11486,21 @@ div.unauthenticated * div.gauge-inverse {
   opacity: .5;
   padding: 0 15px;
 }
+.sub-navbar small {
+  font-size: 70%;
+  color: blue;
+  position: absolute;
+  font-weight: bold;
+  margin-top: -6px;
+}
+.navbar-nav small {
+  font-size: 61%;
+  color: #495e82;
+  position: absolute;
+  font-weight: bold;
+  margin-top: -35px;
+  margin-left: 55px;
+}
 .home-header {
   padding: 40px;
 }
