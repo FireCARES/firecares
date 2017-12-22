@@ -24,7 +24,9 @@
       geom: {{ object.geom.json|safe|default:"null" }},
       centroid: [{{ object.headquarters_address.geom.centroid.y }}, {{ object.headquarters_address.geom.centroid.x }}],
       id: {{object.id}},
-      showParcels: {{ user.is_authenticated|yesno:"true,false"}}
+      showParcels: {{ user.is_authenticated|yesno:"true,false"}},
+      superUser: {{ user.is_superuser|yesno:"true,false"}},
+      emsTransport: {{object.ems_transport|yesno:"true,false"}}
     };
 
     var urls = {
@@ -270,7 +272,7 @@
                         </div>
                         <div class="metric-card">
                             <div class="main-text" ng-if="showEFFFChart">
-                                <risk-efffarea-bar-chart width="665" height="150" 
+                                <risk-efffarea-bar-chart width="695" height="150" 
                                     dataset="{{ parcel_efff_counts }}">
                                 </risk-efffarea-bar-chart>
                                 <div class="description text-center">

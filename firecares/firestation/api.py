@@ -339,7 +339,7 @@ class GetServiceAreaInfo(JSONDefaultModelResourceMixin, ModelResource):
     class Meta:
         resource_name = 'getserviceareainfo'
         authorization = GuardianAuthorization(delegate_to_property='department',
-                                              view_permission_code=None,
+                                              view_permission_code='change_firedepartment',
                                               update_permission_code='change_firedepartment',
                                               create_permission_code='change_firedepartment',
                                               delete_permission_code='change_firedepartment')
@@ -363,7 +363,7 @@ class GetEFFFInfo(JSONDefaultModelResourceMixin, ModelResource):
     class Meta:
         resource_name = 'getefffinfo'
         authorization = GuardianAuthorization(delegate_to_property='department',
-                                              view_permission_code=None,
+                                              view_permission_code='change_firedepartment',
                                               update_permission_code='change_firedepartment',
                                               create_permission_code='change_firedepartment',
                                               delete_permission_code='change_firedepartment')

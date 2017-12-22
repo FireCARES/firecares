@@ -311,6 +311,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
     twitter_handle = models.CharField(max_length=255, blank=True, null=True)
     owned_tracts_geom = models.MultiPolygonField(null=True, blank=True)
     display_metrics = models.BooleanField(default=True)
+    ems_transport = models.BooleanField(default=False)
 
     class Meta:
         ordering = ('name',)

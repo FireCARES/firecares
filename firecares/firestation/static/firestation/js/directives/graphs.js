@@ -609,7 +609,7 @@
           element.find('svg').appear(function() {
             var width = parseInt(attrs.width);
             var height = parseInt(attrs.height);
-            var margins = {top: 5, left: 60, right: 45, bottom: 20};
+            var margins = {top: 5, left: 30, right: 35, bottom: 40};
 
             var dataset = JSON.parse(attrs.dataset);
             var x0 = d3.scale.ordinal()
@@ -618,17 +618,31 @@
             var x1 = d3.scale.ordinal();
             var y = d3.scale.linear()
                 .range([height, 0]);
+            var ypercent = d3.scale.linear()
+                .range([height, 0]);
 
             var color = {};
             color['Low'] = 'rgba(116,172,73,0.6)';
             color['Medium'] = 'rgba(250,142,21,0.4)';
             color['High'] = 'rgba(248,153,131,0.9)';
             color['Unknown'] = 'rgba(50%,50%,50%,0.6)';
-            var nametitle = {};
-            nametitle['15+ Low Hazards (8min)'] = 'Low';
-            nametitle['27+ Medium Hazards (8min)'] = 'Medium';
-            nametitle['42+ High Hazards (10.17min)'] = 'High';
-            nametitle['15+ Unknown Hazards (8min)'] = 'Unknown';
+
+            if(dataset[0][38]){
+                var options =["15+ Low Hazards (8min)", '27+ Medium Hazards (8min)', '38+ High Hazards (10.17min)', '15+ Unknown Hazards (8min)'];
+                var nametitle = {};
+                nametitle['15+ Low Hazards (8min)'] = 'Low';
+                nametitle['27+ Medium Hazards (8min)'] = 'Medium';
+                nametitle['38+ High Hazards (10.17min)'] = 'High';
+                nametitle['15+ Unknown Hazards (8min)'] = 'Unknown';
+            }
+            else{
+                var options =["15+ Low Hazards (8min)", '27+ Medium Hazards (8min)', '42+ High Hazards (10.17min)', '15+ Unknown Hazards (8min)'];
+                var nametitle = {};
+                nametitle['15+ Low Hazards (8min)'] = 'Low';
+                nametitle['27+ Medium Hazards (8min)'] = 'Medium';
+                nametitle['42+ High Hazards (10.17min)'] = 'High';
+                nametitle['15+ Unknown Hazards (8min)'] = 'Unknown';
+            }
 
             var xAxis = d3.svg.axis()
                 .scale(x0)
@@ -637,6 +651,11 @@
             var yAxis = d3.svg.axis()
                 .scale(y)
                 .orient("left")
+                .tickFormat(d3.format(".2s"));
+
+            var yAxispercentage = d3.svg.axis()
+                .scale(ypercent)
+                .orient("right")
                 .tickFormat(d3.format(".2s"));
 
             var svg = d3.select(element).selectAll('svg')
@@ -654,7 +673,6 @@
 
             svg.call(tip);
 
-            var options =["15+ Low Hazards (8min)", '27+ Medium Hazards (8min)', '42+ High Hazards (10.17min)', '15+ Unknown Hazards (8min)'];
             dataset.forEach(function(d) {
                 d.valores = options.map(function(name) { return {name: name, value: +d[name]}; });
             });
@@ -668,9 +686,10 @@
                 element.append("label").text('No Data Available').attr("class", "control-label unavailable")
             }
 
-            // set min for bar scale
+            // set min for bar scale so it shows when 0
             //y.domain([0, maximumY]);
             y.domain([-(maximumY * .02), maximumY]);
+            ypercent.domain([0, 100]);
             
             svg.append("g")
                 .attr("class", "x axis")
@@ -682,10 +701,27 @@
                 .call(yAxis)
                 .append("text")
                 .attr("transform", "rotate(-90)")
-                .attr("y", 6)
-                .attr("dy", ".71em")
+                .attr("dy", "1.51em")
+                .attr("x", -30)
                 .style("text-anchor", "end")
                 .text("Number of Parcels");
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .append("text")
+                .attr("transform", "rotate(-90)") 
+                .attr("y", width - 15)
+                //.style("fill", "red")  
+                .attr("dy", ".71em")
+                .attr("x", -22)
+                .style("text-anchor", "end")
+                .text("% of Parcels Covered");
+
+            svg.append("g")
+                .attr("class", "y axis")    
+                .attr("transform", "translate(" + width + " ,0)")   
+                //.style("fill", "red")
+                .call(yAxispercentage)  
 
             var bar = svg.selectAll(".bar")
                 .data(dataset)
@@ -697,7 +733,6 @@
                 .data(function(d) { return d.valores; })
                 .enter().append("rect")
                 .on('mousemove', tip.show)
-                //.on('mouseout', tip.hide)
                 .attr("width", x1.rangeBand())
                 /*function(d) { 
                     if(d.value == 0){
@@ -708,9 +743,23 @@
                     }
                     }) */
                 .attr("x", function(d) { return x1(d.name); })
-                .attr("y", function(d) { return y(d.value); })
+                .attr("y", function(d, a, series) { 
+                    if(series == 1){
+                        return  ypercent(d.value); 
+                    }
+                    else{
+                        return y(d.value); 
+                    }
+                })
                 .attr("value", function(d){return d.name;})
-                .attr("height", function(d) { return height - y(d.value); })
+                .attr("height", function(d,a,series) { 
+                    if(series == 1){
+                        return height - ypercent(d.value); 
+                    }
+                    else{
+                        return height - y(d.value); 
+                    }
+                })
                 .style("fill", function(d) { return color[nametitle[d.name]]; });
 
             bar
@@ -720,10 +769,15 @@
                     tip.style("display", "inline-block");
                     var x = d3.event.pageX, y = d3.event.pageY
                     var elements = document.querySelectorAll(':hover');
-                    var l = elements.length
-                    l = l-1
-                    var elementData = elements[l].__data__
-                    tip.html("<strong>Personnel: </strong>"+elementData.name+"<br><strong>Hazard Level: </strong>"+nametitle[elementData.name]+"<br><strong>Parcels affected: </strong>"+elementData.value);
+                    var l = elements.length;
+                    l = l-1;
+                    var elementData = elements[l].__data__;
+                    if(d.label == '% Parcel Coverage'){
+                        tip.html("<strong>Personnel: </strong>"+elementData.name+"<br><strong>Hazard Level: </strong>"+nametitle[elementData.name]+"<br><strong>Parcel Coverage: </strong>"+elementData.value+' %'); 
+                    }
+                    else{
+                        tip.html("<strong>Personnel: </strong>"+elementData.name+"<br><strong>Hazard Level: </strong>"+nametitle[elementData.name]+"<br><strong>Parcels affected: </strong>"+elementData.value);
+                    }
                 });
             bar
                 .on("mouseout", function(d){
@@ -734,22 +788,20 @@
                 .data(options.slice())
                 .enter().append("g")
                 .attr("class", "legend")
-                .attr("transform", function(d, i) { return "translate(52," + i * 19 + ")"; });
+                .attr("transform", function(d, i) { return "translate("+ String(Number(-640) + Number(i * 180)) +",177)"; });
 
             legend.append("rect")
-                .attr("x", width - 18)
+                .attr("x", width - 44)
                 .attr("width", 18)
                 .attr("height", 18)
-                .style("fill", function(d) { 
-                    return color[nametitle[d]]; 
-                });
+                .style("fill", function(d) { return color[nametitle[d]]; });
 
             legend.append("text")
                 .attr("x", width - 22)
-                .attr("y", 9)
+                .attr("y", 7)
                 .style("font-size", '70%')
                 .attr("dy", ".35em")
-                .style("text-anchor", "end")
+                .style("text-anchor", "start")
                 .text(function(d) { return d; });
 
             });

@@ -718,7 +718,7 @@ def update_parcel_effectivefirefighting_table(drivetimegeom, department):
     Intersect with Parcel layer and update parcel_department_hazard_level table
     """
 
-    drivetimegeomLT15 = None
+    # drivetimegeomLT15 = None
     drivetimegeomLT27 = None
     drivetimegeomLT42 = None
     drivetimegeomGT38 = None
@@ -757,11 +757,6 @@ def update_parcel_effectivefirefighting_table(drivetimegeom, department):
             else:
                 drivetimegeomGT41 = drivetimegeomGT41.union(responsegeom)
 
-    drivetimegeomLT27 = drivetimegeomLT27.intersection(department.geom)
-    drivetimegeomLT42 = drivetimegeomLT27.intersection(department.geom)
-    drivetimegeomGT38 = drivetimegeomLT27.intersection(department.geom)
-    drivetimegeomGT41 = drivetimegeomLT27.intersection(department.geom)
-
     cursor = connections['nfirs'].cursor()
     QUERY_INTERSECT_FOR_PARCEL_DRIVETIME = """SELECT sum(case when l.risk_category = 'Low' THEN 1 ELSE 0 END) as low,
         sum(CASE WHEN l.risk_category = 'Medium' THEN 1 ELSE 0 END) as medium,
@@ -775,52 +770,62 @@ def update_parcel_effectivefirefighting_table(drivetimegeom, department):
 
     # option to limit dept track and ST_WITHIN(l.wkb_geometry, %(owned_geom)s)
     # option to collect info on 0 14 personnel fighting force
+    # saving overhead because under 15 isn't used right now - would have to add database entry below
     # if drivetimegeomLT15:
-    #   cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomLT15.json, 'owned_geom': department.owned_tracts_geom.wkb})
+    #   cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomLT15.json, 'owned_geom': department.geom.wkb})
     #   results0 = dictfetchall(cursor)
     if drivetimegeomLT27:
-        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomLT27.json, 'owned_geom': department.geom.wkb})
+        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomLT27.intersection(department.owned_tracts_geom).json, 'owned_geom': department.owned_tracts_geom.wkb})
         results15 = dictfetchall(cursor)
     if drivetimegeomLT42:
-        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomLT42.json, 'owned_geom': department.geom.wkb})
+        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomLT42.intersection(department.owned_tracts_geom).json, 'owned_geom': department.owned_tracts_geom.wkb})
         results27 = dictfetchall(cursor)
     if drivetimegeomGT38:
-        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomGT38.json, 'owned_geom': department.geom.wkb})
+        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomGT38.intersection(department.owned_tracts_geom).json, 'owned_geom': department.owned_tracts_geom.wkb})
         results38 = dictfetchall(cursor)
     if drivetimegeomGT41:
-        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomGT41.json, 'owned_geom': department.geom.wkb})
+        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomGT41.intersection(department.owned_tracts_geom).json, 'owned_geom': department.owned_tracts_geom.wkb})
         results42 = dictfetchall(cursor)
 
     # Overwrite/Update efff area if already loaded
     if EffectiveFireFightingForceLevel.objects.filter(department_id=department.id):
         existingrecord = EffectiveFireFightingForceLevel.objects.filter(department_id=department.id)
         addefffdepartment = existingrecord[0]
-        if drivetimegeomLT15:
-            if isinstance(drivetimegeomLT15, MultiPolygon):
-                addefffdepartment.drivetimegeom_014 = drivetimegeomLT15
-            else:
-                addefffdepartment.drivetimegeom_014 = MultiPolygon(drivetimegeomLT15)
+
+        # there is an 'all' value for future calculations on the total
+        addefffdepartment.perc_covered_low_15_26 = 0
+        addefffdepartment.perc_covered_unknown_15_26 = 0
+        addefffdepartment.perc_covered_medium_27_42 = 0
+        addefffdepartment.perc_covered_high38_plus = 0
+        addefffdepartment.perc_covered_high_43_plus = 0
+
         if drivetimegeomLT27:
             addefffdepartment.parcelcount_low_15_26 = results15[0]['low']
             addefffdepartment.parcelcount_unknown_15_26 = results15[0]['unknown']
+            addefffdepartment.perc_covered_low_15_26 = round(100 * (float(results15[0]['low']) / float(department.metrics.structure_counts_by_risk_category.low)), 2)
+            addefffdepartment.perc_covered_unknown_15_26 = round(100 * (float(results15[0]['unknown']) / float(department.metrics.structure_counts_by_risk_category.unknown)), 2)
+
             if isinstance(drivetimegeomLT27, MultiPolygon):
                 addefffdepartment.drivetimegeom_15_26 = drivetimegeomLT27
             else:
                 addefffdepartment.drivetimegeom_15_26 = MultiPolygon(drivetimegeomLT27)
         if drivetimegeomLT42:
             addefffdepartment.parcelcount_medium_27_42 = results27[0]['medium']
+            addefffdepartment.perc_covered_medium_27_42 = round(100 * (float(results27[0]['medium']) / float(department.metrics.structure_counts_by_risk_category.medium)), 2)
             if isinstance(drivetimegeomLT42, MultiPolygon):
                 addefffdepartment.drivetimegeom_27_42 = drivetimegeomLT42
             else:
                 addefffdepartment.drivetimegeom_27_42 = MultiPolygon(drivetimegeomLT42)
         if drivetimegeomGT38:
             addefffdepartment.parcelcount_high38_plus = results38[0]['high']
+            addefffdepartment.perc_covered_high38_plus = round(100 * (float(results38[0]['high']) / float(department.metrics.structure_counts_by_risk_category.high)), 2)
             if isinstance(drivetimegeomGT38, MultiPolygon):
                 addefffdepartment.drivetimegeom_38_plus = drivetimegeomGT38
             else:
                 addefffdepartment.drivetimegeom_38_plus = MultiPolygon(drivetimegeomGT38)
         if drivetimegeomGT41:
             addefffdepartment.parcelcount_high_43_plus = results42[0]['high']
+            addefffdepartment.perc_covered_high_43_plus = round(100 * (float(results42[0]['high']) / float(department.metrics.structure_counts_by_risk_category.high)), 2)
             if isinstance(drivetimegeomGT41, MultiPolygon):
                 addefffdepartment.drivetimegeom_43_plus = drivetimegeomGT41
             else:
@@ -831,38 +836,44 @@ def update_parcel_effectivefirefighting_table(drivetimegeom, department):
     else:
         deptefffarea = {}
         deptefffarea['department'] = department
-        if drivetimegeomLT15:
-            if isinstance(drivetimegeomLT15, MultiPolygon):
-                deptefffarea['drivetimegeom_014'] = drivetimegeomLT15
-            else:
-                deptefffarea['drivetimegeom_014'] = MultiPolygon(drivetimegeomLT15)
+        deptefffarea['perc_covered_low_15_26'] = 0
+        deptefffarea['perc_covered_unknown_15_26'] = 0
+        deptefffarea['perc_covered_medium_27_42'] = 0
+        deptefffarea['perc_covered_high38_plus'] = 0
+        deptefffarea['perc_covered_high_43_plus'] = 0
+
         if drivetimegeomLT27:
             deptefffarea['parcelcount_low_15_26'] = results15[0]['low']
             deptefffarea['parcelcount_unknown_15_26'] = results15[0]['unknown']
+            deptefffarea['perc_covered_low_15_26'] = round(100 * (float(results15[0]['low']) / float(department.metrics.structure_counts_by_risk_category.low)), 2)
+            deptefffarea['perc_covered_unknown_15_26'] = round(100 * (float(results15[0]['unknown']) / float(department.metrics.structure_counts_by_risk_category.unknown)), 2)
             if isinstance(drivetimegeomLT27, MultiPolygon):
                 deptefffarea['drivetimegeom_15_26'] = drivetimegeomLT27
             else:
                 deptefffarea['drivetimegeom_15_26'] = MultiPolygon(drivetimegeomLT27)
         if drivetimegeomLT42:
             deptefffarea['parcelcount_medium_27_42'] = results27[0]['medium']
+            deptefffarea['perc_covered_medium_27_42'] = round(100 * (float(results27[0]['medium']) / float(department.metrics.structure_counts_by_risk_category.medium)), 2)
             if isinstance(drivetimegeomLT42, MultiPolygon):
                 deptefffarea['drivetimegeom_27_42'] = drivetimegeomLT42
             else:
                 deptefffarea['drivetimegeom_27_42'] = MultiPolygon(drivetimegeomLT42)
         if drivetimegeomGT38:
             deptefffarea['parcelcount_high38_plus'] = results38[0]['high']
+            deptefffarea['perc_covered_high38_plus'] = round(100 * (float(results38[0]['high']) / float(department.metrics.structure_counts_by_risk_category.high)), 2)
             if isinstance(drivetimegeomGT38, MultiPolygon):
                 deptefffarea['drivetimegeom_38_plus'] = drivetimegeomGT38
             else:
                 deptefffarea['drivetimegeom_38_plus'] = MultiPolygon(drivetimegeomGT38)
         if drivetimegeomGT41:
             deptefffarea['parcelcount_high_43_plus'] = results42[0]['high']
+            deptefffarea['perc_covered_high_43_plus'] = round(100 * (float(results42[0]['high']) / float(department.metrics.structure_counts_by_risk_category.high)), 2)
             if isinstance(drivetimegeomGT41, MultiPolygon):
                 deptefffarea['drivetimegeom_43_plus'] = drivetimegeomGT41
             else:
                 deptefffarea['drivetimegeom_43_plus'] = MultiPolygon(drivetimegeomGT41)
 
         addefffdepartment = EffectiveFireFightingForceLevel.objects.create(**deptefffarea)
-        print department.name + " EFFF Area Created"
+        print department.name + " EFFF Area Created" + ' at ' + time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
 
     addefffdepartment.save()
