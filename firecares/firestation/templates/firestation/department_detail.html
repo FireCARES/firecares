@@ -24,7 +24,9 @@
       geom: {{ object.geom.json|safe|default:"null" }},
       centroid: [{{ object.headquarters_address.geom.centroid.y }}, {{ object.headquarters_address.geom.centroid.x }}],
       id: {{object.id}},
-      showParcels: {{ user.is_authenticated|yesno:"true,false"}}
+      showParcels: {{ user.is_authenticated|yesno:"true,false"}},
+      superUser: {{ user.is_superuser|yesno:"true,false"}},
+      emsTransport: {{object.ems_transport|yesno:"true,false"}}
     };
 
     var urls = {
@@ -251,13 +253,28 @@
                     {% verbatim %}
                     <div class="text-center no-select ct-u-marginTop20" ng-if="showServiceAreaChart">
                         <div class="metric-cards-title ct-u-marginTop20">
-                            <h5>Structure Hazard Level Distribution by Response Times</h5>
+                            <h5>Structure Hazard Level Distribution by Travel Time</h5>
                         </div>
                         <div class="metric-card">
                             <div class="main-text" ng-if="showServiceAreaChart">
                                 <risk-servicearea-bar-chart width="605" height="150" 
                                     dataset="{{ parcel_hazard_level_counts }}">
                                 </risk-servicearea-bar-chart>
+                                <div class="description text-center">
+                                        {{ department_personnel_counts }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center no-select ct-u-marginTop20" ng-if="showEFFFChart">
+                        <div class="metric-cards-title ct-u-marginTop20">
+                            <h5>Effective Response Force Coverage</h5>
+                        </div>
+                        <div class="metric-card">
+                            <div class="main-text" ng-if="showEFFFChart">
+                                <risk-efffarea-bar-chart width="695" height="150" 
+                                    dataset="{{ parcel_efff_counts }}">
+                                </risk-efffarea-bar-chart>
                                 <div class="description text-center">
                                         {{ department_personnel_counts }}
                                 </div>

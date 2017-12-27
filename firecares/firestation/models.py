@@ -311,6 +311,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
     twitter_handle = models.CharField(max_length=255, blank=True, null=True)
     owned_tracts_geom = models.MultiPolygonField(null=True, blank=True)
     display_metrics = models.BooleanField(default=True)
+    ems_transport = models.BooleanField(default=False)
 
     class Meta:
         ordering = ('name',)
@@ -1375,6 +1376,30 @@ class ParcelDepartmentHazardLevel(models.Model):
     drivetimegeom_0_4 = models.MultiPolygonField(null=True, blank=True)
     drivetimegeom_4_6 = models.MultiPolygonField(null=True, blank=True)
     drivetimegeom_6_8 = models.MultiPolygonField(null=True, blank=True)
+
+
+class EffectiveFireFightingForceLevel(models.Model):
+    """
+    Parcel Count for how many assets can respond
+    """
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    department = models.ForeignKey(FireDepartment, null=True, blank=True)
+    parcelcount_low_15_26 = models.IntegerField(null=True, blank=True)
+    parcelcount_medium_27_42 = models.IntegerField(null=True, blank=True)
+    parcelcount_high38_plus = models.IntegerField(null=True, blank=True)
+    parcelcount_high_43_plus = models.IntegerField(null=True, blank=True)
+    parcelcount_unknown_15_26 = models.IntegerField(null=True, blank=True)
+    perc_covered_low_15_26 = models.FloatField(null=True, blank=True)
+    perc_covered_medium_27_42 = models.FloatField(null=True, blank=True)
+    perc_covered_high38_plus = models.FloatField(null=True, blank=True)
+    perc_covered_high_43_plus = models.FloatField(null=True, blank=True)
+    perc_covered_unknown_15_26 = models.FloatField(null=True, blank=True)
+    drivetimegeom_014 = models.MultiPolygonField(null=True, blank=True)
+    drivetimegeom_15_26 = models.MultiPolygonField(null=True, blank=True)
+    drivetimegeom_27_42 = models.MultiPolygonField(null=True, blank=True)
+    drivetimegeom_38_plus = models.MultiPolygonField(null=True, blank=True)
+    drivetimegeom_43_plus = models.MultiPolygonField(null=True, blank=True)
 
 
 post_save.connect(set_department_region, sender=FireDepartment)
