@@ -3,6 +3,7 @@ import json
 import requests
 import sys
 import csv
+import codecs
 import os
 import re
 from .managers import PriorityDepartmentsManager, CalculationManager
@@ -312,6 +313,8 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
     owned_tracts_geom = models.MultiPolygonField(null=True, blank=True)
     display_metrics = models.BooleanField(default=True)
     ems_transport = models.BooleanField(default=False)
+    boundary_verified = models.BooleanField(default=False)
+    cfai_accredited = models.BooleanField(default=False)
 
     class Meta:
         ordering = ('name',)
@@ -584,6 +587,40 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
 
                 assert counter == cls.objects.all().count()
 
+    @classmethod
+    def load_from_cfai_csv(cls):
+        """
+        Loads cfai accreditation from http://www.cpse.org/agency-accreditation/about-accreditation-cfai.aspx
+        """
+
+        fdqs = FireDepartment.objects.all()
+        fdqs.update(cfai_accredited=False)
+
+        with codecs.open(os.path.join(os.path.dirname(__file__), 'data/accrediteagenciescfai.csv'), mode='rb', encoding='utf-8-sig') as csvfile:
+
+            # iterate through list
+            reader = csv.DictReader(csvfile)
+            depterrorlist = 'Departments not found:  '
+
+            for row in reader:
+
+                try:
+                    dept = FireDepartment.objects.get(name=row['AgencyName'], state=row['State'])
+                    dept.cfai_accredited = True
+                    dept.save()
+                    print '\nSaved Count ' + dept.name
+
+                except FireDepartment.DoesNotExist:
+                    print row['AgencyName'] + ' does not exist\n'
+                    depterrorlist = depterrorlist + row['AgencyName'] + ','
+                    continue
+
+                except FireDepartment.MultipleObjectsReturned:
+                    depterrorlist = depterrorlist + row['AgencyName'] + ','
+                    print '\nMultiple objects returned for: ', row['AgencyName'], row['State']
+
+            print depterrorlist
+
     @cached_property
     def slug(self):
         return slugify(self.name)
@@ -721,22 +758,29 @@ class FireStation(USGSStructureData, Archivable):
         """
         addy = Address.create_from_string(address_string)
 
-        station = FireStation(department=department,
-                              station_address=addy,
-                              address=addy.address_line1,
-                              state=addy.state_province,
-                              city=addy.city,
-                              zipcode=addy.postal_code,
-                              geom=addy.geom,
-                              **kwargs)
+        try:
+            if addy:
+                station = FireStation(department=department,
+                                      station_address=addy,
+                                      address=addy.address_line1,
+                                      state=addy.state_province,
+                                      city=addy.city,
+                                      zipcode=addy.postal_code,
+                                      geom=addy.geom,
+                                      **kwargs)
 
-        if not kwargs.get('station_number'):
-            station.station_number = station.station_number_from_name()
+                if not kwargs.get('station_number'):
+                    station.station_number = station.station_number_from_name()
 
-            if station.station_number:
-                station.station_number = int(station.station_number)
+                    if station.station_number:
+                        station.station_number = int(station.station_number)
 
-        station.save()
+                station.save()
+            else:
+                station = None
+        except:
+                station = None
+
         return station
 
     def station_number_from_name(self):

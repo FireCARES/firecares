@@ -1,0 +1,153 @@
+{% load humanize %}
+{% load firecares_tags %}
+{% load widget_tweaks %}
+
+<!DOCTYPE html>
+<!--[if IE 8 ]>
+<html class="no-js ie8" lang="en"> <![endif]-->
+<!--[if IE 9 ]>
+<html class="no-js ie9" lang="en"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="description" content="{{ object.description }} Learn more about this community's risks.">
+    <meta name="author" content="Prominent Edge LLC">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <title>Add Station: {{ object.name }}</title>
+    {% include 'firestation/_favicon.html' %}
+    {% include "firestation/_firecares_style.html" %}
+    {% include 'google_analytics.html' %}
+    {% include 'google_analytics.html' %}
+</head>
+
+<body class="ct-headroom--fixedTopBar cssAnimate" ng-app="fireStation">
+
+{% include 'firestation/_mobile_navbar.html' %}
+{% include 'firestation/_mobile_search.html' %}
+
+<div id="ct-js-wrapper" class="ct-pageWrapper">
+
+<div class="ct-navbarMobile">
+    <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand logo" href="{% url 'firestation_home' %}"><h1>FireCARES</h1></a>
+    <button type="button" class="searchForm-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span><i class="fa fa-search"></i></span>
+    </button>
+</div>
+
+{% include "firestation/_navbar.html" %}
+
+<div class="ct-site--map">
+    <div class="container">
+        <a href="{% url 'firestation_home' %}">Home</a>
+        <a href="{% url 'firedepartment_list' %}">Departments</a>
+        <a href="{% url 'firedepartment_detail' object.id %}">{{ object.name }}</a>
+        <a href="{% url 'addstation' object.id %}">Add Station</a>
+    </div>
+</div>
+<header class="ct-mediaSection">
+    <div class="ct-mediaSection-inner">
+        <div class="container">
+            <div class="ct-u-displayTableVertical">
+                <div class="ct-textBox ct-u-text--white ct-u-displayTableCell text-left">
+                    <h2>{{ object.name }}</h2>
+                    <h4>{{ object.headquarters_address.get_row_display }}</h4>
+                    <span class="ct-productID ct-fw-300">
+                        FDID: <span>{{ object.fdid }}</span>
+                    </span>
+                </div>
+                <div class="ct-u-displayTableCell text-right">
+                    {% include 'firestation/_department_header.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<div class="container ct-u-paddingBoth20">
+    {% include 'firestation/_message_notifications.html' with use_angular=True %}
+    <div class="row">
+        <div class="col-md-12">
+            <div>
+            <p class="upload-header">Add New Station to {{ object.name }}</p>
+                <br>
+                {% block form %}
+                <div class="ct-u-marginBottom30 text-center" style="margin-top:-20px;">
+                    {% with WIDGET_ERROR_CLASS='form-error' %}
+                    <form id="addstaionform" class="text-left" action="addstation" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div style="padding-top:23px;width: 30%">
+                            <label>Station Name</label>
+                            {% render_field form.name type="text" required=true class+="form input-sm" %}
+                            {{ form.name.errors }}
+                        </div>
+                        <div style="padding-top:23px;width: 10%">
+                            <label>Station Number</label>
+                            {% render_field form.station_number type="number" required=true class+="form input-sm" %}
+                            {{ form.station_number.errors }}
+                        </div>
+                        <div style="padding-top:23px;width: 30%">
+                            <label>Address</label>
+                            {% render_field form.address type="text" required=true class+="form input-sm" %}
+                            {{ form.address.errors }}
+                        </div>
+                        <div style="padding-top:23px;width: 30%">
+                            <label>City</label>
+                            {% render_field form.city type="text" required=true class+="form input-sm" %}
+                            {{ form.city.errors }}
+                        </div>
+                        <div style="padding-top:23px;width: 10%">
+                            <label>State</label>
+                            <select id="statedropdown" name="state">
+                            </select>
+                            {{ form.state.errors }}
+                        </div>
+                        <div style="padding-top:23px;width: 10%">
+                            <label>Zipcode</label>
+                            {% render_field form.zipcode type="number" required=true max="100000" min="1000" class+="form input-sm" %}
+                            {{ form.zipcode.errors }}
+                        </div>
+                        <div style="padding-top:23px;width: 10%">
+                            {{ form.errors }}
+                            <button class="btn btn-primary upload-button" type="submit">Add Station</button>
+                        </div>
+                        {% endwith %}
+                    </form>
+                </div>
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'firestation/_footer.html' %}
+</div>
+
+{% include "firestation/_firecares_scripts.html" %}
+
+<script>
+
+    var stateList = [{"name": "Alabama", "abbreviation": "AL"}, {"name": "Alaska", "abbreviation": "AK"}, {"name": "American Samoa", "abbreviation": "AS"}, {"name": "Arizona", "abbreviation": "AZ"}, {"name": "Arkansas", "abbreviation": "AR"}, {"name": "California", "abbreviation": "CA"}, {"name": "Colorado", "abbreviation": "CO"}, {"name": "Connecticut", "abbreviation": "CT"}, {"name": "Delaware", "abbreviation": "DE"}, {"name": "District Of Columbia", "abbreviation": "DC"}, {"name": "Florida", "abbreviation": "FL"}, {"name": "Georgia", "abbreviation": "GA"}, {"name": "Guam", "abbreviation": "GU"}, {"name": "Hawaii", "abbreviation": "HI"}, {"name": "Idaho", "abbreviation": "ID"}, {"name": "Illinois", "abbreviation": "IL"}, {"name": "Indiana", "abbreviation": "IN"}, {"name": "Iowa", "abbreviation": "IA"}, {"name": "Kansas", "abbreviation": "KS"}, {"name": "Kentucky", "abbreviation": "KY"}, {"name": "Louisiana", "abbreviation": "LA"}, {"name": "Maine", "abbreviation": "ME"}, {"name": "Maryland", "abbreviation": "MD"}, {"name": "Massachusetts", "abbreviation": "MA"}, {"name": "Michigan", "abbreviation": "MI"}, {"name": "Minnesota", "abbreviation": "MN"}, {"name": "Mississippi", "abbreviation": "MS"}, {"name": "Missouri", "abbreviation": "MO"}, {"name": "Montana", "abbreviation": "MT"}, {"name": "Nebraska", "abbreviation": "NE"}, {"name": "Nevada", "abbreviation": "NV"}, {"name": "New Hampshire", "abbreviation": "NH"}, {"name": "New Jersey", "abbreviation": "NJ"}, {"name": "New Mexico", "abbreviation": "NM"}, {"name": "New York", "abbreviation": "NY"}, {"name": "North Carolina", "abbreviation": "NC"}, {"name": "North Dakota", "abbreviation": "ND"}, {"name": "Ohio", "abbreviation": "OH"}, {"name": "Oklahoma", "abbreviation": "OK"}, {"name": "Oregon", "abbreviation": "OR"}, {"name": "Pennsylvania", "abbreviation": "PA"}, {"name": "Puerto Rico", "abbreviation": "PR"}, {"name": "Rhode Island", "abbreviation": "RI"}, {"name": "South Carolina", "abbreviation": "SC"}, {"name": "South Dakota", "abbreviation": "SD"}, {"name": "Tennessee", "abbreviation": "TN"}, {"name": "Texas", "abbreviation": "TX"}, {"name": "Utah", "abbreviation": "UT"}, {"name": "Vermont", "abbreviation": "VT"}, {"name": "Virginia", "abbreviation": "VA"}, {"name": "Washington", "abbreviation": "WA"}, {"name": "West Virginia", "abbreviation": "WV"}, {"name": "Wisconsin", "abbreviation": "WI"}, {"name": "Wyoming", "abbreviation": "WY"}]
+
+    var option = '';
+    for (var i=0;i<stateList.length;i++){
+       option += '<option value="'+ stateList[i]['abbreviation'] + '">' + stateList[i]['name'] + '</option>';
+    }
+    $('#statedropdown').append(option);
+
+    // Clear form
+    $('#addstaionform input[type="text"]').val('');
+    $('#addstaionform input[type="number"]').val('');
+
+</script>
+
+</body>
+</html>

@@ -1,6 +1,6 @@
 import os
 from django import forms
-from .models import Staffing, Document, FireDepartment, DataFeedback
+from .models import Staffing, Document, FireDepartment, DataFeedback, FireStation
 
 
 class StaffingForm(forms.ModelForm):
@@ -58,3 +58,21 @@ class DataFeedbackForm(forms.ModelForm):
     class Meta:
         model = DataFeedback
         fields = ('message', 'user', 'department', 'firestation')
+
+
+class AddStationForm(forms.ModelForm):
+
+    class Meta:
+        model = FireStation
+        fields = ('name', 'station_number', 'address', 'state', 'city', 'zipcode')
+
+    def __init__(self, *args, **kwargs):
+        # Catch a passed in department pk that this document is associated with.
+        self.department_pk = kwargs.pop('department_pk', None)
+        super(AddStationForm, self).__init__(*args, **kwargs)
+
+    def clean_name(self):
+        des = self.cleaned_data['name']
+        if not des:
+            raise forms.ValidationError("name cannot be empty")
+        return des

@@ -19,7 +19,7 @@ from fire_risk.models import DIST, DISTMediumHazard, DISTHighHazard
 class FireDepartmentMetricsTests(BaseFirecaresTestcase):
     def test_convenience_methods(self):
         """
-        Make sure the size2_and_greater_percentile_sum and deaths_and_injuries_sum methods do not throw errors.
+        Make sure the deaths_and_injuries_sum methods do not throw errors.
         """
         fd = FireDepartment.objects.create(name='Test db',
                                            population=0,
@@ -27,7 +27,6 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
                                            department_type='test')
 
         FireDepartmentRiskModels.objects.create(department=fd)
-        self.assertDictEqual(fd.metrics.size2_and_greater_percentile_sum, {'all': None, 'low': None, 'medium': None, 'high': None, 'unknown': None})
         self.assertDictEqual(fd.metrics.deaths_and_injuries_sum, {'all': None, 'low': None, 'medium': None, 'high': None, 'unknown': None})
 
         rm = fd.firedepartmentriskmodels_set.first()
@@ -40,16 +39,6 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         rm.save()
         fd.reload_metrics()
         self.assertEqual(fd.metrics.deaths_and_injuries_sum.low, 2)
-
-        rm.risk_model_fires_size1_percentage = 1
-        rm.save()
-        fd.reload_metrics()
-        self.assertEqual(fd.metrics.size2_and_greater_percentile_sum.low, 1)
-
-        rm.risk_model_fires_size2_percentage = 1
-        rm.save()
-        fd.reload_metrics()
-        self.assertEqual(fd.metrics.size2_and_greater_percentile_sum.low, 2)
 
     def test_population_metric_views(self):
         """
@@ -146,6 +135,12 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
                                             population=0,
                                             population_class=1,
                                             department_type='test')
+
+        fd3 = FireDepartment.objects.create(id=79346,
+                                            name='Test import 3',
+                                            population=0,
+                                            population_class=1,
+                                            department_type='test')
         # Create existing low risk model
         FireDepartmentRiskModels.objects.create(department=fd, level=1,
                                                 risk_model_deaths=2, risk_model_injuries=3,
@@ -155,24 +150,32 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         FireDepartmentRiskModels.objects.create(department=fd2, level=1,
                                                 risk_model_deaths=2)
 
-        call_command('import-predictions', 'firecares/firestation/tests/mock/predictions.csv', stdout=StringIO())
+        try:
+            call_command('import-predictions', 'firecares/firestation/tests/mock/prediction.csv', stdout=StringIO())
+        except:
+            self.fail('Missing fire departments in input CSV should not trigger exceptions')
 
         # Should have a total of 28 fires across size0 (None), size1 and size2
-        self.assertEqual(fd.metrics.risk_model_fires.low, 28)
-
+        self.assertEqual(fd.metrics.risk_model_fires.low, None)
         # Fires size0 deprecated
         self.assertEqual(fd.metrics.risk_model_fires_size0.low, None)
         self.assertEqual(fd.metrics.risk_model_fires_size0.medium, None)
-
-        # Having an NA value that should be considered 0 in the summation
-        self.assertEqual(fd.metrics.risk_model_fires_size2.high, 0.5625)
+        self.assertEqual(fd.metrics.risk_model_deaths.high, None)
+        self.assertEqual(fd.metrics.risk_model_injuries.medium, None)
 
         # Test to make sure that existing data isn't overwritten in the case of incoming NA values
-        self.assertEqual(fd2.metrics.risk_model_deaths.low, 2)
+        self.assertEqual(fd.metrics.risk_model_deaths.low, 2)
+
+        self.assertAlmostEqual(fd2.metrics.risk_model_fires_size2.low, 1.12, 2)
+        self.assertAlmostEqual(fd2.metrics.risk_model_fires_size1.low, 6.00, 2)
+
+        # Zeros should be massaged to None
+        self.assertEqual(fd3.metrics.risk_model_fires.high, None)
 
         # Ensure that aggregated "ALL" risk level rows are created
         self.assertEqual(len(fd.firedepartmentriskmodels_set.all()), 5)
         self.assertEqual(len(fd2.firedepartmentriskmodels_set.all()), 5)
+        self.assertEqual(len(fd3.firedepartmentriskmodels_set.all()), 5)
 
     @mock.patch('firecares.tasks.update.connections')
     def test_update_nfirs(self, mock_connections):

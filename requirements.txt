@@ -1,5 +1,5 @@
 six==1.10.0
-psycopg2==2.7.1
+psycopg2==2.7
 us==0.9.0
 django-phonenumber-field==0.7.2
 jsonfield==1.0.3
@@ -19,7 +19,7 @@ django-storages==1.1.8
 django-compressor==1.5
 django-widget-tweaks==1.4.1
 numpy==1.9.2
--e git+https://github.com/FireCARES/fire-risk.git@75f494134fac2796ecc5d4b48998166915c2a8b6#egg=fire-risk
+-e git+https://github.com/FireCARES/fire-risk.git@db87349bb5d1abd34edf97e9938a4463b8e59e20#egg=fire-risk
 django-queryset-csv==0.3.1
 django-registration-redux==1.2
 django-autocomplete-light==2.2.5

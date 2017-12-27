@@ -330,6 +330,31 @@ class StaffingStationRollupResource(JSONDefaultModelResourceMixin, ModelResource
         limit = 140
 
 
+class WeatherWarningResource(JSONDefaultModelResourceMixin, ModelResource):
+    """
+    The Weather API mege with department id.
+    """
+    department = fields.ForeignKey(FireDepartmentResource, 'department', null=True)
+
+    class Meta:
+        resource_name = 'weather-warning'
+        queryset = DepartmentWarnings.objects.all()
+        authorization = GuardianAuthorization(delegate_to_property='department',
+                                              view_permission_code=None,
+                                              update_permission_code='change_firedepartment',
+                                              create_permission_code='change_firedepartment',
+                                              delete_permission_code='change_firedepartment')
+        filtering = {'department': ('exact',), 'state': ('exact',), 'id': ('exact',)}
+        list_allowed_methods = ['get', 'post']
+        detail_allowed_methods = ['get']
+        cache = SimpleCache(timeout=120)
+        serializer = PrettyJSONSerializer()
+        always_return_data = True
+
+    def get_object_list(self, request):
+        return super(WeatherWarningResource, self).get_object_list(request).filter(expiredate__gte=timezone.now())
+
+
 class GetServiceAreaInfo(JSONDefaultModelResourceMixin, ModelResource):
     """
     Get Service area info based on Drive Times for Department ID
@@ -376,3 +401,6 @@ class GetEFFFInfo(JSONDefaultModelResourceMixin, ModelResource):
         detail_allowed_methods = ['get', 'post']
         serializer = PrettyJSONSerializer()
         always_return_data = True
+
+    def get_object_list(self, request):
+        return super(WeatherWarningResource, self).get_object_list(request).filter(expiredate__gte=timezone.now())

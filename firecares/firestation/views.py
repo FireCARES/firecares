@@ -36,7 +36,7 @@ from firecares.usgs.models import (StateorTerritoryHigh, CountyorEquivalent,
 from guardian.mixins import PermissionRequiredMixin
 from tempfile import mkdtemp
 from firecares.tasks.cleanup import remove_file
-from .forms import DocumentUploadForm, DepartmentUserApprovalForm, DataFeedbackForm
+from .forms import DocumentUploadForm, DepartmentUserApprovalForm, DataFeedbackForm, AddStationForm
 from django.views.generic.edit import FormView
 from .models import (Document, FireStation, FireDepartment, Staffing)
 from favit.models import Favorite
@@ -524,6 +524,55 @@ class SimilarDepartmentsListView(FireDepartmentListView):
         queryset = department.similar_departments
         queryset = self.handle_search(queryset)
         return queryset
+
+
+class AddStationView(LoginRequiredMixin, FormView):
+    """
+    Implements the Add Station View
+    """
+    template_name = 'firestation/firestation_add.html'
+    station = 0
+    form_class = AddStationForm
+
+    def get_context_data(self, **kwargs):
+        department = get_object_or_404(FireDepartment, pk=self.kwargs.get('pk'))
+
+        context = super(AddStationView, self).get_context_data(**kwargs)
+        context['object'] = department
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = AddStationForm(department_pk=self.kwargs.get('pk'), **self.get_form_kwargs())
+
+        if request.method == 'POST':
+
+            if form.is_valid():
+                if self.form_valid(form) == 'Geocode Error':
+                    messages.add_message(request, messages.ERROR, 'An error has occured finding the Station location.  Please check the address.')
+                    return super(AddStationView, self).form_invalid(form)
+                else:
+                    messages.success(request, 'Station Created successfully')
+                    return super(AddStationView, self).form_valid(form)
+            else:
+                messages.add_message(request, messages.ERROR, 'The address submitted is not valid.  Please try again.')
+                return self.form_invalid(form)
+
+    def form_valid(self, form):
+
+        station = form.save(commit=False)
+        fd = FireDepartment.objects.get(pk=self.kwargs.get('pk'))
+        addresss_str = station.address + "" + station.state + "" + station.city + "" + station.zipcode
+        station = station.create_station(department=fd, address_string=addresss_str, name=station.name, station_number=station.station_number)
+
+        if station is None:
+            return "Geocode Error"
+        else:
+            self.station = station
+            return super(AddStationView, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse('firestation_detail_slug', kwargs=dict(pk=self.station.id, slug=self.station.name))
 
 
 class FireStationFavoriteListView(LoginRequiredMixin, PaginationMixin, ListView, SafeSortMixin, LimitMixin):

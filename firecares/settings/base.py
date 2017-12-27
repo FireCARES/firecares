@@ -309,6 +309,8 @@ CELERY_IMPORTS = (
     'firecares.tasks.cleanup',
     'firecares.tasks.quality_control',
     'firecares.tasks.slack',
+    'firecares.tasks.weather_task',
+    'firecares.tasks.predictions'
 )
 
 CELERY_QUEUES = [
@@ -320,6 +322,8 @@ CELERY_QUEUES = [
     Queue('quality-control', routing_key='quality-control'),
     Queue('slack', routing_key='slack'),
     Queue('servicearea', routing_key='servicearea'),
+    Queue('weather-task', routing_key='weather-task'),
+    Queue('singlenode', routing_key='singlenode'),
 ]
 
 ACCOUNT_ACTIVATION_DAYS = 7

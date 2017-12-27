@@ -1,7 +1,7 @@
 L.Control.Messagebox = L.Control.extend({
     options: {
         position: 'topright',
-        timeout: 3000
+        timeout: 7000
     },
 
     onAdd: function (map) {

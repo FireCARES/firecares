@@ -11553,6 +11553,7 @@ div.unauthenticated * div.gauge-inverse {
   margin-bottom: 0;
   margin-top: 1em;
   height: 40px;
+  padding: 10px;
 }
 .usgs-update-link {
   display: inline-block;
@@ -12164,8 +12165,9 @@ div.is-your-department {
   min-width: 250px;
 }
 .alert button.close {
-  margin: -0.11rem 1rem;
+  margin: -0.25rem 1rem;
   opacity: 0.75;
+  padding-bottom: 20px;
 }
 .alert button.close:hover {
   opacity: 1;
@@ -14465,6 +14467,10 @@ header {
 .weather-messages a {
   padding-left: 15px !important;
   color: #428bca !important;
+  cursor: pointer;
+}
+#weathersum {
+  font-weight: bold;
 }
 .ct-productMeta--single h1,
 .ct-productMeta--single h2,
