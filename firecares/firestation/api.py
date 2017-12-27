@@ -403,6 +403,3 @@ class GetEFFFInfo(JSONDefaultModelResourceMixin, ModelResource):
         detail_allowed_methods = ['get', 'post']
         serializer = PrettyJSONSerializer()
         always_return_data = True
-
-    def get_object_list(self, request):
-        return super(WeatherWarningResource, self).get_object_list(request).filter(expiredate__gte=timezone.now())

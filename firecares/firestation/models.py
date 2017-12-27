@@ -1448,7 +1448,7 @@ class EffectiveFireFightingForceLevel(models.Model):
 
 post_save.connect(set_department_region, sender=FireDepartment)
 post_save.connect(update_department, sender=FireDepartment)
-post_save.connect(update_station, sender=FireStation)
+# post_save.connect(update_station, sender=FireStation)
 reversion.register(FireStation)
 reversion.register(FireDepartment)
 reversion.register(Staffing)

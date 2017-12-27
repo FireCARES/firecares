@@ -10,7 +10,7 @@ from .firecares_core.views import (ForgotUsername, ContactUs, AccountRequestView
                                    ShowMessage, Disclaimer, OAuth2Callback,
                                    OAuth2Redirect, sso_logout_then_login, IMISRedirect,
                                    FAQView, TruncatedFileAddView)
-from .firestation.api import StaffingResource, FireStationResource, FireDepartmentResource, StaffingStationRollupResource, GetServiceAreaInfo, GetEFFFInfo
+from .firestation.api import StaffingResource, FireStationResource, FireDepartmentResource, StaffingStationRollupResource, GetServiceAreaInfo, GetEFFFInfo, WeatherWarningResource
 from tastypie.api import Api
 from firestation.views import Home
 from osgeo_importer.urls import importer_api
@@ -24,6 +24,7 @@ v1_api.register(FireDepartmentResource())
 v1_api.register(StaffingStationRollupResource())
 v1_api.register(GetServiceAreaInfo())
 v1_api.register(GetEFFFInfo())
+v1_api.register(WeatherWarningResource())
 
 sitemaps = {
     'base': BaseSitemap,

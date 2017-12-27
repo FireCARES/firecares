@@ -172,6 +172,7 @@ INSTALLED_APPS = (
     'firecares.firecares_core',
     'firecares.firestation',
     'firecares.usgs',
+    'firecares.weather',
     'jsonfield',
     'compressor',
     'storages',
