@@ -219,7 +219,17 @@
           layer = layer.layer;
           if ( layer._leaflet_id === activeFires._leaflet_id && !activeFiresData) {
             departmentMap.spin(true);
-            var deptbbox = countyBoundary.getBounds().pad(1).toBBoxString();//1 % bigger bbox
+            if (config.geom != null){
+              var deptbbox = countyBoundary.getBounds().pad(1).toBBoxString();//1 % bigger bbox
+            }
+            else{
+              var corner1 = L.latLng(config.centroid[0]-.5, config.centroid[1]-.5),
+              corner2 = L.latLng(config.centroid[0]+.5, config.centroid[1]+.5),
+              bounds = L.latLngBounds(corner1, corner2);
+
+              departmentMap.fitBounds(bounds);
+              var deptbbox = bounds.pad(1).toBBoxString();//1 % bigger bbox
+            }
             $http({
               method: 'GET',
               url: activefireURL+deptbbox
