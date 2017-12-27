@@ -596,7 +596,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
         fdqs = FireDepartment.objects.all()
         fdqs.update(cfai_accredited=False)
 
-        with codecs.open(os.path.join(os.path.dirname(__file__), 'data/accrediteagenciescfai.csv'), mode='rb', encoding='utf-8-sig') as csvfile:
+        with codecs.open(os.path.join(os.path.dirname(__file__), 'data/cfai_pe_reviewed.csv'), mode='rb', encoding='utf-8-sig') as csvfile:
 
             # iterate through list
             reader = csv.DictReader(csvfile)
@@ -605,10 +605,14 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
             for row in reader:
 
                 try:
-                    dept = FireDepartment.objects.get(name=row['AgencyName'], state=row['State'])
-                    dept.cfai_accredited = True
-                    dept.save()
-                    print '\nSaved Count ' + dept.name
+                    if(row['firecares_id'].isdigit()):
+                        dept = FireDepartment.objects.get(id=float(row['firecares_id']))
+                        dept.cfai_accredited = True
+                        dept.save()
+                        print '\nSaved Count ' + dept.name
+                    else:
+                        print row['AgencyName'] + ' does not exist\n'
+                        depterrorlist = depterrorlist + row['AgencyName'] + ','
 
                 except FireDepartment.DoesNotExist:
                     print row['AgencyName'] + ' does not exist\n'
