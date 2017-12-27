@@ -2,6 +2,7 @@ import json
 import logging
 from .forms import StaffingForm
 from .models import FireStation, Staffing, FireDepartment, ParcelDepartmentHazardLevel, EffectiveFireFightingForceLevel
+from firecares.weather.models import DepartmentWarnings
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.gis import geos
 from tastypie import fields
@@ -14,6 +15,7 @@ from tastypie.exceptions import Unauthorized, TastypieError
 from tastypie.serializers import Serializer
 from tastypie.validation import FormValidation
 from guardian.core import ObjectPermissionChecker
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
