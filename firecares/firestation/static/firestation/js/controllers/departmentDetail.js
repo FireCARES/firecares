@@ -653,6 +653,9 @@
               if ( layer._leaflet_id === efffArea._leaflet_id && efffAreaData){
                   showEFFFChart(true);
               }
+              else if ( layer._leaflet_id === parcels._leaflet_id){
+                  messagebox.show('Zoom into the map area to view parcels');
+              }
               else if ( layer._leaflet_id === efffArea._leaflet_id && !efffAreaData) {
                 
                 departmentMap.spin(true);
@@ -714,6 +717,7 @@
                           {label:"Personnel Coverage", "42+ High Hazards (10.17min)": 0, "15+ Unknown Hazards (8min)": 0, "27+ Medium Hazards (8min)": 0, "15+ Low Hazards (8min)": 0}
                       ];
                     }
+                    messagebox.show('Effective Fire Fighting Force requiers valid Personnel entries.');
                     departmentMap.spin(false);
                     showEFFFChart(true);
                 });
