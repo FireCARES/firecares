@@ -11735,6 +11735,74 @@ form[name='boundaryUpload'] a.commit:hover {
 .partners .owl-pagination {
   display: none;
 }
+.videos .owl-pagination {
+  display: none;
+}
+
+.videos .owl-item .item {
+  background-color: #f3f3f3;
+  padding: 2rem;
+}
+
+.videos .owl-item .item a{
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 0;
+}
+
+.videos .owl-item .item img:hover, 
+img:hover span i{
+    transform: translateY(5%);
+}
+.videos .owl-item .item img {
+  transition: transform .5s;
+  transition: filter .5s;
+  transition: -webkit-filter .5s;
+  border-radius: 2px;
+  height: 15rem;
+  width: 20rem;
+  margin: 1rem;
+  padding: 0;
+  -webkit-filter: brightness(70%); /* Safari 6.0 - 9.0 */
+  filter: brightness(70%);
+}
+.videos .owl-item .item img:hover {
+    -webkit-filter: none; /* Safari 6.0 - 9.0 */
+    filter: none;
+    cursor: pointer;
+  }
+.videos .owl-item .item span {
+  display: flex;
+  align-items: center;
+  margin-bottom: 42px;
+  margin-left: 15px;
+  background: rgba(31, 41, 54, 0.9);
+  padding: 1rem;
+  color: white;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+.videos .owl-item .item h5 {
+  font-weight: 500;
+  flex: 0 0 76%;
+  opacity: .85;
+  transition: opacity ease-in-out .25s;
+}
+.videos .owl-item .item i {
+  flex: 0 0 7%;
+  background-color: rgba(255, 158, 33, 1);
+  color: rgba(29, 39, 50, 1); 
+  padding: .3rem .6rem;
+  border-radius: 99rem;
+  font-size: 105%;
+  font-weight: 800;
+  transition: all ease-in-out .25s;
+  ::before {
+    left: 1px;
+    position: relative;
+  }
+}
 /* Edit functionality on the firestation detail page */
 .firestationDetail .ct-formSearch--extended {
   background-color: #fff;
