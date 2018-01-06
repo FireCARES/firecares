@@ -452,6 +452,7 @@ class FAQView(TemplateView):
         context['whitelisted_domains'] = RegistrationWhitelist.domain_whitelists()
         return context
 
+
 class VideoView(TemplateView):
     template_name = 'videos.html'
 
@@ -459,6 +460,7 @@ class VideoView(TemplateView):
         context = super(VideoView, self).get_context_data(**kwargs)
         context['whitelisted_domains'] = RegistrationWhitelist.domain_whitelists()
         return context
+
 
 class TruncatedFileAddView(SuperUserRequiredMixin, FileAddView):
     def create_upload_session(self, upload_file):
