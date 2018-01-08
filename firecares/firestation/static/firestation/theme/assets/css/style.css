@@ -11487,11 +11487,11 @@ div.unauthenticated * div.gauge-inverse {
   padding: 0 15px;
 }
 .sub-navbar small {
-  font-size: 70%;
+  font-size: 62%;
   color: blue;
   position: absolute;
   font-weight: bold;
-  margin-top: -6px;
+  margin-top: -2px;
 }
 .navbar-nav small {
   font-size: 61%;
@@ -11500,6 +11500,14 @@ div.unauthenticated * div.gauge-inverse {
   font-weight: bold;
   margin-top: -35px;
   margin-left: 55px;
+}
+.ct-menuMobile-navbar small{
+  font-size: 61%;
+  color: #495e82;
+  position: absolute;
+  font-weight: bold;
+  margin-top: 0px;
+  margin-left: 2px;
 }
 .home-header {
   padding: 40px;
@@ -11750,9 +11758,8 @@ form[name='boundaryUpload'] a.commit:hover {
     margin-bottom: 0;
 }
 
-.videos .owl-item .item img:hover, 
-img:hover span i{
-    transform: translateY(5%);
+.videos .owl-item .item a:hover span i{
+    transform: translateX(30%);
 }
 .videos .owl-item .item img {
   transition: transform .5s;
