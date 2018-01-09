@@ -10862,6 +10862,9 @@ img.mfp-img {
 .navbar .navbar-nav li a {
   font-size: 15px;
 }
+.navbar sup {
+  color: #F29A00;
+}
 .ct-topBar {
   background: transparent;
   box-shadow: none;
@@ -11493,21 +11496,23 @@ div.unauthenticated * div.gauge-inverse {
   font-weight: bold;
   margin-top: -2px;
 }
-.navbar-nav small {
-  font-size: 61%;
-  color: #495e82;
+.sub-navbar small {
+  font-size: 70%;
+  color: blue;
   position: absolute;
   font-weight: bold;
-  margin-top: -35px;
-  margin-left: 55px;
+  margin-top: -6px;
 }
-.ct-menuMobile-navbar small{
+.ct-menuMobile-navbar small {
   font-size: 61%;
   color: #495e82;
   position: absolute;
   font-weight: bold;
   margin-top: 0px;
   margin-left: 2px;
+}
+.ct-menuMobile-navbar sup {
+  color: #F29A00;
 }
 .home-header {
   padding: 40px;
@@ -11746,38 +11751,37 @@ form[name='boundaryUpload'] a.commit:hover {
 .videos .owl-pagination {
   display: none;
 }
-
 .videos .owl-item .item {
   background-color: #f3f3f3;
   padding: 2rem;
 }
-
-.videos .owl-item .item a{
-    display: flex;
-    flex-wrap: wrap;
-    margin-bottom: 0;
+.videos .owl-item .item a {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 0;
 }
-
-.videos .owl-item .item a:hover span i{
-    transform: translateX(30%);
+.videos .owl-item .item a:hover span i {
+  transform: translateX(30%);
 }
 .videos .owl-item .item img {
   transition: transform .5s;
   transition: filter .5s;
-  transition: -webkit-filter .5s;
+  transition: -webkit-filter 0.5s;
   border-radius: 2px;
   height: 15rem;
   width: 20rem;
   margin: 1rem;
   padding: 0;
-  -webkit-filter: brightness(70%); /* Safari 6.0 - 9.0 */
+  -webkit-filter: brightness(70%);
+  /* Safari 6.0 - 9.0 */
   filter: brightness(70%);
 }
 .videos .owl-item .item img:hover {
-    -webkit-filter: none; /* Safari 6.0 - 9.0 */
-    filter: none;
-    cursor: pointer;
-  }
+  -webkit-filter: none;
+  /* Safari 6.0 - 9.0 */
+  filter: none;
+  cursor: pointer;
+}
 .videos .owl-item .item span {
   display: flex;
   align-items: center;
@@ -11794,21 +11798,21 @@ form[name='boundaryUpload'] a.commit:hover {
   font-weight: 500;
   flex: 0 0 76%;
   opacity: .85;
-  transition: opacity ease-in-out .25s;
+  transition: opacity ease-in-out 0.25s;
 }
 .videos .owl-item .item i {
   flex: 0 0 7%;
-  background-color: rgba(255, 158, 33, 1);
-  color: rgba(29, 39, 50, 1); 
+  background-color: #ff9e21;
+  color: #1d2732;
   padding: .3rem .6rem;
   border-radius: 99rem;
   font-size: 105%;
   font-weight: 800;
-  transition: all ease-in-out .25s;
-  ::before {
-    left: 1px;
-    position: relative;
-  }
+  transition: all ease-in-out 0.25s;
+}
+.videos .owl-item .item i ::before {
+  left: 1px;
+  position: relative;
 }
 /* Edit functionality on the firestation detail page */
 .firestationDetail .ct-formSearch--extended {
@@ -12230,6 +12234,13 @@ div.is-your-department {
 .media a.read-more:hover {
   color: #F29A00;
   border-bottom: 1px dotted;
+}
+.media h3 i {
+  visibility: hidden;
+  font-size: 70%;
+}
+.media h3:hover i {
+  visibility: visible;
 }
 .safe-grades a {
   color: #F29A00;
