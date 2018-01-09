@@ -12308,6 +12308,10 @@ div.is-your-department {
 .alert ul li:last-child {
   margin-bottom: 0;
 }
+#video-panel h5 {
+  text-align: left;
+  font-size: 14px;
+}
 .alert-warning {
   background-color: #fff8f5;
   border-color: #ffccb3;
