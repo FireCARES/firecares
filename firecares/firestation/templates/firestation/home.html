@@ -55,6 +55,7 @@
             <a href="#partners" class="text-uppercase">partners</a>
             <a href="{% url 'contact_us' %}" class="text-uppercase">contact us</a>
             <a href="{% url 'faq.html' %}" class="text-uppercase">faqs</a>
+            <a href="{% url 'videos.html' %}" class="text-uppercase">videos <sup>New</sup> </a>
         </span>
         <span class="right-navbar">
             {% if not user.is_authenticated %}
@@ -84,7 +85,7 @@
     </form>
 </header>
 
-<section id="about" class="text-center ct-u-paddingTop100 col-lg-12 section">
+<section id="about" class="text-center ct-u-paddingTop100 ct-u-paddingBottom40 col-lg-12 section">
     <div class="row">
     <div class="col-lg-7">
             <div class="ct-heading text-uppercase ct-u-marginBottom40">
@@ -141,9 +142,12 @@
         <div class="col-lg-1"></div>
     </div>
 </section>
-
-
-<section id="featured" class="section col-lg-12 ct-u-paddingTop100 " style="min-height: 400px">
+<section id="video-panel" class="section col-lg-12 ct-u-paddingTop30 " style="min-height: 400px;background-color: #f1f1f1">
+    <div class="ct-heading text-uppercase text-center ct-u-paddingBottom30">  
+      {% include 'firestation/_videos.html' %}
+    </div>
+</section>
+<section id="featured" class="section col-lg-12 ct-u-paddingTop30 " style="min-height: 400px">
     <div class="ct-heading text-uppercase text-center ct-u-paddingBottom30">
         <h3>Over 40 million fires analyzed.</h3>
     </div>

@@ -9,7 +9,7 @@ from .firecares_core.forms import FirecaresPasswordResetForm
 from .firecares_core.views import (ForgotUsername, ContactUs, AccountRequestView,
                                    ShowMessage, Disclaimer, OAuth2Callback,
                                    OAuth2Redirect, sso_logout_then_login, IMISRedirect,
-                                   FAQView, TruncatedFileAddView)
+                                   FAQView, VideoView, TruncatedFileAddView)
 from .firestation.api import StaffingResource, FireStationResource, FireDepartmentResource, StaffingStationRollupResource, GetServiceAreaInfo, GetEFFFInfo, WeatherWarningResource
 from tastypie.api import Api
 from firestation.views import Home
