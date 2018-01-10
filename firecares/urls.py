@@ -68,6 +68,7 @@ urlpatterns = patterns('',
     url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain'), name='robots.txt'),
     url(r'^faq/$', FAQView.as_view(), name='faq.html'),
     url(r'^sitemap\.xml$', include('static_sitemaps.urls')),
+    url(r'^videos/$', VideoView.as_view(), name='videos.html'),
 
     url(r'^favit/', include('favit.urls')),
 
