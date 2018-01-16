@@ -374,7 +374,7 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         response = requests.head(iaffurl, allow_redirects=True)
         self.assertEqual(response.status_code, 200)
 
-        mockdrivetime = json.loads(self.load_mock_drivetime('/firecares/firecares/firestation/tests/mock/drivetimemock.json'))
+        mockdrivetime = json.loads(self.load_mock_drivetime('mock/drivetimemock.json'))
         self.assertEqual(len(mockdrivetime['results'][0]['value']['features']), 3)
 
         ret = [(543338L, 236418L, 19695L, 1069L)]
@@ -401,7 +401,7 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         response = requests.head(iaffurl, allow_redirects=True)
         self.assertEqual(response.status_code, 200)
 
-        mockdrivetime = json.loads(self.load_mock_drivetime('/firecares/firecares/firestation/tests/mock/efffmock.json'))
+        mockdrivetime = json.loads(self.load_mock_drivetime('mock/efffmock.json'))
 
         ret = [(543338L, 236418L, 19695L, 1069L)]
         mock_cur = mock_connections['nfirs'].cursor.return_value
