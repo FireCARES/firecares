@@ -7,6 +7,8 @@
         .directive('barChart', BarChartDirective)
         .directive('bulletChart', BulletChartDirective)
         .directive('riskDistributionBarChart', RiskDistributionBarChartDirective)
+        .directive('riskServiceareaBarChart', RiskServiceareaBarChartDirective)
+        .directive('riskEfffareaBarChart', RiskEfffareaBarChartDirective)    
     ;
 
     function LineChartDirective() {
@@ -444,6 +446,369 @@
         };
     }
 
+    function RiskServiceareaBarChartDirective() {
+      return {
+        restrict: 'CE',
+        replace: false,
+        scope: {
+          width: '@',
+          dataset: '@',
+          height: '@'
+        },
+        template: '<svg class="no-select"></svg>',
+        link: function(scope, element, attrs) {
+          element.find('svg').appear(function() {
+            var width = parseInt(attrs.width);
+            var height = parseInt(attrs.height);
+            var margins = {top: 5, left: 60, right: 45, bottom: 20};
+
+            var dataset = JSON.parse(attrs.dataset);
+            var x0 = d3.scale.ordinal()
+                .rangeRoundBands([0, width], .1);
+
+            var x1 = d3.scale.ordinal();
+            var y = d3.scale.linear()
+                .range([height, 0]);
+
+            var color = {};
+            color['Low'] = 'rgba(116,172,73,0.6)';
+            color['Medium'] = 'rgba(250,142,21,0.4)';
+            color['High'] = 'rgba(248,153,131,0.9)';
+            color['Unknown'] = 'rgba(50%,50%,50%,0.6)';
+
+            var xAxis = d3.svg.axis()
+                .scale(x0)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .tickFormat(d3.format(".2s"));
+
+            var svg = d3.select(element).selectAll('svg')
+              .attr("width", width + margins.left + margins.right)
+              .attr("height", height + margins.top + margins.bottom)
+              .append('g')
+              .attr('transform', 'translate(' + margins.left + ',' + margins.top + ')');
+
+            var svgBarGroup = svg.append('g').attr('class', 'bar-chart-bars').attr('transform', 'translate(5,0)');
+
+            var svgLabelGroup = svg.append('g').attr('class', 'bar-chart-labels');
+
+            var tip = d3.tip()
+              .attr('class', 'toolTip2');
+
+            svg.call(tip);
+
+            var options = d3.keys(dataset[0]).filter(function(key) { return key !== "label"; });
+
+            dataset.forEach(function(d) {
+                d.valores = options.map(function(name) { return {name: name, value: +d[name]}; });
+            });
+
+            var maximumY = d3.max(dataset, function(d) { return d3.max(d.valores, function(d) { return d.value; }); });
+
+            x0.domain(dataset.map(function(d) { return d.label; }));
+            x1.domain(options).rangeRoundBands([0, x0.rangeBand()]);
+
+            if(maximumY == 0){
+                element.append("label").text('No Data Available').attr("class", "control-label unavailable")
+            }
+
+            // set min for bar scale
+            y.domain([-(maximumY * .02), maximumY]);
+
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Number of Parcels");
+
+            var bar = svg.selectAll(".bar")
+                .data(dataset)
+                .enter().append("g")
+                .attr("class", "rect")
+                .attr("transform", function(d) { return "translate(" + x0(d.label) + ",0)"; });
+
+            bar.selectAll("rect")
+                .data(function(d) { return d.valores; })
+                .enter().append("rect")
+                .on('mousemove', tip.show)
+                //.on('mouseout', tip.hide)
+                .attr("width", x1.rangeBand())
+                .attr("x", function(d) { return x1(d.name); })
+                .attr("y", function(d) { return y(d.value); })
+                .attr("value", function(d){return d.name;})
+                .attr("height", function(d) { return height - y(d.value); })
+                .style("fill", function(d) { return color[d.name]; });
+
+            bar
+                .on("mouseover", function(d){
+                    tip.style("left", d3.event.pageX+10+"px");
+                    tip.style("top", d3.event.pageY-25+"px");
+                    tip.style("display", "inline-block");
+                    var x = d3.event.pageX, y = d3.event.pageY
+                    var elements = document.querySelectorAll(':hover');
+                    var l = elements.length
+                    l = l-1
+                    var elementData = elements[l].__data__
+                    tip.html("<strong>Reponse Time: </strong>"+(d.label)+"<br><strong>Hazard Level: </strong>"+elementData.name+"<br><strong>Parcels affected: </strong>"+elementData.value);
+                });
+            bar
+                .on("mouseout", function(d){
+                    tip.style("display", "none");
+                });
+
+            var legend = svg.selectAll(".legend")
+                .data(options.slice())
+                .enter().append("g")
+                .attr("class", "legend")
+                .attr("transform", function(d, i) { return "translate(37," + i * 19 + ")"; });
+
+            legend.append("rect")
+                .attr("x", width - 18)
+                .attr("width", 18)
+                .attr("height", 18)
+                .style("fill", function(d) { 
+                    return color[d]; 
+                });
+
+            legend.append("text")
+                .attr("x", width - 22)
+                .attr("y", 9)
+                .style("font-size", '70%')
+                .attr("dy", ".35em")
+                .style("text-anchor", "end")
+                .text(function(d) { return d; });
+
+            });
+        }
+      }
+    }
+
+    function RiskEfffareaBarChartDirective() {
+      return {
+        restrict: 'CE',
+        replace: false,
+        scope: {
+          width: '@',
+          dataset: '@',
+          height: '@'
+        },
+        template: '<svg class="no-select"></svg>',
+        link: function(scope, element, attrs) {
+          element.find('svg').appear(function() {
+            var width = parseInt(attrs.width);
+            var height = parseInt(attrs.height);
+            var margins = {top: 5, left: 30, right: 35, bottom: 40};
+
+            var dataset = JSON.parse(attrs.dataset);
+            var x0 = d3.scale.ordinal()
+                .rangeRoundBands([0, width], .1);
+
+            var x1 = d3.scale.ordinal();
+            var y = d3.scale.linear()
+                .range([height, 0]);
+            var ypercent = d3.scale.linear()
+                .range([height, 0]);
+
+            var color = {};
+            color['Low'] = 'rgba(116,172,73,0.6)';
+            color['Medium'] = 'rgba(250,142,21,0.4)';
+            color['High'] = 'rgba(248,153,131,0.9)';
+            color['Unknown'] = 'rgba(50%,50%,50%,0.6)';
+
+            if(dataset[0][38]){
+                var options =["15+ Low Hazards (8min)", '27+ Medium Hazards (8min)', '38+ High Hazards (10.17min)', '15+ Unknown Hazards (8min)'];
+                var nametitle = {};
+                nametitle['15+ Low Hazards (8min)'] = 'Low';
+                nametitle['27+ Medium Hazards (8min)'] = 'Medium';
+                nametitle['38+ High Hazards (10.17min)'] = 'High';
+                nametitle['15+ Unknown Hazards (8min)'] = 'Unknown';
+            }
+            else{
+                var options =["15+ Low Hazards (8min)", '27+ Medium Hazards (8min)', '42+ High Hazards (10.17min)', '15+ Unknown Hazards (8min)'];
+                var nametitle = {};
+                nametitle['15+ Low Hazards (8min)'] = 'Low';
+                nametitle['27+ Medium Hazards (8min)'] = 'Medium';
+                nametitle['42+ High Hazards (10.17min)'] = 'High';
+                nametitle['15+ Unknown Hazards (8min)'] = 'Unknown';
+            }
+
+            var xAxis = d3.svg.axis()
+                .scale(x0)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .tickFormat(d3.format(".2s"));
+
+            var yAxispercentage = d3.svg.axis()
+                .scale(ypercent)
+                .orient("right")
+                .tickFormat(d3.format(".2s"));
+
+            var svg = d3.select(element).selectAll('svg')
+              .attr("width", width + margins.left + margins.right)
+              .attr("height", height + margins.top + margins.bottom)
+              .append('g')
+              .attr('transform', 'translate(' + margins.left + ',' + margins.top + ')');
+
+            var svgBarGroup = svg.append('g').attr('class', 'bar-chart-bars').attr('transform', 'translate(5,0)');
+
+            var svgLabelGroup = svg.append('g').attr('class', 'bar-chart-labels');
+
+            var tip = d3.tip()
+              .attr('class', 'toolTip2');
+
+            svg.call(tip);
+
+            dataset.forEach(function(d) {
+                d.valores = options.map(function(name) { return {name: name, value: +d[name]}; });
+            });
+
+            var maximumY = d3.max(dataset, function(d) { return d3.max(d.valores, function(d) { return d.value; }); });
+
+            x0.domain(dataset.map(function(d) { return d.label; }));
+            x1.domain(options).rangeRoundBands([0, x0.rangeBand()]);
+
+            if(maximumY == 0){
+                element.append("label").text('No Data Available').attr("class", "control-label unavailable")
+            }
+
+            // set min for bar scale so it shows when 0
+            //y.domain([0, maximumY]);
+            y.domain([-(maximumY * .02), maximumY]);
+            ypercent.domain([0, 100]);
+            
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("dy", "1.51em")
+                .attr("x", -30)
+                .style("text-anchor", "end")
+                .text("Number of Parcels");
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .append("text")
+                .attr("transform", "rotate(-90)") 
+                .attr("y", width - 15)
+                //.style("fill", "red")  
+                .attr("dy", ".71em")
+                .attr("x", -22)
+                .style("text-anchor", "end")
+                .text("% of Parcels Covered");
+
+            svg.append("g")
+                .attr("class", "y axis")    
+                .attr("transform", "translate(" + width + " ,0)")   
+                //.style("fill", "red")
+                .call(yAxispercentage)  
+
+            var bar = svg.selectAll(".bar")
+                .data(dataset)
+                .enter().append("g")
+                .attr("class", "rect")
+                .attr("transform", function(d) { return "translate(" + x0(d.label) + ",0)"; });
+
+            bar.selectAll("rect")
+                .data(function(d) { return d.valores; })
+                .enter().append("rect")
+                .on('mousemove', tip.show)
+                .attr("width", x1.rangeBand())
+                /*function(d) { 
+                    if(d.value == 0){
+                        return 0;
+                    }
+                    else{
+                        return x1.rangeBand()*1.5; 
+                    }
+                    }) */
+                .attr("x", function(d) { return x1(d.name); })
+                .attr("y", function(d, a, series) { 
+                    if(series == 1){
+                        return  ypercent(d.value); 
+                    }
+                    else{
+                        return y(d.value); 
+                    }
+                })
+                .attr("value", function(d){return d.name;})
+                .attr("height", function(d,a,series) { 
+                    if(series == 1){
+                        return height - ypercent(d.value); 
+                    }
+                    else{
+                        return height - y(d.value); 
+                    }
+                })
+                .style("fill", function(d) { return color[nametitle[d.name]]; });
+
+            bar
+                .on("mouseover", function(d){
+                    tip.style("left", d3.event.pageX+10+"px");
+                    tip.style("top", d3.event.pageY-25+"px");
+                    tip.style("display", "inline-block");
+                    var x = d3.event.pageX, y = d3.event.pageY
+                    var elements = document.querySelectorAll(':hover');
+                    var l = elements.length;
+                    l = l-1;
+                    var elementData = elements[l].__data__;
+                    if(d.label == '% Parcel Coverage'){
+                        tip.html("<strong>Personnel: </strong>"+elementData.name+"<br><strong>Hazard Level: </strong>"+nametitle[elementData.name]+"<br><strong>Parcel Coverage: </strong>"+elementData.value+' %'); 
+                    }
+                    else{
+                        tip.html("<strong>Personnel: </strong>"+elementData.name+"<br><strong>Hazard Level: </strong>"+nametitle[elementData.name]+"<br><strong>Parcels affected: </strong>"+elementData.value);
+                    }
+                });
+            bar
+                .on("mouseout", function(d){
+                    tip.style("display", "none");
+                });
+
+            var legend = svg.selectAll(".legend")
+                .data(options.slice())
+                .enter().append("g")
+                .attr("class", "legend")
+                .attr("transform", function(d, i) { return "translate("+ String(Number(-640) + Number(i * 180)) +",177)"; });
+
+            legend.append("rect")
+                .attr("x", width - 44)
+                .attr("width", 18)
+                .attr("height", 18)
+                .style("fill", function(d) { return color[nametitle[d]]; });
+
+            legend.append("text")
+                .attr("x", width - 22)
+                .attr("y", 7)
+                .style("font-size", '70%')
+                .attr("dy", ".35em")
+                .style("text-anchor", "start")
+                .text(function(d) { return d; });
+
+            });
+        }
+      }
+    }
+
     function RiskDistributionBarChartDirective() {
       return {
         restrict: 'CE',
@@ -484,6 +849,14 @@
               .append('g')
               .attr('transform', 'translate(' + margins.left + ',' + margins.top + ')');
 
+            d3.select('#chart svg').append("text")
+                .attr("x", "235")
+                .attr("y", "35")
+                .attr("dy", "-.7em")
+                .attr("class", "nvd3 nv-noData")
+                .style("text-anchor", "middle")
+                .text("My Custom No Data Message");
+
             var svgBarGroup = svg.append('g').attr('class', 'bar-chart-bars').attr('transform', 'translate(5,0)');
 
             var svgLabelGroup = svg.append('g').attr('class', 'bar-chart-labels');
@@ -508,7 +881,7 @@
 
             svgBarGroup.selectAll('.chart-section-data')
                 .data(data)
-              .enter()
+                .enter()
                 .append('rect')
                 .attr('class', 'chart-section-data')
                 .attr('x', function(d) { return x(d.level) - margins.left / 3; })

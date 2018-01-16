@@ -12,6 +12,14 @@
         });
     })
 
+    .factory('FireStationandStaffing', function ($resource) {
+        return $resource('/api/v1/staffingstations/:id/', {id: '@id'},
+            {
+                'query': {'method': 'GET', isArray: false}
+
+        });
+    })
+
     .factory('FireDepartment', function ($resource) {
         return $resource('/api/v1/fire-departments/:id/', {id: '@id'},
           {
@@ -37,6 +45,14 @@
 
     .factory('USGSUnit', function ($resource) {
         return $resource('/api/v1/usgs/:id/', {}, {'query': {'method': 'GET', isArray: false}});
+    })
+
+    .factory('ServiceAreaRollup', function ($resource) {
+        return $resource('/api/v1/getserviceareainfo/:id/', {}, {'query': {'method': 'GET', isArray: false}});
+    })
+
+    .factory('EfffChartRollup', function ($resource) {
+        return $resource('/api/v1/getefffinfo/:id/', {}, {'query': {'method': 'GET', isArray: false}});
     })
 
     .factory('Staffing', function ($resource) {

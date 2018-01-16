@@ -312,6 +312,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
     twitter_handle = models.CharField(max_length=255, blank=True, null=True)
     owned_tracts_geom = models.MultiPolygonField(null=True, blank=True)
     display_metrics = models.BooleanField(default=True)
+    ems_transport = models.BooleanField(default=False)
     boundary_verified = models.BooleanField(default=False)
     cfai_accredited = models.BooleanField(default=False)
 
@@ -1251,6 +1252,15 @@ def update_department(sender, instance, **kwargs):
     update.update_department.delay(instance.id)
 
 
+def update_station(sender, instance, **kwargs):
+    """
+    Updates Drive time and service area calculations after Station change
+    """
+    from firecares.tasks import update
+    if(instance.department_id):
+        update.get_parcel_department_hazard_level_rollup(instance.department_id)
+
+
 def create_national_calculations_view(sender, **kwargs):
     """
     Creates DB view based on national calculations queries
@@ -1392,8 +1402,57 @@ class DataFeedback(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
+class ParcelDepartmentHazardLevel(models.Model):
+    """
+    Parcel Departement Hazard Level table from Drive Time Analysis Service Area
+    """
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    department = models.ForeignKey(FireDepartment, null=True, blank=True)
+    parcelcount_low_0_4 = models.IntegerField(null=True, blank=True)
+    parcelcount_low_4_6 = models.IntegerField(null=True, blank=True)
+    parcelcount_low_6_8 = models.IntegerField(null=True, blank=True)
+    parcelcount_medium_0_4 = models.IntegerField(null=True, blank=True)
+    parcelcount_medium_4_6 = models.IntegerField(null=True, blank=True)
+    parcelcount_medium_6_8 = models.IntegerField(null=True, blank=True)
+    parcelcount_high_0_4 = models.IntegerField(null=True, blank=True)
+    parcelcount_high_4_6 = models.IntegerField(null=True, blank=True)
+    parcelcount_high_6_8 = models.IntegerField(null=True, blank=True)
+    parcelcount_unknown_0_4 = models.IntegerField(null=True, blank=True)
+    parcelcount_unknown_4_6 = models.IntegerField(null=True, blank=True)
+    parcelcount_unknown_6_8 = models.IntegerField(null=True, blank=True)
+    drivetimegeom_0_4 = models.MultiPolygonField(null=True, blank=True)
+    drivetimegeom_4_6 = models.MultiPolygonField(null=True, blank=True)
+    drivetimegeom_6_8 = models.MultiPolygonField(null=True, blank=True)
+
+
+class EffectiveFireFightingForceLevel(models.Model):
+    """
+    Parcel Count for how many assets can respond
+    """
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    department = models.ForeignKey(FireDepartment, null=True, blank=True)
+    parcelcount_low_15_26 = models.IntegerField(null=True, blank=True)
+    parcelcount_medium_27_42 = models.IntegerField(null=True, blank=True)
+    parcelcount_high38_plus = models.IntegerField(null=True, blank=True)
+    parcelcount_high_43_plus = models.IntegerField(null=True, blank=True)
+    parcelcount_unknown_15_26 = models.IntegerField(null=True, blank=True)
+    perc_covered_low_15_26 = models.FloatField(null=True, blank=True)
+    perc_covered_medium_27_42 = models.FloatField(null=True, blank=True)
+    perc_covered_high38_plus = models.FloatField(null=True, blank=True)
+    perc_covered_high_43_plus = models.FloatField(null=True, blank=True)
+    perc_covered_unknown_15_26 = models.FloatField(null=True, blank=True)
+    drivetimegeom_014 = models.MultiPolygonField(null=True, blank=True)
+    drivetimegeom_15_26 = models.MultiPolygonField(null=True, blank=True)
+    drivetimegeom_27_42 = models.MultiPolygonField(null=True, blank=True)
+    drivetimegeom_38_plus = models.MultiPolygonField(null=True, blank=True)
+    drivetimegeom_43_plus = models.MultiPolygonField(null=True, blank=True)
+
+
 post_save.connect(set_department_region, sender=FireDepartment)
 post_save.connect(update_department, sender=FireDepartment)
+# post_save.connect(update_station, sender=FireStation)
 reversion.register(FireStation)
 reversion.register(FireDepartment)
 reversion.register(Staffing)

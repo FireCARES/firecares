@@ -1,15 +1,17 @@
 import mock
 import requests
+import json
+import os
 from StringIO import StringIO
 from django.contrib.gis.geos import Point, GEOSGeometry
 from django.core.management import call_command
 from django.db import connections
 from django.test.client import Client
 from firecares.firecares_core.tests.base import BaseFirecaresTestcase
-from firecares.firestation.models import FireDepartment, FireDepartmentRiskModels, PopulationClassQuartile, HazardLevels
+from firecares.firestation.models import FireDepartment, FireDepartmentRiskModels, PopulationClassQuartile, HazardLevels, ParcelDepartmentHazardLevel, EffectiveFireFightingForceLevel
 from firecares.firestation.templatetags.firecares_tags import quartile_text, risk_level
 from firecares.tasks.update import (update_performance_score, dist_model_for_hazard_level, update_nfirs_counts,
-                                    calculate_department_census_geom, calculate_structure_counts)
+                                    calculate_department_census_geom, calculate_structure_counts, get_parcel_department_hazard_level_rollup, update_parcel_effectivefirefighting_table)
 from firecares.firecares_core.models import Address, Country
 from fire_risk.models import DIST, DISTMediumHazard, DISTHighHazard
 
@@ -359,3 +361,61 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         self.assertEqual(lafd.metrics.structure_counts_by_risk_category.low, 543338L)
         # This will fail as soon as we enable the "Unknown" level
         self.assertEqual(lafd.metrics.structure_counts_by_risk_category.all, sum(ret[0]))
+
+    def load_mock_drivetime(self, filename):
+
+        with open(os.path.join(os.path.dirname(__file__), filename), 'r') as f:
+            return f.read()
+
+    @mock.patch('firecares.tasks.update.connections')
+    def test_calculate_service_area_metrics(self, mock_connections):
+        iaffurl = "http://gis.iaff.org/arcgis/rest/services/Production/101ServerServiceAreaOct2012/GPServer/101ServerServiceAreaOct2012/execute"
+
+        response = requests.head(iaffurl, allow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+
+        mockdrivetime = json.loads(self.load_mock_drivetime('/firecares/firecares/firestation/tests/mock/drivetimemock.json'))
+        self.assertEqual(len(mockdrivetime['results'][0]['value']['features']), 3)
+
+        ret = [(543338L, 236418L, 19695L, 1069L)]
+        mock_cur = mock_connections['nfirs'].cursor.return_value
+        mock_cur.description = [('low',), ('medium',), ('high',), ('unknown',)]
+        mock_cur.fetchall.return_value = ret
+
+        us = Country.objects.create(iso_code='US', name='United States')
+        address = Address.objects.create(address_line1='Test', country=us,
+                                         geom=Point(-118.42170426600454, 34.09700463377199))
+        lafd = FireDepartment.objects.create(name='Los Angeles', population=0, population_class=9, state='CA',
+                                             headquarters_address=address, featured=0, archived=0)
+
+        get_parcel_department_hazard_level_rollup(lafd.id)
+        existingrecord = ParcelDepartmentHazardLevel.objects.filter(department_id=lafd.id)
+        addedhazardlevelfordepartment = existingrecord[0]
+
+        self.assertEqual(addedhazardlevelfordepartment.department_id, lafd.id)
+
+    @mock.patch('firecares.tasks.update.connections')
+    def test_calculate_efff_area_metrics(self, mock_connections):
+        iaffurl = "http://gis.iaff.org/arcgis/rest/services/Production/PeopleCountOct2012/GPServer/PeopleCountOct2012/execute"
+
+        response = requests.head(iaffurl, allow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+
+        mockdrivetime = json.loads(self.load_mock_drivetime('/firecares/firecares/firestation/tests/mock/efffmock.json'))
+
+        ret = [(543338L, 236418L, 19695L, 1069L)]
+        mock_cur = mock_connections['nfirs'].cursor.return_value
+        mock_cur.description = [('low',), ('medium',), ('high',), ('unknown',)]
+        mock_cur.fetchall.return_value = ret
+
+        us = Country.objects.create(iso_code='US', name='United States')
+        address = Address.objects.create(address_line1='Test', country=us,
+                                         geom=Point(-118.42170426600454, 34.09700463377199))
+        lafd = FireDepartment.objects.create(name='Los Angeles', population=0, population_class=9, state='CA',
+                                             headquarters_address=address, featured=0, archived=0)
+
+        update_parcel_effectivefirefighting_table(mockdrivetime['results'][0]['value']['features'], lafd)
+        existingrecord = EffectiveFireFightingForceLevel.objects.filter(department_id=lafd.id)
+        addedefffAreafordepartment = existingrecord[0]
+
+        self.assertEqual(addedefffAreafordepartment.department_id, lafd.id)
