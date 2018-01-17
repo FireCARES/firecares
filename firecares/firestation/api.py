@@ -270,7 +270,7 @@ class FireStationResource(JSONDefaultModelResourceMixin, ModelResource):
         authentication = MultiAuthentication(Authentication(), SessionAuthentication(), ApiKeyAuthentication())
         list_allowed_methods = ['get']
         detail_allowed_methods = ['get', 'put']
-        filtering = {'department': ('exact',), 'state': ('exact',), 'id': ('exact',)}
+        filtering = {'department': ('exact',), 'state': ('exact',), 'id': ('exact',), 'fdid': ('exact',)}
         excludes = ['addressbuildingname', 'complex_id', 'data_security', 'distribution_policy', 'fcode', 'foot_id',
                     'ftype', 'globalid', 'gnis_id', 'islandmark', 'loaddate', 'objectid', 'permanent_identifier',
                     'pointlocationtype', 'source_datadesc', 'source_datasetid', 'source_featureid',
