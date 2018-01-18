@@ -157,7 +157,6 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-    'tastypie',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -190,6 +189,7 @@ INSTALLED_APPS = (
     'invitations',
     'static_sitemaps',
     'import_export',
+    'tastypie',
 )
 
 OSGEO_IMPORTER = 'firecares.importers.GeoDjangoImport'
