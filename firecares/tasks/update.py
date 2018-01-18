@@ -460,8 +460,8 @@ def create_parcel_department_hazard_level_rollup_all():
     """
     Task for updating the servicearea table rolling up parcel hazard categories with departement drive time data
     """
-    for fd in FireDepartment.objects.all():
-        get_parcel_department_hazard_level_rollup(fd.id)
+    for fd in FireDepartment.objects.values_list('id', flat=True):
+        get_parcel_department_hazard_level_rollup(fd)
 
 
 def get_parcel_department_hazard_level_rollup(fd_id):
@@ -473,38 +473,38 @@ def get_parcel_department_hazard_level_rollup(fd_id):
 
     print "Calculating Drive times for:  " + dept[0].name
 
-    #  Use Headquarters geometry if there is no Statffing assets
-    if len(stationlist) < 1:
-        drivetimeurl = 'https://geo.firecares.org/?f=json&Facilities={"features":[{"geometry":{"x":' + str(dept[0].headquarters_geom.x) + ',"spatialReference":{"wkid":4326},"y":' + str(dept[0].headquarters_geom.y) + '}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4&Break_Values=4 6 8&returnZ=false&returnM=false'
-        getdrivetime = requests.get(drivetimeurl)
-
-    else:
-        drivetimegeom = []
-        for fireStation in stationlist:
-            stationasset = {}
-            stationasset["spatialReference"] = {"wkid": 4326}
-            stationasset["y"] = round(fireStation.geom.y, 5)
-            stationasset["x"] = round(fireStation.geom.x, 5)
-            stationgeom = {}
-            stationgeom["geometry"] = stationasset
-            drivetimegeom.append(stationgeom)
-
-        drivepostdata = {}
-        drivepostdata['f'] = 'pjson'
-        drivepostdata['returnZ'] = False
-        drivepostdata['returnM'] = False
-        drivepostdata['env:outSR'] = 4326
-        drivepostdata['Break_Values'] = '4 6 8'
-        drivepostfeatures = {}
-        drivepostfeatures['features'] = drivetimegeom
-        drivepostfeatures['geometryType'] = "esriGeometryPoint"
-        drivepostdata['Facilities'] = json.dumps(drivepostfeatures)
-
-        # GET URL (timing out)
-        # getdrivetime = requests.post("http://test.firecares.org/service-area/?", data=drivepostdata)
-        getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/101ServerServiceAreaOct2012/GPServer/101ServerServiceAreaOct2012/execute", data=drivepostdata)
-
     try:
+        #  Use Headquarters geometry if there is no Statffing assets
+        if len(stationlist) < 1:
+            drivetimeurl = 'https://geo.firecares.org/?f=json&Facilities={"features":[{"geometry":{"x":' + str(dept[0].headquarters_geom.x) + ',"spatialReference":{"wkid":4326},"y":' + str(dept[0].headquarters_geom.y) + '}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4&Break_Values=4 6 8&returnZ=false&returnM=false'
+            getdrivetime = requests.get(drivetimeurl)
+
+        else:
+            drivetimegeom = []
+            for fireStation in stationlist:
+                stationasset = {}
+                stationasset["spatialReference"] = {"wkid": 4326}
+                stationasset["y"] = round(fireStation.geom.y, 5)
+                stationasset["x"] = round(fireStation.geom.x, 5)
+                stationgeom = {}
+                stationgeom["geometry"] = stationasset
+                drivetimegeom.append(stationgeom)
+
+            drivepostdata = {}
+            drivepostdata['f'] = 'pjson'
+            drivepostdata['returnZ'] = False
+            drivepostdata['returnM'] = False
+            drivepostdata['env:outSR'] = 4326
+            drivepostdata['Break_Values'] = '4 6 8'
+            drivepostfeatures = {}
+            drivepostfeatures['features'] = drivetimegeom
+            drivepostfeatures['geometryType'] = "esriGeometryPoint"
+            drivepostdata['Facilities'] = json.dumps(drivepostfeatures)
+
+            # GET URL (timing out)
+            # getdrivetime = requests.post("http://test.firecares.org/service-area/?", data=drivepostdata)
+            getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/101ServerServiceAreaOct2012/GPServer/101ServerServiceAreaOct2012/execute", data=drivepostdata)
+
         update_parcel_department_hazard_level(json.loads(getdrivetime.content)['results'][0]['value']['features'], dept[0])
 
     except KeyError:
@@ -620,8 +620,8 @@ def create_effective_firefighting_rollup_all():
     """
     Task for updating the effective fire fighting force EffectiveFireFightingForceLevel table
     """
-    for fd in FireDepartment.objects.all():
-        update_parcel_department_effectivefirefighting_rollup(fd.id)
+    for fd in FireDepartment.objects.values_list('id', flat=True):
+        update_parcel_department_effectivefirefighting_rollup(fd)
 
 
 def get_async_efff_service_status(jobid, dept_name):
@@ -633,10 +633,14 @@ def get_async_efff_service_status(jobid, dept_name):
     """
     getdrivetimejobstatus = requests.get("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCount2017_V2/GPServer/PeopleCount2017/jobs/" + jobid + "?f=json")
 
+    print json.loads(getdrivetimejobstatus.content)
     if 'results' in json.loads(getdrivetimejobstatus.content):
         print "Drive Time Analysis finished for " + dept_name.name
         drivetimejobfinished = requests.get("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCount2017_V2/GPServer/PeopleCount2017/jobs/" + jobid + "/results/PeopleCount?f=pjson")
         update_parcel_effectivefirefighting_table(json.loads(drivetimejobfinished.content)['value']['features'], dept_name)
+
+    elif json.loads(getdrivetimejobstatus.content)['jobStatus'] == 'esriJobFailed':
+        print "Drive Time Analysis errored for " + dept_name.name
 
     else:
         print "Drive Time Analysis processing for " + dept_name.name
@@ -659,47 +663,47 @@ def update_parcel_department_effectivefirefighting_rollup(fd_id):
     else:
         print "Calculating Response times and staffing for:  " + dept[0].name + ' at ' + time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
 
-        #  Use Headquarters geometry if there is no Statffing assets
-        if len(stationlist) < 1:
-            drivetimeurl = 'http://gis.iaff.org/arcgis/rest/services/Production/PeopleCountOct2012/GPServer/PeopleCountOct2012/execute?f=json&Facilities={"features":[{"geometry":{"x":' + str(dept[0].headquarters_geom.x) + ',"spatialReference":{"wkid":4326},"y":' + str(dept[0].headquarters_geom.y) + '}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=' + staffingtotal + '&returnZ=false&returnM=false'
-            getdrivetime = requests.get(drivetimeurl)
-
-        else:
-            drivetimegeom = []
-            staffingtotal = ""
-            for fireStation in stationlist:
-                # staffing
-                assetlist = Staffing.objects.filter(firestation_id=fireStation.id)
-                stationstafftotal = 0
-                for staff in assetlist:
-                    stationstafftotal = stationstafftotal + staff.personnel
-
-                # geometry
-                stationasset = {}
-                stationasset["spatialReference"] = {"wkid": 4326}
-                stationasset["y"] = round(fireStation.geom.y, 5)
-                stationasset["x"] = round(fireStation.geom.x, 5)
-                stationgeom = {}
-                stationgeom["geometry"] = stationasset
-                drivetimegeom.append(stationgeom)
-                staffingtotal = staffingtotal + str(stationstafftotal) + ','
-
-            drivepostdata = {}
-            drivepostdata['f'] = 'pjson'
-            drivepostdata['returnZ'] = False
-            drivepostdata['returnM'] = False
-            drivepostdata['env:outSR'] = 4326
-            drivepostdata['text_input'] = staffingtotal[:-1]
-            drivepostfeatures = {}
-            drivepostfeatures['features'] = drivetimegeom
-            drivepostfeatures['geometryType'] = "esriGeometryPoint"
-            drivepostdata['Facilities'] = json.dumps(drivepostfeatures)
-
-            # need to run async so it doesn't time out
-            # getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCountOct2012/GPServer/PeopleCountOct2012/execute", data=drivepostdata)
-            getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCount2017_V2/GPServer/PeopleCount2017/submitJob", data=drivepostdata)
-
         try:
+            #  Use Headquarters geometry if there is no Statffing assets
+            if len(stationlist) < 1:
+                drivetimeurl = 'http://gis.iaff.org/arcgis/rest/services/Production/PeopleCountOct2012/GPServer/PeopleCountOct2012/execute?f=json&Facilities={"features":[{"geometry":{"x":' + str(dept[0].headquarters_geom.x) + ',"spatialReference":{"wkid":4326},"y":' + str(dept[0].headquarters_geom.y) + '}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=' + staffingtotal + '&returnZ=false&returnM=false'
+                getdrivetime = requests.get(drivetimeurl)
+
+            else:
+                drivetimegeom = []
+                staffingtotal = ""
+                for fireStation in stationlist:
+                    # staffing
+                    assetlist = Staffing.objects.filter(firestation_id=fireStation.id)
+                    stationstafftotal = 0
+                    for staff in assetlist:
+                        stationstafftotal = stationstafftotal + staff.personnel
+
+                    # geometry
+                    stationasset = {}
+                    stationasset["spatialReference"] = {"wkid": 4326}
+                    stationasset["y"] = round(fireStation.geom.y, 5)
+                    stationasset["x"] = round(fireStation.geom.x, 5)
+                    stationgeom = {}
+                    stationgeom["geometry"] = stationasset
+                    drivetimegeom.append(stationgeom)
+                    staffingtotal = staffingtotal + str(stationstafftotal) + ','
+
+                drivepostdata = {}
+                drivepostdata['f'] = 'pjson'
+                drivepostdata['returnZ'] = False
+                drivepostdata['returnM'] = False
+                drivepostdata['env:outSR'] = 4326
+                drivepostdata['text_input'] = staffingtotal[:-1]
+                drivepostfeatures = {}
+                drivepostfeatures['features'] = drivetimegeom
+                drivepostfeatures['geometryType'] = "esriGeometryPoint"
+                drivepostdata['Facilities'] = json.dumps(drivepostfeatures)
+
+                # need to run async so it doesn't time out
+                # getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCountOct2012/GPServer/PeopleCountOct2012/execute", data=drivepostdata)
+                getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCount2017_V2/GPServer/PeopleCount2017/submitJob", data=drivepostdata)
+
             get_async_efff_service_status(json.loads(getdrivetime.content)['jobId'], dept[0])
 
         except KeyError:

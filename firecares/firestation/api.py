@@ -211,7 +211,7 @@ class FireDepartmentResource(JSONDefaultModelResourceMixin, ModelResource):
         cache = SimpleCache()
         list_allowed_methods = ['get']
         detail_allowed_methods = ['get', 'put']
-        filtering = {'state': ALL, 'featured': ALL}
+        filtering = {'state': ALL, 'featured': ALL, 'fdid': ALL}
         serializer = PrettyJSONSerializer()
         limit = 120
         max_limit = 2000

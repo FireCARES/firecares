@@ -709,6 +709,7 @@
                           };
                         });
                         departmentMap.fitBounds(efffArea);
+                        messagebox.show('Effective Fire Fighting Force added to the map.');
                       }
                     }
                     // Return no data if department hasn't been calculated yet 
@@ -716,8 +717,9 @@
                       $scope.parcel_efff_counts = [
                           {label:"Personnel Coverage", "42+ High Hazards (10.17min)": 0, "15+ Unknown Hazards (8min)": 0, "27+ Medium Hazards (8min)": 0, "15+ Low Hazards (8min)": 0}
                       ];
+
+                      messagebox.show('Effective Fire Fighting Force requires valid Personnel entries.');
                     }
-                    messagebox.show('Effective Fire Fighting Force requiers valid Personnel entries.');
                     departmentMap.spin(false);
                     showEFFFChart(true);
                 });
@@ -774,6 +776,7 @@
                           };
                         });
                         departmentMap.fitBounds(serviceArea);
+                        messagebox.show('Service Area Information added to the map.');
                       }
                     }
                     // Return no data if department hasn't been calculated yet 
@@ -783,6 +786,8 @@
                           {label:"4-6 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0},
                           {label:"6-8 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0}
                       ];
+
+                      messagebox.show('Service Area Analysis requires valid Personnel entries.');
                     }
                     departmentMap.spin(false);
                     showServiceAreaChart(true);
