@@ -189,6 +189,7 @@ INSTALLED_APPS = (
     'invitations',
     'static_sitemaps',
     'import_export',
+    'tastypie',
 )
 
 OSGEO_IMPORTER = 'firecares.importers.GeoDjangoImport'
