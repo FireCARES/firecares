@@ -6,6 +6,7 @@ import osr
 import shutil
 import urllib
 import uuid
+from django.utils import timezone
 from django.views.generic import DetailView, ListView, TemplateView, View, CreateView
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
@@ -460,6 +461,9 @@ class FireDepartmentListView(PaginationMixin, ListView, SafeSortMixin, LimitMixi
         if self.request.GET.get('q'):
             queryset = queryset.full_text_search(self.request.GET.get('q'))
 
+        if self.request.GET.get('weather', 'false') == 'true':
+            queryset = queryset.filter(**{'departmentwarnings__expiredate__gte': timezone.now()})
+
         queryset = self.sort_queryset(queryset, self.request.GET.get('sortBy'))
         self.limit_queryset(self.request.GET.get('limit'))
 
@@ -476,12 +480,19 @@ class FireDepartmentListView(PaginationMixin, ListView, SafeSortMixin, LimitMixi
                     Min = int(min)
                     Max = int(max)
 
-                    if Min:
-                        queryset = queryset.filter(**{field + '__gte': Min})
+                    if field == 'dist_model_score':
+                        if Min:
+                            queryset = queryset.filter(**{'firedepartmentriskmodels__level': 0, 'firedepartmentriskmodels__dist_model_score__gte': Min})
 
-                    if Max:
-                        from django.db.models import Q
-                        queryset = queryset.filter(Q(**{field + '__lte': Max}) | Q(**{field + '__isnull': True}))
+                        if Max:
+                            queryset = queryset.filter(**{'firedepartmentriskmodels__level': 0, 'firedepartmentriskmodels__dist_model_score__lte': Max})
+                    else:
+                        if Min:
+                            queryset = queryset.filter(**{field + '__gte': Min})
+
+                        if Max:
+                            from django.db.models import Q
+                            queryset = queryset.filter(Q(**{field + '__lte': Max}) | Q(**{field + '__isnull': True}))
 
             except:
                 pass

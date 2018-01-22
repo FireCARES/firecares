@@ -633,7 +633,6 @@ def get_async_efff_service_status(jobid, dept_name):
     """
     getdrivetimejobstatus = requests.get("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCount2017_V2/GPServer/PeopleCount2017/jobs/" + jobid + "?f=json")
 
-    print json.loads(getdrivetimejobstatus.content)
     if 'results' in json.loads(getdrivetimejobstatus.content):
         print "Drive Time Analysis finished for " + dept_name.name
         drivetimejobfinished = requests.get("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCount2017_V2/GPServer/PeopleCount2017/jobs/" + jobid + "/results/PeopleCount?f=pjson")
