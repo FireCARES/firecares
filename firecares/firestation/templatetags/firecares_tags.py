@@ -39,7 +39,7 @@ intword_converters = (
 
 
 @register.filter(is_safe=False)
-def abbreviatedintword(value):
+def abbreviatedintword(value, args=None):
     """
     Converts a large integer to a friendly text representation. Works best
     for numbers over 1 million. For example, 1000000 becomes '1.0 million',
@@ -61,6 +61,9 @@ def abbreviatedintword(value):
             template = float_formatted
         template = template % {'value': value}
         return template.replace('.0', '')
+
+    if args and value < int(args):
+        return value
 
     for exponent, converters in intword_converters:
         large_number = 10 ** exponent
