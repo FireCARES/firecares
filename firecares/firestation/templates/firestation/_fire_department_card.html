@@ -26,7 +26,7 @@
                 <span tooltip="Predicted number of fires" tooltip-append-to-body="true" tooltip-popup-delay="700">
                     <i class="fa fa-fire"></i>
                     {% if user.is_authenticated and department.display_metrics %}
-                        {{ department.metrics.risk_model_fires.all|floatformat:"0"|intcomma|default:"N/A" }}
+                        {{ department.metrics.risk_model_fires.all|default:"N/A"|abbreviatedintword:1000 }}
                     {% else %}
                         N/A
                     {% endif %}
