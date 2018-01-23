@@ -74,7 +74,7 @@
         }
 
         scope.cleanURLParameters = function() {
-            var parameters = ['favorites', 'fdid', 'state', 'name', 'region', 'population', 'q', 'dist_model_score', 'sortBy', 'limit'];
+            var parameters = ['favorites', 'fdid', 'state', 'name', 'region', 'population', 'q', 'dist_model_score', 'sortBy', 'limit', 'weather'];
             for (var i = 0; i < parameters.length; i++) {
                 var parameterKey = parameters[i];
                 if (scope.params[parameterKey] === '') {
