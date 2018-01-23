@@ -485,7 +485,7 @@ class FireDepartmentListView(PaginationMixin, ListView, SafeSortMixin, LimitMixi
                             queryset = queryset.filter(**{'firedepartmentriskmodels__level': 0, 'firedepartmentriskmodels__dist_model_score__gte': Min})
 
                         if Max:
-                            queryset = queryset.filter(**{'firedepartmentriskmodels__level': 0, 'firedepartmentriskmodels__dist_model_score__lte': Max})
+                            queryset = queryset.filter(**{'firedepartmentriskmodels__level': 0, 'firedepartmentriskmodels__dist_model_score__lte': Max} | {'firedepartmentriskmodels__dist_model_score__isnull': True})
                     else:
                         if Min:
                             queryset = queryset.filter(**{field + '__gte': Min})

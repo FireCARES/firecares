@@ -16,6 +16,10 @@
           scope.params.favorites = attrs.favorites == 'true';
         });
 
+        attrs.$observe('weather', function() {
+          scope.params.weather = attrs.weather == 'true';
+        });
+
         attrs.$observe('fdid', function() {
           scope.params.fdid = attrs.fdid;
         });
