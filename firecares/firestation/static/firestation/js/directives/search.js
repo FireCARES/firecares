@@ -20,6 +20,10 @@
           scope.params.weather = attrs.weather == 'true';
         });
 
+        attrs.$observe('cfai', function() {
+          scope.params.cfai = attrs.cfai == 'true';
+        });
+
         attrs.$observe('fdid', function() {
           scope.params.fdid = attrs.fdid;
         });

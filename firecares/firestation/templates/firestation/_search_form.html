@@ -12,12 +12,16 @@
 </div>
 <div class="ct-form--item ct-u-marginBoth10">
     <label>Search Weather Warnings</label>
-    <input name="weather" type="checkbox" style="object-fit:none;height: 27px;" class="form-control input-medium" ng-model="params.weather" ng-enter="search()">
+    <input name="weather" type="checkbox" style="object-fit:none;height: 20px;" class="form-control input-medium" ng-model="params.weather" ng-enter="search()">
+</div>
+<div class="ct-form--item ct-u-marginBoth10">
+    <label>CFAI Accredited</label>
+    <input name="cfai" type="checkbox" style="object-fit:none;height: 20px;" class="form-control input-medium" ng-model="params.cfai" ng-enter="search()">
 </div>
 {% if user.is_authenticated %}
 <div class="ct-form--item ct-u-marginBoth10">
     <label>Search favorites only</label>
-    <input name="weather" type="checkbox" style="object-fit:none;height: 27px;" class="form-control input-medium" ng-model="params.favorites" ng-enter="search()">
+    <input name="weather" type="checkbox" style="object-fit:none;height: 20px;" class="form-control input-medium" ng-model="params.favorites" ng-enter="search()">
 </div>
 {% endif %}
 <div class="ct-form--item ct-u-marginBottom10">
