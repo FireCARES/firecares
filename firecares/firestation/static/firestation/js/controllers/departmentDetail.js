@@ -276,6 +276,10 @@
                   departmentMap.fitBounds(activeFires);
                   departmentMap.spin(false);
                   messagebox.show(geojson.features.length + ' total Active Wildland Fires in the vicinity of this department');
+
+                  if(layer._leaflet_id === activeFires._leaflet_id){
+                    departmentMap.addControl(activeFirelegend);
+                  }
                 }
                 else{
                   messagebox.show('There are no Active Wildland Fires in the vicinity of this department');
@@ -285,10 +289,6 @@
             }, function error(err) {
               departmentMap.spin(false);
             });
-          }
-
-          if(layer._leaflet_id === activeFires._leaflet_id){
-            departmentMap.addControl(activeFirelegend);
           }
         });
 
@@ -611,8 +611,8 @@
           $scope.level = level;
         };
 
-        //need admin login to view Service area and Effect Fire force Info
-        if (config.superUser) {
+        //need  login to view Service area
+        if (config.showParcels) {
             //
             // Service Area
             //
@@ -630,6 +630,78 @@
 
             layersControl.addOverlay(serviceArea, 'Service Area');
 
+            //
+            //List for Service Area Layer
+            //
+            departmentMap.on('overlayadd', function(layer) {
+              layer = layer.layer;
+              if ( layer._leaflet_id === serviceArea._leaflet_id && serviceAreaData){
+                  showServiceAreaChart(true);
+              }
+              else if ( layer._leaflet_id === serviceArea._leaflet_id && !serviceAreaData) {
+                
+                departmentMap.spin(true);
+
+                // Get Service Area rollup data base on Department 
+                ServiceAreaRollup.query({department: config.id}).$promise.then(function(data) {
+                    
+                    if(data.objects.length > 0){
+                      // Add Hazard Layer Info Template
+                      $scope.parcel_hazard_level_counts = [
+                          {label:"0-4 Minutes", "Low":data.objects[0].parcelcount_low_0_4||0, "Medium":data.objects[0].parcelcount_medium_0_4||0, "High":data.objects[0].parcelcount_high_0_4||0, "Unknown":data.objects[0].parcelcount_unknown_0_4||0},
+                          {label:"4-6 Minutes", "Low":data.objects[0].parcelcount_low_4_6||0, "Medium":data.objects[0].parcelcount_medium_4_6||0, "High":data.objects[0].parcelcount_high_4_6||0, "Unknown":data.objects[0].parcelcount_unknown_4_6||0},
+                          {label:"6-8 Minutes", "Low":data.objects[0].parcelcount_low_6_8||0, "Medium":data.objects[0].parcelcount_medium_6_8||0, "High":data.objects[0].parcelcount_high_6_8||0, "Unknown":data.objects[0].parcelcount_unknown_6_8||0}
+                      ];
+
+                      if(data.objects[0].drivetimegeom_0_4){
+
+                        //merge geometries
+                        var traveltime0 = { "type": "Feature",
+                            "properties": {"Name": "Travel Time: 0 - 4", "ToBreak":4},
+                            "geometry": data.objects[0].drivetimegeom_0_4
+                        }
+                        var traveltime4 = { "type": "Feature",
+                            "properties": {"Name": "Travel Time: 4 - 6", "ToBreak":6},
+                            "geometry": data.objects[0].drivetimegeom_4_6
+                        }
+                        var traveltime6 = { "type": "Feature",
+                            "properties": {"Name": "Travel Time: 6 - 8", "ToBreak":8},
+                            "geometry": data.objects[0].drivetimegeom_6_8
+                        }
+                        var travelTimeGeom = [traveltime0, traveltime4, traveltime6];
+                        
+                        serviceAreaData = travelTimeGeom;
+                        serviceArea.addData(travelTimeGeom);
+                        layer.setStyle(function(feature) {
+                          return {
+                            fillColor: '#33cc33',
+                            fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.2),
+                            weight: 0.8,color:'#003300'
+                          };
+                        });
+                        departmentMap.fitBounds(serviceArea);
+                        messagebox.show('Service Area Information added to the map.');
+                      }
+                    }
+                    // Return no data if department hasn't been calculated yet 
+                    else{
+                      $scope.parcel_hazard_level_counts = [
+                          {label:"0-4 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0},
+                          {label:"4-6 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0},
+                          {label:"6-8 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0}
+                      ];
+
+                      messagebox.show('Service Area Analysis requires valid Personnel entries.');
+                    }
+                    departmentMap.spin(false);
+                    showServiceAreaChart(true);
+                });
+              }
+            });
+
+            //
+            // Add layer for Effective Fire Fighting Force removed config.superUser requirement 
+            //
             efffArea = L.geoJson(null, {
               onEachFeature: function(feature, layer) {
                   layer.bindPopup(feature.properties.Name + '<br>'+ feature.properties.ToBreak);
@@ -645,9 +717,6 @@
             
             layersControl.addOverlay(efffArea, 'Effective Response Force');
 
-            //
-            // Add layer for Effective Fire Fighting Force
-            //
             departmentMap.on('overlayadd', function(layer) {
               layer = layer.layer;
               if ( layer._leaflet_id === efffArea._leaflet_id && efffAreaData){
@@ -722,75 +791,6 @@
                     }
                     departmentMap.spin(false);
                     showEFFFChart(true);
-                });
-              }
-            });
-
-            //
-            //List for Service Area Layer
-            //
-            departmentMap.on('overlayadd', function(layer) {
-              layer = layer.layer;
-              if ( layer._leaflet_id === serviceArea._leaflet_id && serviceAreaData){
-                  showServiceAreaChart(true);
-              }
-              else if ( layer._leaflet_id === serviceArea._leaflet_id && !serviceAreaData) {
-                
-                departmentMap.spin(true);
-
-                // Get Service Area rollup data base on Department 
-                ServiceAreaRollup.query({department: config.id}).$promise.then(function(data) {
-                    
-                    if(data.objects.length > 0){
-                      // Add Hazard Layer Info Template
-                      $scope.parcel_hazard_level_counts = [
-                          {label:"0-4 Minutes", "Low":data.objects[0].parcelcount_low_0_4||0, "Medium":data.objects[0].parcelcount_medium_0_4||0, "High":data.objects[0].parcelcount_high_0_4||0, "Unknown":data.objects[0].parcelcount_unknown_0_4||0},
-                          {label:"4-6 Minutes", "Low":data.objects[0].parcelcount_low_4_6||0, "Medium":data.objects[0].parcelcount_medium_4_6||0, "High":data.objects[0].parcelcount_high_4_6||0, "Unknown":data.objects[0].parcelcount_unknown_4_6||0},
-                          {label:"6-8 Minutes", "Low":data.objects[0].parcelcount_low_6_8||0, "Medium":data.objects[0].parcelcount_medium_6_8||0, "High":data.objects[0].parcelcount_high_6_8||0, "Unknown":data.objects[0].parcelcount_unknown_6_8||0}
-                      ];
-
-                      if(data.objects[0].drivetimegeom_0_4){
-
-                        //merge geometries
-                        var traveltime0 = { "type": "Feature",
-                            "properties": {"Name": "Travel Time: 0 - 4", "ToBreak":4},
-                            "geometry": data.objects[0].drivetimegeom_0_4
-                        }
-                        var traveltime4 = { "type": "Feature",
-                            "properties": {"Name": "Travel Time: 4 - 6", "ToBreak":6},
-                            "geometry": data.objects[0].drivetimegeom_4_6
-                        }
-                        var traveltime6 = { "type": "Feature",
-                            "properties": {"Name": "Travel Time: 6 - 8", "ToBreak":8},
-                            "geometry": data.objects[0].drivetimegeom_6_8
-                        }
-                        var travelTimeGeom = [traveltime0, traveltime4, traveltime6];
-                        
-                        serviceAreaData = travelTimeGeom;
-                        serviceArea.addData(travelTimeGeom);
-                        layer.setStyle(function(feature) {
-                          return {
-                            fillColor: '#33cc33',
-                            fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.2),
-                            weight: 0.8,color:'#003300'
-                          };
-                        });
-                        departmentMap.fitBounds(serviceArea);
-                        messagebox.show('Service Area Information added to the map.');
-                      }
-                    }
-                    // Return no data if department hasn't been calculated yet 
-                    else{
-                      $scope.parcel_hazard_level_counts = [
-                          {label:"0-4 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0},
-                          {label:"4-6 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0},
-                          {label:"6-8 Minutes", "High": 0, "Medium": 0, "Low": 0, "Unknown": 0}
-                      ];
-
-                      messagebox.show('Service Area Analysis requires valid Personnel entries.');
-                    }
-                    departmentMap.spin(false);
-                    showServiceAreaChart(true);
                 });
               }
             });

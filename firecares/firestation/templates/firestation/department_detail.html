@@ -26,6 +26,7 @@
       id: {{object.id}},
       showParcels: {{ user.is_authenticated|yesno:"true,false"}},
       superUser: {{ user.is_superuser|yesno:"true,false"}},
+      staff: {{ user.is_staff|yesno:"true,false"}},
       emsTransport: {{object.ems_transport|yesno:"true,false"}},
       cfai_accredited:{{object.cfai_accredited|yesno:"true,false"}}
     };

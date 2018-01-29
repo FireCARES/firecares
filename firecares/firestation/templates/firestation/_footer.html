@@ -32,11 +32,13 @@
                                 <a class="text-capitalize" href="{% url 'models_community_risk' %}">Community Risk</a>
                                 <a class="text-capitalize" href="{% url 'models_performance_score' %}">Performance Score</a>
                                 <a class="text-capitalize" href="{% url 'safe_grades' %}">Safe Grades</a>
+                                <a class="text-capitalize" href="{% url 'media' %}">FireCARES in the Media</a>
                             </div>
                             <div class="col-md-6">
                                 <a class="text-capitalize" href="{% url 'faq.html' %}">FAQs</a>
-                                <a class="text-capitalize" href="{% url 'media' %}">FireCARES in the Media</a>
+                                <a class="text-capitalize" target="_blank" href="{{ STATIC_URL }}FIRECARES User Guide.pdf">FireCARES User Guide</a>
                                 <a class="text-capitalize" target="_blank" href="{{ STATIC_URL }}access_policy.pdf">FireCARES Access Policy</a>
+                                <a class="text-capitalize" target="_blank" href="{{ STATIC_URL }}FireCARES  Data Use Manual 2018.pdf">Data Access Agreement</a>
                                 {% if not user.is_authenticated %}
                                 <a href="{% url 'registration_register' %}" class="text-capitalize">request account</a>
                                 <a href="{% url 'login' %}?next={% url 'firedepartment_list' %}" class="text-capitalize">login</a>
