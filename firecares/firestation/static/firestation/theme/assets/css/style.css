@@ -10865,6 +10865,9 @@ img.mfp-img {
 .navbar sup {
   color: #F29A00;
 }
+.sub-navbar sup {
+  color: #F29A00;
+}
 .ct-topBar {
   background: transparent;
   box-shadow: none;
@@ -12260,7 +12263,7 @@ div.is-your-department {
 .alert {
   position: relative;
   padding: 0;
-  min-height:33px;
+  min-height: 33px;
   padding-top: 4px;
   padding-left: 11px;
   min-width: 250px;
