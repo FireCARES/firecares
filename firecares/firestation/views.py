@@ -462,7 +462,7 @@ class FireDepartmentListView(PaginationMixin, ListView, SafeSortMixin, LimitMixi
             queryset = queryset.full_text_search(self.request.GET.get('q'))
 
         if self.request.GET.get('weather', 'false') == 'true':
-            queryset = queryset.filter(**{'departmentwarnings__expiredate__gte': timezone.now()})
+            queryset = queryset.filter(**{'departmentwarnings__expiredate__gte': timezone.now()}).distinct()
 
         if self.request.GET.get('cfai', 'false') == 'true':
             queryset = queryset.filter(**{'cfai_accredited': True})
