@@ -295,7 +295,6 @@ def update_nfirs_counts(id, year=None, stat=None):
     for statistic, query, params in queries:
         counts = copy.deepcopy(years)
         cursor.execute(query, params)
-        
         print "...updated NFIRS counts " + str(datetime.now())
 
         for count, year, level in cursor.fetchall():
