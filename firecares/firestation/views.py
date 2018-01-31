@@ -462,7 +462,7 @@ class FireDepartmentListView(PaginationMixin, ListView, SafeSortMixin, LimitMixi
             queryset = queryset.full_text_search(self.request.GET.get('q'))
 
         if self.request.GET.get('weather', 'false') == 'true':
-            queryset = queryset.filter(**{'departmentwarnings__expiredate__gte': timezone.now()}).distinct()
+            queryset = queryset.filter(**{'departmentwarnings__expiredate__gte': timezone.now()})
 
         if self.request.GET.get('cfai', 'false') == 'true':
             queryset = queryset.filter(**{'cfai_accredited': True})
@@ -484,11 +484,16 @@ class FireDepartmentListView(PaginationMixin, ListView, SafeSortMixin, LimitMixi
                     Max = int(max)
 
                     if field == 'dist_model_score':
-                        if Min:
-                            queryset = queryset.filter(**{'firedepartmentriskmodels__level': 0, 'firedepartmentriskmodels__dist_model_score__gte': Min})
-
+                        # include null values with a zero query
+                        from django.db.models import Q
                         if Max:
-                            queryset = queryset.filter(**{'firedepartmentriskmodels__level': 0, 'firedepartmentriskmodels__dist_model_score__lte': Max} | {'firedepartmentriskmodels__dist_model_score__isnull': True})
+                            queryset = queryset.filter(Q(**{'firedepartmentriskmodels__level': 0, 'firedepartmentriskmodels__dist_model_score__lte': Max}) | Q(**{'firedepartmentriskmodels__level': 0, 'firedepartmentriskmodels__dist_model_score__isnull': True}))
+
+                        if str(Min):
+                            if str(Min) == '0':
+                                queryset = queryset.filter(Q(**{'firedepartmentriskmodels__level': 0, 'firedepartmentriskmodels__dist_model_score__gte': Min}) | Q(**{'firedepartmentriskmodels__level': 0, 'firedepartmentriskmodels__dist_model_score__isnull': True}))
+                            else:
+                                queryset = queryset.filter(**{'firedepartmentriskmodels__level': 0, 'firedepartmentriskmodels__dist_model_score__gte': Min})
                     else:
                         if Min:
                             queryset = queryset.filter(**{field + '__gte': Min})
