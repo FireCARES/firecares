@@ -486,14 +486,12 @@ class FireDepartmentListView(PaginationMixin, ListView, SafeSortMixin, LimitMixi
                     if field == 'dist_model_score':
                         # include null values with a zero query
                         from django.db.models import Q
-                        if Max:
+                        # don't filter and show all, some data has no level
+                        if Max < 380:
                             queryset = queryset.filter(Q(**{'firedepartmentriskmodels__level': 0, 'firedepartmentriskmodels__dist_model_score__lte': Max}) | Q(**{'firedepartmentriskmodels__level': 0, 'firedepartmentriskmodels__dist_model_score__isnull': True}))
 
-                        if str(Min):
-                            if str(Min) == '0':
-                                queryset = queryset.filter(Q(**{'firedepartmentriskmodels__level': 0, 'firedepartmentriskmodels__dist_model_score__gte': Min}) | Q(**{'firedepartmentriskmodels__level': 0, 'firedepartmentriskmodels__dist_model_score__isnull': True}))
-                            else:
-                                queryset = queryset.filter(**{'firedepartmentriskmodels__level': 0, 'firedepartmentriskmodels__dist_model_score__gte': Min})
+                        if str(Min) != '0':
+                            queryset = queryset.filter(**{'firedepartmentriskmodels__level': 0, 'firedepartmentriskmodels__dist_model_score__gte': Min})
                     else:
                         if Min:
                             queryset = queryset.filter(**{field + '__gte': Min})

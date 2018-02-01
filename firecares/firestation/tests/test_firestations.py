@@ -553,7 +553,7 @@ class FireStationTests(BaseFirecaresTestcase):
         self.assertTrue(fd in response.context['object_list'])
 
         # regression test default params do not filter out the object
-        response = c.get('/departments?fdid=&state=&name=adak&region=&population=0+%2C+9818605&q=&dist_model_score=0+%2C+458&sortBy=&limit=')
+        response = c.get('/departments?favorites=false&weather=false&cfai=false&name=adak&population=0+%2C+8175133&dist_model_score=0+%2C+380&limit=')
         self.assertTrue(fd in response.context['object_list'])
 
         # test limit=0 does not throw a 500
