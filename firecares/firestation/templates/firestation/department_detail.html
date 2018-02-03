@@ -28,7 +28,10 @@
       superUser: {{ user.is_superuser|yesno:"true,false"}},
       staff: {{ user.is_staff|yesno:"true,false"}},
       emsTransport: {{object.ems_transport|yesno:"true,false"}},
-      cfai_accredited:{{object.cfai_accredited|yesno:"true,false"}}
+      cfai_accredited:{{object.cfai_accredited|yesno:"true,false"}},
+      boundary_verified:{{object.boundary_verified|yesno:"true,false"}},
+      staffing_verified:{{object.staffing_verified|yesno:"true,false"}},
+      stations_verified:{{object.stations_verified|yesno:"true,false"}}
     };
 
     var urls = {
@@ -99,7 +102,7 @@
         <a href="{% url 'firedepartment_detail' object.id %}">{{ object.name }}</a>
     </div>
 </div>
-<header class="ct-mediaSection">
+<header class="ct-mediaSection" style="overflow: initial">
     <div class="ct-mediaSection-inner">
         <div class="container">
             <div class="ct-u-displayTableVertical">
@@ -111,10 +114,106 @@
                     </span>
                     {% if object.cfai_accredited %}
                     <span class="ct-productID ct-fw-300" style='margin-left: 2px;'>
-                        <a href="http://www.cpse.org/agency-accreditation/about-accreditation-cfai.aspx" target="_blank" style="color:#F29A00"><i class="fa fa-shield"></i> CFAI Accredited </a>
-                            <!-- <img src="{{STATIC_URL}}/partners/cfai.png" alt="CFAI" height="30px"> -->
+                        <a href="http://www.cpse.org/agency-accreditation/about-accreditation-cfai.aspx" target="_blank" style="color:#F29A00;"><i class="fa fa-shield"></i> CFAI Accredited </a>
                     </span>
                     {% endif %}
+                    <span class="ct-productID ct-fw-300 dropdown pull-right" style='margin-left: 2px;position: absolute;margin-top:-3px;'>
+                        {% if user_can_change or user.is_superuser %}
+                            {% if object.boundary_verified = False or object.staffing_verified = False or object.stations_verified = False %}
+                                <a id="datareview1" href="" class="dropdown-toggle" type="button" data-toggle="dropdown" style="color:#F29A00;"><i class="fa fa-exclamation-triangle"></i> Data needs review</a>
+                            {% else %}
+                                <a id="datareview1" href="" class="dropdown-toggle" type="button" data-toggle="dropdown" style="color:#F29A00;"><i class="fa fa-fire"></i> Data verified</a>
+                            {% endif %}
+                            <ul class="dropdown-menu in-front" style="left:-2px;right:auto;" aria-labelledby="datareview1">
+                                <li>
+                                    {% if object.boundary_verified %}
+                                    <a href="">
+                                        <i style="color:#F29A00;margin-left: -12px;" class="fa fa-check-square">  </i>
+                                        Department Boundary Verified
+                                    </a>
+                                    {% else %}
+                                    <a href="">
+                                        <i style="color:#F29A00;margin-left: -12px;" class="fa fa-square">  </i>
+                                        Department Boundary Verified
+                                    </a>
+                                    {% endif %}
+                                </li>
+                                <li>
+                                    {% if object.staffing_verified %}
+                                    <a href="">
+                                        <i style="color:#F29A00;margin-left: -12px;" class="fa fa-check-square">  </i>
+                                        Department Staffing Verified
+                                    </a>
+                                    {% else %}
+                                    <a href="">
+                                        <i style="color:#F29A00;margin-left: -12px;" class="fa fa-square">  </i>
+                                        Department Staffing Verified
+                                    </a>
+                                    {% endif %}
+                                </li>
+                                <li>
+                                    {% if object.stations_verified %}
+                                    <a href="">
+                                        <i style="color:#F29A00;margin-left: -12px;" class="fa fa-check-square">  </i>
+                                        Station Locations Verified
+                                    </a>
+                                    {% else %}
+                                    <a href="">
+                                        <i style="color:#F29A00;margin-left: -12px;" class="fa fa-square">  </i>
+                                        Station Locations Verified
+                                    </a>
+                                    {% endif %}
+                                </li>
+                            </ul>
+                        {% else %}
+                            {% if object.boundary_verified = False or object.staffing_verified = False or object.stations_verified = False %}
+                                <a id="datareview1" href="" class="dropdown-toggle" type="button" data-toggle="dropdown" style="color:#F29A00;"><i class="fa fa-exclamation-triangle"></i> Data needs review</a>
+                            {% else %}
+                                <a id="datareview1" href="" class="dropdown-toggle" type="button" data-toggle="dropdown" style="color:#F29A00;"><i class="fa fa-fire"></i> Data verified</a>
+                            {% endif %}
+                            <ul class="dropdown-menu in-front" style="left:-2px;right:auto;" aria-labelledby="datareview1">
+                                <li>
+                                    {% if object.boundary_verified %}
+                                    <a style="cursor: initial;">
+                                        <i style="color:#F29A00;margin-left: -12px;" class="fa fa-check-square">  </i>
+                                        Department Boundary Verified
+                                    </a>
+                                    {% else %}
+                                    <a style="cursor: initial;">
+                                        <i style="color:#F29A00;margin-left: -12px;" class="fa fa-square">  </i>
+                                        Department Boundary Verified
+                                    </a>
+                                    {% endif %}
+                                </li>
+                                <li>
+                                    {% if object.staffing_verified %}
+                                    <a style="cursor: initial;">
+                                        <i style="color:#F29A00;margin-left: -12px;" class="fa fa-check-square">  </i>
+                                        Department Staffing Verified
+                                    </a>
+                                    {% else %}
+                                    <a style="cursor: initial;">
+                                        <i style="color:#F29A00;margin-left: -12px;" class="fa fa-square">  </i>
+                                        Department Staffing Verified
+                                    </a>
+                                    {% endif %}
+                                </li>
+                                <li>
+                                    {% if object.stations_verified %}
+                                    <a style="cursor: initial;">
+                                        <i style="color:#F29A00;margin-left: -12px;" class="fa fa-check-square">  </i>
+                                        Station Locations Verified
+                                    </a>
+                                    {% else %}
+                                    <a style="cursor: initial;">
+                                        <i style="color:#F29A00;margin-left: -12px;" class="fa fa-square">  </i>
+                                        Station Locations Verified
+                                    </a>
+                                    {% endif %}
+                                </li>
+                            </ul>
+                        {% endif %}
+                    </span>
                     {% if object.archived %}
                         <span class="ct-productID ct-fw-300" style="margin-left: 10px">
                             <span>ARCHIVED</span>
@@ -202,6 +301,12 @@
                                         <a href="" ng-controller="ImportController" ng-click="open(null, '{{ STATIC_URL }}osgeo_importer/partials/uploadWizard.html', '{{ STATIC_URL }}mapstory/img/mapstory-icon.png', '{{STATIC_URL}}')">
                                             <i class="fa fa-cloud-upload"></i>
                                             Update Data
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'admin:firestation_firedepartment_change' object.id %}" target="_blank">
+                                            <i class="fa fa-cogs"></i>
+                                            Access Department Admin Page
                                         </a>
                                     </li>
                                     {% endif %}

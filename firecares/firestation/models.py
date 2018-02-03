@@ -315,6 +315,8 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
     ems_transport = models.BooleanField(default=False)
     boundary_verified = models.BooleanField(default=False)
     cfai_accredited = models.BooleanField(default=False)
+    staffing_verified = models.BooleanField(default=False)
+    stations_verified = models.BooleanField(default=False)
 
     class Meta:
         ordering = ('name',)

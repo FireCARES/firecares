@@ -597,6 +597,10 @@
           });
         };
 
+        $scope.updateFireDepartment = function() {
+          return FireDepartment.update({id: $scope.firedepartment.id}, $scope.firedepartment);
+        };
+
         $scope.cancelBoundary = function() {
           departmentMap.removeLayer($scope.shp);
           $scope.shp = null;

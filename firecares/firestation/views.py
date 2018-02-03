@@ -589,7 +589,7 @@ class AddStationView(LoginRequiredMixin, FormView):
             return super(AddStationView, self).form_valid(form)
 
     def get_success_url(self):
-        return reverse('firestation_detail_slug', kwargs=dict(pk=self.station.id, slug=self.station.name))
+        return reverse('firestation_detail_slug', kwargs=dict(pk=self.station.id, slug=self.station.slug))
 
 
 class FireStationFavoriteListView(LoginRequiredMixin, PaginationMixin, ListView, SafeSortMixin, LimitMixin):
