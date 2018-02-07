@@ -598,7 +598,18 @@
         };
 
         $scope.updateFireDepartment = function() {
-          return FireDepartment.update({id: $scope.firedepartment.id}, $scope.firedepartment);
+          var fd = new FireDepartment({
+            id: config.id,
+            boundary_verified:true,
+            staffing_verified:true,
+            stations_verified:true
+          });
+          fd.$update().then(function() {
+            $scope.messages = [];
+            $scope.messages.push({class: 'alert-success', text: 'Department updated.'});
+          }, function() {
+            $scope.messages.push({class: 'alert-danger', text: 'Server issue updating Department Information.'});
+          });
         };
 
         $scope.cancelBoundary = function() {

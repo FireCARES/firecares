@@ -27,7 +27,11 @@
       centroid: [{{ object.headquarters_address.geom.centroid.y }}, {{ object.headquarters_address.geom.centroid.x }}],
       headquarters: {{ object.headquarters_address.geom.json|safe|default:"null" }},
       headquartersName: "{{ object.name }} Headquarters",
-      id: {{object.id}}
+      id: {{object.id}},
+      cfai_accredited:{{object.cfai_accredited|yesno:"true,false"}},
+      boundary_verified:{{object.boundary_verified|yesno:"true,false"}},
+      staffing_verified:{{object.staffing_verified|yesno:"true,false"}},
+      stations_verified:{{object.stations_verified|yesno:"true,false"}}
     }
     </script>
     {% include 'google_analytics.html' %}
@@ -69,11 +73,24 @@
         <div class="container">
             <div class="ct-u-displayTableVertical">
                 <div class="ct-textBox ct-u-text--white ct-u-displayTableCell text-left">
+                    {% if object.boundary_verified = True and object.staffing_verified = True and object.stations_verified = True %}
+                        {% if user_can_change or user.is_superuser %}
+                        <h2>{{ object.name }}<span style="bottom: 14px;position: relative;padding-left:2px;"><a href="{%url 'firedepartment_data_validation' object.id %}"><img src="{{ STATIC_URL }}images/verified-badge.png" title="Data Verified"></a></span></h2>
+                        {% else %}
+                        <h2>{{ object.name }}<span style="bottom: 14px;position: relative;padding-left:2px;"><img src="{{ STATIC_URL }}images/verified-badge.png" title="Data Verified"></span></h2>
+                        {% endif %}
+                    {% else %}
                     <h2>{{ object.name }}</h2>
+                    {% endif %}
                     <h4>{{ object.headquarters_address.get_row_display }}</h4>
                     <span class="ct-productID ct-fw-300">
                         FDID: <span>{{ object.fdid }}</span>
                     </span>
+                    {% if object.cfai_accredited %}
+                    <span class="ct-productID ct-fw-300" style='margin-left: 2px;'>
+                        <a href="http://www.cpse.org/agency-accreditation/about-accreditation-cfai.aspx" target="_blank" style="color:#F29A00;"><i class="fa fa-shield"></i> CFAI Accredited </a>
+                    </span>
+                    {% endif %}
                 </div>
                 <div class="ct-u-displayTableCell text-right">
                     {% include 'firestation/_department_header.html' %}

@@ -1,0 +1,205 @@
+{% load humanize %}
+{% load firecares_tags %}
+{% load widget_tweaks %}
+
+<!DOCTYPE html>
+<!--[if IE 8 ]>
+<html class="no-js ie8" lang="en"> <![endif]-->
+<!--[if IE 9 ]>
+<html class="no-js ie9" lang="en"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="description" content="{{ object.description }} Data Validation page for {{ object.name }}.">
+    <meta name="author" content="Prominent Edge LLC">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <title>Data Validation page for fire department: {{ object.name }}</title>
+    {% include 'firestation/_favicon.html' %}
+    {% include "firestation/_firecares_style.html" %}
+
+
+    <script type="text/javascript">
+    var config = {
+      geom: {{ object.geom.json|safe|default:"null" }},
+      centroid: [{{ object.headquarters_address.geom.centroid.y }}, {{ object.headquarters_address.geom.centroid.x }}],
+      headquarters: {{ object.headquarters_address.geom.json|safe|default:"null" }},
+      headquartersName: "{{ object.name }} Headquarters",
+      id: {{object.id}},
+      cfai_accredited:{{object.cfai_accredited|yesno:"true,false"}},
+      boundary_verified:{{object.boundary_verified|yesno:"true,false"}},
+      staffing_verified:{{object.staffing_verified|yesno:"true,false"}},
+      stations_verified:{{object.stations_verified|yesno:"true,false"}}
+    }
+    </script>
+    {% include 'google_analytics.html' %}
+</head>
+
+<body class="ct-headroom--fixedTopBar cssAnimate" ng-controller="jurisdictionController" ng-app="fireStation">
+
+{% include 'firestation/_mobile_navbar.html' %}
+{% include 'firestation/_mobile_search.html' %}
+
+<div id="ct-js-wrapper" class="ct-pageWrapper">
+
+<div class="ct-navbarMobile">
+    <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand logo" href="{% url 'firestation_home' %}"><h1>FireCARES</h1></a>
+    <button type="button" class="searchForm-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span><i class="fa fa-search"></i></span>
+    </button>
+</div>
+
+{% include "firestation/_navbar.html" %}
+
+<div class="ct-site--map">
+    <div class="container">
+        <a href="{% url 'firestation_home' %}">Home</a>
+        <a href="{% url 'firedepartment_list' %}">Departments</a>
+        <a href="{% url 'firedepartment_detail_slug' object.id object.slug %}">{{ object.name }}</a>
+        <a href="{% url 'firedepartment_update_government_units' object.id %}">Data Validation</a>
+    </div>
+</div>
+<header class="ct-mediaSection">
+    <div class="ct-mediaSection-inner">
+        <div class="container">
+            <div class="ct-u-displayTableVertical">
+                <div class="ct-textBox ct-u-text--white ct-u-displayTableCell text-left">
+                    {% if object.boundary_verified = True and object.staffing_verified = True and object.stations_verified = True %}
+                        {% if user_can_change or user.is_superuser %}
+                        <h2>{{ object.name }}<span style="bottom: 14px;position: relative;padding-left:2px;"><a href="{%url 'firedepartment_data_validation' object.id %}"><img src="{{ STATIC_URL }}images/verified-badge.png" title="Data Verified"></a></span></h2>
+                        {% else %}
+                        <h2>{{ object.name }}<span style="bottom: 14px;position: relative;padding-left:2px;"><img src="{{ STATIC_URL }}images/verified-badge.png" title="Data Verified"></span></h2>
+                        {% endif %}
+                    {% else %}
+                    <h2>{{ object.name }}</h2>
+                    {% endif %}
+                    <h4>{{ object.headquarters_address.get_row_display }}</h4>
+                    <span class="ct-productID ct-fw-300">
+                        FDID: <span>{{ object.fdid }}</span>
+                    </span>
+                    {% if object.cfai_accredited %}
+                    <span class="ct-productID ct-fw-300" style='margin-left: 2px;'>
+                        <a href="http://www.cpse.org/agency-accreditation/about-accreditation-cfai.aspx" target="_blank" style="color:#F29A00;"><i class="fa fa-shield"></i> CFAI Accredited </a>
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="ct-u-displayTableCell text-right">
+                    {% include 'firestation/_department_header.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<section class="ct-u-paddingBottom60">
+    <div class="container">
+        <div class="ct-section--products">
+            <div class="row">
+                <div class="col-md-12 col-lg-12">
+                    <div class="ct-heading ct-u-marginBottom20 ct-u-marginTop30">
+                        <h4>{{ object.name }} Data Validation</h4>
+                    </div>
+                    <form role="form" method="post" class="usgs" action="{% url 'firedepartment_data_validation' object.id %}">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="ct-u-displayTableVertical ct-productDetails">
+                                    <div class="ct-u-displayTableRow">
+                                        <div class="ct-u-displayTableCell">
+                                            <span class="ct-fw-600">Verify Station Staffing Information</span>
+                                        </div>
+                                        <div class="ct-u-displayTableCell text-right">
+                                            <span><input style='float:right' type="checkbox" name="staffing" value="{{ object.staffing_verified }}" {% if object.staffing_verified %}checked="checked" {% endif %}/></span>
+                                        </div>
+                                    </div>
+                                    <div class="ct-u-displayTableRow">
+                                        <div class="ct-u-displayTableCell">
+                                            <b><span class="ct-fw-600">Verify Department Boundary</span></b>
+                                        </div>
+                                        <div class="ct-u-displayTableCell text-right">
+                                            <span><input style='float:right' type="checkbox" name="boundary" value="{{ object.boundary_verified }}" {% if object.boundary_verified %}checked="checked" {% endif %}/></span>
+                                        </div>
+                                    </div>
+                                    <div class="ct-u-displayTableRow">
+                                        <div class="ct-u-displayTableCell">
+                                            <span class="ct-fw-600">Verify Station Locations</span>
+                                        </div>
+                                        <div class="ct-u-displayTableCell text-right">
+                                            <span><input style='float:right' type="checkbox" name="stations" value="{{ object.stations_verified }}" {% if object.stations_verified %}checked="checked" {% endif %}/></span>
+                                        </div>
+                                    </div>
+                                    <div class="ct-u-displayTableRow">
+                                        <div class="ct-u-displayTableCell">
+                                            <span class="ct-fw-600">State</span>
+                                        </div>
+                                        <div class="ct-u-displayTableCell text-right">
+                                            <span>{{ object.state }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="ct-u-displayTableRow">
+                                        <div class="ct-u-displayTableCell">
+                                            <span class="ct-fw-600">Protected population</span>
+                                        </div>
+                                        <div class="ct-u-displayTableCell text-right">
+                                            {% if object.population %}
+                                            <span>{{ object.population|intcomma }}</span>
+                                            {% else %}
+                                            <span>Unknown</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="ct-u-displayTableRow">
+                                        <div class="ct-u-displayTableCell">
+                                            <span class="ct-fw-600">Community size</span>
+                                        </div>
+                                        <div class="ct-u-displayTableCell text-right">
+                                            <span>{{ object.geom_area|floatformat:"2"|intcomma}} <span>mi&sup2;</span></span>
+                                        </div>
+                                    </div>
+                                    <div class="ct-u-displayTableRow">
+                                    </div>
+                                    <br>
+                                    <br>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div id="map"></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 col-lg-12 ct-u-marginTop10">
+                                <div class="ct-u-displayTableVertical">
+                                    <div class="ct-u-displayTableCell text-left">
+                                        <i class="fa fa-clock-o pull-left"></i><h6>Last Updated: {{ object.modified }}</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div class="submission">
+                            <label class="pull-left">
+                                Update Department data validation Settings
+                            </label>
+                            <button class="btn btn-primary btn-xlarge pull-left ct-u-marginTop20" type="submit">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% include 'firestation/_footer.html' %}
+</div>
+
+{% include "firestation/_firecares_scripts.html" %}
+
+</body>
+</html>
