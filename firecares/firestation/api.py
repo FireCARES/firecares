@@ -209,7 +209,7 @@ class FireDepartmentResource(JSONDefaultModelResourceMixin, ModelResource):
                                               delete_permission_code='admin_firedepartment')
         authentication = MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
         cache = SimpleCache()
-        list_allowed_methods = ['get']
+        list_allowed_methods = ['get', 'put']
         detail_allowed_methods = ['get', 'put']
         filtering = {'state': ALL, 'featured': ALL, 'fdid': ALL}
         serializer = PrettyJSONSerializer()
@@ -222,10 +222,13 @@ class FireDepartmentResource(JSONDefaultModelResourceMixin, ModelResource):
             self.fields[f].readonly = True
 
     def hydrate_geom(self, bundle):
-        geom = bundle.data.get('geom')
-        boundary = geos.GEOSGeometry(json.dumps(geom))
-        if type(boundary) is geos.Polygon:
-            bundle.data['geom'] = json.loads(geos.MultiPolygon(boundary).json)
+        try:
+            geom = bundle.data.get('geom')
+            boundary = geos.GEOSGeometry(json.dumps(geom))
+            if type(boundary) is geos.Polygon:
+                bundle.data['geom'] = json.loads(geos.MultiPolygon(boundary).json)
+        except:
+            bundle.data['geom'] = None
         return bundle
 
     def dehydrate(self, bundle):

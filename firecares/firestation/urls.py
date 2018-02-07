@@ -1,7 +1,7 @@
 from .views import (DepartmentDetailView, Stats, FireDepartmentListView, FireStationFavoriteListView,
                     SimilarDepartmentsListView, DepartmentUpdateGovernmentUnits, FireStationDetailView,
                     DownloadShapefile, DocumentsView, DocumentsFileView, DocumentsDeleteView, AddStationView,
-                    RemoveIntersectingDepartments, AdminDepartmentUsers, AdminDepartmentAccountRequests,
+                    RemoveIntersectingDepartments, AdminDepartmentUsers, AdminDepartmentAccountRequests, DepartmentDataValidationView,
                     DataFeedbackView)
 from .slack import FireCARESSlack
 from django.views.generic import TemplateView
@@ -18,6 +18,7 @@ urlpatterns = patterns('',
                        url(r'^departments/(?P<pk>\d+)/(?P<slug>[\w-]+)/fire-districts.shp$', DownloadShapefile.as_view(), kwargs=dict(geometry_field='district'), name='department_districts_shapefile'),
                        url(r'^departments/(?P<pk>\d+)/similar-departments/?$', SimilarDepartmentsListView.as_view(template_name='firestation/firedepartment_list.html'), name='similar_departments'),
                        url(r'^departments/(?P<pk>\d+)/settings/government-units/?$', DepartmentUpdateGovernmentUnits.as_view(), name='firedepartment_update_government_units'),
+                       url(r'^departments/(?P<pk>\d+)/settings/data-validation/?$', DepartmentDataValidationView.as_view(), name='firedepartment_data_validation'),
                        url(r'^departments/(?P<pk>\d+)/settings/intersecting-departments/?$', RemoveIntersectingDepartments.as_view(), name='remove_intersecting_departments'),
                        url(r'^departments/(?P<pk>\d+)/settings/users/?$', AdminDepartmentUsers.as_view(), name='admin_department_users'),
                        url(r'^departments/(?P<pk>\d+)/settings/verify-account-request/?$', AdminDepartmentAccountRequests.as_view(), name='admin_department_account_requests'),

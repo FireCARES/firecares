@@ -285,6 +285,39 @@ class DepartmentUpdateGovernmentUnits(PermissionRequiredMixin, LoginRequiredMixi
         return redirect(self.object)
 
 
+class DepartmentDataValidationView(PermissionRequiredMixin, LoginRequiredMixin, DetailView):
+    """
+    View to update a Department's associated government units.
+    """
+    model = FireDepartment
+    template_name = 'firestation/department_data_validation.html'
+    permission_required = 'change_firedepartment'
+
+    def get_context_data(self, **kwargs):
+        department = get_object_or_404(FireDepartment, pk=self.kwargs.get('pk'))
+
+        context = super(DepartmentDataValidationView, self).get_context_data(**kwargs)
+        context['object'] = department
+
+        context['user_can_change'] = self.object.is_curator(self.request.user)
+        context['user_can_admin'] = self.object.is_admin(self.request.user)
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        self.object.staffing_verified = map(bool, request.POST.getlist('staffing'))
+        self.object.stations_verified = map(bool, request.POST.getlist('stations'))
+        self.object.boundary_verified = map(bool, request.POST.getlist('boundary'))
+
+        messages.add_message(request, messages.SUCCESS, 'Department Data Validation updated')
+
+        self.object.save()
+
+        return redirect(self.object)
+
+
 class RemoveIntersectingDepartments(PermissionRequiredMixin, LoginRequiredMixin, DetailView):
     """
     View to update a Department's government unit.
@@ -462,7 +495,7 @@ class FireDepartmentListView(PaginationMixin, ListView, SafeSortMixin, LimitMixi
             queryset = queryset.full_text_search(self.request.GET.get('q'))
 
         if self.request.GET.get('weather', 'false') == 'true':
-            queryset = queryset.filter(**{'departmentwarnings__expiredate__gte': timezone.now()})
+            queryset = queryset.filter(**{'departmentwarnings__expiredate__gte': timezone.now()}).distinct()
 
         if self.request.GET.get('cfai', 'false') == 'true':
             queryset = queryset.filter(**{'cfai_accredited': True})
