@@ -495,7 +495,28 @@
                             <a name="stations"></a>
                             {% if not firestations %}
                             <div class="ct-heading ct-u-marginBottom20">
-                                <h3>No stations linked to this department </h3>
+                                <h3 style="line-height: 33px;">No stations linked to this department </h3>
+                                {% if user_can_change or user.is_superuser %}
+                                <div class="dropdown pull-right">
+                                    <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenuStation" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                        <i class="fa fa-cog"></i>
+                                      </button>
+                                    <ul class="dropdown-menu in-front" aria-labelledby="dropdownMenuStation">
+                                        <li>
+                                            <a href="{% url 'addstation' object.id %}">
+                                                <i class="fa fa-plus"></i>
+                                                Add New Station
+                                            </a>
+                                        </li>
+                                        <li>
+                                        <a href="{% url 'firedepartment_data_validation' object.id %}">
+                                            <i class="fa fa-check-circle"></i>
+                                            Validate Department Data
+                                        </a>
+                                    </li>
+                                    </ul>
+                                </div>
+                                {% endif %}
                             </div>
                             {% else %}
 
