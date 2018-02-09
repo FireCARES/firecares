@@ -119,21 +119,37 @@
 
             var weatherPolygons = [];
             var numWarnings = data.objects.length;
+            var relevantwarnings = false;
+            var relevantwarninglist = ['High Wind Watch', "High Wind Warning", "Air Stagnation Advisory", "Lake Wind Advisory", "Fire Weather Warning", "Wind Advisory", "Gale Watch", "Fire Weather Watch", "Red Flag Warning", "Gale Warning"];
+            var warningurllist = []; //not showing duplicate urls
 
             for (var i = 0; i < numWarnings; i++) {
               var warning = data.objects[i];
-              var poly = L.multiPolygon(warning.warngeom.coordinates.map(function(d){return mapPolygon(d)}),{color: '#f00', weight:'1px'});
-              var warningdate = new Date(warning.expiredate);
-              poly.bindPopup('<b>' + warning.prod_type + '</b><br/>Ending: ' + warningdate.toDateString() +' '+ warningdate.toLocaleTimeString() + '<br/><br/><a target="_blank" href='+warning.url+'>Click for More Info</a>');
-              weatherPolygons.push(poly);
-              $scope.weather_messages.push({class: 'alert-warning', text: '<a class="alert-link" target="_blank" href='+warning.url+'>'+' ' + warning.prod_type + '  Until  ' + warningdate.toDateString() +',  '+ warningdate.toLocaleTimeString().replace(':00 ',' ') +'</a>'});
+              
+              if(relevantwarninglist.indexOf(warning.prod_type) > -1){
+                relevantwarnings = true;
+              }
+
+              if(warningurllist.indexOf(warning.url) == -1){
+
+                var poly = L.multiPolygon(warning.warngeom.coordinates.map(function(d){return mapPolygon(d)}),{color: '#f00', weight:'1px'});
+                var warningdate = new Date(warning.expiredate);
+                poly.bindPopup('<b>' + warning.prod_type + '</b><br/>Ending: ' + warningdate.toDateString() +' '+ warningdate.toLocaleTimeString() + '<br/><br/><a target="_blank" href='+warning.url+'>Click for More Info</a>');
+                weatherPolygons.push(poly);
+                $scope.weather_messages.push({class: 'alert-warning', text: '<a class="alert-link" target="_blank" href='+warning.url+'>'+' ' + warning.prod_type + '  Until  ' + warningdate.toDateString() +',  '+ warningdate.toLocaleTimeString().replace(':00 ',' ') +'</a>'});
+                warningurllist.push(warning.url);
+              }
             }
 
             if (numWarnings > 0) {
               var weatherLayer = L.featureGroup(weatherPolygons);
               weatherLayer.id = 'weather';
-              weatherLayer.addTo(departmentMap); //deafult on
-              weatherLayer.bringToBack();
+
+              if(relevantwarnings){
+                weatherLayer.addTo(departmentMap); //deafult on only if there is wind or red flag warning
+                weatherLayer.bringToBack();
+              }
+
               layersControl.addOverlay(weatherLayer, 'Weather Warnings');
 
               // Hide layer when zoom gets to parcel layer z15

@@ -109,9 +109,9 @@
                 <div class="ct-textBox ct-u-text--white ct-u-displayTableCell text-left">
                     {% if object.boundary_verified = True and object.staffing_verified = True and object.stations_verified = True %}
                         {% if user_can_change or user.is_superuser %}
-                        <h2>{{ object.name }}<span style="bottom: 14px;position: relative;padding-left:2px;"><a href="{%url 'firedepartment_data_validation' object.id %}"><img src="{{ STATIC_URL }}images/verified-badge.png" title="Data Verified"></a></span></h2>
+                        <h2>{{ object.name }}<span style="bottom: 14px;position: relative;padding-left:2px;"><a href="{%url 'firedepartment_data_validation' object.id %}"><img src="{{ STATIC_URL }}images/verified-badge.png" title="Department Data Verified"></a></span></h2>
                         {% else %}
-                        <h2>{{ object.name }}<span style="bottom: 14px;position: relative;padding-left:2px;"><img src="{{ STATIC_URL }}images/verified-badge.png" title="Data Verified"></span></h2>
+                        <h2>{{ object.name }}<span style="bottom: 14px;position: relative;padding-left:2px;"><img src="{{ STATIC_URL }}images/verified-badge.png" title="Department Data Verified"></span></h2>
                         {% endif %}
                     {% else %}
                     <h2>{{ object.name }}</h2>
