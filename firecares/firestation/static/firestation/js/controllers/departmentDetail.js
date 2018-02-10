@@ -146,7 +146,7 @@
               weatherLayer.id = 'weather';
 
               if(relevantwarnings){
-                weatherLayer.addTo(departmentMap); //deafult on only if there is wind or red flag warning
+                weatherLayer.addTo(departmentMap); //deafult on only if there is wind or fire warning
                 weatherLayer.bringToBack();
               }
 
@@ -649,12 +649,14 @@
             //
             serviceArea = L.geoJson(null, {
               onEachFeature: function(feature, layer) {
-                  layer.bindPopup(feature.properties.Name + ' minutes');
-                  layer.on('mouseover', function(e) {
-                     layer.setStyle({fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5) + mouseOverAddedOpacity, fillColor: highlightColor});
+                  layer.bindLabel(feature.properties.Name + ' minutes');
+                  var popup = layer.bindPopup(feature.properties.Name + ' minutes');
+                  popup.on("popupclose", function(e) {
+                      e.layer.setStyle({weight: 0.8, fillOpacity:-(feature.properties.ToBreak * 0.8 - max) / (max * 1.3), fillColor: '#33cc33'});
                   });
-                  layer.on('mouseout', function(e) {
-                     layer.setStyle({weight: 0.8, fillOpacity:-(feature.properties.ToBreak * 0.8 - max) / (max * 1.3), fillColor: '#33cc33'});
+
+                  layer.on('click', function(e) {
+                     e.layer.setStyle({fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5) + mouseOverAddedOpacity, fillColor: highlightColor});
                   });
               }
             });
@@ -735,13 +737,15 @@
             //
             efffArea = L.geoJson(null, {
               onEachFeature: function(feature, layer) {
-                  layer.bindPopup(feature.properties.Name + '<br>'+ feature.properties.ToBreak);
+                  
                   layer.bindLabel(feature.properties.Name + '<br>'+ feature.properties.ToBreak);
-                  layer.on('mouseover', function(e) {
-                     layer.setStyle({weight: .7,fillOpacity: .9, fillColor: feature.properties.tocolor, weight:3, color:'#fff', opacity:.8});
+                  var popup = layer.bindPopup(feature.properties.Name + '<br>'+ feature.properties.ToBreak);
+                  popup.on("popupclose", function(e) {
+                      e.layer.setStyle({weight: 0.1, fillOpacity:.4, fillColor: feature.properties.tocolor, weight:1, color:'#fff', opacity:.8});
                   });
-                  layer.on('mouseout', function(e) {
-                     layer.setStyle({weight: 0.1, fillOpacity:.4, fillColor: feature.properties.tocolor, weight:1, color:'#fff', opacity:.8});
+
+                  layer.on('click', function(e) {
+                     e.layer.setStyle({weight: .7,fillOpacity: .9, fillColor: feature.properties.tocolor, weight:3, color:'#fff', opacity:.8});
                   });
               }
             });
@@ -774,17 +778,17 @@
 
                         //merge geometries
                         var traveltime0 = { "type": "Feature",
-                            "properties": {"Name": "Travel Time 8 min", "ToBreak":"15+ Personnel Available", "tocolor": '#74ac49'},
+                            "properties": {"Name": "Travel Time: 8 min", "ToBreak":"15+ Personnel Available", "tocolor": '#74ac49', "hazard":'Low'},
                             "geometry": data.objects[0].drivetimegeom_15_26||null
                         }
                         var traveltime4 = { "type": "Feature",
-                            "properties": {"Name": "Travel Time: 8 min", "ToBreak":"27+ Personnel Available", "tocolor":'#f9b380'},//fa8e15
+                            "properties": {"Name": "Travel Time: 8 min", "ToBreak":"27+ Personnel Available", "tocolor":'#f9b380', "hazard":'Medium'},
                             "geometry": data.objects[0].drivetimegeom_27_42||null
                         }
                         
                         if(config.emsTransport){
                             var traveltime6 = { "type": "Feature",
-                                "properties": {"Name": "Travel Time: 10.17 min", "ToBreak":"38+ Personnel Available", "tocolor":'#f89983'},
+                                "properties": {"Name": "Travel Time: 10.17 min", "ToBreak":"38+ Personnel Available", "tocolor":'#f89983', "hazard":'High'},
                                 "geometry": data.objects[0].drivetimegeom_38_plus||null
                             }
                             $scope.parcel_efff_counts = [
@@ -794,7 +798,7 @@
                         }
                         else{
                             var traveltime6 = { "type": "Feature",
-                                "properties": {"Name": "Travel Time: 10.17 min", "ToBreak":"42+ Personnel Available", "tocolor":'#f89983'},
+                                "properties": {"Name": "Travel Time: 10.17 min", "ToBreak":"42+ Personnel Available", "tocolor":'#f89983', "hazard":'High'},
                                 "geometry": data.objects[0].drivetimegeom_43_plus||null
                             }
                         }
@@ -822,6 +826,22 @@
                     }
                     departmentMap.spin(false);
                     showEFFFChart(true);
+
+                    document.addEventListener("efffHighlight", function (e) {
+                      for (var l in efffArea._layers) {
+                        if(efffArea._layers[l].feature.properties.hazard == e.detail){
+                            efffArea._layers[l].setStyle({weight: .7,fillOpacity: .9, fillColor: efffArea._layers[l].feature.properties.tocolor, weight:3, color:'#fff', opacity:.8});
+                        }
+                        else{
+                            efffArea._layers[l].setStyle({weight: 0.1, fillOpacity:0, fillColor: efffArea._layers[l].feature.properties.tocolor, weight:1, color:'#fff', opacity:.8});
+                        }
+                      };
+                    });
+                    document.addEventListener("uNefffHighlight", function (e) {
+                      for (var l in efffArea._layers) {
+                          efffArea._layers[l].setStyle({weight: 0.1, fillOpacity:0.4, fillColor: efffArea._layers[l].feature.properties.tocolor, weight:1, color:'#fff', opacity:.8});
+                      };
+                    });
                 });
               }
             });
