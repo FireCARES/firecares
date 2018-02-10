@@ -604,7 +604,7 @@
           dataset: '@',
           height: '@'
         },
-        template: '<svg class="no-select"></svg>',
+        template: '<svg id="efffchart" class="no-select"></svg>',
         link: function(scope, element, attrs) {
           element.find('svg').appear(function() {
             var width = parseInt(attrs.width);
@@ -778,10 +778,18 @@
                     else{
                         tip.html("<strong>Personnel: </strong>"+elementData.name+"<br><strong>Hazard Level: </strong>"+nametitle[elementData.name]+"<br><strong>Parcels affected: </strong>"+elementData.value);
                     }
+
+                    //Hightlight on map
+                    var selectionName = new CustomEvent("efffHighlight", {"detail": nametitle[elementData.name]});
+                    document.dispatchEvent(selectionName);
                 });
             bar
                 .on("mouseout", function(d){
                     tip.style("display", "none");
+
+                    //unhighlight on map
+                    var unselectAll = new CustomEvent("uNefffHighlight", {});
+                    document.dispatchEvent(unselectAll);
                 });
 
             var legend = svg.selectAll(".legend")
