@@ -317,6 +317,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
     cfai_accredited = models.BooleanField(default=False)
     staffing_verified = models.BooleanField(default=False)
     stations_verified = models.BooleanField(default=False)
+    census_override = models.BooleanField(default=False)
 
     class Meta:
         ordering = ('name',)
@@ -502,7 +503,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
             pop = getattr(gov_unit, 'population', 0)
             population += pop
 
-        if population:
+        if population and not self.census_override:
             self.population = population
 
         self.population_class = self.get_population_class()
