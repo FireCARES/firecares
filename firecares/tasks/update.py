@@ -781,15 +781,29 @@ def update_parcel_effectivefirefighting_table(drivetimegeom, department):
     if drivetimegeomLT27:
         cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomLT27.intersection(department.owned_tracts_geom).json, 'owned_geom': department.owned_tracts_geom.wkb})
         results15 = dictfetchall(cursor)
+        if results15:
+            if results15[0]['unknown'] is None:
+                results15[0]['unknown'] = 0
+            if results15[0]['low'] is None:
+                results15[0]['low'] = 0
     if drivetimegeomLT42:
         cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomLT42.intersection(department.owned_tracts_geom).json, 'owned_geom': department.owned_tracts_geom.wkb})
         results27 = dictfetchall(cursor)
+        if results27:
+            if results27[0]['medium'] is None:
+                results27[0]['medium'] = 0
     if drivetimegeomGT38:
         cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomGT38.intersection(department.owned_tracts_geom).json, 'owned_geom': department.owned_tracts_geom.wkb})
         results38 = dictfetchall(cursor)
+        if results38:
+            if results38[0]['high'] is None:
+                results38[0]['high'] = 0
     if drivetimegeomGT41:
         cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomGT41.intersection(department.owned_tracts_geom).json, 'owned_geom': department.owned_tracts_geom.wkb})
         results42 = dictfetchall(cursor)
+        if results15:
+            if results42[0]['high'] is None:
+                results42[0]['high'] = 0
 
     # Overwrite/Update efff area if already loaded
     if EffectiveFireFightingForceLevel.objects.filter(department_id=department.id):
