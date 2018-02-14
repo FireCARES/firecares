@@ -1252,6 +1252,7 @@ def update_department(sender, instance, **kwargs):
     from firecares.tasks import update
     from firecares import celery
     celery.cache_thumbnail.delay(instance.id, upload_to_s3=not(settings.TESTING))
+    celery.run_erf_update_task.delay(instance.id)
     update.update_department.delay(instance.id)
 
 
@@ -1259,9 +1260,9 @@ def update_station(sender, instance, **kwargs):
     """
     Updates Drive time and service area calculations after Station change
     """
-    from firecares.tasks import update
+    from firecares import celery
     if(instance.department_id):
-        update.get_parcel_department_hazard_level_rollup(instance.department_id)
+        celery.run_erf_update_task.delay(instance.department_id)
 
 
 def create_national_calculations_view(sender, **kwargs):
@@ -1455,7 +1456,7 @@ class EffectiveFireFightingForceLevel(models.Model):
 
 post_save.connect(set_department_region, sender=FireDepartment)
 post_save.connect(update_department, sender=FireDepartment)
-# post_save.connect(update_station, sender=FireStation)
+post_save.connect(update_station, sender=FireStation)
 reversion.register(FireStation)
 reversion.register(FireDepartment)
 reversion.register(Staffing)

@@ -245,7 +245,6 @@ def update_department(id):
     print "updating department {}".format(id)
     chain(update_nfirs_counts.si(id),
           update_performance_score.si(id),
-          # get_parcel_department_hazard_level_rollup(id), taking too long
           group(calculate_department_census_geom.si(), refresh_quartile_view_task.si(), refresh_national_calculations_view_task.si())).delay()
 
 
@@ -657,7 +656,7 @@ def update_parcel_department_effectivefirefighting_rollup(fd_id):
     dept = FireDepartment.objects.filter(id=fd_id)
     staffingtotal = "1"  # assume staffing minimum of 1 for now
 
-    if dept[0].geom is None:
+    if dept[0].owned_tracts_geom is None:
 
         print "No geometry for the department " + dept[0].name
 

@@ -8,6 +8,7 @@ from celery import Celery
 from django.conf import settings
 from firecares.utils.s3put import singlepart_upload
 from celery.task import current
+from firecares.tasks import update
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'firecares.settings.local')
@@ -38,6 +39,13 @@ def download_file(url, download_to=None):
 @app.task(bind=True)
 def debug_task(self):
     print('Request: {0!r}'.format(self.request))
+
+
+@app.task(rate_limit=40)
+def run_erf_update_task(fid):
+    # post save department
+    update.get_parcel_department_hazard_level_rollup(fid)
+    print('Updating ERF Data for Department ' + str(fid))
 
 
 @app.task(rate_limit=10)
