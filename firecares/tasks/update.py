@@ -7,6 +7,7 @@ import time
 from django.db.utils import IntegrityError
 from firecares.utils.arcgis2geojson import arcgis2geojson
 from celery import chain, group
+from celery.task.control import inspect
 from firecares.celery import app
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon, fromstr
 from django.db import connections
@@ -456,7 +457,38 @@ def calculate_story_distribution(fd_id):
         rm.save()
 
 
-@app.task(queue='servicearea')
+@app.task(queue='dataanalysis')
+def run_analysis_update_tasks(fid):
+    """
+    Task for updating the any analysis features from station or department change/update.
+    Using cache to make sure duplicates are not run and overlap
+    """
+
+    taskinspector = inspect()
+    duplicatetask = False
+
+    print taskinspector.reserved()
+    print taskinspector.active_queues()
+    print taskinspector.scheduled()
+    print taskinspector.active()
+
+    active_tasks = taskinspector.active().values()[0]
+    queue_tasks = taskinspector.reserved().values()[0]
+    for task in queue_tasks:
+        print task['request']['name']
+        duplicatetask = True
+
+    for task in active_tasks:
+        print task['request']['name']
+        duplicatetask = True
+
+    if not duplicatetask:
+
+        get_parcel_department_hazard_level_rollup.delay(fid)
+        update_parcel_department_effectivefirefighting_rollup.delay(fid)
+
+
+@app.task(queue='dataanalysis')
 def create_parcel_department_hazard_level_rollup_all():
     """
     Task for updating the servicearea table rolling up parcel hazard categories with departement drive time data
@@ -465,6 +497,7 @@ def create_parcel_department_hazard_level_rollup_all():
         get_parcel_department_hazard_level_rollup(fd)
 
 
+@app.task(queue='dataanalysis')
 def get_parcel_department_hazard_level_rollup(fd_id):
     """
     Update for one department for the drive time hazard level
@@ -616,7 +649,7 @@ def update_parcel_department_hazard_level(drivetimegeom, department):
     addhazardlevelfordepartment.save()
 
 
-@app.task(queue='servicearea')
+@app.task(queue='dataanalysis')
 def create_effective_firefighting_rollup_all():
     """
     Task for updating the effective fire fighting force EffectiveFireFightingForceLevel table
@@ -648,6 +681,7 @@ def get_async_efff_service_status(jobid, dept_name):
         get_async_efff_service_status(jobid, dept_name)
 
 
+@app.task(queue='dataanalysis')
 def update_parcel_department_effectivefirefighting_rollup(fd_id):
     """
     Update for one department for the effective fire fighting force

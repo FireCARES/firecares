@@ -323,7 +323,7 @@ CELERY_QUEUES = [
     Queue('cleanup', routing_key='cleanup'),
     Queue('quality-control', routing_key='quality-control'),
     Queue('slack', routing_key='slack'),
-    Queue('servicearea', routing_key='servicearea'),
+    Queue('dataanalysis', routing_key='dataanalysis'),
     Queue('weather-task', routing_key='weather-task'),
     Queue('singlenode', routing_key='singlenode'),
 ]
