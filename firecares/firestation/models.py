@@ -1267,12 +1267,12 @@ def update_station(sender, instance, **kwargs):
 
 def update_station_from_staffing(sender, instance, **kwargs):
     """
-    Updates Drive time and service area calculations after Station change
+    Updates Drive time and service area calculations after Station Staffin change
     """
     from firecares.tasks import update
 
     if(instance.firestation):
-        fid = FireStation.filter(usgsstructuredata_ptr_id=instance.firestation)[0].department_id
+        fid = FireStation.objects.filter(usgsstructuredata_ptr_id=instance.firestation)[0].department_id
         update.run_analysis_update_tasks.delay(fid)
 
 

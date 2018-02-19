@@ -599,7 +599,7 @@ class AddStationView(LoginRequiredMixin, FormView):
 
             if form.is_valid():
                 if self.form_valid(form) == 'Geocode Error':
-                    messages.add_message(request, messages.ERROR, 'An error has occured finding the Station location.  Please check the address.')
+                    messages.add_message(request, messages.ERROR, 'A geocoding error has occured finding the Station location.  Please check the address or try again in a few minutes.')
                     return super(AddStationView, self).form_invalid(form)
                 else:
                     messages.success(request, 'Station Created successfully')
@@ -610,16 +610,21 @@ class AddStationView(LoginRequiredMixin, FormView):
 
     def form_valid(self, form):
 
-        station = form.save(commit=False)
-        fd = FireDepartment.objects.get(pk=self.kwargs.get('pk'))
-        addresss_str = station.address + "" + station.state + "" + station.city + "" + station.zipcode
-        station = station.create_station(department=fd, address_string=addresss_str, name=station.name, station_number=station.station_number)
+        try:
+            station = form.save(commit=False)
+            fd = FireDepartment.objects.get(pk=self.kwargs.get('pk'))
+            addresss_str = station.address + "" + station.state + "" + station.city + "" + station.zipcode
+            station = station.create_station(department=fd, address_string=addresss_str, name=station.name, station_number=station.station_number)
 
-        if station is None:
+            if station is None:
+                return "Geocode Error"
+            else:
+                self.station = station
+                return super(AddStationView, self).form_valid(form)
+
+        except:
+            print 'Geocoding Problem'
             return "Geocode Error"
-        else:
-            self.station = station
-            return super(AddStationView, self).form_valid(form)
 
     def get_success_url(self):
         return reverse('firestation_detail_slug', kwargs=dict(pk=self.station.id, slug=self.station.slug))

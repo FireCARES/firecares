@@ -465,7 +465,7 @@ def run_analysis_update_tasks(fid):
     """
 
     taskinspector = inspect()
-    duplicatetask = False
+    duplicatetask = True
 
     print taskinspector.reserved()
     print taskinspector.active_queues()
@@ -482,10 +482,10 @@ def run_analysis_update_tasks(fid):
         print task['request']['name']
         duplicatetask = True
 
-    if not duplicatetask:
+    #if not duplicatetask:
 
-        get_parcel_department_hazard_level_rollup.delay(fid)
-        update_parcel_department_effectivefirefighting_rollup.delay(fid)
+    get_parcel_department_hazard_level_rollup(fid)
+    update_parcel_department_effectivefirefighting_rollup(fid)
 
 
 @app.task(queue='dataanalysis')
