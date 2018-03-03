@@ -228,12 +228,19 @@ class FireDepartmentResource(JSONDefaultModelResourceMixin, ModelResource):
 
     def prepend_urls(self):
         return [
-            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/name%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_name'), name="api_get_name"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/grafana%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_grafana_line'), name="api_get_name"),
         ]
 
-    def get_name(self, request, **kwargs):
-        self.method_check(request, allowed=['get'])
+    def get_grafana_line(self, request, **kwargs):
+        self.method_check(request, allowed=['get', 'options'])
         self.is_authenticated(request)
+
+        response = HttpResponse()
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Headers'] = 'Content-Type'
+
+        if request.method == 'options':
+            return response
 
         try:
             bundle = self.build_bundle(data={'pk': kwargs['pk']}, request=request)
@@ -243,7 +250,8 @@ class FireDepartmentResource(JSONDefaultModelResourceMixin, ModelResource):
         except MultipleObjectsReturned:
             return HttpMultipleChoices("More than one resource is found at this URI.")
 
-        return HttpResponse(obj.name)
+        response.content = '<h2>{}</h2><span>FDID: {} STATE: {} POPULATION: {}</span>'.format(obj.name, obj.fdid, obj.state, obj.population)
+        return response
 
     def hydrate_geom(self, bundle):
         try:
