@@ -157,7 +157,6 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-    'tastypie',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',

@@ -71,17 +71,19 @@
 
     serviceArea = L.geoJson(null, {
       onEachFeature: function(feature, layer) {
-          layer.bindPopup(feature.properties.Name + ' minutes');
-          layer.on('mouseover', function(e) {
-             layer.setStyle({fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5) + mouseOverAddedOpacity, fillColor: highlightColor, weight: 4});
+          layer.bindLabel(feature.properties.Name + ' minutes');
+          var popup = layer.bindPopup(feature.properties.Name + ' minutes');
+          popup.on("popupclose", function(e) {
+              e.layer.setStyle({weight: 0.8, fillOpacity:-(feature.properties.ToBreak * 0.8 - max) / (max * 1.3), fillColor: '#33cc33'});
           });
-          layer.on('mouseout', function(e) {
-             layer.setStyle({weight: 0.8, fillOpacity:-(feature.properties.ToBreak * 0.8 - max) / (max * 1.5), fillColor: '#33cc33', weight: 1});
+
+          layer.on('click', function(e) {
+             e.layer.setStyle({fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5) + mouseOverAddedOpacity, fillColor: highlightColor});
           });
       }
     });
 
-    layersControl.addOverlay(serviceArea, 'Service area');
+    layersControl.addOverlay(serviceArea, 'Service Areas');
 
     if (config.district) {
       district = L.geoJson(config.district, {

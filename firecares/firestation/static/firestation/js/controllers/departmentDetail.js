@@ -661,7 +661,7 @@
               }
             });
 
-            layersControl.addOverlay(serviceArea, 'Service Area');
+            layersControl.addOverlay(serviceArea, 'Service Areas');
 
             //
             //List for Service Area Layer
@@ -914,11 +914,15 @@
             category: eventCategory + ': map',
             label: layer.name
           });
-          if (layer.layer._leaflet_id === serviceArea._leaflet_id) {
-              showServiceAreaChart(false);
+          if(serviceArea) {
+            if (layer.layer._leaflet_id === serviceArea._leaflet_id) {
+                showServiceAreaChart(false);
+            }
           }
-          else if (layer.layer._leaflet_id === efffArea._leaflet_id) {
-              showEFFFChart(false);
+          if(efffArea){
+            if (layer.layer._leaflet_id === efffArea._leaflet_id) {
+                showEFFFChart(false);
+            }
           }
         });
 
