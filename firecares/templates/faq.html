@@ -140,16 +140,18 @@ Frequently Asked Questions
                                 email domains include:
 
                                 <ul>
-                                    {% for w in whitelisted_domains %}
-                                    <li>
-                                        {{ w.email_or_domain }}
-                                    </li>
-                                    {% endfor %}
+                                    {% with orgs='iafc.org iaff.org nist.gov ul.com urban.org wpi.edu utexas.edu dhs.gov fema.gov cpse.org nfpa.org fema.dhs.gov dhs.fema.gov st.dhs.gov redcross.org' %} 
+                                        {% for w in orgs.split %}
+                                        <li>
+                                            {{ w }}
+                                        </li>
+                                        {% endfor %}
+                                    {% endwith %}
                                 </ul>
 
                                 If you work at a fire department, you may be able to send an account request through FireCARES that will notify
                                 your chief or IAFF local president of your account request.  request. Upon their approval, you will be provided
-                                access.<a href="{% url 'firedepartment_list' %}">Search</a> for your department and click
+                                access. <a href="{% url 'firedepartment_list' %}">Search</a> for your department and click
                                 <strong>&quot;Request access from your Fire Chief or Local Officer.&quot;</strong> If your fire
                                 chief or local president has registered with FireCARES for your department, then he/she will receive a
                                 notification to approve your account request.
@@ -360,9 +362,12 @@ Frequently Asked Questions
                                 </a>
                             </h4>
                             <p class="ct-u-marginTop10">
-                                To add data, please select the <a href="{% url 'contact_us' %}">contact us</a> button on the
-                                website and send a message including your contact information. You will be contacted within
-                                1 week to update the information.
+                                The Chief or his/her designee administrator is able to enter staffing information on the individual stations associated
+                                with your department.  If you have administator permissions on your department, you will be presented with an
+                                "Add Apparatus" button on your department's station pages. Please ensure that you click "SAVE" each time
+                                you enter data.
+                                
+                                <img src="{{STATIC_URL}}/images/add-apparatus.png" alt="Staffing tables" style="max-width: 100%;"/>
                             </p>
                         </div>
 
