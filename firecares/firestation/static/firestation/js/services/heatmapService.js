@@ -12,7 +12,8 @@
         var _layer = L.heatLayer([], {
             gradient: {0.55: '#74ac49', 0.65: '#febe00', 1: '#f6542f'},
             radius: 10,
-            minOpacity: 0.5
+            minOpacity: 0.5,
+            maxZoom: 15
         });
         var _crossfilter = null;
         var _fires = {

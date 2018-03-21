@@ -50,7 +50,8 @@
 
     function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter, FireDepartment, $analytics, WeatherWarning, $interpolate, FireStationandStaffing, ServiceAreaRollup, EfffChartRollup) {
         var departmentMap = map.initMap('map', {scrollWheelZoom: false});
-        var messagebox = L.control.messagebox({ timeout: 12000, position:'bottomleft' }).addTo(departmentMap);
+        var messagebox = L.control.messagebox({ timeout: 11000, position:'bottomright' }).addTo(departmentMap);
+        var messageboxData = L.control.messagebox({ timeout: 22000, position:'bottomleft' }).addTo(departmentMap);
         var showStations = true;
         var stationIcon = L.FireCARESMarkers.firestationmarker();
         var headquartersIcon = L.FireCARESMarkers.headquartersmarker();
@@ -649,15 +650,12 @@
             //
             serviceArea = L.geoJson(null, {
               onEachFeature: function(feature, layer) {
-                  layer.bindLabel(feature.properties.Name + ' minutes');
-                  var popup = layer.bindPopup(feature.properties.Name + ' minutes');
-                  popup.on("popupclose", function(e) {
-                      e.layer.setStyle({weight: 0.8, fillOpacity:-(feature.properties.ToBreak * 0.8 - max) / (max * 1.3), fillColor: '#33cc33'});
-                  });
+                layer.bindLabel(feature.properties.Name + ' minutes');
 
-                  layer.on('click', function(e) {
-                     e.layer.setStyle({fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5) + mouseOverAddedOpacity, fillColor: highlightColor});
-                  });
+                layer.on('click', function(e) {
+                  messageboxData.showforever(feature.properties.Name + ' minutes');
+                  e.layer.setStyle({fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5) + mouseOverAddedOpacity, fillColor: highlightColor});
+                });
               }
             });
 
@@ -737,16 +735,12 @@
             //
             efffArea = L.geoJson(null, {
               onEachFeature: function(feature, layer) {
-                  
-                  layer.bindLabel(feature.properties.Name + '<br>'+ feature.properties.ToBreak);
-                  var popup = layer.bindPopup(feature.properties.Name + '<br>'+ feature.properties.ToBreak);
-                  popup.on("popupclose", function(e) {
-                      e.layer.setStyle({weight: 0.1, fillOpacity:.4, fillColor: feature.properties.tocolor, weight:1, color:'#fff', opacity:.8});
-                  });
+                layer.bindLabel(feature.properties.Name + '<br>'+ feature.properties.ToBreak);
 
-                  layer.on('click', function(e) {
-                     e.layer.setStyle({weight: .7,fillOpacity: .9, fillColor: feature.properties.tocolor, weight:3, color:'#fff', opacity:.8});
-                  });
+                layer.on('click', function(e) {
+                  messageboxData.showforever(feature.properties.Name + '<br>'+ feature.properties.ToBreak);
+                  e.layer.setStyle({weight: .7,fillOpacity: .9, fillColor: feature.properties.tocolor, weight:3, color:'#fff', opacity:.8});
+                });
               }
             });
             
@@ -909,11 +903,31 @@
            });
         });
 
+        departmentMap.on('click', function(e) {
+          serviceArea.setStyle(function(feature) {
+            return {
+              fillColor: '#33cc33',
+              fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5),
+              weight: 0.8
+            };
+          });
+          efffArea.setStyle(function(feature) {
+            return {
+              fillColor: feature.properties.tocolor,
+              fillOpacity: .4, weight:1, color:'#fff', opacity:.8
+            };
+          });
+          messageboxData.hide();  
+        });
+
         departmentMap.on('overlayremove', function(layer) {
           $analytics.eventTrack('disable layer', {
             category: eventCategory + ': map',
             label: layer.name
           });
+
+          messageboxData.hide();
+          
           if(serviceArea) {
             if (layer.layer._leaflet_id === serviceArea._leaflet_id) {
                 showServiceAreaChart(false);
