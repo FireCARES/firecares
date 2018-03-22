@@ -7,7 +7,6 @@ import time
 from django.db.utils import IntegrityError
 from firecares.utils.arcgis2geojson import arcgis2geojson
 from celery import chain, group
-from celery.task.control import inspect
 from firecares.celery import app
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon, fromstr
 from django.db import connections
@@ -464,23 +463,26 @@ def run_analysis_update_tasks(fid):
     Using cache to make sure duplicates are not run and overlap
     """
 
-    taskinspector = inspect()
-    duplicatetask = True
+    # TODO Check for status of the current celery queue
 
-    print taskinspector.reserved()
-    print taskinspector.active_queues()
-    print taskinspector.scheduled()
-    print taskinspector.active()
+    # from celery.task.control import inspect
+    # taskinspector = inspect()
+    # duplicatetask = True
 
-    active_tasks = taskinspector.active().values()[0]
-    queue_tasks = taskinspector.reserved().values()[0]
-    for task in queue_tasks:
-        print task['request']['name']
-        duplicatetask = True
+    # print taskinspector.reserved()
+    # print taskinspector.active_queues()
+    # print taskinspector.scheduled()
+    # print taskinspector.active()
 
-    for task in active_tasks:
-        print task['request']['name']
-        duplicatetask = True
+    # active_tasks = taskinspector.active().values()[0]
+    # queue_tasks = taskinspector.reserved().values()[0]
+    # for task in queue_tasks:
+    #     print task['request']['name']
+    #     duplicatetask = True
+
+    # for task in active_tasks:
+    #     print task['request']['name']
+    #     duplicatetask = True
 
     # if not duplicatetask:
 
