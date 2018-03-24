@@ -463,8 +463,8 @@ def run_analysis_update_tasks(fid):
     Using cache to make sure duplicates are not run and overlap
     """
 
-    get_parcel_department_hazard_level_rollup.delay(fid)
-    update_parcel_department_effectivefirefighting_rollup.delay(fid)
+    get_parcel_department_hazard_level_rollup.apply_async((fid), task_id=str(fid) + 'servicearea')
+    update_parcel_department_effectivefirefighting_rollup.apply_async((fid), task_id=str(fid) + 'efff')
 
 
 @app.task(queue='dataanalysis')
@@ -639,7 +639,6 @@ def create_effective_firefighting_rollup_all():
         update_parcel_department_effectivefirefighting_rollup(fd)
 
 
-@app.task(queue='dataanalysis')
 def get_async_efff_service_status(jobid, dept_name):
     """
     Check status for Drive Time Asynchronous Webservice until there is a results value then call the results url to get json geom
@@ -663,6 +662,7 @@ def get_async_efff_service_status(jobid, dept_name):
         get_async_efff_service_status(jobid, dept_name)
 
 
+@app.task(queue='dataanalysis')
 def update_parcel_department_effectivefirefighting_rollup(fd_id):
     """
     Update for one department for the effective fire fighting force

@@ -1266,8 +1266,8 @@ def run_update_department_task(depart_id):
     taskinspector = inspect()
     notaduplicatetask = True
 
-    print taskinspector.reserved()
-    print taskinspector.active()
+    # print taskinspector.reserved()
+    # print taskinspector.active()
 
     active_tasks = taskinspector.active().values()[0]
     queue_tasks = taskinspector.reserved().values()[0]
@@ -1275,20 +1275,21 @@ def run_update_department_task(depart_id):
     for q_task in queue_tasks:
         q_departmentid = q_task['args']
         print q_departmentid
-        if depart_id in q_departmentid:
+        if str(depart_id) in str(q_departmentid):
             notaduplicatetask = False
 
     if notaduplicatetask:
         for a_task in active_tasks:
             a_departmentid = a_task['args']
             print a_departmentid
-            if depart_id in a_departmentid:
+            if str(depart_id) in str(a_departmentid):
                 notaduplicatetask = False
 
     if notaduplicatetask:
         # delay for a minute
-        update.update_department.apply_async((depart_id), countdown=60, task_id=depart_id + 'deptupdate')
-        update.run_analysis_update_tasks.apply_async((depart_id), countdown=60, task_id=depart_id + 'deptanaysis')
+        print 'Running dept update for ' + str(depart_id)
+        update.update_department.apply_async((depart_id), countdown=60, task_id=str(depart_id) + 'deptupdate')
+        update.run_analysis_update_tasks.apply_async((depart_id), countdown=60, task_id=str(depart_id) + 'deptanaysis')
 
 
 def update_station(sender, instance, **kwargs):
