@@ -463,29 +463,6 @@ def run_analysis_update_tasks(fid):
     Using cache to make sure duplicates are not run and overlap
     """
 
-    # TODO Check for status of the current celery queue
-
-    # from celery.task.control import inspect
-    # taskinspector = inspect()
-    # duplicatetask = True
-
-    # print taskinspector.reserved()
-    # print taskinspector.active_queues()
-    # print taskinspector.scheduled()
-    # print taskinspector.active()
-
-    # active_tasks = taskinspector.active().values()[0]
-    # queue_tasks = taskinspector.reserved().values()[0]
-    # for task in queue_tasks:
-    #     print task['request']['name']
-    #     duplicatetask = True
-
-    # for task in active_tasks:
-    #     print task['request']['name']
-    #     duplicatetask = True
-
-    # if not duplicatetask:
-
     get_parcel_department_hazard_level_rollup.delay(fid)
     update_parcel_department_effectivefirefighting_rollup.delay(fid)
 
@@ -578,6 +555,8 @@ def update_parcel_department_hazard_level(drivetimegeom, department):
         WHERE ST_WITHIN(l.wkb_geometry, drive_geom)
         """
 
+    print 'Querying Database for parcels'
+
     cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': json.dumps(drivetimegeom0)})
     results0 = dictfetchall(cursor)
     cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': json.dumps(drivetimegeom4)})
@@ -660,6 +639,7 @@ def create_effective_firefighting_rollup_all():
         update_parcel_department_effectivefirefighting_rollup(fd)
 
 
+@app.task(queue='dataanalysis')
 def get_async_efff_service_status(jobid, dept_name):
     """
     Check status for Drive Time Asynchronous Webservice until there is a results value then call the results url to get json geom
@@ -683,7 +663,6 @@ def get_async_efff_service_status(jobid, dept_name):
         get_async_efff_service_status(jobid, dept_name)
 
 
-@app.task(queue='dataanalysis')
 def update_parcel_department_effectivefirefighting_rollup(fd_id):
     """
     Update for one department for the effective fire fighting force

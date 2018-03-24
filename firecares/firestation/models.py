@@ -1247,33 +1247,65 @@ def set_department_region(sender, instance, **kwargs):
 
 def update_department(sender, instance, **kwargs):
     """
-    Creates an FD's thumbnail and updates its performance score and NFIRS counts when it is instantiated.
+    Creates an FD's thumbnail and run update task
+    """
+    from firecares import celery
+
+    celery.cache_thumbnail.delay(instance.id, upload_to_s3=not(settings.TESTING))
+    run_update_department_task(instance.id)
+
+
+def run_update_department_task(depart_id):
+    """
+    Updates Department performance score and NFIRS counts when it is instantiated. Updates ERF and Service area
     """
     from firecares.tasks import update
-    from firecares import celery
-    celery.cache_thumbnail.delay(instance.id, upload_to_s3=not(settings.TESTING))
-    update.update_department.delay(instance.id)
-    update.run_analysis_update_tasks.delay(instance.id)
+    from celery.task.control import inspect
+
+    # Check for status of the current celery queue
+    taskinspector = inspect()
+    notaduplicatetask = True
+
+    print taskinspector.reserved()
+    print taskinspector.active()
+
+    active_tasks = taskinspector.active().values()[0]
+    queue_tasks = taskinspector.reserved().values()[0]
+
+    for q_task in queue_tasks:
+        q_departmentid = q_task['args']
+        print q_departmentid
+        if depart_id in q_departmentid:
+            notaduplicatetask = False
+
+    if notaduplicatetask:
+        for a_task in active_tasks:
+            a_departmentid = a_task['args']
+            print a_departmentid
+            if depart_id in a_departmentid:
+                notaduplicatetask = False
+
+    if notaduplicatetask:
+        # delay for a minute
+        update.update_department.apply_async((depart_id), countdown=60, task_id=depart_id + 'deptupdate')
+        update.run_analysis_update_tasks.apply_async((depart_id), countdown=60, task_id=depart_id + 'deptanaysis')
 
 
 def update_station(sender, instance, **kwargs):
     """
     Updates Drive time and service area calculations after Station change
     """
-    from firecares.tasks import update
     if(instance.department_id):
-        update.run_analysis_update_tasks.delay(instance.department_id)
+        run_update_department_task(instance.department_id)
 
 
 def update_station_from_staffing(sender, instance, **kwargs):
     """
     Updates Drive time and service area calculations after Station Staffin change
     """
-    from firecares.tasks import update
-
     if(instance.firestation):
         fid = FireStation.objects.filter(usgsstructuredata_ptr_id=instance.firestation)[0].department_id
-        update.run_analysis_update_tasks.delay(fid)
+        run_update_department_task(fid)
 
 
 def create_national_calculations_view(sender, **kwargs):
