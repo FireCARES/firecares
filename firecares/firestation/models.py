@@ -1305,9 +1305,10 @@ def update_station(sender, instance, **kwargs):
         run_update_department_task(instance.department_id)
 
 
+@when_not_testing
 def update_station_from_staffing(sender, instance, **kwargs):
     """
-    Updates Drive time and service area calculations after Station Staffin change
+    Updates Drive time and service area calculations after Station Staffing change
     """
     if(instance.firestation):
         fid = FireStation.objects.filter(usgsstructuredata_ptr_id=instance.firestation)[0].department_id
