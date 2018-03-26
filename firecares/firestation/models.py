@@ -23,7 +23,7 @@ from django.utils.functional import cached_property
 from django.utils.deconstruct import deconstructible
 from firecares.firecares_core.models import Address
 from firecares.firecares_core.validators import validate_choice
-from firecares.utils import IntChoiceEnum
+from firecares.utils import IntChoiceEnum, when_not_testing
 from numpy import histogram
 from phonenumber_field.modelfields import PhoneNumberField
 from firecares.firecares_core.models import Country
@@ -1245,6 +1245,7 @@ def set_department_region(sender, instance, **kwargs):
         instance.region = ""
 
 
+@when_not_testing
 def update_department(sender, instance, **kwargs):
     """
     Creates an FD's thumbnail and run update task
@@ -1269,6 +1270,9 @@ def run_update_department_task(depart_id):
     # print taskinspector.reserved()
     # print taskinspector.active()
 
+    if taskinspector.active() is None or taskinspector.reserved() is None:
+        return
+
     active_tasks = taskinspector.active().values()[0]
     queue_tasks = taskinspector.reserved().values()[0]
 
@@ -1292,6 +1296,7 @@ def run_update_department_task(depart_id):
         update.run_analysis_update_tasks.apply_async((depart_id), countdown=60, task_id=str(depart_id) + 'deptanaysis')
 
 
+@when_not_testing
 def update_station(sender, instance, **kwargs):
     """
     Updates Drive time and service area calculations after Station change

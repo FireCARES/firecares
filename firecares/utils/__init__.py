@@ -1,7 +1,9 @@
 import inspect
 import numbers
 import re
+from django.conf import settings
 from enum import IntEnum
+from functools import wraps
 
 
 def dictfetchall(cursor):
@@ -72,3 +74,12 @@ class IntChoiceEnum(IntEnum):
         # format into django choice tuple
         choices = tuple([(p[1].value, p[0]) for p in props])
         return choices
+
+
+def when_not_testing(signal_handler):
+    @wraps(signal_handler)
+    def wrapper(*args, **kwargs):
+        if settings.TESTING:
+            return
+        signal_handler(*args, **kwargs)
+    return wrapper
