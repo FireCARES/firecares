@@ -50,6 +50,7 @@
     var mouseOverAddedOpacity = 0.25; // put in settings?
     var highlightColor = 'blue';      // put in settings?
     var serviceArea, max;
+    var messageboxData = L.control.messagebox({ timeout: 22000, position:'bottomleft' }).addTo(map);
 
     station.bindPopup('<b>' + config.stationName + '</b>');
     station.addTo(map);
@@ -71,17 +72,31 @@
 
     serviceArea = L.geoJson(null, {
       onEachFeature: function(feature, layer) {
-          layer.bindPopup(feature.properties.Name + ' minutes');
-          layer.on('mouseover', function(e) {
-             layer.setStyle({fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5) + mouseOverAddedOpacity, fillColor: highlightColor, weight: 4});
-          });
-          layer.on('mouseout', function(e) {
-             layer.setStyle({weight: 0.8, fillOpacity:-(feature.properties.ToBreak * 0.8 - max) / (max * 1.5), fillColor: '#33cc33', weight: 1});
+          layer.bindLabel(feature.properties.Name + ' minutes');
+          /*var popup = layer.bindPopup(feature.properties.Name + ' minutes');
+          popup.on("popupclose", function(e) {
+            e.layer.setStyle({weight: 0.8, fillOpacity:-(feature.properties.ToBreak * 0.8 - max) / (max * 1.3), fillColor: '#33cc33'});
+          });*/
+
+          layer.on('click', function(e) {
+            messageboxData.showforever(feature.properties.Name + ' minutes');
+            layer.setStyle({fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5) + mouseOverAddedOpacity, fillColor: highlightColor});
           });
       }
     });
 
-    layersControl.addOverlay(serviceArea, 'Service area');
+    map.on('click', function(e) {
+      serviceArea.setStyle(function(feature) {
+        return {
+          fillColor: '#33cc33',
+          fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5),
+          weight: 0.8
+        };
+      });      
+      messageboxData.hide();  
+    });
+
+    layersControl.addOverlay(serviceArea, 'Service Areas');
 
     if (config.district) {
       district = L.geoJson(config.district, {
@@ -209,6 +224,8 @@
         category: $scope.eventCategory + ': map',
         label: layer.name
       });
+
+      messageboxData.hide();
     });
 
     $scope.closeMapPopup = function() {

@@ -245,8 +245,7 @@ def update_department(id):
     print "updating department {}".format(id)
     chain(update_nfirs_counts.si(id),
           update_performance_score.si(id),
-          # get_parcel_department_hazard_level_rollup(id), taking too long
-          group(refresh_quartile_view_task.si(), refresh_national_calculations_view_task.si())).delay()
+          group(calculate_department_census_geom.si(), refresh_quartile_view_task.si(), refresh_national_calculations_view_task.si())).delay()
 
 
 @app.task(queue='update')
@@ -457,7 +456,18 @@ def calculate_story_distribution(fd_id):
         rm.save()
 
 
-@app.task(queue='servicearea')
+@app.task(queue='dataanalysis')
+def run_analysis_update_tasks(fid):
+    """
+    Task for updating the any analysis features from station or department change/update.
+    Using cache to make sure duplicates are not run and overlap
+    """
+
+    get_parcel_department_hazard_level_rollup.apply_async((fid), task_id=str(fid) + 'servicearea')
+    update_parcel_department_effectivefirefighting_rollup.apply_async((fid), task_id=str(fid) + 'efff')
+
+
+@app.task(queue='dataanalysis')
 def create_parcel_department_hazard_level_rollup_all():
     """
     Task for updating the servicearea table rolling up parcel hazard categories with departement drive time data
@@ -466,6 +476,7 @@ def create_parcel_department_hazard_level_rollup_all():
         get_parcel_department_hazard_level_rollup(fd)
 
 
+@app.task(queue='dataanalysis')
 def get_parcel_department_hazard_level_rollup(fd_id):
     """
     Update for one department for the drive time hazard level
@@ -544,6 +555,8 @@ def update_parcel_department_hazard_level(drivetimegeom, department):
         WHERE ST_WITHIN(l.wkb_geometry, drive_geom)
         """
 
+    print 'Querying Database for parcels'
+
     cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': json.dumps(drivetimegeom0)})
     results0 = dictfetchall(cursor)
     cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': json.dumps(drivetimegeom4)})
@@ -617,7 +630,7 @@ def update_parcel_department_hazard_level(drivetimegeom, department):
     addhazardlevelfordepartment.save()
 
 
-@app.task(queue='servicearea')
+@app.task(queue='dataanalysis')
 def create_effective_firefighting_rollup_all():
     """
     Task for updating the effective fire fighting force EffectiveFireFightingForceLevel table
@@ -649,6 +662,7 @@ def get_async_efff_service_status(jobid, dept_name):
         get_async_efff_service_status(jobid, dept_name)
 
 
+@app.task(queue='dataanalysis')
 def update_parcel_department_effectivefirefighting_rollup(fd_id):
     """
     Update for one department for the effective fire fighting force
@@ -657,7 +671,7 @@ def update_parcel_department_effectivefirefighting_rollup(fd_id):
     dept = FireDepartment.objects.filter(id=fd_id)
     staffingtotal = "1"  # assume staffing minimum of 1 for now
 
-    if dept[0].geom is None:
+    if dept[0].owned_tracts_geom is None:
 
         print "No geometry for the department " + dept[0].name
 
@@ -781,15 +795,29 @@ def update_parcel_effectivefirefighting_table(drivetimegeom, department):
     if drivetimegeomLT27:
         cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomLT27.intersection(department.owned_tracts_geom).json, 'owned_geom': department.owned_tracts_geom.wkb})
         results15 = dictfetchall(cursor)
+        if results15:
+            if results15[0]['unknown'] is None:
+                results15[0]['unknown'] = 0
+            if results15[0]['low'] is None:
+                results15[0]['low'] = 0
     if drivetimegeomLT42:
         cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomLT42.intersection(department.owned_tracts_geom).json, 'owned_geom': department.owned_tracts_geom.wkb})
         results27 = dictfetchall(cursor)
+        if results27:
+            if results27[0]['medium'] is None:
+                results27[0]['medium'] = 0
     if drivetimegeomGT38:
         cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomGT38.intersection(department.owned_tracts_geom).json, 'owned_geom': department.owned_tracts_geom.wkb})
         results38 = dictfetchall(cursor)
+        if results38:
+            if results38[0]['high'] is None:
+                results38[0]['high'] = 0
     if drivetimegeomGT41:
         cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomGT41.intersection(department.owned_tracts_geom).json, 'owned_geom': department.owned_tracts_geom.wkb})
         results42 = dictfetchall(cursor)
+        if results15:
+            if results42[0]['high'] is None:
+                results42[0]['high'] = 0
 
     # Overwrite/Update efff area if already loaded
     if EffectiveFireFightingForceLevel.objects.filter(department_id=department.id):
