@@ -1288,8 +1288,10 @@ def run_update_department_task(depart_id):
     if notaduplicatetask:
         # delay for a minute
         print 'Running dept update for ' + str(depart_id)
-        update.update_department.apply_async((depart_id), countdown=60, task_id=str(depart_id) + 'deptupdate')
-        update.run_analysis_update_tasks.apply_async((depart_id), countdown=60, task_id=str(depart_id) + 'deptanaysis')
+        # running with asyn doesn't async it!
+        # update.update_department.apply_async((depart_id,), eta=eta, task_id=str(depart_id) + 'deptupdate')
+        update.run_analysis_update_tasks.delay((depart_id,), countdown=60, task_id=str(depart_id) + 'deptanaysis')
+        update.update_department.delay((depart_id,), countdown=60, task_id=str(depart_id) + 'deptupdate')
 
 
 def update_station(sender, instance, **kwargs):

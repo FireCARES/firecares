@@ -463,8 +463,8 @@ def run_analysis_update_tasks(fid):
     Using cache to make sure duplicates are not run and overlap
     """
 
-    get_parcel_department_hazard_level_rollup.apply_async((fid), task_id=str(fid) + 'servicearea')
-    update_parcel_department_effectivefirefighting_rollup.apply_async((fid), task_id=str(fid) + 'efff')
+    get_parcel_department_hazard_level_rollup.apply_async((fid,), task_id=str(fid) + 'servicearea')
+    update_parcel_department_effectivefirefighting_rollup.apply_async((fid,), task_id=str(fid) + 'efff')
 
 
 @app.task(queue='dataanalysis')
