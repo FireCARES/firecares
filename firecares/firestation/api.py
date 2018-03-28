@@ -3,8 +3,11 @@ import logging
 from .forms import StaffingForm
 from .models import FireStation, Staffing, FireDepartment, ParcelDepartmentHazardLevel, EffectiveFireFightingForceLevel
 from firecares.weather.models import DepartmentWarnings
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.core.serializers.json import DjangoJSONEncoder
+from django.conf.urls import url
 from django.contrib.gis import geos
+from django.http import HttpResponse
 from tastypie import fields
 from tastypie.authentication import SessionAuthentication, ApiKeyAuthentication, MultiAuthentication, Authentication
 from tastypie.authorization import DjangoAuthorization
@@ -12,7 +15,9 @@ from tastypie.cache import SimpleCache
 from tastypie.constants import ALL
 from tastypie.contrib.gis.resources import ModelResource
 from tastypie.exceptions import Unauthorized, TastypieError
+from tastypie.http import HttpGone, HttpMultipleChoices
 from tastypie.serializers import Serializer
+from tastypie.utils import trailing_slash
 from tastypie.validation import FormValidation
 from guardian.core import ObjectPermissionChecker
 from django.utils import timezone
@@ -211,7 +216,7 @@ class FireDepartmentResource(JSONDefaultModelResourceMixin, ModelResource):
         cache = SimpleCache()
         list_allowed_methods = ['get', 'put']
         detail_allowed_methods = ['get', 'put']
-        filtering = {'state': ALL, 'featured': ALL, 'fdid': ALL}
+        filtering = {'state': ALL, 'featured': ALL, 'fdid': ALL, 'id': ALL}
         serializer = PrettyJSONSerializer()
         limit = 120
         max_limit = 2000
@@ -220,6 +225,33 @@ class FireDepartmentResource(JSONDefaultModelResourceMixin, ModelResource):
         super(FireDepartmentResource, self).__init__(**kwargs)
         for f in getattr(self.Meta, 'readonly_fields', []):
             self.fields[f].readonly = True
+
+    def prepend_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/grafana%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_grafana_line'), name="api_get_name"),
+        ]
+
+    def get_grafana_line(self, request, **kwargs):
+        self.method_check(request, allowed=['get', 'options'])
+        self.is_authenticated(request)
+
+        response = HttpResponse()
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Headers'] = 'Content-Type'
+
+        if request.method == 'options':
+            return response
+
+        try:
+            bundle = self.build_bundle(data={'pk': kwargs['pk']}, request=request)
+            obj = self.cached_obj_get(bundle=bundle, **self.remove_api_resource_names(kwargs))
+        except ObjectDoesNotExist:
+            return HttpGone()
+        except MultipleObjectsReturned:
+            return HttpMultipleChoices("More than one resource is found at this URI.")
+
+        response.content = '<h2>{}</h2><span>FDID: {} STATE: {} POPULATION: {}</span>'.format(obj.name, obj.fdid, obj.state, obj.population)
+        return response
 
     def hydrate_geom(self, bundle):
         try:

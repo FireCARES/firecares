@@ -456,7 +456,18 @@ def calculate_story_distribution(fd_id):
         rm.save()
 
 
-@app.task(queue='servicearea')
+@app.task(queue='dataanalysis')
+def run_analysis_update_tasks(fid):
+    """
+    Task for updating the any analysis features from station or department change/update.
+    Using cache to make sure duplicates are not run and overlap
+    """
+
+    get_parcel_department_hazard_level_rollup.apply_async((fid), task_id=str(fid) + 'servicearea')
+    update_parcel_department_effectivefirefighting_rollup.apply_async((fid), task_id=str(fid) + 'efff')
+
+
+@app.task(queue='dataanalysis')
 def create_parcel_department_hazard_level_rollup_all():
     """
     Task for updating the servicearea table rolling up parcel hazard categories with departement drive time data
@@ -465,6 +476,7 @@ def create_parcel_department_hazard_level_rollup_all():
         get_parcel_department_hazard_level_rollup(fd)
 
 
+@app.task(queue='dataanalysis')
 def get_parcel_department_hazard_level_rollup(fd_id):
     """
     Update for one department for the drive time hazard level
@@ -543,6 +555,8 @@ def update_parcel_department_hazard_level(drivetimegeom, department):
         WHERE ST_WITHIN(l.wkb_geometry, drive_geom)
         """
 
+    print 'Querying Database for parcels'
+
     cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': json.dumps(drivetimegeom0)})
     results0 = dictfetchall(cursor)
     cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': json.dumps(drivetimegeom4)})
@@ -616,7 +630,7 @@ def update_parcel_department_hazard_level(drivetimegeom, department):
     addhazardlevelfordepartment.save()
 
 
-@app.task(queue='servicearea')
+@app.task(queue='dataanalysis')
 def create_effective_firefighting_rollup_all():
     """
     Task for updating the effective fire fighting force EffectiveFireFightingForceLevel table
@@ -648,6 +662,7 @@ def get_async_efff_service_status(jobid, dept_name):
         get_async_efff_service_status(jobid, dept_name)
 
 
+@app.task(queue='dataanalysis')
 def update_parcel_department_effectivefirefighting_rollup(fd_id):
     """
     Update for one department for the effective fire fighting force

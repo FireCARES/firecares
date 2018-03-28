@@ -1,12 +1,14 @@
 L.Control.Messagebox = L.Control.extend({
     options: {
         position: 'topright',
-        timeout: 7000
+        timeout: 7000,
     },
 
     onAdd: function (map) {
         this._container = L.DomUtil.create('div', 'leaflet-control-messagebox');
-        //L.DomEvent.disableClickPropagation(this._container);
+
+
+        L.DomEvent.on(this._container, 'click', this.hide, this);
         return this._container;
     },
 
@@ -23,6 +25,18 @@ L.Control.Messagebox = L.Control.extend({
         this.timeoutID = setTimeout(function () {
             elem.style.display = 'none';
         }, timeout);
+    },
+
+    showforever: function (message, timeout) {
+        var elem = this._container;
+        elem.innerHTML = message + '    <i style="cursor:pointer;padding-left:4px;" class="fa fa-times-circle"></i>';
+        elem.style.display = 'block';
+        elem.style.border = "3px solid #ccc";
+    },
+
+    hide: function () {
+        var elem = this._container;
+        elem.style.display = 'none';
     }
 });
 

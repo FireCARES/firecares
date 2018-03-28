@@ -502,18 +502,22 @@
                                         <i class="fa fa-cog"></i>
                                       </button>
                                     <ul class="dropdown-menu in-front" aria-labelledby="dropdownMenuStation">
+                                        {% if user.is_superuser %}
                                         <li>
                                             <a href="{% url 'addstation' object.id %}">
                                                 <i class="fa fa-plus"></i>
                                                 Add New Station
                                             </a>
                                         </li>
+                                        {% endif %}
+                                        {% if user_can_change or user.is_superuser %}
                                         <li>
-                                        <a href="{% url 'firedepartment_data_validation' object.id %}">
-                                            <i class="fa fa-check-circle"></i>
-                                            Validate Department Data
-                                        </a>
-                                    </li>
+                                            <a href="{% url 'firedepartment_data_validation' object.id %}">
+                                                <i class="fa fa-check-circle"></i>
+                                                Validate Department Data
+                                            </a>
+                                        </li>
+                                        {% endif %}
                                     </ul>
                                 </div>
                                 {% endif %}
@@ -538,18 +542,22 @@
                                         <i class="fa fa-cog"></i>
                                       </button>
                                     <ul class="dropdown-menu in-front" aria-labelledby="dropdownMenuStation">
+                                        {% if user.is_superuser %}
                                         <li>
                                             <a href="{% url 'addstation' object.id %}">
                                                 <i class="fa fa-plus"></i>
                                                 Add New Station
                                             </a>
                                         </li>
+                                        {% endif %}
+                                        {% if user_can_change or user.is_superuser %}
                                         <li>
-                                        <a href="{% url 'firedepartment_data_validation' object.id %}">
-                                            <i class="fa fa-check-circle"></i>
-                                            Validate Department Data
-                                        </a>
-                                    </li>
+                                            <a href="{% url 'firedepartment_data_validation' object.id %}">
+                                                <i class="fa fa-check-circle"></i>
+                                                Validate Department Data
+                                            </a>
+                                        </li>
+                                        {% endif %}
                                     </ul>
                                 </div>
                                 {% endif %}

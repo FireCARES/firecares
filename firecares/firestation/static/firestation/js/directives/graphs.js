@@ -1262,7 +1262,8 @@
                         // HACK: It's possible to select bars farther back than the shorter mobile chart displays.
                         //       Just ignore invalid indices for now. Ideally, we should only have one chart that
                         //       dynamically resizes based on the screen size.
-                        if (!index) {
+                        
+                        if (!index && index != 0) {
                             continue;
                         }
 
