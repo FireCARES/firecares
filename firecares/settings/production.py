@@ -50,6 +50,10 @@ CELERYBEAT_SCHEDULE = {
     'update_warning_geometry_every_midnight': {
         'task': 'firecares.tasks.weather_task.cleanup_dept_weather_noaa_warnings',
         'schedule': crontab(minute=0, hour=0)
+    },
+    'update_department_views_every_midnight': {
+        'task': 'firecares.tasks.update.refresh_department_views',
+        'schedule': crontab(minute=0, hour=0)
     }
 }
 

@@ -6,7 +6,7 @@ import json
 import time
 from django.db.utils import IntegrityError
 from firecares.utils.arcgis2geojson import arcgis2geojson
-from celery import chain, group
+from celery import chain
 from firecares.celery import app
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon, fromstr
 from django.db import connections
@@ -244,8 +244,13 @@ ORDER BY extract(year from a.inc_date) DESC"""
 def update_department(id):
     print "updating department {}".format(id)
     chain(update_nfirs_counts.si(id),
-          update_performance_score.si(id),
-          group(calculate_department_census_geom.si(), refresh_quartile_view_task.si(), refresh_national_calculations_view_task.si())).delay()
+          update_performance_score.si(id), calculate_department_census_geom.si(id)).delay()
+
+
+@app.task(queue='update')
+def refresh_department_views():
+    print "updating department Views"
+    chain(refresh_quartile_view_task.si(), refresh_national_calculations_view_task.si()).delay()
 
 
 @app.task(queue='update')
@@ -454,17 +459,6 @@ def calculate_story_distribution(fd_id):
         rm = fd.firedepartmentriskmodels_set.get(level=nlevel)
         rm.floor_count_coefficients = {'shape': samp[0], 'loc': samp[1], 'scale': samp[2]}
         rm.save()
-
-
-@app.task(queue='dataanalysis')
-def run_analysis_update_tasks(fid):
-    """
-    Task for updating the any analysis features from station or department change/update.
-    Using cache to make sure duplicates are not run and overlap
-    """
-
-    get_parcel_department_hazard_level_rollup.apply_async((fid,), task_id=str(fid) + 'servicearea')
-    update_parcel_department_effectivefirefighting_rollup.apply_async((fid,), task_id=str(fid) + 'efff')
 
 
 @app.task(queue='dataanalysis')

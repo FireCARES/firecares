@@ -1269,29 +1269,31 @@ def run_update_department_task(depart_id):
     # print taskinspector.reserved()
     # print taskinspector.active()
 
-    active_tasks = taskinspector.active().values()[0]
-    queue_tasks = taskinspector.reserved().values()[0]
+    try:
+        active_tasks = taskinspector.active().values()[0]
+        queue_tasks = taskinspector.reserved().values()[0]
 
-    for q_task in queue_tasks:
-        q_departmentid = q_task['args']
-        print q_departmentid
-        if str(depart_id) in str(q_departmentid):
-            notaduplicatetask = False
-
-    if notaduplicatetask:
-        for a_task in active_tasks:
-            a_departmentid = a_task['args']
-            print a_departmentid
-            if str(depart_id) in str(a_departmentid):
+        for q_task in queue_tasks:
+            q_departmentid = q_task['args']
+            print q_departmentid
+            if str(depart_id) in str(q_departmentid):
                 notaduplicatetask = False
 
+        if notaduplicatetask:
+            for a_task in active_tasks:
+                a_departmentid = a_task['args']
+                print a_departmentid
+                if str(depart_id) in str(a_departmentid):
+                    notaduplicatetask = False
+    except:
+        return 'No Data in celery queue'
+
     if notaduplicatetask:
-        # delay for a minute
+        # delay for 50 seconds
         print 'Running dept update for ' + str(depart_id)
-        # running with asyn doesn't async it!
-        # update.update_department.apply_async((depart_id,), eta=eta, task_id=str(depart_id) + 'deptupdate')
-        update.run_analysis_update_tasks.delay((depart_id,), countdown=60, task_id=str(depart_id) + 'deptanaysis')
-        update.update_department.delay((depart_id,), countdown=60, task_id=str(depart_id) + 'deptupdate')
+        update.update_parcel_department_effectivefirefighting_rollup.apply_async((depart_id,), countdown=50, task_id=str(depart_id) + 'efff')
+        update.get_parcel_department_hazard_level_rollup.apply_async((depart_id,), countdown=50, task_id=str(depart_id) + 'servicearea')
+        update.update_department.apply_async((depart_id,), countdown=50, task_id=str(depart_id) + 'nfirs')
 
 
 def update_station(sender, instance, **kwargs):
