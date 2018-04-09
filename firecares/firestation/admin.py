@@ -17,7 +17,7 @@ class FireStationAdminForm(AutocompleteModelForm):
 
 class FireStationAdmin(VersionAdmin, LocalOpenLayersAdmin):
     form = FireStationAdminForm
-    list_display = ['state', 'name', 'created', 'modified']
+    list_display = ['state', 'name', 'department', 'created', 'modified']
     list_filter = ['state', 'ftype']
     search_fields = ['name', 'state', 'city', 'id']
     readonly_fields = ['permanent_identifier', 'source_featureid', 'source_datasetid', 'objectid', 'globalid',
