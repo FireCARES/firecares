@@ -1,13 +1,18 @@
 import copy
+import csv
 import numpy as np
 import traceback
 import requests
 import json
 import time
+import boto
+from boto.s3.key import Key
+from StringIO import StringIO
 from django.db.utils import IntegrityError
 from firecares.utils.arcgis2geojson import arcgis2geojson
 from celery import chain
 from firecares.celery import app
+from django.conf import settings
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon, fromstr
 from django.db import connections
 from django.db.utils import ConnectionDoesNotExist
@@ -190,7 +195,6 @@ LEFT JOIN
         ) AS x
     ) AS y
 USING (state, fdid, inc_date, inc_no, exp_no)
-WHERE a.state = %(state)s AND a.fdid = %(fdid)s AND extract(year FROM a.inc_date) IN %(years)s
 WHERE a.state = %(state)s AND a.fdid in %(fdid)s AND extract(year FROM a.inc_date) IN %(years)s
 GROUP BY y.risk_category, extract(year from a.inc_date)
 ORDER BY extract(year from a.inc_date) DESC"""
@@ -206,7 +210,6 @@ LEFT JOIN
         ) AS x
     ) AS y
 USING (state, fdid, inc_date, inc_no, exp_no)
-WHERE b.state = %(state)s AND b.fdid = %(fdid)s AND extract(year FROM b.inc_date) IN %(years)s
 WHERE b.state = %(state)s AND b.fdid in %(fdid)s AND extract(year FROM b.inc_date) IN %(years)s
 GROUP BY y.risk_category, extract(year FROM b.inc_date)
 ORDER BY extract(year FROM b.inc_date) DESC"""
@@ -222,7 +225,6 @@ LEFT JOIN
         ) AS x
     ) AS y
 USING (state, fdid, inc_date, inc_no, exp_no)
-WHERE a.state = %(state)s AND a.fdid = %(fdid)s AND extract(year FROM a.inc_date) IN %(years)s
 WHERE a.state = %(state)s AND a.fdid in %(fdid)s AND extract(year FROM a.inc_date) IN %(years)s
 GROUP BY y.risk_category, extract(year from a.alarm)
 ORDER BY extract(year from a.alarm) DESC"""
@@ -238,10 +240,48 @@ LEFT JOIN
         ) AS x
     ) AS y
 USING (state, fdid, inc_date, inc_no, exp_no)
-WHERE a.state = %(state)s AND a.fdid = %(fdid)s AND extract(year FROM a.inc_date) IN %(years)s
 WHERE a.state = %(state)s AND a.fdid in %(fdid)s AND extract(year FROM a.inc_date) IN %(years)s
 GROUP BY y.risk_category, extract(year from a.inc_date)
 ORDER BY extract(year from a.inc_date) DESC"""
+
+
+@app.task(queue='update')
+def update_fires_heatmap(id):
+    try:
+        fd = FireDepartment.objects.get(id=id)
+        cursor = connections['nfirs'].cursor()
+    except (FireDepartment.DoesNotExist, ConnectionDoesNotExist):
+        return
+
+    q = """
+    SELECT alarm, a.inc_type, alarms,ff_death, oth_death, ST_X(geom) AS x, st_y(geom) AS y, COALESCE(y.risk_category, 'Unknown') AS risk_category
+    FROM buildingfires a
+    LEFT JOIN  (
+        SELECT state, fdid, inc_date, inc_no, exp_no, x.geom, x.parcel_id, x.risk_category
+            FROM (
+                SELECT *
+                FROM incidentaddress a
+                LEFT JOIN parcel_risk_category_local
+                using (parcel_id)
+            ) AS x
+        ) AS y
+    USING (state, fdid, inc_date, inc_no, exp_no)
+    WHERE a.state = %(state)s and a.fdid in %(fdid)s
+    """
+
+    cursor.execute(q, params=dict(state=fd.state, fdid=tuple(fd.fdids)))
+    res = cursor.fetchall()
+    out = StringIO()
+    writer = csv.writer(out)
+    writer.writerow('alarm,inc_type,alarms,ff_death,oth_death,x,y,risk_category'.split(','))
+    for r in res:
+        writer.writerow(r)
+
+    s3 = boto.connect_s3()
+    k = Key(s3.get_bucket(settings.HEATMAP_BUCKET))
+    k.key = '{}-building-fires.csv'.format(id)
+    k.set_contents_from_string(out.getvalue())
+    k.set_acl('public-read')
 
 
 @app.task(queue='update')
@@ -287,7 +327,6 @@ def update_nfirs_counts(id, year=None, stat=None):
     else:
         years = {y: {1: None, 2: None, 4: None, 5: None} for y in year}
 
-    params = dict(fdid=fd.fdid, state=fd.state, years=tuple(years.keys()))
     params = dict(fdid=tuple(fd.fdids), state=fd.state, years=tuple(years.keys()))
 
     queries = (
