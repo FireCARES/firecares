@@ -318,6 +318,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
     staffing_verified = models.BooleanField(default=False)
     stations_verified = models.BooleanField(default=False)
     census_override = models.BooleanField(default=False)
+    additional_fdids = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         ordering = ('name',)
@@ -367,6 +368,12 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
                 return (self.geom.transform(2163, clone=True).area / 1000000) * 0.386102
             except:
                 return
+
+    @property
+    def fdids(self):
+        ret = [self.fdid]
+        ret.extend([x.strip() for x in self.additional_fdids.split(',')])
+        return ret
 
     def get_population_class(self):
         """
