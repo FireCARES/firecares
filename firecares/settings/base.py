@@ -269,6 +269,8 @@ NOSE_ARGS = [
     '--nologcapture'
 ]
 
+HEATMAP_BUCKET = 'firecares-test'
+
 # Celery settings.
 BROKER_URL = os.getenv('BROKER_URL', 'amqp://guest:guest@127.0.0.1//')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'amqp')
