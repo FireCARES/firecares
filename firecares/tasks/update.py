@@ -73,14 +73,14 @@ def update_performance_score(id, dry_run=False):
              left join parcel_risk_category_local b using (parcel_id)
              ) AS x
         ) AS y using (state, inc_date, exp_no, fdid, inc_no)
-    where a.state='%(state)s' and a.fdid='%(fdid)s' and prop_use in (''419'',''429'',''439'',''449'',''459'',''460'',''462'',''464'',''400'')
+    where a.state='%(state)s' and a.fdid in %(fdid)s and prop_use in (''419'',''429'',''439'',''449'',''459'',''460'',''462'',''464'',''400'')
         and fire_sprd is not null and fire_sprd != ''''
     group by risk_category, fire_sprd
     order by risk_category, fire_sprd ASC')
     AS ct(risk_category text, "object_of_origin" bigint, "room_of_origin" bigint, "floor_of_origin" bigint, "building_of_origin" bigint, "beyond" bigint);
     """
 
-    cursor.execute(RESIDENTIAL_FIRES_BY_FDID_STATE, {'fdid': fd.fdid, 'state': fd.state})
+    cursor.execute(RESIDENTIAL_FIRES_BY_FDID_STATE, {'fdid': tuple(fd.fdids), 'state': fd.state})
 
     results = dictfetchall(cursor)
 
@@ -191,6 +191,7 @@ LEFT JOIN
     ) AS y
 USING (state, fdid, inc_date, inc_no, exp_no)
 WHERE a.state = %(state)s AND a.fdid = %(fdid)s AND extract(year FROM a.inc_date) IN %(years)s
+WHERE a.state = %(state)s AND a.fdid in %(fdid)s AND extract(year FROM a.inc_date) IN %(years)s
 GROUP BY y.risk_category, extract(year from a.inc_date)
 ORDER BY extract(year from a.inc_date) DESC"""
 
@@ -206,6 +207,7 @@ LEFT JOIN
     ) AS y
 USING (state, fdid, inc_date, inc_no, exp_no)
 WHERE b.state = %(state)s AND b.fdid = %(fdid)s AND extract(year FROM b.inc_date) IN %(years)s
+WHERE b.state = %(state)s AND b.fdid in %(fdid)s AND extract(year FROM b.inc_date) IN %(years)s
 GROUP BY y.risk_category, extract(year FROM b.inc_date)
 ORDER BY extract(year FROM b.inc_date) DESC"""
 
@@ -221,6 +223,7 @@ LEFT JOIN
     ) AS y
 USING (state, fdid, inc_date, inc_no, exp_no)
 WHERE a.state = %(state)s AND a.fdid = %(fdid)s AND extract(year FROM a.inc_date) IN %(years)s
+WHERE a.state = %(state)s AND a.fdid in %(fdid)s AND extract(year FROM a.inc_date) IN %(years)s
 GROUP BY y.risk_category, extract(year from a.alarm)
 ORDER BY extract(year from a.alarm) DESC"""
 
@@ -236,6 +239,7 @@ LEFT JOIN
     ) AS y
 USING (state, fdid, inc_date, inc_no, exp_no)
 WHERE a.state = %(state)s AND a.fdid = %(fdid)s AND extract(year FROM a.inc_date) IN %(years)s
+WHERE a.state = %(state)s AND a.fdid in %(fdid)s AND extract(year FROM a.inc_date) IN %(years)s
 GROUP BY y.risk_category, extract(year from a.inc_date)
 ORDER BY extract(year from a.inc_date) DESC"""
 
@@ -284,6 +288,7 @@ def update_nfirs_counts(id, year=None, stat=None):
         years = {y: {1: None, 2: None, 4: None, 5: None} for y in year}
 
     params = dict(fdid=fd.fdid, state=fd.state, years=tuple(years.keys()))
+    params = dict(fdid=tuple(fd.fdids), state=fd.state, years=tuple(years.keys()))
 
     queries = (
         ('civilian_casualties', CIVILIAN_CASUALTIES, params),
