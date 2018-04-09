@@ -372,7 +372,8 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
     @property
     def fdids(self):
         ret = [self.fdid]
-        ret.extend([x.strip() for x in self.additional_fdids.split(',')])
+        if self.additional_fdids:
+            ret.extend([x.strip() for x in self.additional_fdids.split(',')])
         return ret
 
     def get_population_class(self):
