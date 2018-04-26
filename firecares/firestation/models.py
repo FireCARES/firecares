@@ -1510,6 +1510,14 @@ class EffectiveFireFightingForceLevel(models.Model):
     drivetimegeom_43_plus = models.MultiPolygonField(null=True, blank=True)
 
 
+class Note(models.Model):
+    class Meta:
+        unique_together = ('parent_department', 'parent_station')
+    text = models.TextField(null=True, blank=True)
+    parent_department = models.OneToOneField('FireDepartment', related_name='note', null=True, blank=True)
+    parent_station = models.OneToOneField('FireStation', related_name='note', null=True, blank=True)
+
+
 post_save.connect(set_department_region, sender=FireDepartment)
 post_save.connect(update_department, sender=FireDepartment)
 post_save.connect(update_station, sender=FireStation)

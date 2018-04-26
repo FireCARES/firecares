@@ -1,5 +1,5 @@
 import autocomplete_light
-from .models import FireStation, FireDepartment, Staffing, Document, IntersectingDepartmentLog, DataFeedback
+from .models import FireStation, FireDepartment, Staffing, Document, IntersectingDepartmentLog, DataFeedback, Note
 from firecares.firecares_core.models import Address
 from firecares.firecares_core.admin import LocalOpenLayersAdmin
 from firecares.celery import cache_thumbnail
@@ -7,6 +7,16 @@ from django.contrib.gis import admin
 from autocomplete_light import ModelForm as AutocompleteModelForm
 from reversion.admin import VersionAdmin
 from guardian.admin import GuardedModelAdmin
+
+
+class DepartmentNoteInline(admin.TabularInline):
+    model = Note
+    exclude = ['parent_station']
+
+
+class StationNoteInline(admin.TabularInline):
+    model = Note
+    exclude = ['parent_department']
 
 
 class FireStationAdminForm(AutocompleteModelForm):
@@ -27,6 +37,8 @@ class FireStationAdmin(VersionAdmin, LocalOpenLayersAdmin):
         return str(instance.geom)
 
     address_point.short_description = 'Address (lon, lat)'
+
+    inlines = [StationNoteInline]
 
 
 class FireStationInline(admin.TabularInline):
@@ -63,6 +75,7 @@ class FireDepartmentAdmin(GuardedModelAdmin, VersionAdmin, LocalOpenLayersAdmin)
     list_display = ['name', 'state', 'created', 'modified', 'archived', 'display_metrics']
     list_filter = ['state', 'archived', 'display_metrics']
     actions = [generate_thumbnail]
+    inlines = [DepartmentNoteInline]
 
 
 class ResponseCapabilityAdmin(LocalOpenLayersAdmin):
