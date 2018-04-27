@@ -46,9 +46,9 @@
         })
     ;
 
-    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', '$filter', 'FireDepartment', '$analytics', 'WeatherWarning', '$interpolate', 'FireStationandStaffing', 'ServiceAreaRollup', 'EfffChartRollup'];
+    JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'map', 'heatmap', 'emsHeatmap', '$filter', 'FireDepartment', '$analytics', 'WeatherWarning', '$interpolate', 'FireStationandStaffing', 'ServiceAreaRollup', 'EfffChartRollup'];
 
-    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, $filter, FireDepartment, $analytics, WeatherWarning, $interpolate, FireStationandStaffing, ServiceAreaRollup, EfffChartRollup) {
+    function JurisdictionController($scope, $timeout, $http, FireStation, map, heatmap, emsHeatmap, $filter, FireDepartment, $analytics, WeatherWarning, $interpolate, FireStationandStaffing, ServiceAreaRollup, EfffChartRollup) {
         var departmentMap = map.initMap('map', {scrollWheelZoom: false});
         var messagebox = L.control.messagebox({ timeout: 11000, position:'bottomright' }).addTo(departmentMap);
         var messageboxData = L.control.messagebox({ timeout: 22000, position:'bottomleft' }).addTo(departmentMap);
@@ -369,6 +369,71 @@
               function showHeatmapCharts(show) {
                   $timeout(function() {
                       $scope.showHeatmapCharts = show;
+                  });
+              }
+        });
+        
+        //
+        // EMS Heatmap
+        //
+        
+        var emsHeatmapDataUrl = 'https://s3.amazonaws.com/firecares-test/' + config.id + '-ems-incidents.csv';
+        $http.head(emsHeatmapDataUrl)
+          .then(function(response) {
+              var contentLength = Number(response.headers('Content-Length'));
+
+              // Don't show the ems heatmap layer option for a department with no ems heatmap data.
+              // HACK: A department with no ems heatmap data will still return the table header for the empty data, which
+              //       has a length of 59 bytes. Remember to change this value if the columns ever change in any way.
+              if (contentLength <= 59) {
+                  return;
+              }
+
+              emsHeatmap.init(departmentMap);
+              $scope.emsHeatmap = emsHeatmap;
+              $scope.showEMSHeatmapCharts = false;
+
+              layersControl.addOverlay(emsHeatmap.layer, 'Fires Heatmap');
+              departmentMap.on('overlayadd', function(layer) {
+                  if(layer.layer.id === 'weather'){
+                      $('.weather-messages').fadeIn('slow');
+                      $scope.showDetails = false;
+                  }
+                  else if (layer.layer._leaflet_id === emsHeatmap.layer._leaflet_id) {
+                      if (emsHeatmap.heat) {
+                          showEMSHeatmapCharts(true);
+                      } else {
+                          departmentMap.spin(true);
+                          emsHeatmap.download(heatmapDataUrl)
+                              .then(function() {
+                                  showEMSHeatmapCharts(true);
+                              }, function(err) {
+                                  alert(err.message);
+                                  layersControl.removeLayer(emsHeatmap.layer);
+                              })
+                              .finally(function() {
+                                  departmentMap.spin(false);
+                              })
+                          ;
+                      }
+                  }
+              });
+
+              departmentMap.on('overlayremove', function(layer) {
+                  if(layer.layer.id === 'weather'){
+                      $('.weather-messages').fadeOut('slow');
+                  }
+                  else if (layer.layer._leaflet_id === emsHeatmap.layer._leaflet_id) {
+                      showEMSHeatmapCharts(false);
+                  }
+                  if(layer.layer._leaflet_id === activeFires._leaflet_id){
+                      departmentMap.removeControl(activeFirelegend);
+                  }
+              });
+
+              function showEMSHeatmapCharts(show) {
+                  $timeout(function() {
+                      $scope.showEMSHeatmapCharts = show;
                   });
               }
         });

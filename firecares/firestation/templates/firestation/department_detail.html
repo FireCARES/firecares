@@ -323,6 +323,15 @@
                         <aster-chart filter-type="hours" metric-title="HOUR"></aster-chart>
                         <aster-chart filter-type="risk" metric-title="HAZARD"></aster-chart>
                     </div>
+                    <div class="text-center no-select ct-u-marginTop20" ng-if="showEMSHeatmapCharts">
+                        <bar-chart class="hidden-xs" filter-type="yearsMonths" metric-title="HISTORY" width="800" height="150" max-years="8"></bar-chart>
+                        <bar-chart class="visible-xs" filter-type="yearsMonths" metric-title="HISTORY" width="400" height="150" max-years="6"></bar-chart>
+                        <br/>
+                        <aster-chart filter-type="months" metric-title="MONTH" label-offset="5"></aster-chart>
+                        <aster-chart filter-type="daysOfWeek" metric-title="DAY" label-offset="5"></aster-chart>
+                        <aster-chart filter-type="hours" metric-title="HOUR"></aster-chart>
+                        <aster-chart filter-type="risk" metric-title="HAZARD"></aster-chart>
+                    </div>
                     {% include 'firestation/_department_community_risk.html' %}
                     <div class="row">
                         <div class="col-md-4">

@@ -79,12 +79,12 @@
 
             onRefresh: function(scope, callback) {
                 var handler = $rootScope.$on('heatmap.onRefresh', callback);
-				scope.$on('$destroy', handler);
+                scope.$on('$destroy', handler);
             },
 
             onFilterChanged: function(filterType, scope, callback) {
                 var handler = $rootScope.$on('heatmap.' + filterType + 'FilterChanged', callback);
-				scope.$on('$destroy', handler);
+                scope.$on('$destroy', handler);
             },
 
             reset: function() {
