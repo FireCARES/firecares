@@ -61,6 +61,9 @@ def update_performance_score(id, dry_run=False):
     except (ConnectionDoesNotExist, FireDepartment.DoesNotExist):
         return
 
+    # Hack to get around inline SQL string execution and argument escaping in a tuple
+    fds = ["''{}''".format(x) for x in fd.fdids]
+
     RESIDENTIAL_FIRES_BY_FDID_STATE = """
     SELECT *
     FROM crosstab(
@@ -78,14 +81,14 @@ def update_performance_score(id, dry_run=False):
              left join parcel_risk_category_local b using (parcel_id)
              ) AS x
         ) AS y using (state, inc_date, exp_no, fdid, inc_no)
-    where a.state='%(state)s' and a.fdid in %(fdid)s and prop_use in (''419'',''429'',''439'',''449'',''459'',''460'',''462'',''464'',''400'')
+    where a.state='%(state)s' and a.fdid in ({fds}) and prop_use in (''419'',''429'',''439'',''449'',''459'',''460'',''462'',''464'',''400'')
         and fire_sprd is not null and fire_sprd != ''''
     group by risk_category, fire_sprd
     order by risk_category, fire_sprd ASC')
     AS ct(risk_category text, "object_of_origin" bigint, "room_of_origin" bigint, "floor_of_origin" bigint, "building_of_origin" bigint, "beyond" bigint);
-    """
+    """.format(fds=','.join(fds))
 
-    cursor.execute(RESIDENTIAL_FIRES_BY_FDID_STATE, {'fdid': tuple(fd.fdids), 'state': fd.state})
+    cursor.execute(RESIDENTIAL_FIRES_BY_FDID_STATE, {'state': fd.state})
 
     results = dictfetchall(cursor)
 
@@ -564,7 +567,7 @@ def get_parcel_department_hazard_level_rollup(fd_id):
     except IntegrityError:
         print 'Drive Time Failed for ' + dept[0].name
 
-    except:
+    except Exception:
         print 'Drive Time Failed for ' + dept[0].name
 
 
@@ -765,7 +768,7 @@ def update_parcel_department_effectivefirefighting_rollup(fd_id):
         except IntegrityError:
             print 'Drive Time Failed for ' + dept[0].name
 
-        except:
+        except Exception:
             print 'Drive Time Failed for ' + dept[0].name
 
 
