@@ -24,6 +24,8 @@ from django.views.generic import View, CreateView, TemplateView
 from requests_oauthlib import OAuth2Session
 from oauthlib.common import to_unicode
 from zeep import Client
+from zeep.cache import InMemoryCache
+from zeep.transports import Transport
 from guardian.shortcuts import get_objects_for_user
 from firecares.tasks.email import send_mail, email_admins
 from firecares.firestation.models import FireDepartment
@@ -388,8 +390,9 @@ class IMISRedirect(View):
     def get(self, request):
         # Looking to start a new session
         if 'ibcToken' in request.GET:
+            transport = Transport(cache=InMemoryCache())
             # Do service reflection on demand vs on middleware init
-            self.imis = Client(settings.IMIS_SSO_SERVICE_URL) if not self.imis else self.imis
+            self.imis = Client(settings.IMIS_SSO_SERVICE_URL, transport=transport) if not self.imis else self.imis
             # Verify token and create user if none exists
             token = request.GET['ibcToken']
 
