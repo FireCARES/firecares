@@ -9,6 +9,8 @@ from guardian.models import UserObjectPermission, GroupObjectPermission
 from invitations.signals import invite_accepted
 from invitations.models import Invitation
 from zeep import Client
+from zeep.cache import InMemoryCache
+from zeep.transports import Transport
 from registration.signals import user_activated
 from firecares.firecares_core.models import PredeterminedUser, RegistrationWhitelist
 from firecares.tasks.email import email_admins
@@ -40,7 +42,8 @@ def sessionend_handler(sender, **kwargs):
     inst = kwargs.get('instance').get_decoded()
     if 'ibcToken' in inst:
         token = inst.get('ibcToken')
-        imis = Client(settings.IMIS_SSO_SERVICE_URL)
+        transport = Transport(cache=InMemoryCache())
+        imis = Client(settings.IMIS_SSO_SERVICE_URL, transport=transport)
         imis.service.DisposeSessionByUserToken(applicationInstance=1, userToken=token)
 
 
