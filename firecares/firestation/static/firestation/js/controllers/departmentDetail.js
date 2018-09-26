@@ -376,8 +376,9 @@
         //
         // EMS Heatmap
         //
-        
-        var emsHeatmapDataUrl = 'https://s3.amazonaws.com/firecares-test/' + config.id + '-ems-incidents.csv';
+        var emsHeatmapDataUrl = 'https://s3.amazonaws.com/firecares-test/' + config.id + '-building-fires.csv';
+        // TODO: Switch back to good URL when its providing data
+        // var emsHeatmapDataUrl = 'https://s3.amazonaws.com/firecares-test/' + config.id + '-ems-incidents.csv';
         $http.head(emsHeatmapDataUrl)
           .then(function(response) {
               var contentLength = Number(response.headers('Content-Length'));
@@ -393,7 +394,7 @@
               $scope.emsHeatmap = emsHeatmap;
               $scope.showEMSHeatmapCharts = false;
 
-              layersControl.addOverlay(emsHeatmap.layer, 'Fires Heatmap');
+              layersControl.addOverlay(emsHeatmap.layer, 'EMS Heatmap');
               departmentMap.on('overlayadd', function(layer) {
                   if(layer.layer.id === 'weather'){
                       $('.weather-messages').fadeIn('slow');
@@ -419,7 +420,7 @@
                   }
               });
 
-              departmentMap.on('overlayremove', function(layer) {
+              departmentMap.on('emsoverlayremove', function(layer) {
                   if(layer.layer.id === 'weather'){
                       $('.weather-messages').fadeOut('slow');
                   }
