@@ -1,0 +1,24 @@
+{
+  "env": {
+    "browser": true,
+    "node": false,
+    "jasmine": true,
+    "es6": false
+  },
+  "globals": {
+    "ol": true
+  },
+  "rules": {
+    "camelcase": ["error", { "properties": "always" }],
+    "indent": ["error", 2],
+    "no-bitwise": ["error", { "int32Hint": true }],
+    "no-param-reassign": "off",
+    "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
+    "no-unused-vars": ["error", { "args": "none" }],
+    "one-var": "off",
+    "no-var": 0,
+    "prefer-destructuring": "off",
+    "prettier/prettier": "off",
+    "quotes": ["error", "single", { "allowTemplateLiterals": true, "avoidEscape": true }]
+  }
+}
