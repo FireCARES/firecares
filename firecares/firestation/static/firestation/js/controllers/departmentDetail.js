@@ -376,9 +376,7 @@
         //
         // EMS Heatmap
         //
-        var emsHeatmapDataUrl = 'https://s3.amazonaws.com/firecares-test/' + config.id + '-building-fires.csv';
-        // TODO: Switch back to good URL when its providing data
-        // var emsHeatmapDataUrl = 'https://s3.amazonaws.com/firecares-test/' + config.id + '-ems-incidents.csv';
+        var emsHeatmapDataUrl = 'https://s3.amazonaws.com/firecares-test/' + config.id + '-ems-incidents.csv';
         $http.head(emsHeatmapDataUrl)
           .then(function(response) {
               var contentLength = Number(response.headers('Content-Length'));
