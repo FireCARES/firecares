@@ -295,9 +295,8 @@ def update_ems_heatmap(id):
     except (FireDepartment.DoesNotExist, ConnectionDoesNotExist):
         return
 
-    # TODO: Need to have parcel risk category associated in NFIRS DB w/ ems.incidentaddress in order to get a risk category
     q = """
-    SELECT alarm, a.inc_type, alarms,ff_death, oth_death, ST_X(geom) AS x, st_y(geom) AS y, COALESCE(y.risk_category, 'Unknown') AS risk_category
+    SELECT ST_X(geom) AS x, st_y(geom) AS y, COALESCE(y.risk_category, 'Unknown') AS risk_category
     FROM ems.ems a
     LEFT JOIN  (
         SELECT state, fdid, inc_date, inc_no, exp_no, x.geom, x.parcel_id, x.risk_category
@@ -308,7 +307,7 @@ def update_ems_heatmap(id):
                 using (parcel_id)
             ) AS x
         ) AS y
-    USING (state, fdid, inc_date, inc_no, exp_no)
+    ON a.state = y.state and a.fdid = y.fdid and to_date(a.inc_date, 'MMDDYYYY') = y.inc_date and a.inc_no = y.inc_no and a.exp_no = y.exp_no
     WHERE a.state = %(state)s and a.fdid in %(fdid)s
     """
 
@@ -316,7 +315,7 @@ def update_ems_heatmap(id):
     res = cursor.fetchall()
     out = StringIO()
     writer = csv.writer(out)
-    writer.writerow('alarm,inc_type,alarms,x,y,risk_category'.split(','))
+    writer.writerow('x,y,risk_category'.split(','))
     for r in res:
         writer.writerow(r)
 
