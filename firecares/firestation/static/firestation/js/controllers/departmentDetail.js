@@ -403,7 +403,7 @@
                           showEMSHeatmapCharts(true);
                       } else {
                           departmentMap.spin(true);
-                          emsHeatmap.download(heatmapDataUrl)
+                          emsHeatmap.download(emsHeatmapDataUrl)
                               .then(function() {
                                   showEMSHeatmapCharts(true);
                               }, function(err) {
