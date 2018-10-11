@@ -187,9 +187,6 @@
                 reject(new Error('EMS Heatmap data is not yet available for this department.'));
                 return;
               }
-
-              // TODO: Cleanup the extra quotes in the payload.
-
               // Preprocess dates into individual parts. This is MUCH faster than
               // doing it for each dimension, and speeds up loading significantly.
               var risks = {'Unknown': 0, 'Low': 1, 'Medium': 2, 'High': 3};
@@ -199,7 +196,7 @@
                 var day;
                 var year;
                 // Date
-                var incidentDate = line['"inc_date"'].slice(1, -1);
+                var incidentDate = line['inc_date'];
                 if(incidentDate.length === 7) {
                   // Month is 1 digit long
                   month = parseInt(incidentDate.substr(0, 1), 10);
@@ -212,7 +209,7 @@
                   year = parseInt(incidentDate.substr(4, 4), 10);
                 }
 
-                var risk = line['"risk_category"'].slice(1, -1);
+                var risk = line['risk_category'];
 
                 line.dateTime = {
                   year: year,
@@ -226,7 +223,7 @@
 
               _crossfilter = crossfilter(lines);
 
-              _fires.dates = _crossfilter.dimension(function(d) {return d['"inc_date"'].slice(1, -1);});
+              _fires.dates = _crossfilter.dimension(function(d) {return d['inc_date'];});
               _fires.months = _crossfilter.dimension(function(d) {return d.dateTime.month;});
               _fires.daysOfWeek = _crossfilter.dimension(function(d) {return d.dateTime.dayOfWeek;});
               _fires.hours = _crossfilter.dimension(function(d) {return d.dateTime.hours;});
