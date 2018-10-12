@@ -317,7 +317,7 @@ def update_ems_heatmap(id):
     res = cursor.fetchall()
     out = StringIO()
     writer = csv.writer(out)
-    writer.writerow('x,y,risk_category'.split(','))
+    writer.writerow('alarm,x,y,risk_category'.split(','))
     for r in res:
         writer.writerow(r)
 
