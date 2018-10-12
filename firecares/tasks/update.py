@@ -735,6 +735,9 @@ def update_parcel_department_effectivefirefighting_rollup(fd_id):
                     for staff in assetlist:
                         stationstafftotal = stationstafftotal + staff.personnel
 
+                    if stationstafftotal <= 0:
+                        continue
+
                     # geometry
                     stationasset = {}
                     stationasset["spatialReference"] = {"wkid": 4326}
