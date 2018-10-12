@@ -257,9 +257,8 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
 
     DEPARTMENT_TYPE_CHOICES = [
         ('Volunteer', 'Volunteer'),
-        ('Mostly Volunteer', 'Mostly Volunteer'),
         ('Career', 'Career'),
-        ('Mostly Career', 'Mostly Career'),
+        ('Combination', 'Combination'),
     ]
 
     REGION_CHOICES = [
@@ -366,7 +365,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
         if self.geom:
             try:
                 return (self.geom.transform(2163, clone=True).area / 1000000) * 0.386102
-            except:
+            except Exception:
                 return
 
     @property
@@ -543,7 +542,7 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
                 .format(name=name,
                         department_type=self.department_type.lower(),
                         object=self).strip()
-        except:
+        except Exception:
             return 'No description for Fire Department'
 
     @classmethod
@@ -793,7 +792,7 @@ class FireStation(USGSStructureData, Archivable):
                 station.save()
             else:
                 station = None
-        except:
+        except Exception:
                 station = None
 
         return station
@@ -878,10 +877,10 @@ class FireStation(USGSStructureData, Archivable):
 
                 try:
                     rollback()
-                except:
+                except Exception:
                     pass
 
-            except:
+            except Exception:
                 print '{0} failed.'.format(object)
                 print url.format(object)
                 print sys.exc_info()
@@ -895,7 +894,7 @@ class FireStation(USGSStructureData, Archivable):
         if self.district:
             try:
                 return (self.district.transform(102009, clone=True).area / 1000000) * 0.38610
-            except:
+            except Exception:
                 return
 
     def suggested_departments(self):
@@ -1294,7 +1293,7 @@ def run_update_department_task(depart_id):
                 print a_departmentid
                 if str(depart_id) in str(a_departmentid):
                     notaduplicatetask = False
-    except:
+    except Exception:
         return 'No Data in celery queue'
 
     if notaduplicatetask:
