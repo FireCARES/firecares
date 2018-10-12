@@ -1026,7 +1026,7 @@
         }
 
         departmentMap.on('heatmapfilterchanged',
-          _.throttle(heatMapFiltered, 500, {trailing: true}))
+          _.throttle(heatMapFiltered, 500, {trailing: true}));
 
         $timeout(function() {
           angular.element(".loading").fadeOut();
