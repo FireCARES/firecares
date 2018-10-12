@@ -15,7 +15,7 @@
       maxZoom: 15
     });
     var _crossfilter = null;
-    var _fires = {
+    var _ems = {
       dates: null,
       months: null,
       daysOfWeek: null,
@@ -101,11 +101,11 @@
 
         var filter = _filters[filterType];
         if (filter.length) {
-          _fires[filterType].filter(function(d) {
+          _ems[filterType].filter(function(d) {
             return (filter.indexOf(d) > -1);
           });
         } else {
-          _fires[filterType].filterAll();
+          _ems[filterType].filterAll();
         }
 
         // Notify listeners.
@@ -160,7 +160,7 @@
 
       refresh: function() {
         // Update layer with new fire points.
-        _layer.setLatLngs(_fires.dates.top(Infinity).filter(function(fire) {
+        _layer.setLatLngs(_ems.dates.top(Infinity).filter(function(fire) {
           return (fire.y !== '' && fire.x !== '');
         }).map(function(fire) {
           return [fire.y, fire.x];
@@ -212,20 +212,20 @@
               }
 
               _crossfilter = crossfilter(lines);
-              _fires.dates = _crossfilter.dimension(function(d) {return d.alarm;});
-              _fires.months = _crossfilter.dimension(function(d) {return d.dateTime.month;});
-              _fires.daysOfWeek = _crossfilter.dimension(function(d) {return d.dateTime.dayOfWeek;});
-              _fires.hours = _crossfilter.dimension(function(d) {return d.dateTime.hours;});
-              _fires.yearsMonths = _crossfilter.dimension(function(d) {
+              _ems.dates = _crossfilter.dimension(function(d) {return d.alarm;});
+              _ems.months = _crossfilter.dimension(function(d) {return d.dateTime.month;});
+              _ems.daysOfWeek = _crossfilter.dimension(function(d) {return d.dateTime.dayOfWeek;});
+              _ems.hours = _crossfilter.dimension(function(d) {return d.dateTime.hours;});
+              _ems.yearsMonths = _crossfilter.dimension(function(d) {
                 return self.keyForYearsMonths(d.dateTime.year, d.dateTime.month);});
-              _fires.risk = _crossfilter.dimension(function(d) {return d.dateTime.risk;});
-              _totals.months = _fires.months.group().top(Infinity).sort(function(a, b) {return a.key - b.key;});
-              _totals.daysOfWeek = _fires.daysOfWeek.group().top(Infinity).sort(function(a, b) {return a.key - b.key;});
-              _totals.hours = _fires.hours.group().top(Infinity).sort(function(a, b) {return a.key - b.key;});
-              _totals.yearsMonths = _fires.yearsMonths.group().top(Infinity).sort(function(a, b) {
+              _ems.risk = _crossfilter.dimension(function(d) {return d.dateTime.risk;});
+              _totals.months = _ems.months.group().top(Infinity).sort(function(a, b) {return a.key - b.key;});
+              _totals.daysOfWeek = _ems.daysOfWeek.group().top(Infinity).sort(function(a, b) {return a.key - b.key;});
+              _totals.hours = _ems.hours.group().top(Infinity).sort(function(a, b) {return a.key - b.key;});
+              _totals.yearsMonths = _ems.yearsMonths.group().top(Infinity).sort(function(a, b) {
                 return a.key.localeCompare(b.key);
               });
-              _totals.risk = _fires.risk.group().top(Infinity).sort(function(a, b) {return a.key - b.key;});
+              _totals.risk = _ems.risk.group().top(Infinity).sort(function(a, b) {return a.key - b.key;});
 
               self.refresh();
 

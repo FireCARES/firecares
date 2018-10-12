@@ -214,7 +214,7 @@
             var div = L.DomUtil.create('div', 'info legend');
             div.innerHTML = '<i style="background:#f4f4f4;border-color:#e2301f;border-width:2.5px;border-style:dashed;"></i> Active Burning Fires<br>';
             div.innerHTML += '<i style="background:#f4f4f4;border-color:#f28715;border-width:2.5px;border-style:dashed;"></i> Last 12-24 hrs<br>';
-            div.innerHTML += '<i style="background:#f4f4f4b;border-color:#353433;border-width:2.5px;border-style:dashed;"></i> Last 24-48 hrs<br>';
+            div.innerHTML += '<i style="background:#f4f4f4;border-color:#353433;border-width:2.5px;border-style:dashed;"></i> Last 24-48 hrs<br>';
             return div;
         };
 
@@ -369,6 +369,10 @@
               function showHeatmapCharts(show) {
                   $timeout(function() {
                       $scope.showHeatmapCharts = show;
+                      if(show === true) {
+                        // Hide EMS
+                        $scope.showEMSHeatmapCharts = false;
+                      }
                   });
               }
         });
@@ -433,6 +437,9 @@
               function showEMSHeatmapCharts(show) {
                   $timeout(function() {
                       $scope.showEMSHeatmapCharts = show;
+                      if(show === true) {
+                        $scope.showHeatmapCharts = false;
+                      }
                   });
               }
         });
