@@ -192,38 +192,27 @@
               var risks = {'Unknown': 0, 'Low': 1, 'Medium': 2, 'High': 3};
               for (var i = 0; i < lines.length; i++) {
                 var line = lines[i];
-                var month;
-                var day;
-                var year;
-                // Date
-                var incidentDate = line['inc_date'];
-                if(incidentDate.length === 7) {
-                  // Month is 1 digit long
-                  month = parseInt(incidentDate.substr(0, 1), 10);
-                  day = parseInt(incidentDate.substr(1, 2), 10);
-                  year = parseInt(incidentDate.substr(3, 4), 10);
-                } else {
-                  // Month is 2 digits long
-                  month = parseInt(incidentDate.substr(0, 2), 10);
-                  day = parseInt(incidentDate.substr(2, 2), 10);
-                  year = parseInt(incidentDate.substr(4, 4), 10);
-                }
+                // Parse the date timestamp
+                var dateTime = line.alarm.split(' ');
+                var yearMonthDay = dateTime[0].split('-');
+                var hoursMinutesSeconds = dateTime[1].split(':');
 
-                var risk = line['risk_category'];
+                var year = Number(yearMonthDay[0]);
+                var month = Number(yearMonthDay[1]);
+                var day = Number(yearMonthDay[2]);
+                var risk = risks[line.risk_category];
 
                 line.dateTime = {
                   year: year,
                   month: month - 1,
                   dayOfWeek: dayOfWeek(year, month, day),
-                  hours: 12,
+                  hours: Number(hoursMinutesSeconds[0]),
                   risk: risk
                 };
-
               }
 
               _crossfilter = crossfilter(lines);
-
-              _fires.dates = _crossfilter.dimension(function(d) {return d['inc_date'];});
+              _fires.dates = _crossfilter.dimension(function(d) {return d.alarm;});
               _fires.months = _crossfilter.dimension(function(d) {return d.dateTime.month;});
               _fires.daysOfWeek = _crossfilter.dimension(function(d) {return d.dateTime.dayOfWeek;});
               _fires.hours = _crossfilter.dimension(function(d) {return d.dateTime.hours;});
