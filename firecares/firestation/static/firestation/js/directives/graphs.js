@@ -8,9 +8,7 @@
     .directive('bulletChart', BulletChartDirective)
     .directive('riskDistributionBarChart', RiskDistributionBarChartDirective)
     .directive('riskServiceareaBarChart', RiskServiceareaBarChartDirective)
-    .directive('riskEfffareaBarChart', RiskEfffareaBarChartDirective)
-    .directive('asterChartEms', AsterChartEmsDirective)
-    .directive('barChartEms', BarChartEmsDirective);
+    .directive('riskEfffareaBarChart', RiskEfffareaBarChartDirective);
 
   function LineChartDirective() {
     return {
@@ -110,9 +108,9 @@
   }
 
 
-  AsterChartDirective.$inject = ['heatmap'];
+  AsterChartDirective.$inject = ['heatmap', 'emsHeatmap'];
 
-  function AsterChartDirective(heatmap) {
+  function AsterChartDirective(fireHeatmap, emsHeatmap) {
     return {
       restrict: 'CE',
       replace: false,
@@ -120,7 +118,8 @@
         metricTitle: '@?',
         filterType: '@',
         diameter: '@',
-        labelOffset: '@'
+        labelOffset: '@',
+        heatmapClass: '@',
       },
       template: '<div class="chart-header">' +
         '<div class="chart-title">{{metricTitle}}</div>' +
@@ -129,6 +128,9 @@
         '<svg class="no-select"></svg>',
       // The linking function will add behavior to the template
       link: function (scope, element, attrs) {
+        // Get the correct heatmap service
+        var heatmap = scope.heatmapClass === 'fire' ? fireHeatmap : emsHeatmap;
+
         var diameter = (attrs.diameter) ? Number(attrs.diameter) : 175;
         var width = diameter;
         var height = diameter;
@@ -1333,9 +1335,9 @@
     }
   }
 
-  BarChartDirective.$inject = ['heatmap'];
+  BarChartDirective.$inject = ['heatmap', 'emsHeatmap'];
 
-  function BarChartDirective(heatmap) {
+  function BarChartDirective(fireHeatmap, emsHeatmap) {
     return {
       restrict: 'CE',
       replace: false,
@@ -1344,7 +1346,8 @@
         filterType: '@',
         width: '@',
         height: '@',
-        maxYears: '@'
+        maxYears: '@',
+        heatmapClass: '@'
       },
       template: '<div class="chart-header">' +
         '<div class="chart-title">{{metricTitle}}</div>' +
@@ -1353,6 +1356,7 @@
         '<svg class="no-select"></svg>',
       // The linking function will add behavior to the template
       link: function (scope, element, attrs) {
+        var heatmap = scope.heatmapClass === 'fire' ? fireHeatmap : emsHeatmap;
         var width = (attrs.width) ? Number(attrs.width) : element[0].parentElement.offsetWidth;
         var height = (attrs.height) ? Number(attrs.height) : 150;
         var maxYears = (attrs.maxYears) ? Number(attrs.maxYears) : 8;

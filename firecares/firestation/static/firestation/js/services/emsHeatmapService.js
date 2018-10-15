@@ -77,12 +77,12 @@
       },
 
       onRefresh: function(scope, callback) {
-        var handler = $rootScope.$on('emsHeatmap.onRefresh', callback);
+        var handler = $rootScope.$on('heatmap.onRefresh', callback);
         scope.$on('$destroy', handler);
       },
 
       onFilterChanged: function(filterType, scope, callback) {
-        var handler = $rootScope.$on('emsHeatmap.' + filterType + 'FilterChanged', callback);
+        var handler = $rootScope.$on('heatmap.' + filterType + 'FilterChanged', callback);
         scope.$on('$destroy', handler);
       },
 
@@ -109,8 +109,8 @@
         }
 
         // Notify listeners.
-        $rootScope.$emit('emsheatmap.' + filterType + 'FilterChanged', filter);
-        _map.fireEvent('emsheatmapfilterchanged', {
+        $rootScope.$emit('heatmap.' + filterType + 'FilterChanged', filter);
+        _map.fireEvent('heatmapfilterchanged', {
           filterType: filterType,
           filter: filter
         });
@@ -167,7 +167,7 @@
         }));
 
         // Notify listeners.
-        $rootScope.$emit('emsheatmap.onRefresh');
+        $rootScope.$emit('heatmap.onRefresh');
       },
 
       keyForYearsMonths: function(year, month) {
