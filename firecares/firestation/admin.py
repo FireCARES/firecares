@@ -72,10 +72,16 @@ generate_thumbnail.short_description = "Re-generate thumbnail for selected fire 
 class FireDepartmentAdmin(GuardedModelAdmin, VersionAdmin, LocalOpenLayersAdmin):
     form = FireDepartmentAdminForm
     search_fields = ['name']
-    list_display = ['name', 'state', 'created', 'modified', 'archived', 'display_metrics']
+    list_display = ['name', 'state', 'created', 'modified', 'archived', 'display_metrics', 'has_boundary']
     list_filter = ['state', 'archived', 'display_metrics']
     actions = [generate_thumbnail]
     inlines = [DepartmentNoteInline]
+
+    def has_boundary(self, obj):
+        return bool(obj.geom)
+
+    has_boundary.boolean = True
+    has_boundary.admin_order_field = 'geom'
 
 
 class ResponseCapabilityAdmin(LocalOpenLayersAdmin):
