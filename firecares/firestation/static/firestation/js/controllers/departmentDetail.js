@@ -422,7 +422,7 @@
                   }
               });
 
-              departmentMap.on('emsoverlayremove', function(layer) {
+              departmentMap.on('overlayremove', function(layer) {
                   if(layer.layer.id === 'weather'){
                       $('.weather-messages').fadeOut('slow');
                   }
