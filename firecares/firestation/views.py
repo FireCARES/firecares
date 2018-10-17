@@ -1,5 +1,6 @@
 import json
 import logging
+import math
 import ogr
 import os
 import osr
@@ -229,7 +230,9 @@ class DepartmentUpdateGovernmentUnits(PermissionRequiredMixin, LoginRequiredMixi
     def get_context_data(self, **kwargs):
         context = super(DepartmentUpdateGovernmentUnits, self).get_context_data(**kwargs)
 
-        geom = self.object.headquarters_geom.buffer(0.01)
+        og = self.object.headquarters_geom.clone()
+        # 5km-ish
+        geom = og.buffer(5000 / 40000000. * 360. / math.cos(og.y / 360. * math.pi))
 
         context['user_can_change'] = self.object.is_curator(self.request.user)
         context['user_can_admin'] = self.object.is_admin(self.request.user)
@@ -438,7 +441,7 @@ class LimitMixin(object):
             if limit:
                 self.paginate_by = limit
 
-        except:
+        except Exception:
             return
 
     def get_queryset(self):
@@ -533,7 +536,7 @@ class FireDepartmentListView(PaginationMixin, ListView, SafeSortMixin, LimitMixi
                             from django.db.models import Q
                             queryset = queryset.filter(Q(**{field + '__lte': Max}) | Q(**{field + '__isnull': True}))
 
-            except:
+            except Exception:
                 pass
         return queryset
 
@@ -622,7 +625,7 @@ class AddStationView(LoginRequiredMixin, FormView):
                 self.station = station
                 return super(AddStationView, self).form_valid(form)
 
-        except:
+        except Exception:
             print 'Geocoding Problem'
             return "Geocode Error"
 
