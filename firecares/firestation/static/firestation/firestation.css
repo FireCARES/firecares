@@ -134,7 +134,7 @@ input.ng-invalid {
     fill: orange;
 }
 
-aster-chart, bar-chart, aster-chart-ems, bar-chart-ems {
+aster-chart, bar-chart {
     display: inline-block;
     padding: 0 10px;
 
@@ -145,11 +145,11 @@ aster-chart, bar-chart, aster-chart-ems, bar-chart-ems {
     user-select: none;
 }
 
-aster-chart > svg, bar-chart > svg, aster-chart-ems > svg, bar-chart-ems > svg {
+aster-chart > svg, bar-chart > svg {
     cursor: crosshair;
 }
 
-bar-chart > svg, bar-chart-ems > svg {
+bar-chart > svg {
     overflow: visible !important;
     -moz-transform: scale(1, -1);
     -o-transform: scale(1, -1);
@@ -157,7 +157,7 @@ bar-chart > svg, bar-chart-ems > svg {
     transform: scale(1, -1);
 }
 
-bar-chart > svg > g.bar-chart-labels, bar-chart-ems > svg > g.bar-chart-labels  {
+bar-chart > svg > g.bar-chart-labels  {
     -moz-transform: scale(1, -1);
     -o-transform: scale(1, -1);
     -webkit-transform: scale(1, -1);
