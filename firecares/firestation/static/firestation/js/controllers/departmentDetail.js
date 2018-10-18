@@ -192,7 +192,8 @@
 
         if (config.geom != null) {
             countyBoundary = L.geoJson(config.geom, {
-                style: function(feature) { return {color: '#0074D9', fillOpacity: .05, opacity: .8, weight: 2}; }
+                style: function(feature) { return {color: '#0074D9', fillOpacity: .05, opacity: .8, weight: 2}; },
+                interactive: false
             }).addTo(departmentMap);
             layersControl.addOverlay(countyBoundary, 'Jurisdiction Boundary');
             departmentMap.fitBounds(countyBoundary.getBounds(), fitBoundsOptions);
