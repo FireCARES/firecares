@@ -179,10 +179,23 @@
         return poly.map(function(line){return mapLineString(line)})
       }
 
+
       function mapLineString(line){
         return line.map(function(d){return [d[1],d[0]]})
       }
     });
+
+    if (config.geom != null) {
+      countyBoundary = L.geoJson(config.geom, {
+        style: function(feature) { return {color: '#0074D9', fillOpacity: .05, opacity: .8, weight: 2}; },
+        clickable: false
+      }).addTo(departmentMap);
+      layersControl.addOverlay(countyBoundary, 'Jurisdiction Boundary');
+      departmentMap.fitBounds(countyBoundary.getBounds(), fitBoundsOptions);
+    } else {
+      departmentMap.setView(config.centroid, 13);
+    }
+
 
     if (config.centroid != null) {
       var headquarters = L.marker(config.centroid, {icon: headquartersIcon, zIndexOffset: 1000});
@@ -906,16 +919,16 @@
             document.addEventListener("efffHighlight", function (e) {
               for (var l in efffArea._layers) {
                 if(efffArea._layers[l].feature.properties.hazard == e.detail){
-                  efffArea._layers[l].setStyle({weight: .7,fillOpacity: .9, fillColor: efffArea._layers[l].feature.properties.tocolor, weight:3, color:'#fff', opacity:.8});
+                  efffArea._layers[l].setStyle({weight: .7,fillOpacity: .9, fillColor: efffArea._layers[l].feature.properties.tocolor, color:'#fff', opacity:.8});
                 }
                 else{
-                  efffArea._layers[l].setStyle({weight: 0.1, fillOpacity:0, fillColor: efffArea._layers[l].feature.properties.tocolor, weight:1, color:'#fff', opacity:.8});
+                  efffArea._layers[l].setStyle({weight: 0.1, fillOpacity:0, fillColor: efffArea._layers[l].feature.properties.tocolor, color:'#fff', opacity:.8});
                 }
               };
             });
             document.addEventListener("uNefffHighlight", function (e) {
               for (var l in efffArea._layers) {
-                efffArea._layers[l].setStyle({weight: 0.1, fillOpacity:0.4, fillColor: efffArea._layers[l].feature.properties.tocolor, weight:1, color:'#fff', opacity:.8});
+                efffArea._layers[l].setStyle({weight: 0.1, fillOpacity:0.4, fillColor: efffArea._layers[l].feature.properties.tocolor, color:'#fff', opacity:.8});
               };
             });
           });
