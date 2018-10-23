@@ -16,6 +16,7 @@
       'fireStation.weatherWarning',
       'fireStation.mapService',
       'fireStation.heatmapService',
+      'fireStation.emsHeatmapService',
       'fireStation.favoriteService',
       'fireStation.gauge',
       'fireStation.search',

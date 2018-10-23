@@ -314,14 +314,24 @@
                         </div>
                     </div>
                     {% endverbatim %}
+
                     <div class="text-center no-select ct-u-marginTop20" ng-if="showHeatmapCharts">
-                        <bar-chart class="hidden-xs" filter-type="yearsMonths" metric-title="HISTORY" width="800" height="150" max-years="8"></bar-chart>
-                        <bar-chart class="visible-xs" filter-type="yearsMonths" metric-title="HISTORY" width="400" height="150" max-years="6"></bar-chart>
+                        <bar-chart heatmap-class="fire" class="hidden-xs" filter-type="yearsMonths" metric-title="HISTORY" width="800" height="150" max-years="8"></bar-chart>
+                        <bar-chart heatmap-class="fire" class="visible-xs" filter-type="yearsMonths" metric-title="HISTORY" width="400" height="150" max-years="6"></bar-chart>
                         <br/>
-                        <aster-chart filter-type="months" metric-title="MONTH" label-offset="5"></aster-chart>
-                        <aster-chart filter-type="daysOfWeek" metric-title="DAY" label-offset="5"></aster-chart>
-                        <aster-chart filter-type="hours" metric-title="HOUR"></aster-chart>
-                        <aster-chart filter-type="risk" metric-title="HAZARD"></aster-chart>
+                        <aster-chart heatmap-class="fire" filter-type="months" metric-title="MONTH" label-offset="5"></aster-chart>
+                        <aster-chart heatmap-class="fire" filter-type="daysOfWeek" metric-title="DAY" label-offset="5"></aster-chart>
+                        <aster-chart heatmap-class="fire" filter-type="hours" metric-title="HOUR"></aster-chart>
+                        <aster-chart heatmap-class="fire" filter-type="risk" metric-title="HAZARD"></aster-chart>
+                    </div>
+                    <div class="text-center no-select ct-u-marginTop20" ng-if="showEMSHeatmapCharts">
+                        <bar-chart heatmap-class="ems" class="hidden-xs" filter-type="yearsMonths" metric-title="HISTORY" width="800" height="150" max-years="8"></bar-chart>
+                        <bar-chart class="visible-xs" heatmap-class="ems" filter-type="yearsMonths" metric-title="HISTORY" width="400" height="150" max-years="6"></bar-chart>
+                        <br/>
+                        <aster-chart heatmap-class="ems" filter-type="months" metric-title="MONTH" label-offset="5"></aster-chart>
+                        <aster-chart heatmap-class="ems" filter-type="daysOfWeek" metric-title="DAY" label-offset="5"></aster-chart>
+                        <aster-chart heatmap-class="ems" filter-type="hours" metric-title="HOUR"></aster-chart>
+                        <aster-chart heatmap-class="ems" filter-type="risk" metric-title="HAZARD"></aster-chart>
                     </div>
                     {% include 'firestation/_department_community_risk.html' %}
                     <div class="row">

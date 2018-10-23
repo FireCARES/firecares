@@ -288,6 +288,47 @@ def update_fires_heatmap(id):
 
 
 @app.task(queue='update')
+def update_ems_heatmap(id):
+    try:
+        fd = FireDepartment.objects.get(id=id)
+        cursor = connections['nfirs'].cursor()
+    except (FireDepartment.DoesNotExist, ConnectionDoesNotExist):
+        return
+
+    q = """
+    SELECT bi.alarm, ST_X(geom) AS x, st_y(geom) AS y, COALESCE(y.risk_category, 'Unknown') AS risk_category
+    FROM ems.ems a
+    INNER JOIN ems.basicincident bi
+    ON a.state = bi.state and a.fdid = bi.fdid and a.inc_no = bi.inc_no and a.exp_no = bi.exp_no and to_date(a.inc_date, 'MMDDYYYY') = bi.inc_date
+    LEFT JOIN  (
+        SELECT state, fdid, inc_date, inc_no, exp_no, x.geom, x.parcel_id, x.risk_category
+            FROM (
+                SELECT *
+                FROM ems.incidentaddress a
+                LEFT JOIN parcel_risk_category_local
+                using (parcel_id)
+            ) AS x
+        ) AS y
+    ON a.state = y.state and a.fdid = y.fdid and to_date(a.inc_date, 'MMDDYYYY') = y.inc_date and a.inc_no = y.inc_no and a.exp_no = y.exp_no
+    WHERE a.state = %(state)s and a.fdid in %(fdid)s
+    """
+
+    cursor.execute(q, params=dict(state=fd.state, fdid=tuple(fd.fdids)))
+    res = cursor.fetchall()
+    out = StringIO()
+    writer = csv.writer(out)
+    writer.writerow('alarm,x,y,risk_category'.split(','))
+    for r in res:
+        writer.writerow(r)
+
+    s3 = boto.connect_s3()
+    k = Key(s3.get_bucket(settings.HEATMAP_BUCKET))
+    k.key = '{}-ems-incidents.csv'.format(id)
+    k.set_contents_from_string(out.getvalue())
+    k.set_acl('public-read')
+
+
+@app.task(queue='update')
 def update_department(id):
     print "updating department {}".format(id)
     chain(update_nfirs_counts.si(id),

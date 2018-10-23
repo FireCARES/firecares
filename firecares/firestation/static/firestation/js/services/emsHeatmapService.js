@@ -1,21 +1,21 @@
 'use strict';
 
 (function() {
-  angular.module('fireStation.heatmapService', [])
-    .factory('heatmap', HeatmapService);
+  angular.module('fireStation.emsHeatmapService', [])
+    .factory('emsHeatmap', EmsHeatmapService);
 
-  HeatmapService.$inject = ['$http', '$q', '$rootScope'];
+  EmsHeatmapService.$inject = ['$http', '$q', '$rootScope'];
 
-  function HeatmapService($http, $q, $rootScope) {
+  function EmsHeatmapService($http, $q, $rootScope) {
     var _map = null;
     var _layer = L.heatLayer([], {
-      gradient: {0.55: '#74ac49', 0.65: '#febe00', 1: '#f6542f'},
+      gradient: {0.55: '#7400ff', 0.65: '#3333ff', 1: '#ff3333'},
       radius: 10,
       minOpacity: 0.5,
       maxZoom: 15
     });
     var _crossfilter = null;
-    var _fires = {
+    var _ems = {
       dates: null,
       months: null,
       daysOfWeek: null,
@@ -44,7 +44,7 @@
 
       for (var i = 1; i < allTextLines.length; i++) {
         var data = allTextLines[i].split(',');
-        if (data.length == headers.length) {
+        if (data.length === headers.length) {
 
           var tarr = {};
           for (var j = 0; j < headers.length; j++) {
@@ -101,16 +101,16 @@
 
         var filter = _filters[filterType];
         if (filter.length) {
-          _fires[filterType].filter(function(d) {
+          _ems[filterType].filter(function(d) {
             return (filter.indexOf(d) > -1);
           });
         } else {
-          _fires[filterType].filterAll();
+          _ems[filterType].filterAll();
         }
 
         // Notify listeners.
         $rootScope.$emit('heatmap.' + filterType + 'FilterChanged', filter);
-        _map.fireEvent( 'heatmapfilterchanged',  {
+        _map.fireEvent('heatmapfilterchanged', {
           filterType: filterType,
           filter: filter
         });
@@ -160,8 +160,8 @@
 
       refresh: function() {
         // Update layer with new fire points.
-        _layer.setLatLngs(_fires.dates.top(Infinity).filter(function(fire) {
-          return (fire.y !== "" && fire.x !== "");
+        _layer.setLatLngs(_ems.dates.top(Infinity).filter(function(fire) {
+          return (fire.y !== '' && fire.x !== '');
         }).map(function(fire) {
           return [fire.y, fire.x];
         }));
@@ -183,16 +183,16 @@
           $http.get(url)
             .then(function(response) {
               var lines = processData(response.data);
-              if (lines.length == 0) {
-                reject(new Error("Heatmap data is not yet available for this department."));
+              if (lines.length === 0) {
+                reject(new Error('EMS Heatmap data is not yet available for this department.'));
                 return;
               }
-
               // Preprocess dates into individual parts. This is MUCH faster than
               // doing it for each dimension, and speeds up loading significantly.
-              var risks = { "Unknown":0, "Low":1, "Medium":2, "High":3 };
+              var risks = {'Unknown': 0, 'Low': 1, 'Medium': 2, 'High': 3};
               for (var i = 0; i < lines.length; i++) {
                 var line = lines[i];
+                // Parse the date timestamp
                 var dateTime = line.alarm.split(' ');
                 var yearMonthDay = dateTime[0].split('-');
                 var hoursMinutesSeconds = dateTime[1].split(':');
@@ -212,20 +212,20 @@
               }
 
               _crossfilter = crossfilter(lines);
-              _fires.dates = _crossfilter.dimension(function(d) { return d.alarm; });
-              _fires.months = _crossfilter.dimension(function(d) { return d.dateTime.month; });
-              _fires.daysOfWeek = _crossfilter.dimension(function(d) { return d.dateTime.dayOfWeek; });
-              _fires.hours = _crossfilter.dimension(function(d) { return d.dateTime.hours; });
-              _fires.yearsMonths = _crossfilter.dimension(function(d) {
+              _ems.dates = _crossfilter.dimension(function(d) {return d.alarm;});
+              _ems.months = _crossfilter.dimension(function(d) {return d.dateTime.month;});
+              _ems.daysOfWeek = _crossfilter.dimension(function(d) {return d.dateTime.dayOfWeek;});
+              _ems.hours = _crossfilter.dimension(function(d) {return d.dateTime.hours;});
+              _ems.yearsMonths = _crossfilter.dimension(function(d) {
                 return self.keyForYearsMonths(d.dateTime.year, d.dateTime.month);});
-              _fires.risk = _crossfilter.dimension(function(d) { return d.dateTime.risk; });
-              _totals.months = _fires.months.group().top(Infinity).sort(function(a, b) { return a.key - b.key; });
-              _totals.daysOfWeek = _fires.daysOfWeek.group().top(Infinity).sort(function(a, b) { return a.key - b.key;});
-              _totals.hours = _fires.hours.group().top(Infinity).sort(function(a, b) { return a.key - b.key; });
-              _totals.yearsMonths = _fires.yearsMonths.group().top(Infinity).sort(function(a, b) {
+              _ems.risk = _crossfilter.dimension(function(d) {return d.dateTime.risk;});
+              _totals.months = _ems.months.group().top(Infinity).sort(function(a, b) {return a.key - b.key;});
+              _totals.daysOfWeek = _ems.daysOfWeek.group().top(Infinity).sort(function(a, b) {return a.key - b.key;});
+              _totals.hours = _ems.hours.group().top(Infinity).sort(function(a, b) {return a.key - b.key;});
+              _totals.yearsMonths = _ems.yearsMonths.group().top(Infinity).sort(function(a, b) {
                 return a.key.localeCompare(b.key);
               });
-              _totals.risk = _fires.risk.group().top(Infinity).sort(function(a, b) { return a.key - b.key; });
+              _totals.risk = _ems.risk.group().top(Infinity).sort(function(a, b) {return a.key - b.key;});
 
               self.refresh();
 
