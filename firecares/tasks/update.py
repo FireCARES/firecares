@@ -309,7 +309,7 @@ def update_ems_heatmap(id):
                 using (parcel_id)
             ) AS x
         ) AS y
-    ON a.state = y.state and a.fdid = y.fdid and to_date(a.inc_date, 'MMDDYYYY') = y.inc_date and a.inc_no = y.inc_no and a.exp_no = y.exp_no
+    ON a.state = y.state and a.fdid = y.fdid and to_date(a.inc_date, 'MMDDYYYY') = y.inc_date and ltrim(a.inc_no, '0') = ltrim(y.inc_no, '0') and a.exp_no = y.exp_no
     WHERE a.state = %(state)s and a.fdid in %(fdid)s
     """
 
