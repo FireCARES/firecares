@@ -10,7 +10,7 @@ from firecares.utils import lenient_summation
 
 class Command(BaseCommand):
     help = """Imports prediction data into FireCARES.  Expects incoming CSV data to have columns including:
-fd_id, lr.fire, mr.fire, hr.fires, lr.injuries, mr.injuries, hr.injuries, lr.deaths.1se, mr.deaths, hr.deaths, lr.sz2, mr.sz2, hr.sz2, lr.sz3, mr.sz3, hr.sz3
+fc_dept_id, lr.fire, mr.fire, hr.fires, lr.injuries, mr.injuries, hr.injuries, lr.deaths.1se, mr.deaths.1se, hr.deaths, lr.sz2, mr.sz2, hr.sz2, lr.sz3, mr.sz3, hr.sz3
     """
 
     def add_arguments(self, parser):
@@ -37,8 +37,8 @@ fd_id, lr.fire, mr.fire, hr.fires, lr.injuries, mr.injuries, hr.injuries, lr.dea
         dry_run = options.get('dry_run')
         df = pd.read_csv(options['file'])
         count = 0
-        cols = ['fd_id', 'lr.fire', 'mr.fire', 'hr.fires', 'lr.injuries', 'mr.injuries', 'hr.injuries',
-                'lr.deaths.1se', 'mr.deaths', 'hr.deaths',
+        cols = ['fc_dept_id', 'lr.fire', 'mr.fire', 'hr.fires', 'lr.injuries', 'mr.injuries', 'hr.injuries',
+                'lr.deaths.1se', 'mr.deaths.1se', 'hr.deaths',
                 'lr.sz2', 'mr.sz2', 'hr.sz2', 'lr.sz3', 'mr.sz3', 'hr.sz3',
                 'lr_beyond_room', 'lr_beyond_structure',
                 'mr_beyond_room', 'mr_beyond_structure',
@@ -57,12 +57,12 @@ fd_id, lr.fire, mr.fire, hr.fires, lr.injuries, mr.injuries, hr.injuries, lr.dea
             return not np.isnan(num) and num != 0
 
         for idx, i in enumerate(items.iterrows()):
-            cur_id = int(i[1]['fd_id'])
+            cur_id = int(i[1]['fc_dept_id'])
             row = i[1]
 
             if ids is None or cur_id in ids:
 
-                row = df[df.fd_id == cur_id].to_dict(orient='row')[0]
+                row = df[df.fc_dept_id == cur_id].to_dict(orient='row')[0]
 
                 lr_beyond_room = row['lr_beyond_room']
                 lr_beyond_structure = row['lr_beyond_structure']
@@ -91,7 +91,7 @@ fd_id, lr.fire, mr.fire, hr.fires, lr.injuries, mr.injuries, hr.injuries, lr.dea
                 low.risk_model_fires_size2 = lr_beyond_structure if valid(lr_beyond_structure) else low.risk_model_fires_size2
                 self.calculate_derived_values(low)
 
-                medium.risk_model_deaths = row['mr.deaths'] if valid(row['mr.deaths']) else medium.risk_model_deaths
+                medium.risk_model_deaths = row['mr.deaths.1se'] if valid(row['mr.deaths.1se']) else medium.risk_model_deaths
                 medium.risk_model_injuries = row['mr.injuries'] if valid(row['mr.injuries']) else medium.risk_model_injuries
                 medium.risk_model_fires = row['mr.fire'] if valid(row['mr.fire']) else medium.risk_model_fires
                 medium.risk_model_fires_size0 = None
