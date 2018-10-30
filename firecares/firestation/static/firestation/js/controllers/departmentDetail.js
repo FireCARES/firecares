@@ -197,6 +197,8 @@
           clickable: false,
           interactive: false};
         },
+        clickable: false,
+        interactive: false,
       }).addTo(departmentMap);
       layersControl.addOverlay(countyBoundary, 'Jurisdiction Boundary');
       departmentMap.fitBounds(countyBoundary.getBounds(), fitBoundsOptions);
