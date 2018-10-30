@@ -187,30 +187,27 @@
 
     if (config.geom != null) {
       countyBoundary = L.geoJson(config.geom, {
-        style: function(feature) { return {color: '#0074D9', fillOpacity: .05, opacity: .8, weight: 2}; },
-        clickable: false
+        style: function(feature) { return {
+          color: '#0074D9',
+          fillOpacity: .05,
+          opacity: .8,
+          weight: 2,
+          pointerEvents: 'none',
+          cursor: 'default',
+          clickable: false,
+          interactive: false};
+        },
       }).addTo(departmentMap);
       layersControl.addOverlay(countyBoundary, 'Jurisdiction Boundary');
       departmentMap.fitBounds(countyBoundary.getBounds(), fitBoundsOptions);
     } else {
       departmentMap.setView(config.centroid, 13);
     }
-
 
     if (config.centroid != null) {
       var headquarters = L.marker(config.centroid, {icon: headquartersIcon, zIndexOffset: 1000});
       headquarters.addTo(departmentMap);
       layersControl.addOverlay(headquarters, 'Headquarters Location');
-    }
-
-    if (config.geom != null) {
-      countyBoundary = L.geoJson(config.geom, {
-        style: function(feature) { return {color: '#0074D9', fillOpacity: .05, opacity: .8, weight: 2}; }
-      }).addTo(departmentMap);
-      layersControl.addOverlay(countyBoundary, 'Jurisdiction Boundary');
-      departmentMap.fitBounds(countyBoundary.getBounds(), fitBoundsOptions);
-    } else {
-      departmentMap.setView(config.centroid, 13);
     }
 
     $scope.toggleFullScreenMap = function() {
