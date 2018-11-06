@@ -259,7 +259,7 @@ class FireDepartmentResource(JSONDefaultModelResourceMixin, ModelResource):
             boundary = geos.GEOSGeometry(json.dumps(geom))
             if type(boundary) is geos.Polygon:
                 bundle.data['geom'] = json.loads(geos.MultiPolygon(boundary).json)
-        except:
+        except Exception:
             bundle.data['geom'] = None
         return bundle
 
@@ -312,6 +312,17 @@ class FireStationResource(JSONDefaultModelResourceMixin, ModelResource):
                     ]
         serializer = PrettyJSONSerializer()
         limit = 120
+
+    def hydrate_district(self, bundle):
+        try:
+            geom = bundle.data.get('district')
+            boundary = geos.GEOSGeometry(json.dumps(geom))
+            if type(boundary) is geos.Polygon:
+                boundary = geos.MultiPolygon(boundary)
+            bundle.data['district'] = json.loads(boundary.json)
+        except Exception:
+            bundle.data['district'] = None
+        return bundle
 
 
 class StaffingResource(JSONDefaultModelResourceMixin, ModelResource):
