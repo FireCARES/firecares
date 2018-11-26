@@ -296,8 +296,8 @@ def update_ems_heatmap(id):
         return
 
     q = """
-    SELECT bi.alarm, ST_X(geom) AS x, st_y(geom) AS y, COALESCE(y.risk_category, 'Unknown') AS risk_category
-    FROM JOIN ems.basicincident a
+    SELECT a.alarm, ST_X(geom) AS x, st_y(geom) AS y, COALESCE(y.risk_category, 'Unknown') AS risk_category
+    FROM ems.basicincident a
     LEFT JOIN  (
         SELECT state, fdid, inc_date, inc_no, exp_no, x.geom, x.parcel_id, x.risk_category
             FROM (
