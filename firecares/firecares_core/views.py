@@ -97,6 +97,11 @@ class ContactUs(View):
                 }
                 resp = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
                 if resp.json()['success']:
+                    if settings.SPAM_FILTER_ENABLED:
+                        body = dict(email_text=form.cleaned_data['message'])
+                        resp = requests.post('https://plino.herokuapp.com/api/v1/classify/', data=json.dumps(body), headers={'content-type': 'application/json'}, timeout=3)
+                        if resp.status_code == 200 and resp.json()['email_class'] == 'spam':
+                            return redirect(reverse('contact_thank_you'))
                     return self._save_and_notify(form)
                 else:
                     form.add_error(None, 'Robot check failed.  Did you check the "I\'m not a robot" checkbox?')
