@@ -563,7 +563,7 @@ def get_parcel_department_hazard_level_rollup(fd_id):
     """
     Update for one department for the drive time hazard level
     """
-    stationlist = FireStation.objects.filter(department_id=fd_id)
+    stationlist = FireStation.objects.filter(department_id=fd_id, archived=False)
     dept = FireDepartment.objects.filter(id=fd_id)
 
     print "Calculating Drive times for:  " + dept[0].name
