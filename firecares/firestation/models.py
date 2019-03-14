@@ -1045,6 +1045,7 @@ class Staffing(models.Model):
     modified = models.DateTimeField(auto_now=True)
     firestation = models.ForeignKey(FireStation)
     apparatus = models.CharField(choices=APPARATUS_CHOICES, max_length=20, default='Engine')
+    other_apparatus_type = models.CharField(null=True, blank=True, max_length=255)
     personnel = models.PositiveIntegerField(null=True, blank=True, default=0, validators=[MaxValueValidator(99)])
     als = models.BooleanField(default=False)
 
