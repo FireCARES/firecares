@@ -257,6 +257,10 @@
     };
 
     $scope.UpdateForm = function(form) {
+      if (form['apparatus'] != 'Other') {
+        form['other_apparatus_type'] = '';
+      }
+      
       if (form.new_form === true) {
 
         //remove temp variables

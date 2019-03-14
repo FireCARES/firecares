@@ -15,6 +15,14 @@
                         </div>
                     </div>
                 </div>
+                <div ng-if="form.apparatus == 'Other'" class="ct-u-displayTableVertical ct-u-marginBottom20">
+                    <div class="ct-u-displayTableCell">
+                        <div class="ct-form--item">
+                            <label for="apparatus">Other Apparatus Type Name</label>
+                            <input class="form-control" ng-model="form.other_apparatus_type" name="apparatus" ng-maxlength="200"/>
+                        </div>
+                    </div>
+                </div>
                 <div class="ct-u-displayTableVertical ct-u-marginBottom20">
                     <div>
                         <div class="ct-form--item">
