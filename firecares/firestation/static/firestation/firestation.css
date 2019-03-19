@@ -157,7 +157,7 @@ bar-chart > svg {
     transform: scale(1, -1);
 }
 
-bar-chart > svg > g.bar-chart-labels {
+bar-chart > svg > g.bar-chart-labels  {
     -moz-transform: scale(1, -1);
     -o-transform: scale(1, -1);
     -webkit-transform: scale(1, -1);
