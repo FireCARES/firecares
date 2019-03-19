@@ -413,7 +413,7 @@
                             <p><strong><em>Department and station administrators and curators, please make sure your apparatus information is accurate.</em></strong></p>
                             <ul class="nav nav-tabs apparatus-tabs">
                                 <li id="tab-{{ form.id }}" ng-repeat="form in forms" ng-class="{'active': $last}">
-                                    <a href="#{{ form.id }}" data-toggle="tab">{{ form.apparatus }} </a>
+                                    <a href="#{{ form.id }}" data-toggle="tab">{{ form.other_apparatus_type || form.apparatus }} </a>
                                 </li>
                                 <li ng-click="AddForm()" id="" class="nav-action" data-toggle="tab">Add Apparatus</li>
                             </ul>
@@ -426,7 +426,7 @@
                                 <p>This station has <strong>{{ forms.length }}</strong> staffed apparatuses:</p>
                                 <ul>
                                     <li ng-repeat="form in forms">
-                                        <strong>{{ form.apparatus }}</strong>: staffed with <strong>{{ form.personnel }}</strong> personnel
+                                        <strong>{{ form.other_apparatus_type || form.apparatus }}</strong>: staffed with <strong>{{ form.personnel }}</strong> personnel
                                         <span ng-if="form.als">and also <strong>provides Advanced Life Support</strong></span>
                                     </li>
                                 </ul>
