@@ -1802,3 +1802,23 @@ div.is-your-department {
     padding: 5px;
     text-align: center;
 }
+
+ol.numbered {
+  list-style-type: none;
+  counter-reset: item;
+
+  li {
+    margin: 0 0 21px;
+  }
+
+  li::before {
+    content: counters(item, ".") " ";
+    counter-increment: item;
+    font-weight: bold;
+  }
+
+  p {
+    margin-inline-start: 20px;
+    display: inline;
+  }
+}

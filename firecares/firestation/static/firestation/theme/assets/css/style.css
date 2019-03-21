@@ -52,9 +52,6 @@ Licensed under the MIT license - http://opensource.org/licenses/MIT
 
 Copyright (c) 2014 Daniel Eden
 */
-@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
-@import url(https://fonts.googleapis.com/css?family=Libre+Baskerville:400italic);
-@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700,800);
 .animated {
   -webkit-animation-duration: 1s;
   animation-duration: 1s;
@@ -560,8 +557,8 @@ Copyright (c) 2014 Daniel Eden
 .bounceIn {
   -webkit-animation-name: bounceIn;
   animation-name: bounceIn;
-  -webkit-animation-duration: .75s;
-  animation-duration: .75s;
+  -webkit-animation-duration: 0.75s;
+  animation-duration: 0.75s;
 }
 @-webkit-keyframes bounceInDown {
   0%,
@@ -872,8 +869,8 @@ Copyright (c) 2014 Daniel Eden
 .bounceOut {
   -webkit-animation-name: bounceOut;
   animation-name: bounceOut;
-  -webkit-animation-duration: .75s;
-  animation-duration: .75s;
+  -webkit-animation-duration: 0.75s;
+  animation-duration: 0.75s;
 }
 @-webkit-keyframes bounceOutDown {
   20% {
@@ -1692,8 +1689,8 @@ Copyright (c) 2014 Daniel Eden
 .flipOutX {
   -webkit-animation-name: flipOutX;
   animation-name: flipOutX;
-  -webkit-animation-duration: .75s;
-  animation-duration: .75s;
+  -webkit-animation-duration: 0.75s;
+  animation-duration: 0.75s;
   -webkit-backface-visibility: visible !important;
   backface-visibility: visible !important;
 }
@@ -1734,8 +1731,8 @@ Copyright (c) 2014 Daniel Eden
   backface-visibility: visible !important;
   -webkit-animation-name: flipOutY;
   animation-name: flipOutY;
-  -webkit-animation-duration: .75s;
-  animation-duration: .75s;
+  -webkit-animation-duration: 0.75s;
+  animation-duration: 0.75s;
 }
 @-webkit-keyframes lightSpeedIn {
   0% {
@@ -5031,40 +5028,40 @@ html[dir="rtl"] .select2-container-multi .select2-search-choice-close {
 .ct-navbar--bounceIn > li.dropdown:hover .dropdown-menu {
   -webkit-animation-name: bounceIn;
   animation-name: bounceIn;
-  -webkit-animation-duration: .5s;
-  animation-duration: .5s;
+  -webkit-animation-duration: 0.5s;
+  animation-duration: 0.5s;
   animation-fill-mode: forwards;
   -webkit-animation-fill-mode: forwards;
 }
 .ct-navbar--fadeIn > li.dropdown:hover .dropdown-menu {
   -webkit-animation-name: fadeIn;
   animation-name: fadeIn;
-  -webkit-animation-duration: .5s;
-  animation-duration: .5s;
+  -webkit-animation-duration: 0.5s;
+  animation-duration: 0.5s;
   animation-fill-mode: forwards;
   -webkit-animation-fill-mode: forwards;
 }
 .ct-navbar--fadeInLeft > li.dropdown:hover .dropdown-menu {
   -webkit-animation-name: fadeInLeft;
   animation-name: fadeInLeft;
-  -webkit-animation-duration: .5s;
-  animation-duration: .5s;
+  -webkit-animation-duration: 0.5s;
+  animation-duration: 0.5s;
   animation-fill-mode: forwards;
   -webkit-animation-fill-mode: forwards;
 }
 .ct-navbar--fadeInRight > li.dropdown:hover .dropdown-menu {
   -webkit-animation-name: fadeInRight;
   animation-name: fadeInRight;
-  -webkit-animation-duration: .5s;
-  animation-duration: .5s;
+  -webkit-animation-duration: 0.5s;
+  animation-duration: 0.5s;
   animation-fill-mode: forwards;
   -webkit-animation-fill-mode: forwards;
 }
 .ct-navbar--fadeInDown > li.dropdown:hover .dropdown-menu {
   -webkit-animation-name: fadeInDown;
   animation-name: fadeInDown;
-  -webkit-animation-duration: .5s;
-  animation-duration: .5s;
+  -webkit-animation-duration: 0.5s;
+  animation-duration: 0.5s;
   animation-fill-mode: forwards;
   -webkit-animation-fill-mode: forwards;
 }
@@ -5095,72 +5092,72 @@ html[dir="rtl"] .select2-container-multi .select2-search-choice-close {
 .ct-navbar--fadeInUp > li.dropdown:hover .dropdown-menu {
   -webkit-animation-name: ct-navbar--fadeInUp;
   animation-name: ct-navbar--fadeInUp;
-  -webkit-animation-duration: .5s;
-  animation-duration: .5s;
+  -webkit-animation-duration: 0.5s;
+  animation-duration: 0.5s;
   animation-fill-mode: forwards;
   -webkit-animation-fill-mode: forwards;
 }
 .ct-navbar--pulse > li.dropdown:hover .dropdown-menu {
   -webkit-animation-name: pulse;
   animation-name: pulse;
-  -webkit-animation-duration: .5s;
-  animation-duration: .5s;
+  -webkit-animation-duration: 0.5s;
+  animation-duration: 0.5s;
   animation-fill-mode: forwards;
   -webkit-animation-fill-mode: forwards;
 }
 .ct-navbar--bounceInRight > li.dropdown:hover .dropdown-menu {
   -webkit-animation-name: bounceInRight;
   animation-name: bounceInRight;
-  -webkit-animation-duration: .5s;
-  animation-duration: .5s;
+  -webkit-animation-duration: 0.5s;
+  animation-duration: 0.5s;
   animation-fill-mode: forwards;
   -webkit-animation-fill-mode: forwards;
 }
 .ct-navbar--bounceInLeft > li.dropdown:hover .dropdown-menu {
   -webkit-animation-name: bounceInLeft;
   animation-name: bounceInLeft;
-  -webkit-animation-duration: .5s;
-  animation-duration: .5s;
+  -webkit-animation-duration: 0.5s;
+  animation-duration: 0.5s;
   animation-fill-mode: forwards;
   -webkit-animation-fill-mode: forwards;
 }
 .ct-navbar--flipInX > li.dropdown:hover .dropdown-menu {
   -webkit-animation-name: flipInX;
   animation-name: flipInX;
-  -webkit-animation-duration: .5s;
-  animation-duration: .5s;
+  -webkit-animation-duration: 0.5s;
+  animation-duration: 0.5s;
   animation-fill-mode: forwards;
   -webkit-animation-fill-mode: forwards;
 }
 .ct-navbar--flipInY > li.dropdown:hover .dropdown-menu {
   -webkit-animation-name: flipInY;
   animation-name: flipInY;
-  -webkit-animation-duration: .5s;
-  animation-duration: .5s;
+  -webkit-animation-duration: 0.5s;
+  animation-duration: 0.5s;
   animation-fill-mode: forwards;
   -webkit-animation-fill-mode: forwards;
 }
 .ct-navbar--zoomIn > li.dropdown:hover .dropdown-menu {
   -webkit-animation-name: zoomIn;
   animation-name: zoomIn;
-  -webkit-animation-duration: .5s;
-  animation-duration: .5s;
+  -webkit-animation-duration: 0.5s;
+  animation-duration: 0.5s;
   animation-fill-mode: forwards;
   -webkit-animation-fill-mode: forwards;
 }
 .ct-navbar--zoomInDown > li.dropdown:hover .dropdown-menu {
   -webkit-animation-name: zoomInDown;
   animation-name: zoomInDown;
-  -webkit-animation-duration: .5s;
-  animation-duration: .5s;
+  -webkit-animation-duration: 0.5s;
+  animation-duration: 0.5s;
   animation-fill-mode: forwards;
   -webkit-animation-fill-mode: forwards;
 }
 .ct-navbar--zoomInUp > li.dropdown:hover .dropdown-menu {
   -webkit-animation-name: zoomInUp;
   animation-name: zoomInUp;
-  -webkit-animation-duration: .5s;
-  animation-duration: .5s;
+  -webkit-animation-duration: 0.5s;
+  animation-duration: 0.5s;
   animation-fill-mode: forwards;
   -webkit-animation-fill-mode: forwards;
 }
@@ -5244,6 +5241,60 @@ html[dir="rtl"] .select2-container-multi .select2-search-choice-close {
   -moz-transition: all 0.2s ease;
   -o-transition: all 0.2s ease;
   transition: all 0.2s ease;
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Montserrat Regular'), local('Montserrat-Regular'), url(https://fonts.gstatic.com/s/montserrat/v12/JTUSjIg1_i6t8kCHKm459Wlhzg.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Montserrat Bold'), local('Montserrat-Bold'), url(https://fonts.gstatic.com/s/montserrat/v12/JTURjIg1_i6t8kCHKm45_dJE3gnD-w.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Libre Baskerville';
+  font-style: italic;
+  font-weight: 400;
+  src: local('Libre Baskerville Italic'), local('LibreBaskerville-Italic'), url(https://fonts.gstatic.com/s/librebaskerville/v6/kmKhZrc3Hgbbcjq75U4uslyuy4kn0qNcWxEQCQ.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-weight: 400;
+  src: local('Open Sans Italic'), local('OpenSans-Italic'), url(https://fonts.gstatic.com/s/opensans/v15/mem6YaGs126MiZpBA-UFUK0Zdcg.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Open Sans Light'), local('OpenSans-Light'), url(https://fonts.gstatic.com/s/opensans/v15/mem5YaGs126MiZpBA-UN_r8OUuhs.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans Regular'), local('OpenSans-Regular'), url(https://fonts.gstatic.com/s/opensans/v15/mem8YaGs126MiZpBA-UFVZ0e.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 600;
+  src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'), url(https://fonts.gstatic.com/s/opensans/v15/mem5YaGs126MiZpBA-UNirkOUuhs.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(https://fonts.gstatic.com/s/opensans/v15/mem5YaGs126MiZpBA-UN7rgOUuhs.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 800;
+  src: local('Open Sans ExtraBold'), local('OpenSans-ExtraBold'), url(https://fonts.gstatic.com/s/opensans/v15/mem5YaGs126MiZpBA-UN8rsOUuhs.ttf) format('truetype');
 }
 body {
   font-family: "Open Sans", sans-serif;
@@ -5634,7 +5685,7 @@ form input {
 }
 .ct-js-select .select2-chosen {
   font-size: 14px;
-  color: #555555!important;
+  color: #555555 !important;
 }
 .select2-container {
   width: 100%!important;
@@ -5653,7 +5704,7 @@ form input {
   color: #fff;
 }
 .select2-container .select2-choice .select2-chosen {
-  color: #858585!important;
+  color: #858585 !important;
   font-weight: 400;
   margin: 0;
   width: 100px;
@@ -6014,7 +6065,7 @@ form input {
 }
 .ct-select2--light .select2-arrow {
   border: none!important;
-  color: #cccccc!important;
+  color: #cccccc !important;
   opacity: 1;
 }
 .infinite-left {
@@ -6886,14 +6937,14 @@ button {
 /* fade */
 .owl-fade-out {
   z-index: 10;
-  -webkit-animation: fadeOut .7s both ease;
-  -moz-animation: fadeOut .7s both ease;
-  animation: fadeOut .7s both ease;
+  -webkit-animation: fadeOut 0.7s both ease;
+  -moz-animation: fadeOut 0.7s both ease;
+  animation: fadeOut 0.7s both ease;
 }
 .owl-fade-in {
-  -webkit-animation: fadeIn .7s both ease;
-  -moz-animation: fadeIn .7s both ease;
-  animation: fadeIn .7s both ease;
+  -webkit-animation: fadeIn 0.7s both ease;
+  -moz-animation: fadeIn 0.7s both ease;
+  animation: fadeIn 0.7s both ease;
 }
 /* backSlide */
 .owl-backSlide-out {
@@ -6908,25 +6959,25 @@ button {
 }
 /* goDown */
 .owl-goDown-out {
-  -webkit-animation: scaleToFade .7s ease both;
-  -moz-animation: scaleToFade .7s ease both;
-  animation: scaleToFade .7s ease both;
+  -webkit-animation: scaleToFade 0.7s ease both;
+  -moz-animation: scaleToFade 0.7s ease both;
+  animation: scaleToFade 0.7s ease both;
 }
 .owl-goDown-in {
-  -webkit-animation: goDown .6s ease both;
-  -moz-animation: goDown .6s ease both;
-  animation: goDown .6s ease both;
+  -webkit-animation: goDown 0.6s ease both;
+  -moz-animation: goDown 0.6s ease both;
+  animation: goDown 0.6s ease both;
 }
 /* scaleUp */
 .owl-fadeUp-in {
-  -webkit-animation: scaleUpFrom .5s ease both;
-  -moz-animation: scaleUpFrom .5s ease both;
-  animation: scaleUpFrom .5s ease both;
+  -webkit-animation: scaleUpFrom 0.5s ease both;
+  -moz-animation: scaleUpFrom 0.5s ease both;
+  animation: scaleUpFrom 0.5s ease both;
 }
 .owl-fadeUp-out {
-  -webkit-animation: scaleUpTo .5s ease both;
-  -moz-animation: scaleUpTo .5s ease both;
-  animation: scaleUpTo .5s ease both;
+  -webkit-animation: scaleUpTo 0.5s ease both;
+  -moz-animation: scaleUpTo 0.5s ease both;
+  animation: scaleUpTo 0.5s ease both;
 }
 /* Keyframes */
 /*empty*/
@@ -6995,54 +7046,54 @@ button {
 }
 @-webkit-keyframes backSlideOut {
   25% {
-    opacity: .5;
+    opacity: 0.5;
     -webkit-transform: translateZ(-500px);
   }
   75% {
-    opacity: .5;
+    opacity: 0.5;
     -webkit-transform: translateZ(-500px) translateX(-200%);
   }
   100% {
-    opacity: .5;
+    opacity: 0.5;
     -webkit-transform: translateZ(-500px) translateX(-200%);
   }
 }
 @-moz-keyframes backSlideOut {
   25% {
-    opacity: .5;
+    opacity: 0.5;
     -moz-transform: translateZ(-500px);
   }
   75% {
-    opacity: .5;
+    opacity: 0.5;
     -moz-transform: translateZ(-500px) translateX(-200%);
   }
   100% {
-    opacity: .5;
+    opacity: 0.5;
     -moz-transform: translateZ(-500px) translateX(-200%);
   }
 }
 @keyframes backSlideOut {
   25% {
-    opacity: .5;
+    opacity: 0.5;
     transform: translateZ(-500px);
   }
   75% {
-    opacity: .5;
+    opacity: 0.5;
     transform: translateZ(-500px) translateX(-200%);
   }
   100% {
-    opacity: .5;
+    opacity: 0.5;
     transform: translateZ(-500px) translateX(-200%);
   }
 }
 @-webkit-keyframes backSlideIn {
   0%,
   25% {
-    opacity: .5;
+    opacity: 0.5;
     -webkit-transform: translateZ(-500px) translateX(200%);
   }
   75% {
-    opacity: .5;
+    opacity: 0.5;
     -webkit-transform: translateZ(-500px);
   }
   100% {
@@ -7053,11 +7104,11 @@ button {
 @-moz-keyframes backSlideIn {
   0%,
   25% {
-    opacity: .5;
+    opacity: 0.5;
     -moz-transform: translateZ(-500px) translateX(200%);
   }
   75% {
-    opacity: .5;
+    opacity: 0.5;
     -moz-transform: translateZ(-500px);
   }
   100% {
@@ -7068,11 +7119,11 @@ button {
 @keyframes backSlideIn {
   0%,
   25% {
-    opacity: .5;
+    opacity: 0.5;
     transform: translateZ(-500px) translateX(200%);
   }
   75% {
-    opacity: .5;
+    opacity: 0.5;
     transform: translateZ(-500px);
   }
   100% {
@@ -8051,9 +8102,9 @@ img.mfp-img {
   left: -1.85714286em;
 }
 .fa-border {
-  padding: .2em .25em .15em;
+  padding: 0.2em 0.25em 0.15em;
   border: solid 0.08em #eee;
-  border-radius: .1em;
+  border-radius: 0.1em;
 }
 .fa-pull-left {
   float: left;
@@ -8062,10 +8113,10 @@ img.mfp-img {
   float: right;
 }
 .fa.fa-pull-left {
-  margin-right: .3em;
+  margin-right: 0.3em;
 }
 .fa.fa-pull-right {
-  margin-left: .3em;
+  margin-left: 0.3em;
 }
 /* Deprecated as of 4.4.0 */
 .pull-right {
@@ -8075,10 +8126,10 @@ img.mfp-img {
   float: left;
 }
 .fa.pull-left {
-  margin-right: .3em;
+  margin-right: 0.3em;
 }
 .fa.pull-right {
-  margin-left: .3em;
+  margin-left: 0.3em;
 }
 .fa-spin {
   -webkit-animation: fa-spin 2s infinite linear;
@@ -11277,7 +11328,7 @@ div.unauthenticated * div.gauge-inverse {
 }
 .bullet-chart .bullet .tick line {
   stroke: #666;
-  stroke-width: .5px;
+  stroke-width: 0.5px;
 }
 .bullet-chart .bullet .range.s0 {
   fill: #eee;
@@ -11323,7 +11374,7 @@ div.unauthenticated * div.gauge-inverse {
 .metric-card .description {
   font-size: 13px;
   font-family: "Open Sans", sans-serif;
-  opacity: .6;
+  opacity: 0.6;
   padding-top: 4px;
 }
 .metric-card .main-content {
@@ -11395,7 +11446,7 @@ div.unauthenticated * div.gauge-inverse {
 .diamond-legend {
   width: 10px;
   height: 10px;
-  opacity: .5;
+  opacity: 0.5;
   display: inline-block;
 }
 .risk-card {
@@ -11421,7 +11472,7 @@ div.unauthenticated * div.gauge-inverse {
 .risk-card .description {
   font-size: 13px;
   font-family: "Open Sans", sans-serif;
-  opacity: .6;
+  opacity: 0.6;
   padding-top: 4px;
 }
 .risk-card .main-content {
@@ -11435,7 +11486,7 @@ div.unauthenticated * div.gauge-inverse {
   line-height: 1.2;
 }
 .community-risk-legend .help-text {
-  opacity: .6;
+  opacity: 0.6;
   font-size: 11px;
   padding-right: 15px;
 }
@@ -11454,13 +11505,13 @@ div.unauthenticated * div.gauge-inverse {
   width: 10px;
   height: 10px;
   display: inline-block;
-  opacity: .6;
+  opacity: 0.6;
   margin: 1px;
 }
 .safe-grade-legend {
   padding-top: 0;
   padding-left: 0;
-  line-height: .94;
+  line-height: 0.94;
 }
 .safe-grade-legend div {
   padding: 5px;
@@ -11489,7 +11540,7 @@ div.unauthenticated * div.gauge-inverse {
 }
 .sub-navbar a {
   color: #2d3a51;
-  opacity: .5;
+  opacity: 0.5;
   padding: 0 15px;
 }
 .sub-navbar small {
@@ -11571,7 +11622,7 @@ div.unauthenticated * div.gauge-inverse {
   font-weight: 600;
 }
 .leaflet-control-layers-list span {
-  margin-left: .35em;
+  margin-left: 0.35em;
 }
 .leaflet-control-layers-list input[type='checkbox'] {
   width: auto;
@@ -11729,7 +11780,7 @@ form[name='boundaryUpload'] a.commit:hover {
 .sign-up-button:hover {
   background-color: white;
   color: #2d3a51 !important;
-  opacity: .5;
+  opacity: 0.5;
   padding: 0 15px;
 }
 .sign-up-popover-content .popup-content {
@@ -11768,8 +11819,8 @@ form[name='boundaryUpload'] a.commit:hover {
   transform: translateX(30%);
 }
 .videos .owl-item .item img {
-  transition: transform .5s;
-  transition: filter .5s;
+  transition: transform 0.5s;
+  transition: filter 0.5s;
   transition: -webkit-filter 0.5s;
   border-radius: 2px;
   height: 15rem;
@@ -11801,14 +11852,14 @@ form[name='boundaryUpload'] a.commit:hover {
 .videos .owl-item .item h5 {
   font-weight: 500;
   flex: 0 0 76%;
-  opacity: .85;
+  opacity: 0.85;
   transition: opacity ease-in-out 0.25s;
 }
 .videos .owl-item .item i {
   flex: 0 0 7%;
   background-color: #ff9e21;
   color: #1d2732;
-  padding: .3rem .6rem;
+  padding: 0.3rem 0.6rem;
   border-radius: 99rem;
   font-size: 105%;
   font-weight: 800;
@@ -12399,6 +12450,22 @@ div.is-your-department {
   font: 12px sans-serif;
   padding: 5px;
   text-align: center;
+}
+ol.numbered {
+  list-style-type: none;
+  counter-reset: item;
+}
+ol.numbered li {
+  margin: 0 0 21px;
+}
+ol.numbered li::before {
+  content: counters(item, ".") " ";
+  counter-increment: item;
+  font-weight: bold;
+}
+ol.numbered p {
+  margin-inline-start: 20px;
+  display: inline;
 }
 .ct-pageWrapper {
   background-color: #ffffff;
@@ -13279,7 +13346,7 @@ header {
   overflow: hidden;
 }
 .ct-navigationThumbnail .owl-item img {
-  opacity: 0.5!important;
+  opacity: 0.5 !important;
   width: 100%;
 }
 .ct-navigationThumbnail .synced img {
@@ -13855,16 +13922,16 @@ header {
   line-height: 21px;
 }
 .panel-success .panel-heading a:before {
-  color: #a2bf52!important;
+  color: #a2bf52 !important;
 }
 .panel-danger .panel-heading a:before {
-  color: #e30000!important;
+  color: #e30000 !important;
 }
 .panel-warning .panel-heading a:before {
-  color: #eb8a21!important;
+  color: #eb8a21 !important;
 }
 .panel-info .panel-heading a:before {
-  color: #a2bf52!important;
+  color: #a2bf52 !important;
 }
 .ct-navigation {
   width: 100%;
@@ -14677,7 +14744,7 @@ header {
 .ct-sortingBar .select2-container .select2-chosen {
   font-size: 14px;
   line-height: 24px;
-  color: #333!important;
+  color: #333 !important;
   padding: 3px 55px 3px 13px;
   width: 210px;
 }
@@ -14975,7 +15042,7 @@ header {
   background: #1F2530;
 }
 .ct-hover:hover .ct-imageBox img {
-  opacity: 0.3!important;
+  opacity: 0.3 !important;
   -webkit-transition: all 0.3s ease;
   -moz-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;
@@ -15392,7 +15459,7 @@ header {
 }
 .ct-calculator--whiteStyle form .form-control {
   background-color: #fff;
-  border: 2px solid #e6e6e6!important;
+  border: 2px solid #e6e6e6 !important;
   color: #333;
 }
 .ct-calculator--whiteStyle form .form-control:focus {
@@ -15642,7 +15709,7 @@ header {
 }
 @media (max-width: 1600px) {
   .ct-section--products2col .col-lg-3 {
-    width: 33.33333333333333% !important;
+    width: 33.33333333% !important;
   }
 }
 @media (max-width: 1200px) {

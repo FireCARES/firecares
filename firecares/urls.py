@@ -82,7 +82,8 @@ urlpatterns = patterns('',
     url(r'^invitations/', include('firecares.firecares_core.ext.invitations.urls', namespace='invitations')),
     url(r'^oauth/$', OAuth2Callback.as_view(), name='oauth_callback'),
     url(r'^oauthlogin/$', OAuth2Redirect.as_view(), name='oauth_redirect'),
-    url(r'^imis/$', IMISRedirect.as_view(), name='imis')
+    url(r'^imis/$', IMISRedirect.as_view(), name='imis'),
+    url(r'^api-terms/$', TemplateView.as_view(template_name='api_terms.html'), name='api-terms')
 )
 
 if settings.DEBUG:
