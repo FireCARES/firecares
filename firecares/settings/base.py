@@ -22,7 +22,7 @@ DATABASES = {
         'NAME': os.getenv('DATABASE_NAME', 'firecares'),
         'USER': os.getenv('DATABASE_USER', 'firecares'),
         'PASSWORD': os.getenv('DATABASE_PASSWORD', 'password'),
-        'HOST': os.getenv('DATABASE_HOST', 'postgres-postgresql.default.svc.cluster.local'),
+        'HOST': os.getenv('DATABASE_HOST', 'localhost'),
         'PORT': os.getenv('DATABASE_PORT', '5432'),
     },
     'nfirs': {
