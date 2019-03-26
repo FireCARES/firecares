@@ -1,4 +1,4 @@
-six==1.10.0
+six==1.11.0
 psycopg2==2.7
 us==0.9.0
 django-phonenumber-field==0.7.2
