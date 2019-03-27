@@ -51,3 +51,4 @@ django-import-export==0.5.1
 pylibmc==1.5.2
 tornado==4.5.3
 setuptools==34.4.0  # pinned to get around django-static-sitemaps issues with 35
+requests[security]

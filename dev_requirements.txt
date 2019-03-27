@@ -3,3 +3,4 @@ coverage==4.2
 locustio==0.7.5
 ipython[notebook]<=6.0
 flake8==3.4.0
+requests[security]
