@@ -748,6 +748,9 @@ class FireDepartmentRiskModels(models.Model):
 
     dist_model_score_fire_count = models.IntegerField(null=True, blank=True)
 
+    risk_model_ems = models.FloatField(null=True, blank=True, db_index=True,
+                                         verbose_name='Predicted number of EMS incidents per year.')
+
     def __unicode__(self):
         return '{level} risk - {department} ({f_id})'.format(level=HazardLevels(self.level).name, department=self.department, f_id=self.department.id)
 
