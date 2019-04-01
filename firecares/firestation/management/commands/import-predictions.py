@@ -11,7 +11,7 @@ from firecares.utils import lenient_summation
 class Command(BaseCommand):
     help = """Imports prediction data into FireCARES.  Expects incoming CSV data to have columns including:
 fc_dept_id, lr.fire, mr.fire, hr.fires, lr.injuries, mr.injuries, hr.injuries, lr.deaths.1se, mr.deaths.1se, 
-hr.deaths, lr.sz2, mr.sz2, hr.sz2, lr.sz3, mr.sz3, hr.sz3, lr.ems, mr.ems, hr.ems
+hr.deaths, lr.sz2, mr.sz2, hr.sz2, lr.sz3, mr.sz3, hr.sz3, ems
     """
 
     def add_arguments(self, parser):
@@ -44,7 +44,7 @@ hr.deaths, lr.sz2, mr.sz2, hr.sz2, lr.sz3, mr.sz3, hr.sz3, lr.ems, mr.ems, hr.em
                 'lr_beyond_room', 'lr_beyond_structure',
                 'mr_beyond_room', 'mr_beyond_structure',
                 'hr_beyond_room', 'hr_beyond_structure',
-                'lr.ems', 'mr.ems', 'hr.ems']
+                'ems']
 
         df['lr_beyond_room'] = df.apply(lambda row: row['lr.fire'] * row['lr.sz2'], axis=1)
         df['lr_beyond_structure'] = df.apply(lambda row: row['lr.fire'] * row['lr.sz2'] * row['lr.sz3'], axis=1)
@@ -91,7 +91,7 @@ hr.deaths, lr.sz2, mr.sz2, hr.sz2, lr.sz3, mr.sz3, hr.sz3, lr.ems, mr.ems, hr.em
                 low.risk_model_fires_size0 = None
                 low.risk_model_fires_size1 = lr_beyond_room if valid(lr_beyond_room) else low.risk_model_fires_size1
                 low.risk_model_fires_size2 = lr_beyond_structure if valid(lr_beyond_structure) else low.risk_model_fires_size2
-                low.risk_model_ems = row['lr.ems'] if valid(row['lr.ems']) else low.risk_model_ems
+                low.risk_model_ems = row['ems'] if valid(row['ems']) else low.risk_model_ems
                 self.calculate_derived_values(low)
                 
 
@@ -101,7 +101,7 @@ hr.deaths, lr.sz2, mr.sz2, hr.sz2, lr.sz3, mr.sz3, hr.sz3, lr.ems, mr.ems, hr.em
                 medium.risk_model_fires_size0 = None
                 medium.risk_model_fires_size1 = mr_beyond_room if valid(mr_beyond_room) else medium.risk_model_fires_size1
                 medium.risk_model_fires_size2 = mr_beyond_structure if valid(mr_beyond_structure) else medium.risk_model_fires_size2
-                medium.risk_model_ems = row['mr.ems'] if valid(row['mr.ems']) else medium.risk_model_ems
+                medium.risk_model_ems = row['ems'] if valid(row['ems']) else medium.risk_model_ems
                 self.calculate_derived_values(medium)
 
                 high.risk_model_deaths = row['hr.deaths'] if valid(row['hr.deaths']) else high.risk_model_deaths
@@ -110,7 +110,7 @@ hr.deaths, lr.sz2, mr.sz2, hr.sz2, lr.sz3, mr.sz3, hr.sz3, lr.ems, mr.ems, hr.em
                 high.risk_model_fires_size0 = None
                 high.risk_model_fires_size1 = hr_beyond_room if valid(hr_beyond_room) else high.risk_model_fires_size1
                 high.risk_model_fires_size2 = hr_beyond_structure if valid(hr_beyond_structure) else high.risk_model_fires_size2
-                high.risk_model_ems = row['hr.ems'] if valid(row['hr.ems']) else high.risk_model_ems
+                high.risk_model_ems = row['ems'] if valid(row['ems']) else high.risk_model_ems
                 self.calculate_derived_values(high)
 
                 all_level.risk_model_deaths = lenient_summation(low.risk_model_deaths, medium.risk_model_deaths, high.risk_model_deaths)
