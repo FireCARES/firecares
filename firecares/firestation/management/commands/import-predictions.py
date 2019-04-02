@@ -46,6 +46,9 @@ hr.deaths, lr.sz2, mr.sz2, hr.sz2, lr.sz3, mr.sz3, hr.sz3, ems
                 'hr_beyond_room', 'hr_beyond_structure',
                 'ems']
 
+        # Convert everything to numbers
+        df = df.convert_objects(convert_numeric=True)
+
         df['lr_beyond_room'] = df.apply(lambda row: row['lr.fire'] * row['lr.sz2'], axis=1)
         df['lr_beyond_structure'] = df.apply(lambda row: row['lr.fire'] * row['lr.sz2'] * row['lr.sz3'], axis=1)
         df['mr_beyond_room'] = df.apply(lambda row: row['mr.fire'] * row['mr.sz2'], axis=1)
