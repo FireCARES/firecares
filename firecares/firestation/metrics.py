@@ -424,6 +424,10 @@ class FireDepartmentMetrics(object):
         return self._get_risk_model_field('structure_count')
 
     @cached_property
+    def risk_model_ems(self):
+        return self._get_risk_model_field('risk_model_ems')
+
+    @cached_property
     def deaths_and_injuries_sum(self):
 
         low, med, high, unknown, all_levels = self._get_risk_model_rows()
