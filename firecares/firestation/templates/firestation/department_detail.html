@@ -72,7 +72,21 @@
     {% include 'google_analytics.html' %}
 </head>
 
-<body class="ct-headroom--fixedTopBar cssAnimate" ng-controller="jurisdictionController" ng-app="fireStation" ng-init="setLevel('all')">
+{% if EMS_ENABLED %}
+<body 
+    class="ct-headroom--fixedTopBar cssAnimate" 
+    ng-controller="jurisdictionController" 
+    ng-app="fireStation" 
+    ng-init="setLevel('all'); setEmsEnabled(true);"
+>
+{% else %}
+<body 
+    class="ct-headroom--fixedTopBar cssAnimate" 
+    ng-controller="jurisdictionController" 
+    ng-app="fireStation" 
+    ng-init="setLevel('all'); setEmsEnabled(false);"
+>
+{% endif %}
 
 {% include 'firestation/_mobile_navbar.html' %}
 {% include 'firestation/_mobile_search.html' %}

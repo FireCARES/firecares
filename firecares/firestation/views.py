@@ -115,6 +115,7 @@ class DepartmentDetailView(DetailView):
 
         # population stats provide summary statistics for fields within the current objects population class
         context['population_stats'] = self.object.metrics.population_class_stats
+        context['EMS_ENABLED'] = settings.EMS_ENABLED
 
         return context
 
