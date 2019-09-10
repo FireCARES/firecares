@@ -19,7 +19,6 @@ IMIS_SSO_SERVICE_URL = 'https://member.iaff.org/iaff_sso_prod/sso.asmx?WSDL'
 HELIX_ROOT = 'https://helix.auth0.com'
 HELIX_AUTHORIZE_URL = HELIX_ROOT + '/authorize'
 HELIX_TOKEN_URL = HELIX_ROOT + '/oauth/token'
-HELIX_SCOPE = ['openid', 'profile']
 HELIX_CLIENT_ID = 'O06btCnCKS98g025ACAgbeSuilHS9Pxa'
 HELIX_REDIRECT = 'https://firecares.org/oauth'
 HELIX_LOGOUT_URL = HELIX_ROOT + '/v2/logout?client_id=' + HELIX_CLIENT_ID + '&returnTo=https://firecares.org/'

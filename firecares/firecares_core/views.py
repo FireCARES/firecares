@@ -245,7 +245,7 @@ class OAuth2Callback(View):
         return 'iafc-{}'.format(token['https://www.myhelix.org/contactid'] or rand_username)
 
     def _allowed_in(self, token):
-        return token.get('https://www.myhelix.org/iafcmember') or token.get('https://www.myhelix.org/username') == 'joe@prominentedge.com'
+        return token.get('https://www.myhelix.org/iafcmember')
 
     def _will_be_admin(self, title):
         return title.lower() in [x.lower() for x in settings.HELIX_ACCEPTED_CHIEF_ADMIN_TITLES]
