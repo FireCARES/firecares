@@ -1,3 +1,4 @@
+setuptools==34.4.0  # pinned to get around django-static-sitemaps issues with 35
 amqp==1.4.9
 anyjson==0.3.3
 appdirs==1.4.3
@@ -12,7 +13,7 @@ boto==2.38.0
 cached-property==1.3.0
 celery==3.1.18
 certifi==2017.1.23
-cffi==1.9.1
+cffi==1.12.3
 click==4.0
 coverage==4.2
 cryptography==2.5
@@ -66,12 +67,12 @@ jellyfish==0.2.1
 jsonfield==1.0.3
 kombu==3.0.37
 lxml==3.5.0
+numpy==1.10.4
 matplotlib==1.4.3
 mccabe==0.6.1
 mock==2.0.0
 ndg-httpsclient==0.4.0
 nose==1.3.7
-numpy==1.16.1
 oauthlib==2.0.2
 odfpy==1.4.0
 openpyxl==2.5.14
@@ -92,6 +93,7 @@ pyasn1==0.2.3
 pycparser==2.17
 pyflakes==1.5.0
 Pygments==2.2.0
+PyJWT==1.7.1
 pylibmc==1.5.2
 pyOpenSSL==17.2.0
 pyparsing==2.2.0
@@ -107,7 +109,6 @@ requests-mock==1.2.0
 requests-oauthlib==0.7.0
 scandir==1.5
 scipy==0.17.0
-setuptools==34.4.0  # pinned to get around django-static-sitemaps issues with 35
 simplegeneric==0.8.1
 singledispatch==3.4.0.3
 six==1.10.0

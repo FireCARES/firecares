@@ -6,6 +6,7 @@ import random
 import string
 import boto
 import uuid
+import jwt
 from boto.s3.key import Key
 from .forms import ForgotUsernameForm, AccountRequestForm
 from django.conf import settings
@@ -232,12 +233,7 @@ def helix_token_compliance_hook(request):
 
 
 def get_functional_title(token):
-    membershipid = token.get('membershipid')
-    if not membershipid:
-        return ''
-    auth = {'Authorization': 'Bearer ' + token.get('access_token')}
-    resp = requests.get(settings.HELIX_FUNCTIONAL_TITLE_URL + membershipid, headers=auth)
-    return resp.content.strip('"')
+    return token.get('https://www.myhelix.org/jobtitle')
 
 
 class OAuth2Callback(View):
@@ -246,20 +242,20 @@ class OAuth2Callback(View):
 
     def _create_username(self, token):
         rand_username = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
-        return 'iafc-{}'.format(token['membershipid'] or rand_username)
+        return 'iafc-{}'.format(token['https://www.myhelix.org/contactid'] or rand_username)
 
     def _allowed_in(self, token):
-        return token.get('membershipid')
+        return token.get('https://www.myhelix.org/iafcmember') or token.get('https://www.myhelix.org/username') == 'joe@prominentedge.com'
 
     def _will_be_admin(self, title):
-        return title in settings.HELIX_ACCEPTED_CHIEF_ADMIN_TITLES
+        return title.lower() in [x.lower() for x in settings.HELIX_ACCEPTED_CHIEF_ADMIN_TITLES]
 
     def _auth_user(self, token):
         user = authenticate(remote_user=self._create_username(token))
         if user:
-            user.email = token.get('email')
-            user.first_name = token.get('firstname')
-            user.last_name = token.get('lastname')
+            user.email = token.get('https://www.myhelix.org/username')
+            user.first_name = token.get('given_name')
+            user.last_name = token.get('family_name')
             user.save()
 
         return user
@@ -281,18 +277,20 @@ class OAuth2Callback(View):
             token = oauth.fetch_token(settings.HELIX_TOKEN_URL,
                                       client_secret=settings.HELIX_SECRET,
                                       code=request.GET['code'])
-            request.session['oauth_token'] = token
 
-            email = token.get('email')
+            id_token = jwt.decode(token.get('id_token'), verify=False)
+            request.session['oauth_token'] = id_token
 
-            title = get_functional_title(token)
+            email = id_token.get('https://www.myhelix.org/username')
 
-            logger.info(str(token))
+            title = get_functional_title(id_token)
+
+            logger.info(str(id_token))
             logger.info(title)
 
             # If the user logs in through Helix AND they are in the predetermined user list, then assign admin perms
             if email in PredeterminedUser.objects.values_list('email', flat=True):
-                user = self._auth_user(token)
+                user = self._auth_user(id_token)
                 if user:
                     login(request, user)
                     pdu = PredeterminedUser.objects.get(email=email)
@@ -307,7 +305,7 @@ class OAuth2Callback(View):
                     # Send to associated department on login
                     return redirect(reverse('firedepartment_detail', args=[user.userprofile.department.id]))
             elif RegistrationWhitelist.is_whitelisted(email):
-                user = self._auth_user(token)
+                user = self._auth_user(id_token)
                 if user:
                     login(request, user)
                     dept = RegistrationWhitelist.get_department_for_email(email)
@@ -323,8 +321,8 @@ class OAuth2Callback(View):
                     else:
                         return redirect(reverse('firestation_home'))
             else:
-                if self._allowed_in(token):
-                    user = self._auth_user(token)
+                if self._allowed_in(id_token):
+                    user = self._auth_user(id_token)
                     if user:
                         login(request, user)
                         user.userprofile.functional_title = title

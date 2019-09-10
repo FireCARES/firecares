@@ -286,17 +286,17 @@ LOGIN_URL = '/login'
 IMIS_SSO_LOGIN_URL = 'https://staging.iaff.org/Web/Contacts/SignIn_withoutCreateNewAccount.aspx?doRedirect='
 IMIS_SSO_SERVICE_URL = 'https://member.iaff.org/iaff_sso_staging/sso.asmx?WSDL'
 
-HELIX_ROOT = 'https://test.myhelix.org'
-HELIX_AUTHORIZE_URL = HELIX_ROOT + '/app/OAuth/Authorize'
-HELIX_TOKEN_URL = HELIX_ROOT + '/App/Token'
-HELIX_SCOPE = ['basic']
-HELIX_CLIENT_ID = '39913518'
+HELIX_ROOT = 'https://helix.auth0.com'
+HELIX_AUTHORIZE_URL = HELIX_ROOT + '/authorize'
+HELIX_TOKEN_URL = HELIX_ROOT + '/oauth/token'
+HELIX_SCOPE = ['openid', 'profile']
+HELIX_CLIENT_ID = 'O06btCnCKS98g025ACAgbeSuilHS9Pxa'
 HELIX_SECRET = os.getenv('HELIX_SECRET', None)
 HELIX_REDIRECT = 'https://192.168.33.15:8000/oauth'
-HELIX_LOGOUT_URL = HELIX_ROOT + '/App/logout/' + HELIX_CLIENT_ID
+HELIX_LOGOUT_URL = HELIX_ROOT + '/v2/logout?client_id=' + HELIX_CLIENT_ID + '&returnTo=https://firecares.org/'
 HELIX_WHOAMI_URL = HELIX_ROOT + '/App/api/v2/Account/WhoAmI'
 HELIX_FUNCTIONAL_TITLE_URL = HELIX_ROOT + '/App/api/v2/Membership/FuncTitle/'
-HELIX_ACCEPTED_CHIEF_ADMIN_TITLES = ['FIRE_CHIEF', 'DEPT_CHIEF', 'CEO', 'COMMISH', 'CHIEF_OFF', 'PRES']
+HELIX_ACCEPTED_CHIEF_ADMIN_TITLES = ['Fire Chief', '2-3 Crossed Bugle Chief Officer', '4 Crossed Bugle Chief Officer', 'Company Officer', 'Elected/Appointed Official']
 
 STATICSITEMAPS_ROOT_SITEMAP = 'firecares.urls.sitemaps'
 

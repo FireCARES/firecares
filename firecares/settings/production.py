@@ -16,12 +16,13 @@ EMAIL_USE_TLS = True
 IMIS_SSO_LOGIN_URL = 'https://my.iaff.org/Web/Contacts/SignIn_withoutCreateNewAccount.aspx?doRedirect='
 IMIS_SSO_SERVICE_URL = 'https://member.iaff.org/iaff_sso_prod/sso.asmx?WSDL'
 
-HELIX_ROOT = 'https://www.myhelix.org'
-HELIX_AUTHORIZE_URL = HELIX_ROOT + '/app/OAuth/Authorize'
-HELIX_TOKEN_URL = HELIX_ROOT + '/App/Token'
-HELIX_CLIENT_ID = '39913518'
+HELIX_ROOT = 'https://helix.auth0.com'
+HELIX_AUTHORIZE_URL = HELIX_ROOT + '/authorize'
+HELIX_TOKEN_URL = HELIX_ROOT + '/oauth/token'
+HELIX_SCOPE = ['openid', 'profile']
+HELIX_CLIENT_ID = 'O06btCnCKS98g025ACAgbeSuilHS9Pxa'
 HELIX_REDIRECT = 'https://firecares.org/oauth'
-HELIX_LOGOUT_URL = HELIX_ROOT + '/App/logout/' + HELIX_CLIENT_ID
+HELIX_LOGOUT_URL = HELIX_ROOT + '/v2/logout?client_id=' + HELIX_CLIENT_ID + '&returnTo=https://firecares.org/'
 HELIX_WHOAMI_URL = HELIX_ROOT + '/App/api/v2/Account/WhoAmI'
 HELIX_FUNCTIONAL_TITLE_URL = HELIX_ROOT + '/App/api/v2/Membership/FuncTitle/'
 
