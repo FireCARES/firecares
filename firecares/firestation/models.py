@@ -774,14 +774,15 @@ class FireStation(USGSStructureData, Archivable):
 
         try:
             if addy:
-                station = FireStation(department=department,
-                                      station_address=addy,
-                                      address=addy.address_line1,
-                                      state=addy.state_province,
-                                      city=addy.city,
-                                      zipcode=addy.postal_code,
-                                      geom=addy.geom,
-                                      **kwargs)
+                station = FireStation(
+                    department=department,
+                    station_address=addy,
+                    address=addy.address_line1,
+                    state=addy.state_province,
+                    city=addy.city,
+                    zipcode=addy.postal_code,
+                    geom=addy.geom,
+                    **kwargs)
 
                 if not kwargs.get('station_number'):
                     station.station_number = station.station_number_from_name()
