@@ -82,6 +82,11 @@
                 {% block form %}
                 <div class="ct-u-marginBottom30 text-center" style="margin-top:-20px;">
                     {% with WIDGET_ERROR_CLASS='form-error' %}
+                    <script>
+                        function show_alert() {
+                            alert("Please wait while we create a new station, this might take a minute or two...");
+                        }
+                    </script>
                     <form id="addstaionform" class="text-left" action="addstation" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div style="padding-top:23px;width: 30%">
@@ -117,7 +122,7 @@
                         </div>
                         <div style="padding-top:23px;width: 10%">
                             {{ form.errors }}
-                            <button class="btn btn-primary upload-button" type="submit">Add Station</button>
+                            <button class="btn btn-primary upload-button" type="submit" onclick="show_alert();">Add Station</button>
                         </div>
                         {% endwith %}
                     </form>
