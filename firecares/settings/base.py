@@ -359,11 +359,3 @@ PHONENUMBER_DB_FORMAT = 'NATIONAL'
 PHONENUMBER_DEFAULT_REGION = 'US'
 
 SPAM_FILTER_ENABLED = True
-GOOGLE_MAP_API_KEY = os.getenv('GOOGLE_API_KEY', '')
-MAP_WIDGETS = {
-    "GooglePointFieldWidget": (
-        ("zoom", 15),
-        ("markerFitZoom", 12),
-    ),
-    "GOOGLE_MAP_API_KEY": os.getenv('GOOGLE_API_KEY', '')
-}
