@@ -1,6 +1,7 @@
 import os
 from django import forms
 from .models import Staffing, Document, FireDepartment, DataFeedback, FireStation
+from mapwidgets.widgets import GooglePointFieldWidget
 
 
 class StaffingForm(forms.ModelForm):
@@ -64,7 +65,10 @@ class AddStationForm(forms.ModelForm):
 
     class Meta:
         model = FireStation
-        fields = ('name', 'station_number', 'address', 'state', 'city', 'zipcode')
+        fields = ('name', 'station_number', 'address')
+        widgets = {
+            'address': GooglePointFieldWidget,
+        }
 
     def __init__(self, *args, **kwargs):
         # Catch a passed in department pk that this document is associated with.

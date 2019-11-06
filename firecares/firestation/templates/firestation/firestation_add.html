@@ -1,6 +1,7 @@
 {% load humanize %}
 {% load firecares_tags %}
 {% load widget_tweaks %}
+{% load staticfiles %}
 
 <!DOCTYPE html>
 <!--[if IE 8 ]>
@@ -15,12 +16,13 @@
     <meta name="author" content="Prominent Edge LLC">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <title>Add Station: {{ object.name }}</title>
     {% include 'firestation/_favicon.html' %}
     {% include "firestation/_firecares_style.html" %}
     {% include 'google_analytics.html' %}
     {% include 'google_analytics.html' %}
+    {{ form.media }}
 </head>
 
 <body class="ct-headroom--fixedTopBar cssAnimate" ng-app="fireStation">
