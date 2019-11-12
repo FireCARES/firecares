@@ -43,6 +43,7 @@ from django.views.generic.edit import FormView
 from .models import (Document, FireStation, FireDepartment, Staffing)
 from favit.models import Favorite
 from invitations.models import Invitation
+from django.contrib.gis.geos import GEOSGeometry
 
 User = get_user_model()
 log = logging.getLogger(__name__)
@@ -586,6 +587,7 @@ class AddStationView(LoginRequiredMixin, FormView):
     template_name = 'firestation/firestation_add.html'
     station = 0
     form_class = AddStationForm
+    address_string = ""
 
     def get_context_data(self, **kwargs):
         department = get_object_or_404(FireDepartment, pk=self.kwargs.get('pk'))
@@ -599,8 +601,8 @@ class AddStationView(LoginRequiredMixin, FormView):
         form = AddStationForm(department_pk=self.kwargs.get('pk'), **self.get_form_kwargs())
 
         if request.method == 'POST':
-
             if form.is_valid():
+                self.address_string = request.POST.get('hidaddress', '')
                 if self.form_valid(form) == 'Geocode Error':
                     messages.add_message(request, messages.ERROR, 'A geocoding error has occured finding the Station location.  Please check the address or try again in a few minutes.')
                     return super(AddStationView, self).form_invalid(form)
@@ -612,14 +614,13 @@ class AddStationView(LoginRequiredMixin, FormView):
                 return self.form_invalid(form)
 
     def form_valid(self, form):
-
         try:
             station = form.save(commit=False)
             fd = FireDepartment.objects.get(pk=self.kwargs.get('pk'))
-            addresss_str = station.address + " " + station.state + " " + station.city + " " + station.zipcode
-            station = station.create_station(department=fd, address_string=addresss_str, name=station.name, station_number=station.station_number)
-
+            address_string = self.address_string
+            station = station.create_station(department=fd, address_string=address_string, name=station.name, station_number=station.station_number)
             if station is None:
+                print("Station was not created!")
                 return "Geocode Error"
             else:
                 self.station = station
