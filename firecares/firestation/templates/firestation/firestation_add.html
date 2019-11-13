@@ -78,8 +78,11 @@
 </header>
 <div class="container ct-u-paddingBoth20">
     <script>
-    var address = "";
-    $(document).on("google_point_map_widget:marker_create", function (e, place, lat, lng, locationInputElem, mapWrapID) {
+    /**
+    * Stores all the address values in corresponding input fields
+    */
+    function reflectAddressOnInputs(place){
+        document.getElementById("hidaddress").value = place.formatted_address;
         [...place.address_components].forEach( component => {
             [...component['types']].forEach( type => {
                 switch(type){
@@ -118,53 +121,14 @@
                 }
             })
         });
+    }
+    $(document).on("google_point_map_widget:marker_create", function (e, place, lat, lng, locationInputElem, mapWrapID) {
+        reflectAddressOnInputs(place);
         document.getElementById("hidaddress").value = place.formatted_address;
     });
-
     $(document).on("google_point_map_widget:marker_change", function (e, place, lat, lng, locationInputElem, mapWrapID) {
-        console.log(place);
-        console.log(lat);
-        console.log(lng);
-        console.log(locationInputElem);
-        console.log(mapWrapID);
         if(place){
-            document.getElementById("hidaddress").value = place.formatted_address;
-            [...place.address_components].forEach( component => {
-                [...component['types']].forEach( type => {
-                    switch(type){
-                        case 'street_number':
-                            document.getElementById("street_number").value = component.long_name;
-                            console.log(component.long_name);
-                            break;
-                        case 'postal_code':
-                            document.getElementById("postal_code").value = component.long_name;
-                            console.log(component.long_name);
-                            break;
-                        case 'route':
-                            document.getElementById("route").value = component.long_name;
-                            console.log(component.long_name);
-                            break;
-                        case 'sublocality':
-                            document.getElementById("sublocality").value = component.long_name;
-                            console.log(component.long_name);
-                            break;
-                        case 'locality':
-                            document.getElementById("locality").value = component.long_name;
-                            console.log(component.long_name);
-                            break;
-                        case 'administrative_area_level_1':
-                            document.getElementById("administrative_area_level_1").value = component.long_name;
-                            console.log(component.long_name);
-                            break;
-                        case 'country':
-                            document.getElementById("country").value = component.long_name;
-                            console.log(component.long_name);
-                            break;
-                        default:
-                            break;
-                    }
-                })
-            })
+            reflectAddressOnInputs(place);
         } else {
             // Get the user's text and use that instead
             console.log(locationInputElem);
@@ -173,6 +137,41 @@
             console.log(`text: ${userText}`);
         }
     });
+    function checkFormAndSubmit(button){
+        button.disabled=true; button.value='waiting ...';
+        // Show a warning if any of the address fields are empty
+        inputIds = [
+            "id_m_number",
+            "id_m_postal_code",
+            "id_m_street",
+            "id_m_county",
+            "id_m_city",
+            "id_m_country"
+        ]
+
+        let isAnyInputEmpty = false;
+        let elementNotFound = 0;
+        inputIds.forEach(iid => {
+            const element = document.getElementById(iid);
+            
+            if(element){
+                if(!element.value){
+                    isAnyInputEmpty = true;
+                }
+                
+            } else {
+                elementNotFound++;
+            }
+        });
+        if(isAnyInputEmpty){
+            alert("Please enter a correct address");
+            button.disabled=false; button.value='Add Station';
+        } else {
+            console.log(elementNotFound);
+            button.form.submit();
+        }
+        
+    }
     </script>
     {% include 'firestation/_message_notifications.html' with use_angular=True %}
     <div class="row">
@@ -197,6 +196,7 @@
                             </div>
                             <br />
                             <label>Enter Address</label>
+                            {{ form.address.errors }}
                             <ul class="nav nav-tabs" id="geolocationTab" role="tablist">
                                 <li class="nav-item active">
                                     <a class="nav-link active" data-toggle="tab" href="#map-tab">Use Map</a>
@@ -207,9 +207,9 @@
                             </ul>
                             <div class="tab-content" id="myTabContent">
                                 <div class="tab-pane fade in show active" id="map-tab" role="tabpanel">
+                                    
                                     <div>
                                         {% render_field form.address required=true %}
-                                        {{ form.address.errors }}
                                     </div>
                                 </div>
                                 <div class="tab-pane fade" id="address-tab" role="tabpanel" >
@@ -262,7 +262,7 @@
                             </div>
                             <div style="padding-top:23px;width: 10%">
                                 {{ form.errors }}
-                                <button class="btn btn-primary upload-button" type="submit">Add Station</button>
+                                <button class="btn btn-primary upload-button" onClick="checkFormAndSubmit(this);">Add Station</button>
                             </div>
                             {% endwith %}
                         </form>
