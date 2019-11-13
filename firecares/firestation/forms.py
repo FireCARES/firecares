@@ -62,6 +62,11 @@ class DataFeedbackForm(forms.ModelForm):
 
 
 class AddStationForm(forms.ModelForm):
+    m_number = forms.CharField(max_length=100, required=True)
+    m_street = forms.CharField(max_length=100, required=True)
+    m_city = forms.CharField(max_length=100, required=True)
+    m_postal_code = forms.CharField(max_length=100, required=True)
+    m_country = forms.CharField(max_length=100, required=True)
 
     class Meta:
         model = FireStation

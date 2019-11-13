@@ -85,31 +85,33 @@
                 switch(type){
                     case 'street_number':
                         document.getElementById("street_number").value = component.long_name;
-                        console.log(component.long_name);
+                        document.getElementById("id_m_number").value = component.long_name;
                         break;
                     case 'postal_code':
                         document.getElementById("postal_code").value = component.long_name;
-                        console.log(component.long_name);
+                        document.getElementById("id_m_postal_code").value = component.long_name;
                         break;
                     case 'route':
                         document.getElementById("route").value = component.long_name;
-                        console.log(component.long_name);
+                        document.getElementById("id_m_street").value = component.long_name;
                         break;
                     case 'sublocality':
                         document.getElementById("sublocality").value = component.long_name;
-                        console.log(component.long_name);
+                        document.getElementById("id_m_county").value = component.long_name;
+                        
                         break;
                     case 'locality':
                         document.getElementById("locality").value = component.long_name;
-                        console.log(component.long_name);
+                        document.getElementById("id_m_city").value = component.long_name;
                         break;
                     case 'administrative_area_level_1':
+                    console.log(component)
                         document.getElementById("administrative_area_level_1").value = component.long_name;
-                        console.log(component.long_name);
+                        document.getElementById("statedropdown").value = component.short_name;
                         break;
                     case 'country':
                         document.getElementById("country").value = component.long_name;
-                        console.log(component.long_name);
+                        document.getElementById("id_m_country").value = component.long_name;
                         break;
                     default:
                         break;
@@ -211,40 +213,51 @@
                                     </div>
                                 </div>
                                 <div class="tab-pane fade" id="address-tab" role="tabpanel" >
+                                    <input type="hidden" id="hidaddress" name="hidaddress" value=""></input>
                                     <div>
-                                        <input type="hidden" id="hidaddress" name="hidaddress" value=""></input>
-                                        <label>Number</label>
-                                        <input type="text" id="street_number" name="street_number" value=""></input>
-                                        <label>Street</label>
-                                        <input type="text" id="route" name="route" value=""></input>
-                                        <label>County</label>
-                                        <input type="text" id="sublocality" name="sublocality" value=""></input>
-                                        <label>City</label>
-                                        <input type="text" id="locality" name="locality" value=""></input>
-                                        <label>Postal code</label>
-                                        <input type="text" id="postal_code" name="postal_code" value=""></input>
-                                        <label>State/Province</label>
-                                        <input type="text" id="administrative_area_level_1" name="administrative_area_level_1" value=""></input>
-                                        <label>Country</label>
-                                        <input type="text" id="country" name="country" value=""></input>
+                                        {% comment %} NUMBER {% endcomment %}
+                                        <div style="padding-top:23px;width: 10%">
+                                            <label>Number</label>
+                                            {% render_field form.m_number type="text" required=true class+="form input-sm" %}
+                                            {{ form.m_number.errors }}
+                                        </div>
+                                        {% comment %} STREET {% endcomment %}
+                                        <div style="padding-top:23px;width: 30%">
+                                            <label>Street</label>
+                                            {% render_field form.m_street type="text" required=true class+="form input-sm" %}
+                                            {{ form.m_street.errors }}
+                                        </div>
+                                        {% comment %} CITY {% endcomment %}
+                                        <div style="padding-top:23px;width: 30%">
+                                            <label>City</label>
+                                            {% render_field form.m_city type="text" required=true class+="form input-sm" %}
+                                            {{ form.m_city.errors }}
+                                        </div>
+                                        <div style="padding-top:23px;width: 10%">
+                                            <label>State</label>
+                                            <select id="statedropdown" name="state">
+                                            </select>
+                                            {{ form.state.errors }}
+                                        </div>
+                                        <div style="padding-top:23px;width: 10%">
+                                            <label>Zipcode</label>
+                                            {% render_field form.m_postal_code type="number" required=true max="100000" min="1000" class+="form input-sm" %}
+                                            {{ form.m_postal_code.errors }}
+                                        </div>
+                                        <div style="padding-top:23px;width: 30%">
+                                            <label>Country</label>
+                                            {% render_field form.m_country type="text" required=true class+="form input-sm" %}
+                                            {{ form.m_country.errors }}
+                                        </div>
+                                        <input type="hidden" class="form input-sm" id="street_number" name="street_number" value=""></input>
+                                        <input type="hidden" class="form input-sm" id="route" name="route" value=""></input>
+                                        <input type="hidden" class="form input-sm" id="sublocality" name="sublocality" value=""></input>
+                                        <input type="hidden" class="form input-sm" id="locality" name="locality" value=""></input>
+                                        <input type="hidden" class="form input-sm" id="administrative_area_level_1" name="administrative_area_level_1" value=""></input>
+                                        <input type="hidden" class="form input-sm" id="postal_code" name="postal_code" value=""></input>
+                                        <input type="hidden" class="form input-sm" id="country" name="country" value=""></input>
+                                        </div> 
                                     </div>
-                                    {% comment %} THIS GOES ON THE NEXT TAB: {% endcomment %}
-                                    {% comment %} <div style="padding-top:23px;width: 30%">
-                                        <label>City</label>
-                                        {% render_field form.city type="text" required=true class+="form input-sm" %}
-                                        {{ form.city.errors }}
-                                    </div>
-                                    <div style="padding-top:23px;width: 10%">
-                                        <label>State</label>
-                                        <select id="statedropdown" name="state">
-                                        </select>
-                                        {{ form.state.errors }}
-                                    </div>
-                                    <div style="padding-top:23px;width: 10%">
-                                        <label>Zipcode</label>
-                                        {% render_field form.zipcode type="number" required=true max="100000" min="1000" class+="form input-sm" %}
-                                        {{ form.zipcode.errors }}
-                                    </div> {% endcomment %}
                                 </div>
                             </div>
                             <div style="padding-top:23px;width: 10%">
