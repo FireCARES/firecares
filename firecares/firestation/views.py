@@ -630,7 +630,6 @@ class AddStationView(LoginRequiredMixin, FormView):
             address_string = self.address_string
             station = station.create_station(department=fd, address_string=address_string, name=station.name, station_number=station.station_number)
             if station is None:
-                print("Station was not created!")
                 return "Geocode Error"
             else:
                 self.station = station

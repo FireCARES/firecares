@@ -131,18 +131,14 @@
                 if(place){
                     reflectAddressOnInputs(place);
                 } else {
-                    // Get the user's text and use that instead
-                    console.log(locationInputElem);
-                    console.log($("#address-mw-google-address-input")[0].value);
-                    var userText = $("#address-mw-google-address-input")[0].value;
-                    console.log(`text: ${userText}`);
-                    // TODO: Test this, edit behaves differently!
+                    $("#hidaddress").value = $('#address-mw-google-address-input').value;
                 }
             });
             // Form submit
             function checkFormAndSubmit(button){
                 $('#loader-placeholder').addClass('loader');
                 $('#wait-text').removeClass('hidden');
+                document.getElementById("hidaddress").value = $('#address-mw-google-address-input').value;
                 button.form.submit();
             }
             </script>
@@ -172,6 +168,14 @@
                                     <br />
                                     <label>Enter Address</label>
                                     {{ form.address.errors }}
+                                    <input type="hidden" id="hidaddress" name="hidaddress" value=""></input>
+                                        <input type="hidden" class="form input-sm" id="street_number" name="street_number" value=""></input>
+                                        <input type="hidden" class="form input-sm" id="route" name="route" value=""></input>
+                                        <input type="hidden" class="form input-sm" id="sublocality" name="sublocality" value=""></input>
+                                        <input type="hidden" class="form input-sm" id="locality" name="locality" value=""></input>
+                                        <input type="hidden" class="form input-sm" id="administrative_area_level_1" name="administrative_area_level_1" value=""></input>
+                                        <input type="hidden" class="form input-sm" id="postal_code" name="postal_code" value=""></input>
+                                        <input type="hidden" class="form input-sm" id="country" name="country" value=""></input>
                                     <ul class="nav nav-tabs" id="geolocationTab" role="tablist">
                                         <li class="nav-item active">
                                             <a class="nav-link active" data-toggle="tab" href="#map-tab">Use Map</a>
@@ -182,14 +186,7 @@
                                             
                                             <div>
                                                 {% render_field form.address required=true %}
-                                                <input type="hidden" id="hidaddress" name="hidaddress" value=""></input>
-                                                <input type="hidden" class="form input-sm" id="street_number" name="street_number" value=""></input>
-                                                <input type="hidden" class="form input-sm" id="route" name="route" value=""></input>
-                                                <input type="hidden" class="form input-sm" id="sublocality" name="sublocality" value=""></input>
-                                                <input type="hidden" class="form input-sm" id="locality" name="locality" value=""></input>
-                                                <input type="hidden" class="form input-sm" id="administrative_area_level_1" name="administrative_area_level_1" value=""></input>
-                                                <input type="hidden" class="form input-sm" id="postal_code" name="postal_code" value=""></input>
-                                                <input type="hidden" class="form input-sm" id="country" name="country" value=""></input>
+                                                
                                             </div>
                                         </div>
                                     </div>
