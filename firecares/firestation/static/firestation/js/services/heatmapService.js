@@ -14,6 +14,7 @@
       minOpacity: 0.5,
       maxZoom: 15
     });
+    var _clipLayer = null;
     var _crossfilter = null;
     var _fires = {
       dates: null,
@@ -38,6 +39,7 @@
     };
 
     function processData(allText) {
+      var risks = { "Unknown":0, "Low":1, "Medium":2, "High":3 };
       var allTextLines = allText.split(/\r\n|\n/);
       var headers = allTextLines[0].split(',');
       var lines = [];
@@ -50,6 +52,30 @@
           for (var j = 0; j < headers.length; j++) {
             tarr[headers[j]] = data[j];
           }
+
+          if (tarr.x === '' || tarr.y === '') {
+            continue;
+          }
+
+          tarr.x = parseFloat(tarr.x);
+          tarr.y = parseFloat(tarr.y);
+
+          var dateTime = tarr.alarm.split(' ');
+          var yearMonthDay = dateTime[0].split('-');
+          var hoursMinutesSeconds = dateTime[1].split(':');
+
+          var year = Number(yearMonthDay[0]);
+          var month = Number(yearMonthDay[1]);
+          var day = Number(yearMonthDay[2]);
+          var risk = risks[tarr.risk_category];
+
+          tarr.dateTime = {
+            year: year,
+            month: month - 1,
+            dayOfWeek: dayOfWeek(year, month, day),
+            hours: Number(hoursMinutesSeconds[0]),
+            risk: risk
+          };
 
           lines.push(tarr);
         }
@@ -117,6 +143,10 @@
         this.refresh();
       },
 
+      setClipLayer: function(clipLayer) {
+        _clipLayer = clipLayer;
+      },
+
       add: function(filterType, keys) {
         // Allow single values to be passed in, as well as arrays.
         if (!Array.isArray(keys)) {
@@ -160,11 +190,11 @@
 
       refresh: function() {
         // Update layer with new fire points.
-        _layer.setLatLngs(_fires.dates.top(Infinity).filter(function(fire) {
-          return (fire.y !== "" && fire.x !== "");
-        }).map(function(fire) {
+        var latLngs = _fires.dates.top(Infinity).map(function(fire) {
           return [fire.y, fire.x];
-        }));
+        });
+
+        _layer.setLatLngs(latLngs);
 
         // Notify listeners.
         $rootScope.$emit('heatmap.onRefresh');
@@ -182,36 +212,64 @@
         return $q(function(resolve, reject) {
           $http.get(url)
             .then(function(response) {
-              var lines = processData(response.data);
-              if (lines.length == 0) {
+              var fires = processData(response.data);
+              if (fires.length === 0) {
                 reject(new Error("Heatmap data is not yet available for this department."));
                 return;
               }
 
-              // Preprocess dates into individual parts. This is MUCH faster than
-              // doing it for each dimension, and speeds up loading significantly.
-              var risks = { "Unknown":0, "Low":1, "Medium":2, "High":3 };
-              for (var i = 0; i < lines.length; i++) {
-                var line = lines[i];
-                var dateTime = line.alarm.split(' ');
-                var yearMonthDay = dateTime[0].split('-');
-                var hoursMinutesSeconds = dateTime[1].split(':');
+              // Point in polygon filter.
+              if (_clipLayer) {
+                var clipLayerVerts = [];
+                _clipLayer.eachLayer(function(layer) {
+                  if (!layer.feature
+                    || !layer.feature.geometry
+                    || !layer.feature.geometry.type
+                    || ['Polygon', 'MultiPolygon'].indexOf(layer.feature.geometry.type) === -1) {
+                    return;
+                  }
 
-                var year = Number(yearMonthDay[0]);
-                var month = Number(yearMonthDay[1]);
-                var day = Number(yearMonthDay[2]);
-                var risk = risks[line.risk_category];
+                  var geometry = layer.toGeoJSON().geometry;
+                  var polygons = (geometry.type === "Polygon") ? [geometry.coordinates] : geometry.coordinates;
 
-                line.dateTime = {
-                  year: year,
-                  month: month - 1,
-                  dayOfWeek: dayOfWeek(year, month, day),
-                  hours: Number(hoursMinutesSeconds[0]),
-                  risk: risk
-                };
+                  polygons.forEach(function(coords) {
+                    var verts = [[0, 0]];
+
+                    for (var i = 0; i < coords.length; i++) {
+                      for (var j = 0; j < coords[i].length; j++) {
+                        verts.push(coords[i][j]);
+                      }
+                      verts.push(coords[i][0]);
+                      verts.push([0, 0]);
+                    }
+
+                    clipLayerVerts.push(verts);
+                  });
+                });
+
+                fires = fires.filter(function(fire) {
+                  if (!_clipLayer.getBounds().contains([fire.y, fire.x])) {
+                    return false;
+                  }
+
+                  for (var vertsIndex = 0; vertsIndex < clipLayerVerts.length; vertsIndex++) {
+                    var verts = clipLayerVerts[vertsIndex];
+
+                    var inside = false;
+                    for (var i = 0, j = verts.length - 1; i < verts.length; j = i++) {
+                      if (((verts[i][0] > fire.x) !== (verts[j][0] > fire.x)) && (fire.y < (verts[j][1] - verts[i][1]) * (fire.x - verts[i][0]) / (verts[j][0] - verts[i][0]) + verts[i][1])) {
+                        inside = !inside;
+                      }
+                    }
+
+                    if (inside) {
+                      return true;
+                    }
+                  }
+                })
               }
 
-              _crossfilter = crossfilter(lines);
+              _crossfilter = crossfilter(fires);
               _fires.dates = _crossfilter.dimension(function(d) { return d.alarm; });
               _fires.months = _crossfilter.dimension(function(d) { return d.dateTime.month; });
               _fires.daysOfWeek = _crossfilter.dimension(function(d) { return d.dateTime.dayOfWeek; });

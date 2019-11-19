@@ -202,6 +202,7 @@
       }).addTo(departmentMap);
       layersControl.addOverlay(countyBoundary, 'Jurisdiction Boundary');
       departmentMap.fitBounds(countyBoundary.getBounds(), fitBoundsOptions);
+      heatmap.setClipLayer(countyBoundary);
     } else {
       departmentMap.setView(config.centroid, 13);
     }

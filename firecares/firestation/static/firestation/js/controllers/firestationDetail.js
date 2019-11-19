@@ -107,6 +107,7 @@
       layersControl.addOverlay(district, 'District');
       map.fitBounds(district.getBounds());
       map.setView(stationGeom);
+      heatmap.setClipLayer(district);
     }
     else {
       map.setView(stationGeom, 15);
