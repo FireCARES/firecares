@@ -2,7 +2,7 @@
 
 (function() {
   angular.module('fireStation.firestationDetailController', ['xeditable', 'ui.bootstrap'])
-  .controller('fireStationController', function($scope, $window, $http, Staffing, $timeout, map, FireStation, $filter, $interpolate, $compile, $analytics, WeatherWarning) {
+  .controller('fireStationController', function($scope, $window, $http, Staffing, $timeout, map, FireStation, $filter, $interpolate, $compile, $analytics, WeatherWarning, heatmap, emsHeatmap) {
     var thisFirestation = '/api/v1/firestations/' + config.id + '/';
     var serviceAreaData = null;
     var stationGeom = {
@@ -92,8 +92,8 @@
           fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5),
           weight: 0.8
         };
-      });      
-      messageboxData.hide();  
+      });
+      messageboxData.hide();
     });
 
     layersControl.addOverlay(serviceArea, 'Service Areas');
@@ -119,7 +119,7 @@
 
         var weatherPolygons = [];
         var numWarnings = data.objects.length;
-        
+
         for (var i = 0; i < numWarnings; i++) {
           var warning = data.objects[i];
           var poly = L.multiPolygon(warning.warngeom.coordinates.map(function(d){return mapPolygon(d)}),{color: '#f00', weight:'1px'});
@@ -163,9 +163,155 @@
         }
 
         function mapLineString(line){
-          return line.map(function(d){return [d[1],d[0]]})  
+          return line.map(function(d){return [d[1],d[0]]})
         }
     });
+
+    //
+    // Heatmap
+    //
+    var heatmapDataUrl = 'https://s3.amazonaws.com/firecares-test/' + config.departmentId + '-building-fires.csv';
+    $http.head(heatmapDataUrl)
+      .then(function(response) {
+        var contentLength = Number(response.headers('Content-Length'));
+
+        // Don't show the heatmap layer option for a department with no heatmap data.
+        // HACK: A department with no heatmap data will still return the table header for the empty data, which
+        //       has a length of 59 bytes. Remember to change this value if the columns ever change in any way.
+        if (contentLength <= 59) {
+          return;
+        }
+
+        heatmap.init(map);
+        $scope.heatmap = heatmap;
+        $scope.showHeatmapCharts = false;
+
+        layersControl.addOverlay(heatmap.layer, 'Fires Heatmap');
+        map.on('overlayadd', function(layer) {
+          if(layer.layer.id === 'weather'){
+            $('.weather-messages').fadeIn('slow');
+            $scope.showDetails = false;
+          }
+          else if (layer.layer._leaflet_id === heatmap.layer._leaflet_id) {
+            if (heatmap.heat) {
+              showHeatmapCharts(true);
+            } else {
+              map.spin(true);
+              heatmap.download(heatmapDataUrl)
+                .then(function() {
+                  showHeatmapCharts(true);
+                }, function(err) {
+                  alert(err.message);
+                  layersControl.removeLayer(heatmap.layer);
+                })
+                .finally(function() {
+                  map.spin(false);
+                })
+              ;
+            }
+          }
+        });
+
+        map.on('overlayremove', function(layer) {
+          if(layer.layer.id === 'weather'){
+            $('.weather-messages').fadeOut('slow');
+          }
+          else if (layer.layer._leaflet_id === heatmap.layer._leaflet_id) {
+            showHeatmapCharts(false);
+          }
+          // if(layer.layer._leaflet_id === activeFires._leaflet_id){
+          //   map.removeControl(activeFirelegend);
+          // }
+        });
+
+        function showHeatmapCharts(show) {
+          $timeout(function() {
+            $scope.showHeatmapCharts = show;
+            if(show === true) {
+              // Removes the ems heatmap and unchecks the control.
+              $scope.showEMSHeatmapCharts = false;
+              if(map.hasLayer(emsHeatmap.layer)) {
+                map.removeLayer(emsHeatmap.layer);
+                layersControl.update();
+              }
+            }
+          });
+        }
+      });
+
+    //
+    // EMS Heatmap
+    //
+    var emsHeatmapDataUrl = 'https://s3.amazonaws.com/firecares-test/' + config.departmentId + '-ems-incidents.csv';
+    $http.head(emsHeatmapDataUrl)
+      .then(function(response) {
+        var contentLength = Number(response.headers('Content-Length'));
+
+        // Don't show the ems heatmap layer option for a department with no ems heatmap data.
+        // HACK: A department with no ems heatmap data will still return the table header for the empty data, which
+        //       has a length of 59 bytes. Remember to change this value if the columns ever change in any way.
+        if (contentLength <= 59) {
+          return;
+        }
+
+        emsHeatmap.init(map);
+        $scope.emsHeatmap = emsHeatmap;
+        $scope.showEMSHeatmapCharts = false;
+
+        layersControl.addOverlay(emsHeatmap.layer, 'EMS Heatmap');
+        map.on('overlayadd', function(layer) {
+          if(layer.layer.id === 'weather'){
+            $('.weather-messages').fadeIn('slow');
+            $scope.showDetails = false;
+          }
+          else if (layer.layer._leaflet_id === emsHeatmap.layer._leaflet_id) {
+            if (emsHeatmap.heat) {
+              showEMSHeatmapCharts(true);
+            } else {
+              map.spin(true);
+              emsHeatmap.download(emsHeatmapDataUrl)
+                .then(function() {
+                  showEMSHeatmapCharts(true);
+                }, function(err) {
+                  alert(err.message);
+                  layersControl.removeLayer(emsHeatmap.layer);
+                })
+                .finally(function() {
+                  map.spin(false);
+                })
+              ;
+            }
+          }
+        });
+
+        map.on('overlayremove', function(layer) {
+          if(layer.layer.id === 'weather'){
+            $('.weather-messages').fadeOut('slow');
+          }
+          else if (layer.layer._leaflet_id === emsHeatmap.layer._leaflet_id) {
+            showEMSHeatmapCharts(false);
+          }
+          // if(layer.layer._leaflet_id === activeFires._leaflet_id){
+          //   map.removeControl(activeFirelegend);
+          // }
+        });
+
+        function showEMSHeatmapCharts(show) {
+          $timeout(function() {
+            $scope.showEMSHeatmapCharts = show;
+
+            if(show === true) {
+              // Remove Fires heatmap if its on
+              $scope.showHeatmapCharts = false; // Hides filters
+              // Removes the heatmap and unchecks the control.
+              if(map.hasLayer(heatmap.layer)) {
+                map.removeLayer(heatmap.layer);
+                layersControl.update();
+              }
+            }
+          });
+        }
+      });
 
     map.on('overlayadd', function(layer) {
       layer = layer.layer;
@@ -218,7 +364,7 @@
 
     map.on('overlayremove', function(layer) {
       if(layer.layer.id === 'weather'){
-          $('.weather-messages').fadeOut('slow'); 
+          $('.weather-messages').fadeOut('slow');
       }
       $analytics.eventTrack('disable layer', {
         category: $scope.eventCategory + ': map',
@@ -260,7 +406,7 @@
       if (form['apparatus'] != 'Other') {
         form['other_apparatus_type'] = '';
       }
-      
+
       if (form.new_form === true) {
 
         //remove temp variables
