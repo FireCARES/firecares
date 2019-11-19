@@ -615,7 +615,6 @@ class AddStationView(LoginRequiredMixin, FormView):
                     return super(AddStationView, self).form_invalid(form)
                 
                 self.address_string = request.POST.get('hidaddress', '')
-                
                 if self.form_valid(form) == 'Geocode Error':
                     messages.add_message(request, messages.ERROR, 'A geocoding error has occured finding the Station location.  Please check the address or try again in a few minutes.')
                     return super(AddStationView, self).form_invalid(form)
