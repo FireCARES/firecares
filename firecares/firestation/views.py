@@ -43,7 +43,6 @@ from django.views.generic.edit import FormView
 from .models import (Document, FireStation, FireDepartment, Staffing)
 from favit.models import Favorite
 from invitations.models import Invitation
-from django.contrib.gis.geos import GEOSGeometry
 
 User = get_user_model()
 log = logging.getLogger(__name__)
@@ -599,29 +598,24 @@ class AddStationView(LoginRequiredMixin, FormView):
 
     def post(self, request, *args, **kwargs):
         form = AddStationForm(department_pk=self.kwargs.get('pk'), **self.get_form_kwargs())
-        department_id = self.kwargs.get('pk')
-
         if request.method == 'POST':
             if form.is_valid():
-                self.address_string = request.POST.get('hidaddress', '')
-                if not self.address_string:
-                    messages.add_message(request, messages.ERROR, 'The address submitted is not valid.  Please try again.')
-                    return super(AddStationView, self).form_invalid(form)
-                    
-
+                fd = FireDepartment.objects.get(pk=self.kwargs.get('pk'))
                 # Check that name is not used already
-                duplicate_station = FireStation.objects.filter(name=form.cleaned_data['name'])
+                duplicate_station = FireStation.objects.filter(name=form.cleaned_data['name'], department=fd)
+                
                 if duplicate_station.exists():
                     messages.add_message(request, messages.ERROR, 'The name submitted is already in use.')
                     return super(AddStationView, self).form_invalid(form)
-
                 # Check that station id is not used already
-                duplicate_id = FireStation.objects.filter(station_number=form.cleaned_data['station_number'])
+                duplicate_id = FireStation.objects.filter(station_number=form.cleaned_data['station_number'], department=fd)
+                
                 if duplicate_id.exists():
                     messages.add_message(request, messages.ERROR, 'The station number submitted is already in use.')
                     return super(AddStationView, self).form_invalid(form)
-
-
+                
+                self.address_string = request.POST.get('hidaddress', '')
+                
                 if self.form_valid(form) == 'Geocode Error':
                     messages.add_message(request, messages.ERROR, 'A geocoding error has occured finding the Station location.  Please check the address or try again in a few minutes.')
                     return super(AddStationView, self).form_invalid(form)
