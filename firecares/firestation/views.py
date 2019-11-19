@@ -609,11 +609,9 @@ class AddStationView(LoginRequiredMixin, FormView):
                     return super(AddStationView, self).form_invalid(form)
                 # Check that station id is not used already
                 duplicate_id = FireStation.objects.filter(station_number=form.cleaned_data['station_number'], department=fd)
-                
                 if duplicate_id.exists():
                     messages.add_message(request, messages.ERROR, 'The station number submitted is already in use.')
                     return super(AddStationView, self).form_invalid(form)
-                
                 self.address_string = request.POST.get('hidaddress', '')
                 if self.form_valid(form) == 'Geocode Error':
                     messages.add_message(request, messages.ERROR, 'A geocoding error has occured finding the Station location.  Please check the address or try again in a few minutes.')
