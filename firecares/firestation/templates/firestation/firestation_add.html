@@ -10,290 +10,184 @@
 <html class="no-js ie9" lang="en"> <![endif]-->
 <!--[if (gt IE 9)|!(IE)]><!-->
 <html class="no-js" lang="en"> <!--<![endif]-->
-<head lang="en">
-    <meta charset="UTF-8">
-    <meta name="description" content="{{ object.description }} Learn more about this community's risks.">
-    <meta name="author" content="Prominent Edge LLC">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    <title>Add Station: {{ object.name }}</title>
-    {% include 'firestation/_favicon.html' %}
-    {% include "firestation/_firecares_style.html" %}
-    {% include 'google_analytics.html' %}
-    {% include 'google_analytics.html' %}
-    {{ form.media }}
-</head>
+    <head lang="en">
+        <meta charset="UTF-8">
+        <meta name="description" content="{{ object.description }} Learn more about this community's risks.">
+        <meta name="author" content="Prominent Edge LLC">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <title>Add Station: {{ object.name }}</title>
+        {% include 'firestation/_favicon.html' %}
+        {% include "firestation/_firecares_style.html" %}
+        {% include 'google_analytics.html' %}
+        {% include 'google_analytics.html' %}
+        {{ form.media }}
+    </head>
 
-<body class="ct-headroom--fixedTopBar cssAnimate" ng-app="fireStation">
-
-{% include 'firestation/_mobile_navbar.html' %}
-{% include 'firestation/_mobile_search.html' %}
-
-<div id="ct-js-wrapper" class="ct-pageWrapper">
-
-<div class="ct-navbarMobile">
-    <button type="button" class="navbar-toggle">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-    </button>
-    <a class="navbar-brand logo" href="{% url 'firestation_home' %}"><h1>FireCARES</h1></a>
-    <button type="button" class="searchForm-toggle">
-        <span class="sr-only">Toggle navigation</span>
-        <span><i class="fa fa-search"></i></span>
-    </button>
-</div>
-
-{% include "firestation/_navbar.html" %}
-
-<div class="ct-site--map">
-    <div class="container">
-        <a href="{% url 'firestation_home' %}">Home</a>
-        <a href="{% url 'firedepartment_list' %}">Departments</a>
-        <a href="{% url 'firedepartment_detail' object.id %}">{{ object.name }}</a>
-        <a href="{% url 'addstation' object.id %}">Add Station</a>
-    </div>
-</div>
-<header class="ct-mediaSection">
-    <div class="ct-mediaSection-inner">
-        <div class="container">
-            <div class="ct-u-displayTableVertical">
-                <div class="ct-textBox ct-u-text--white ct-u-displayTableCell text-left">
-                    <h2>{{ object.name }}</h2>
-                    <h4>{{ object.headquarters_address.get_row_display }}</h4>
-                    <span class="ct-productID ct-fw-300">
-                        FDID: <span>{{ object.fdid }}</span>
-                    </span>
-                </div>
-                <div class="ct-u-displayTableCell text-right">
-                    {% include 'firestation/_department_header.html' %}
-                </div>
+    <body class="ct-headroom--fixedTopBar cssAnimate" ng-app="fireStation">
+        {% include 'firestation/_mobile_navbar.html' %}
+        {% include 'firestation/_mobile_search.html' %}
+        <div id="ct-js-wrapper" class="ct-pageWrapper">
+        <div class="ct-navbarMobile">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand logo" href="{% url 'firestation_home' %}"><h1>FireCARES</h1></a>
+            <button type="button" class="searchForm-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span><i class="fa fa-search"></i></span>
+            </button>
+        </div>
+        {% include "firestation/_navbar.html" %}
+        <div class="ct-site--map">
+            <div class="container">
+                <a href="{% url 'firestation_home' %}">Home</a>
+                <a href="{% url 'firedepartment_list' %}">Departments</a>
+                <a href="{% url 'firedepartment_detail' object.id %}">{{ object.name }}</a>
+                <a href="{% url 'addstation' object.id %}">Add Station</a>
             </div>
         </div>
-    </div>
-</header>
-<div class="container ct-u-paddingBoth20">
-    <script>
-    /**
-    * Stores all the address values in corresponding input fields
-    */
-    function reflectAddressOnInputs(place){
-        document.getElementById("hidaddress").value = place.formatted_address;
-        [...place.address_components].forEach( component => {
-            [...component['types']].forEach( type => {
-                switch(type){
-                    case 'street_number':
-                        document.getElementById("street_number").value = component.long_name;
-                        document.getElementById("id_m_number").value = component.long_name;
-                        break;
-                    case 'postal_code':
-                        document.getElementById("postal_code").value = component.long_name;
-                        document.getElementById("id_m_postal_code").value = component.long_name;
-                        break;
-                    case 'route':
-                        document.getElementById("route").value = component.long_name;
-                        document.getElementById("id_m_street").value = component.long_name;
-                        break;
-                    case 'sublocality':
-                        document.getElementById("sublocality").value = component.long_name;
-                        document.getElementById("id_m_county").value = component.long_name;
-                        
-                        break;
-                    case 'locality':
-                        document.getElementById("locality").value = component.long_name;
-                        document.getElementById("id_m_city").value = component.long_name;
-                        break;
-                    case 'administrative_area_level_1':
-                    console.log(component)
-                        document.getElementById("administrative_area_level_1").value = component.long_name;
-                        document.getElementById("statedropdown").value = component.short_name;
-                        break;
-                    case 'country':
-                        document.getElementById("country").value = component.long_name;
-                        document.getElementById("id_m_country").value = component.long_name;
-                        break;
-                    default:
-                        break;
-                }
-            })
-        });
-    }
-    $(document).on("google_point_map_widget:marker_create", function (e, place, lat, lng, locationInputElem, mapWrapID) {
-        reflectAddressOnInputs(place);
-        document.getElementById("hidaddress").value = place.formatted_address;
-    });
-    $(document).on("google_point_map_widget:marker_change", function (e, place, lat, lng, locationInputElem, mapWrapID) {
-        if(place){
-            reflectAddressOnInputs(place);
-        } else {
-            // Get the user's text and use that instead
-            console.log(locationInputElem);
-            console.log($("#address-mw-google-address-input")[0].value);
-            var userText = $("#address-mw-google-address-input")[0].value;
-            console.log(`text: ${userText}`);
-        }
-    });
-    function checkFormAndSubmit(button){
-        button.disabled=true; button.value='waiting ...';
-        // Show a warning if any of the address fields are empty
-        inputIds = [
-            "id_m_number",
-            "id_m_postal_code",
-            "id_m_street",
-            "id_m_county",
-            "id_m_city",
-            "id_m_country"
-        ]
-
-        let isAnyInputEmpty = false;
-        let elementNotFound = 0;
-        inputIds.forEach(iid => {
-            const element = document.getElementById(iid);
-            
-            if(element){
-                if(!element.value){
-                    isAnyInputEmpty = true;
-                }
-                
-            } else {
-                elementNotFound++;
-            }
-        });
-        if(isAnyInputEmpty){
-            alert("Please enter a correct address");
-            button.disabled=false; button.value='Add Station';
-        } else {
-            console.log(elementNotFound);
-            button.form.submit();
-        }
-        
-    }
-    </script>
-    {% include 'firestation/_message_notifications.html' with use_angular=True %}
-    <div class="row">
-        <div class="col-md-12">
-            <div>
-            <p class="upload-header">Add New Station to {{ object.name }}</p>
-                <br>
-                    {% block form %}
-                    <div class="ct-u-marginBottom30 text-center" style="margin-top:-20px;">
-                        {% with WIDGET_ERROR_CLASS='form-error' %}
-                        <form id="addstaionform" class="text-left" action="addstation" method="post" enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <div style="padding-top:23px;width: 30%">
-                                <label>Enter Station Name</label>
-                                {% render_field form.name type="text" required=true class+="form input-sm" %}
-                                {{ form.name.errors }}
-                            </div>
-                            <div style="padding-top:23px;width: 10%">
-                                <label>Enter Station Number</label>
-                                {% render_field form.station_number type="number" required=true class+="form input-sm" %}
-                                {{ form.station_number.errors }}
-                            </div>
-                            <br />
-                            <label>Enter Address</label>
-                            {{ form.address.errors }}
-                            <ul class="nav nav-tabs" id="geolocationTab" role="tablist">
-                                <li class="nav-item active">
-                                    <a class="nav-link active" data-toggle="tab" href="#map-tab">Use Map</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" data-toggle="tab" href="#address-tab">Manually Enter Address</a>
-                                </li>
-                            </ul>
-                            <div class="tab-content" id="myTabContent">
-                                <div class="tab-pane fade in show active" id="map-tab" role="tabpanel">
-                                    
-                                    <div>
-                                        {% render_field form.address required=true %}
-                                    </div>
-                                </div>
-                                <div class="tab-pane fade" id="address-tab" role="tabpanel" >
-                                    <input type="hidden" id="hidaddress" name="hidaddress" value=""></input>
-                                    <div>
-                                        {% comment %} NUMBER {% endcomment %}
-                                        <div style="padding-top:23px;width: 10%">
-                                            <label>Number</label>
-                                            {% render_field form.m_number type="text" required=true class+="form input-sm" %}
-                                            {{ form.m_number.errors }}
-                                        </div>
-                                        {% comment %} STREET {% endcomment %}
-                                        <div style="padding-top:23px;width: 30%">
-                                            <label>Street</label>
-                                            {% render_field form.m_street type="text" required=true class+="form input-sm" %}
-                                            {{ form.m_street.errors }}
-                                        </div>
-                                        {% comment %} CITY {% endcomment %}
-                                        <div style="padding-top:23px;width: 30%">
-                                            <label>City</label>
-                                            {% render_field form.m_city type="text" required=true class+="form input-sm" %}
-                                            {{ form.m_city.errors }}
-                                        </div>
-                                        <div style="padding-top:23px;width: 10%">
-                                            <label>State</label>
-                                            <select id="statedropdown" name="state">
-                                            </select>
-                                            {{ form.state.errors }}
-                                        </div>
-                                        <div style="padding-top:23px;width: 10%">
-                                            <label>Zipcode</label>
-                                            {% render_field form.m_postal_code type="number" required=true max="100000" min="1000" class+="form input-sm" %}
-                                            {{ form.m_postal_code.errors }}
-                                        </div>
-                                        <div style="padding-top:23px;width: 30%">
-                                            <label>Country</label>
-                                            {% render_field form.m_country type="text" required=true class+="form input-sm" %}
-                                            {{ form.m_country.errors }}
-                                        </div>
-                                        <input type="hidden" class="form input-sm" id="street_number" name="street_number" value=""></input>
-                                        <input type="hidden" class="form input-sm" id="route" name="route" value=""></input>
-                                        <input type="hidden" class="form input-sm" id="sublocality" name="sublocality" value=""></input>
-                                        <input type="hidden" class="form input-sm" id="locality" name="locality" value=""></input>
-                                        <input type="hidden" class="form input-sm" id="administrative_area_level_1" name="administrative_area_level_1" value=""></input>
-                                        <input type="hidden" class="form input-sm" id="postal_code" name="postal_code" value=""></input>
-                                        <input type="hidden" class="form input-sm" id="country" name="country" value=""></input>
-                                        </div> 
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="padding-top:23px;width: 10%">
-                                {{ form.errors }}
-                                <button class="btn btn-primary upload-button" onClick="checkFormAndSubmit(this);">Add Station</button>
-                            </div>
-                            {% endwith %}
-                        </form>
+        <header class="ct-mediaSection">
+            <div class="ct-mediaSection-inner">
+                <div class="container">
+                    <div class="ct-u-displayTableVertical">
+                        <div class="ct-textBox ct-u-text--white ct-u-displayTableCell text-left">
+                            <h2>{{ object.name }}</h2>
+                            <h4>{{ object.headquarters_address.get_row_display }}</h4>
+                            <span class="ct-productID ct-fw-300">
+                                FDID: <span>{{ object.fdid }}</span>
+                            </span>
+                        </div>
+                        <div class="ct-u-displayTableCell text-right">
+                            {% include 'firestation/_department_header.html' %}
+                        </div>
                     </div>
-                    {% endblock %}
+                </div>
+            </div>
+        </header>
+        <div class="container ct-u-paddingBoth20">
+            <script>
+            /**
+            * Stores all the address values in corresponding input fields
+            */
+            function reflectAddressOnInputs(place){
+                document.getElementById("hidaddress").value = place.formatted_address;
+                [...place.address_components].forEach( component => {
+                    [...component['types']].forEach( type => {
+                        switch(type){
+                            case 'street_number':
+                                document.getElementById("street_number").value = component.long_name;
+                                break;
+                            case 'postal_code':
+                                document.getElementById("postal_code").value = component.long_name;
+                                break;
+                            case 'route':
+                                document.getElementById("route").value = component.long_name;
+                                break;
+                            case 'sublocality':
+                                document.getElementById("sublocality").value = component.long_name;
+                                break;
+                            case 'locality':
+                                document.getElementById("locality").value = component.long_name;
+                                break;
+                            case 'administrative_area_level_1':
+                                document.getElementById("administrative_area_level_1").value = component.long_name;
+                                break;
+                            case 'country':
+                                document.getElementById("country").value = component.long_name;
+                                break;
+                            default:
+                                break;
+                        }
+                    })
+                });
+            }
+            $(document).on("google_point_map_widget:marker_create", function (e, place, lat, lng, locationInputElem, mapWrapID) {
+                reflectAddressOnInputs(place);
+            });
+            $(document).on("google_point_map_widget:marker_change", function (e, place, lat, lng, locationInputElem, mapWrapID) {
+                if(place){
+                    reflectAddressOnInputs(place);
+                } else {
+                    // Get the user's text and use that instead
+                    console.log(locationInputElem);
+                    console.log($("#address-mw-google-address-input")[0].value);
+                    var userText = $("#address-mw-google-address-input")[0].value;
+                    console.log(`text: ${userText}`);
+                    // TODO: Test this, edit behaves differently!
+                }
+            });
+            function checkFormAndSubmit(button){
+                // TODO: Extra checking here
+                button.form.submit();
+            }
+            </script>
+            {% include 'firestation/_message_notifications.html' with use_angular=True %}
+            <div class="row">
+                <div class="col-md-12">
+                    <div>
+                    <p class="upload-header">Add New Station to {{ object.name }}</p>
+                        <br>
+                            {% block form %}
+                            <div class="ct-u-marginBottom30 text-center" style="margin-top:-20px;">
+                                {% with WIDGET_ERROR_CLASS='form-error' %}
+                                <form id="addstaionform" class="text-left" action="addstation" method="post" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <div style="padding-top:23px;width: 30%">
+                                        <label>Enter Station Name</label>
+                                        {% render_field form.name type="text" required=true class+="form input-sm" %}
+                                        {{ form.name.errors }}
+                                    </div>
+                                    <div style="padding-top:23px;width: 10%">
+                                        <label>Enter Station Number</label>
+                                        {% render_field form.station_number type="number" required=true class+="form input-sm" %}
+                                        {{ form.station_number.errors }}
+                                    </div>
+                                    <br />
+                                    <label>Enter Address</label>
+                                    {{ form.address.errors }}
+                                    <ul class="nav nav-tabs" id="geolocationTab" role="tablist">
+                                        <li class="nav-item active">
+                                            <a class="nav-link active" data-toggle="tab" href="#map-tab">Use Map</a>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content" id="myTabContent">
+                                        <div class="tab-pane fade in show active" id="map-tab" role="tabpanel">
+                                            
+                                            <div>
+                                                {% render_field form.address required=true %}
+                                                <input type="hidden" id="hidaddress" name="hidaddress" value=""></input>
+                                                <input type="hidden" class="form input-sm" id="street_number" name="street_number" value=""></input>
+                                                <input type="hidden" class="form input-sm" id="route" name="route" value=""></input>
+                                                <input type="hidden" class="form input-sm" id="sublocality" name="sublocality" value=""></input>
+                                                <input type="hidden" class="form input-sm" id="locality" name="locality" value=""></input>
+                                                <input type="hidden" class="form input-sm" id="administrative_area_level_1" name="administrative_area_level_1" value=""></input>
+                                                <input type="hidden" class="form input-sm" id="postal_code" name="postal_code" value=""></input>
+                                                <input type="hidden" class="form input-sm" id="country" name="country" value=""></input>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="padding-top:23px;width: 10%">
+                                        {{ form.errors }}
+                                        <button class="btn btn-primary upload-button" onClick="checkFormAndSubmit(this);">Add Station</button>
+                                    </div>
+                                    {% endwith %}
+                                </form>
+                            </div>
+                            {% endblock %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-
-{% include 'firestation/_footer.html' %}
-</div>
-
-{% include "firestation/_firecares_scripts.html" %}
-
-<script>
-
-    var stateList = [{"name": "Alabama", "abbreviation": "AL"}, {"name": "Alaska", "abbreviation": "AK"}, {"name": "American Samoa", "abbreviation": "AS"}, {"name": "Arizona", "abbreviation": "AZ"}, {"name": "Arkansas", "abbreviation": "AR"}, {"name": "California", "abbreviation": "CA"}, {"name": "Colorado", "abbreviation": "CO"}, {"name": "Connecticut", "abbreviation": "CT"}, {"name": "Delaware", "abbreviation": "DE"}, {"name": "District Of Columbia", "abbreviation": "DC"}, {"name": "Florida", "abbreviation": "FL"}, {"name": "Georgia", "abbreviation": "GA"}, {"name": "Guam", "abbreviation": "GU"}, {"name": "Hawaii", "abbreviation": "HI"}, {"name": "Idaho", "abbreviation": "ID"}, {"name": "Illinois", "abbreviation": "IL"}, {"name": "Indiana", "abbreviation": "IN"}, {"name": "Iowa", "abbreviation": "IA"}, {"name": "Kansas", "abbreviation": "KS"}, {"name": "Kentucky", "abbreviation": "KY"}, {"name": "Louisiana", "abbreviation": "LA"}, {"name": "Maine", "abbreviation": "ME"}, {"name": "Maryland", "abbreviation": "MD"}, {"name": "Massachusetts", "abbreviation": "MA"}, {"name": "Michigan", "abbreviation": "MI"}, {"name": "Minnesota", "abbreviation": "MN"}, {"name": "Mississippi", "abbreviation": "MS"}, {"name": "Missouri", "abbreviation": "MO"}, {"name": "Montana", "abbreviation": "MT"}, {"name": "Nebraska", "abbreviation": "NE"}, {"name": "Nevada", "abbreviation": "NV"}, {"name": "New Hampshire", "abbreviation": "NH"}, {"name": "New Jersey", "abbreviation": "NJ"}, {"name": "New Mexico", "abbreviation": "NM"}, {"name": "New York", "abbreviation": "NY"}, {"name": "North Carolina", "abbreviation": "NC"}, {"name": "North Dakota", "abbreviation": "ND"}, {"name": "Ohio", "abbreviation": "OH"}, {"name": "Oklahoma", "abbreviation": "OK"}, {"name": "Oregon", "abbreviation": "OR"}, {"name": "Pennsylvania", "abbreviation": "PA"}, {"name": "Puerto Rico", "abbreviation": "PR"}, {"name": "Rhode Island", "abbreviation": "RI"}, {"name": "South Carolina", "abbreviation": "SC"}, {"name": "South Dakota", "abbreviation": "SD"}, {"name": "Tennessee", "abbreviation": "TN"}, {"name": "Texas", "abbreviation": "TX"}, {"name": "Utah", "abbreviation": "UT"}, {"name": "Vermont", "abbreviation": "VT"}, {"name": "Virginia", "abbreviation": "VA"}, {"name": "Washington", "abbreviation": "WA"}, {"name": "West Virginia", "abbreviation": "WV"}, {"name": "Wisconsin", "abbreviation": "WI"}, {"name": "Wyoming", "abbreviation": "WY"}]
-
-    var option = '';
-    for (var i=0;i<stateList.length;i++){
-       option += '<option value="'+ stateList[i]['abbreviation'] + '">' + stateList[i]['name'] + '</option>';
-    }
-    $('#statedropdown').append(option);
-
-    // Clear form
-    $('#addstaionform input[type="text"]').val('');
-    $('#addstaionform input[type="number"]').val('');
-
-</script>
-
-</body>
+        {% include 'firestation/_footer.html' %}
+        {% comment %} </div> {% endcomment %}
+        {% include "firestation/_firecares_scripts.html" %}
+    </body>
 </html>
