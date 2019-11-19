@@ -25,6 +25,21 @@
         {% include 'google_analytics.html' %}
         {% include 'google_analytics.html' %}
         {{ form.media }}
+        <style>
+        .loader {
+            border: 16px solid #f3f3f3; /* Light grey */
+            border-top: 16px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 2s linear infinite;
+            margin: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        </style>
     </head>
 
     <body class="ct-headroom--fixedTopBar cssAnimate" ng-app="fireStation">
@@ -108,6 +123,7 @@
                     })
                 });
             }
+            // Map callbacks
             $(document).on("google_point_map_widget:marker_create", function (e, place, lat, lng, locationInputElem, mapWrapID) {
                 reflectAddressOnInputs(place);
             });
@@ -123,8 +139,8 @@
                     // TODO: Test this, edit behaves differently!
                 }
             });
+            // Form submit
             function checkFormAndSubmit(button){
-                // TODO: Extra checking here
                 button.form.submit();
             }
             </script>
@@ -143,11 +159,13 @@
                                         <label>Enter Station Name</label>
                                         {% render_field form.name type="text" required=true class+="form input-sm" %}
                                         {{ form.name.errors }}
+                                        
                                     </div>
                                     <div style="padding-top:23px;width: 10%">
                                         <label>Enter Station Number</label>
                                         {% render_field form.station_number type="number" required=true class+="form input-sm" %}
                                         {{ form.station_number.errors }}
+                                        
                                     </div>
                                     <br />
                                     <label>Enter Address</label>
@@ -174,7 +192,7 @@
                                         </div>
                                     </div>
                                     <div style="padding-top:23px;width: 10%">
-                                        {{ form.errors }}
+                                        <div id="loader-placeholder"></div>
                                         <button class="btn btn-primary upload-button" onClick="checkFormAndSubmit(this);">Add Station</button>
                                     </div>
                                     {% endwith %}
@@ -187,7 +205,6 @@
             </div>
         </div>
         {% include 'firestation/_footer.html' %}
-        {% comment %} </div> {% endcomment %}
         {% include "firestation/_firecares_scripts.html" %}
     </body>
 </html>
