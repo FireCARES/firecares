@@ -603,7 +603,6 @@ class AddStationView(LoginRequiredMixin, FormView):
                 fd = FireDepartment.objects.get(pk=self.kwargs.get('pk'))
                 # Check that name is not used already
                 duplicate_station = FireStation.objects.filter(name=form.cleaned_data['name'], department=fd)
-                
                 if duplicate_station.exists():
                     messages.add_message(request, messages.ERROR, 'The name submitted is already in use.')
                     return super(AddStationView, self).form_invalid(form)
