@@ -141,6 +141,8 @@
             });
             // Form submit
             function checkFormAndSubmit(button){
+                $('#loader-placeholder').addClass('loader');
+                $('#wait-text').removeClass('hidden');
                 button.form.submit();
             }
             </script>
@@ -191,8 +193,11 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div style="padding-top:23px;width: 10%">
+                                    <div>
                                         <div id="loader-placeholder"></div>
+                                        <div id="wait-text" class="hidden">Please wait, this might take some time to complete</div>
+                                    </div>
+                                    <div style="padding-top:23px;width: 10%">
                                         <button class="btn btn-primary upload-button" onClick="checkFormAndSubmit(this);">Add Station</button>
                                     </div>
                                     {% endwith %}
