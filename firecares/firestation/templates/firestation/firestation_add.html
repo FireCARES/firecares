@@ -169,25 +169,18 @@
                                     <label>Enter Address</label>
                                     {{ form.address.errors }}
                                     <input type="hidden" id="hidaddress" name="hidaddress" value=""></input>
-                                        <input type="hidden" class="form input-sm" id="street_number" name="street_number" value=""></input>
-                                        <input type="hidden" class="form input-sm" id="route" name="route" value=""></input>
-                                        <input type="hidden" class="form input-sm" id="sublocality" name="sublocality" value=""></input>
-                                        <input type="hidden" class="form input-sm" id="locality" name="locality" value=""></input>
-                                        <input type="hidden" class="form input-sm" id="administrative_area_level_1" name="administrative_area_level_1" value=""></input>
-                                        <input type="hidden" class="form input-sm" id="postal_code" name="postal_code" value=""></input>
-                                        <input type="hidden" class="form input-sm" id="country" name="country" value=""></input>
-                                    <ul class="nav nav-tabs" id="geolocationTab" role="tablist">
-                                        <li class="nav-item active">
-                                            <a class="nav-link active" data-toggle="tab" href="#map-tab">Use Map</a>
-                                        </li>
-                                    </ul>
-                                    <div class="tab-content" id="myTabContent">
-                                        <div class="tab-pane fade in show active" id="map-tab" role="tabpanel">
+                                    <input type="hidden" class="form input-sm" id="street_number" name="street_number" value=""></input>
+                                    <input type="hidden" class="form input-sm" id="route" name="route" value=""></input>
+                                    <input type="hidden" class="form input-sm" id="sublocality" name="sublocality" value=""></input>
+                                    <input type="hidden" class="form input-sm" id="locality" name="locality" value=""></input>
+                                    <input type="hidden" class="form input-sm" id="administrative_area_level_1" name="administrative_area_level_1" value=""></input>
+                                    <input type="hidden" class="form input-sm" id="postal_code" name="postal_code" value=""></input>
+                                    <input type="hidden" class="form input-sm" id="country" name="country" value=""></input>
+                                    <div class="tab-pane fade in show active" id="map-tab" role="tabpanel">
+                                        
+                                        <div>
+                                            {% render_field form.address required=true %}
                                             
-                                            <div>
-                                                {% render_field form.address required=true %}
-                                                
-                                            </div>
                                         </div>
                                     </div>
                                     <div>
