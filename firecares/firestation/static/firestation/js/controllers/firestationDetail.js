@@ -108,6 +108,7 @@
       map.fitBounds(district.getBounds());
       map.setView(stationGeom);
       heatmap.setClipLayer(district);
+      emsHeatmap.setClipLayer(district);
     }
     else {
       map.setView(stationGeom, 15);
@@ -194,7 +195,7 @@
             $scope.showDetails = false;
           }
           else if (layer.layer._leaflet_id === heatmap.layer._leaflet_id) {
-            if (heatmap.heat) {
+            if (heatmap.isDownloaded) {
               showHeatmapCharts(true);
             } else {
               map.spin(true);
@@ -233,7 +234,6 @@
               $scope.showEMSHeatmapCharts = false;
               if(map.hasLayer(emsHeatmap.layer)) {
                 map.removeLayer(emsHeatmap.layer);
-                layersControl.update();
               }
             }
           });
@@ -255,7 +255,9 @@
           return;
         }
 
-        emsHeatmap.init(map);
+        emsHeatmap.init(map, {
+          gradient: { 0.55: '#7400ff', 0.65: '#3333ff', 1: '#ff3333' },
+        });
         $scope.emsHeatmap = emsHeatmap;
         $scope.showEMSHeatmapCharts = false;
 
@@ -266,7 +268,7 @@
             $scope.showDetails = false;
           }
           else if (layer.layer._leaflet_id === emsHeatmap.layer._leaflet_id) {
-            if (emsHeatmap.heat) {
+            if (emsHeatmap.isDownloaded) {
               showEMSHeatmapCharts(true);
             } else {
               map.spin(true);
@@ -307,7 +309,6 @@
               // Removes the heatmap and unchecks the control.
               if(map.hasLayer(heatmap.layer)) {
                 map.removeLayer(heatmap.layer);
-                layersControl.update();
               }
             }
           });

@@ -203,6 +203,7 @@
       layersControl.addOverlay(countyBoundary, 'Jurisdiction Boundary');
       departmentMap.fitBounds(countyBoundary.getBounds(), fitBoundsOptions);
       heatmap.setClipLayer(countyBoundary);
+      emsHeatmap.setClipLayer(countyBoundary);
     } else {
       departmentMap.setView(config.centroid, 13);
     }
@@ -348,7 +349,7 @@
             $scope.showDetails = false;
           }
           else if (layer.layer._leaflet_id === heatmap.layer._leaflet_id) {
-            if (heatmap.heat) {
+            if (heatmap.isDownloaded) {
               showHeatmapCharts(true);
             } else {
               departmentMap.spin(true);
@@ -387,7 +388,6 @@
               $scope.showEMSHeatmapCharts = false;
               if(departmentMap.hasLayer(emsHeatmap.layer)) {
                 departmentMap.removeLayer(emsHeatmap.layer);
-                layersControl.update();
               }
             }
           });
@@ -409,7 +409,9 @@
           return;
         }
 
-        emsHeatmap.init(departmentMap);
+        emsHeatmap.init(departmentMap, {
+          gradient: { 0.55: '#7400ff', 0.65: '#3333ff', 1: '#ff3333' },
+        });
         $scope.emsHeatmap = emsHeatmap;
         $scope.showEMSHeatmapCharts = false;
 
@@ -420,7 +422,7 @@
             $scope.showDetails = false;
           }
           else if (layer.layer._leaflet_id === emsHeatmap.layer._leaflet_id) {
-            if (emsHeatmap.heat) {
+            if (emsHeatmap.isDownloaded) {
               showEMSHeatmapCharts(true);
             } else {
               departmentMap.spin(true);
@@ -461,7 +463,6 @@
               // Removes the heatmap and unchecks the control.
               if(departmentMap.hasLayer(heatmap.layer)) {
                 departmentMap.removeLayer(heatmap.layer);
-                layersControl.update();
               }
             }
           });
