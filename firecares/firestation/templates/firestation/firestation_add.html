@@ -131,14 +131,21 @@
                 if(place){
                     reflectAddressOnInputs(place);
                 } else {
-                    $("#hidaddress").value = $('#address-mw-google-address-input').value;
+                    let val = $('#address-mw-google-address-input')["0"].value;
+                    if(val){
+                        $("#hidaddress").value = val;
+                    }
                 }
             });
             // Form submit
             function checkFormAndSubmit(button){
                 $('#loader-placeholder').addClass('loader');
                 $('#wait-text').removeClass('hidden');
-                document.getElementById("hidaddress").value = $('#address-mw-google-address-input').value;
+                let val = $('#address-mw-google-address-input')["0"].value;
+                if(val){
+                    document.getElementById("hidaddress").value = val;
+                }
+                
                 button.form.submit();
             }
             </script>
