@@ -1,10 +1,12 @@
-setuptools==34.4.0  # pinned to get around django-static-sitemaps issues with 35
 amqp==1.4.9
 anyjson==0.3.3
 appdirs==1.4.3
+appnope==0.1.0
 asn1crypto==0.22.0
+astroid==1.6.6
 Babel==2.3.4
 backports-abc==0.5
+backports.functools-lru-cache==1.5
 backports.shutil-get-terminal-size==1.0.0
 backports.ssl-match-hostname==3.5.0.1
 beautifulsoup4==4.5.3
@@ -15,6 +17,7 @@ celery==3.1.18
 certifi==2017.1.23
 cffi==1.12.3
 click==4.0
+configparser==4.0.2
 coverage==4.2
 cryptography==2.5
 decorator==4.0.11
@@ -35,6 +38,7 @@ django-fixture-magic==0.0.7
 django-guardian==1.4.6
 django-import-export==0.5.1
 django-invitations==1.8
+django-map-widgets==0.2.2
 django-nose==1.4.4
 -e git://github.com/ProminentEdge/django-osgeo-importer.git@45aa4fb1ee091416c761a9906c457014c1a7251c#egg=django_osgeo_importer
 django-phonenumber-field==0.7.2
@@ -62,17 +66,19 @@ ipdb==0.8.1
 ipython==5.3.0
 ipython-genutils==0.2.0
 isodate==0.5.4
+isort==4.3.21
 jdcal==1.4
 jellyfish==0.2.1
 jsonfield==1.0.3
 kombu==3.0.37
+lazy-object-proxy==1.4.3
 lxml==3.5.0
-numpy==1.10.4
 matplotlib==1.4.3
 mccabe==0.6.1
 mock==2.0.0
 ndg-httpsclient==0.4.0
 nose==1.3.7
+numpy==1.10.4
 oauthlib==2.0.2
 odfpy==1.4.0
 openpyxl==2.5.14
@@ -87,6 +93,7 @@ pickleshare==0.7.4
 Pillow==2.9.0
 prompt-toolkit==1.0.13
 psycopg2==2.7
+ptvsd==4.3.2
 ptyprocess==0.5.1
 py==1.4.33
 pyasn1==0.2.3
@@ -95,6 +102,7 @@ pyflakes==1.5.0
 Pygments==2.2.0
 PyJWT==1.7.1
 pylibmc==1.5.2
+pylint==1.9.5
 pyOpenSSL==17.2.0
 pyparsing==2.2.0
 pytest==2.7.0
@@ -120,6 +128,7 @@ traitlets==4.3.2
 unicodecsv==0.14.1
 us==0.9.0
 wcwidth==0.1.7
+wrapt==1.11.2
 xlrd==1.2.0
 xlwt==1.3.0
 zeep==0.23.0

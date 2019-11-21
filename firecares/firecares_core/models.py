@@ -83,13 +83,12 @@ class Address(models.Model):
 
     @classmethod
     def create_from_string(cls, query_string, dry_run=False):
-        g = GoogleV3()
+        g = GoogleV3(api_key=settings.GOOGLE_API_KEY)
         try:
-            results = g.geocode(query=query_string)
+            results = g.geocode(query_string, timeout=10)
         except GeocoderQuotaExceeded:
             sleep(0.5)
             results = g.geocode(query=query_string)
-
         if results and results.latitude and results.longitude:
             params = dict(geom=Point(results.longitude, results.latitude))
             filter_components = lambda n: [c for c in results.raw['address_components'] if n in c['types']]  # noqa

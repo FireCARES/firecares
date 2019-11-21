@@ -586,6 +586,7 @@ class AddStationView(LoginRequiredMixin, FormView):
     template_name = 'firestation/firestation_add.html'
     station = 0
     form_class = AddStationForm
+    address_string = ""
 
     def get_context_data(self, **kwargs):
         department = get_object_or_404(FireDepartment, pk=self.kwargs.get('pk'))
@@ -597,10 +598,20 @@ class AddStationView(LoginRequiredMixin, FormView):
 
     def post(self, request, *args, **kwargs):
         form = AddStationForm(department_pk=self.kwargs.get('pk'), **self.get_form_kwargs())
-
         if request.method == 'POST':
-
             if form.is_valid():
+                fd = FireDepartment.objects.get(pk=self.kwargs.get('pk'))
+                # Check that name is not used already
+                duplicate_station = FireStation.objects.filter(name=form.cleaned_data['name'], department=fd)
+                if duplicate_station.exists():
+                    messages.add_message(request, messages.ERROR, 'The name submitted is already in use.')
+                    return super(AddStationView, self).form_invalid(form)
+                # Check that station id is not used already
+                duplicate_id = FireStation.objects.filter(station_number=form.cleaned_data['station_number'], department=fd)
+                if duplicate_id.exists():
+                    messages.add_message(request, messages.ERROR, 'The station number submitted is already in use.')
+                    return super(AddStationView, self).form_invalid(form)
+                self.address_string = request.POST.get('hidaddress', '')
                 if self.form_valid(form) == 'Geocode Error':
                     messages.add_message(request, messages.ERROR, 'A geocoding error has occured finding the Station location.  Please check the address or try again in a few minutes.')
                     return super(AddStationView, self).form_invalid(form)
@@ -612,13 +623,11 @@ class AddStationView(LoginRequiredMixin, FormView):
                 return self.form_invalid(form)
 
     def form_valid(self, form):
-
         try:
             station = form.save(commit=False)
             fd = FireDepartment.objects.get(pk=self.kwargs.get('pk'))
-            addresss_str = station.address + "" + station.state + "" + station.city + "" + station.zipcode
-            station = station.create_station(department=fd, address_string=addresss_str, name=station.name, station_number=station.station_number)
-
+            address_string = self.address_string
+            station = station.create_station(department=fd, address_string=address_string, name=station.name, station_number=station.station_number)
             if station is None:
                 return "Geocode Error"
             else:

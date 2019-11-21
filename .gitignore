@@ -65,3 +65,4 @@ firecares/settings/local_settings.py
 celerybeat-schedule
 
 .ipynb_checkpoints
+.vscode/
