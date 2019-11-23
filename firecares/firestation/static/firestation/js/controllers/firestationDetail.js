@@ -315,6 +315,171 @@
         }
       });
 
+    //
+    // Parcels
+    //
+    var previousParcels = {};
+    // Declare variables to avoid reallocating.
+    var filter_iterator = 0;
+    var joined_coordinate = '';
+
+    // join coordinates on string to check if already added
+    var join_coordinates = function(feature) {
+      joined_coordinate = '';
+      feature.forEach(function(currentValue) {
+        joined_coordinate += currentValue.x + currentValue.y;
+      });
+      return joined_coordinate;
+    };
+    var parcels = new L.TileLayer.MVTSource({
+      url: "https://{s}.firecares.org/parcels/{z}/{x}/{y}.pbf",
+      debug: false,
+      clickableLayers: null,
+      mutexToggle: true,
+      maxZoom: 18,
+      minZoom: 10,
+
+      getIDForLayerFeature: function(feature) {
+        return feature.properties.parcel_id;
+      },
+
+      style: function(feature) {
+        // If overlapping parcel then make it transparent.
+        var current_coordinates = join_coordinates(feature.coordinates[0])
+        if (current_coordinates in previousParcels) {
+          return {
+            color: 'rgba(0,0,0,0)'
+          }
+        } else {
+          previousParcels[current_coordinates] = null;
+        }
+
+        var style = {};
+        var selected = style.selected = {};
+        var pointRadius = 1;
+
+        function ScaleDependentPointRadius(zoom) {
+          //Set point radius based on zoom
+          var pointRadius = 1;
+          if (zoom >= 0 && zoom <= 7) {
+            pointRadius = 1;
+          }
+          else if (zoom > 7 && zoom <= 10) {
+            pointRadius = 2;
+          }
+          else if (zoom > 10) {
+            pointRadius = 3;
+          }
+
+          return pointRadius;
+        }
+
+        var type = feature.type;
+        switch (type) {
+          case 1: //'Point'
+            // unselected
+            style.color = CICO_LAYERS[feature.properties.type].color || '#3086AB';
+            style.radius = ScaleDependentPointRadius;
+            // selected
+            style.selected = {
+              color: 'rgba(255,255,0,0.5)',
+              radius: 6
+            };
+            break;
+          case 2: //'LineString'
+            // unselected
+            style.color = 'rgba(161,217,155,0.8)';
+            style.size = 3;
+            // selected
+            style.selected = {
+              color: 'rgba(255,255,0,0.5)',
+              size: 6
+            };
+            break;
+          case 3: //'Polygon'
+            // unselected
+            switch (feature.properties.risk_category) {
+              case 'Low':
+                style.color = 'rgba(50%,100%,50%,0.2)';
+                break;
+              case 'Medium':
+                style.color = 'rgba(100%,75%,50%,0.2)';
+                break;
+              case 'High':
+                style.color = 'rgba(100%,50%,50%,0.2)';
+                break;
+              default:
+                style.color = 'rgba(50%,50%,50%,0.2)';
+                break;
+            }
+
+            style.outline = {
+              color: 'rgb(20,20,20)',
+              size: 1
+            };
+            // selected
+            style.selected = {
+              color: 'rgba(255,255,0,0.5)',
+              outline: {
+                color: '#d9534f',
+                size: 3
+              }
+            };
+        }
+
+        return style;
+      },
+
+      onClick: function(evt) {
+        if (config.showParcels) {
+          var message = 'No parcel data found at this location.';
+          if (evt.feature != null) {
+            message = '';
+
+            var items = {
+              'Address': 'addr',
+              'City': 'city',
+              'State': 'state',
+              'Zip': 'zip',
+              'Building Sq Footage': 'bld_sq_ft',
+              'Stories': 'story_nbr',
+              'Units': 'units_nbr',
+              'Condition': 'condition',
+              'Year Built': 'yr_blt',
+              'Rooms': 'rooms',
+              'Bed Rooms': 'bed_rooms',
+              'Total Value': 'tot_val',
+              'Land Value': 'lan_val',
+              'Improvements Value': 'imp_val',
+              'Structure Hazard Risk Level': 'risk_category'
+            };
+
+            _.each(_.pairs(items), function(pair){
+              var key = pair[0];
+              var value = evt.feature.properties[pair[1]];
+
+              if (key.indexOf('Value') !== -1 && value != null) {
+                value = $filter('currency')(value, '$', 0);
+              }
+
+              if ((key === 'Building Sq Footage' || key === 'Units') && value != null) {
+                value = $filter('number')(value, 0);
+              }
+
+              value = value ? value : 'Unknown';
+              message += '<b>' + key + ':</b> ' + value + '</br>';
+            });
+
+            L.popup()
+              .setLatLng(evt.latlng)
+              .setContent(message)
+              .openOn(map);
+          }
+        }
+      }
+    });
+    layersControl.addOverlay(parcels, 'Parcels');
+
     map.on('overlayadd', function(layer) {
       layer = layer.layer;
       if(layer.id === 'weather'){
