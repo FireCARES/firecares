@@ -30,7 +30,8 @@
         id: {{object.id}},
         departmentId: {{ object.department_id|default:"null" }},
         draggable: {{ user_can_change|yesno:"true,false" }},
-        isCurator: {{ user_can_change|yesno:"true,false" }}
+        isCurator: {{ user_can_change|yesno:"true,false" }},
+        isAuthenticated: {{ user.is_authenticated|yesno:"true,false"}}
     };
     </script>
     {% include 'google_analytics.html' %}
@@ -247,7 +248,7 @@
                         <div id="map"></div>
                     </div>
 
-                    <div class="text-center no-select ct-u-marginTop20" ng-if="showHeatmapCharts">
+                    <div class="text-center no-select ct-u-marginTop20" ng-if="showFireHeatmapCharts">
                         <bar-chart heatmap-class="fire" class="visible-lg-inline-block" filter-type="yearsMonths" metric-title="HISTORY" width="850" height="150" max-years="10"></bar-chart>
                         <bar-chart heatmap-class="fire" class="visible-md-inline-block" filter-type="yearsMonths" metric-title="HISTORY" width="596" height="150" max-years="8"></bar-chart>
                         <bar-chart heatmap-class="fire" class="visible-sm-inline-block" filter-type="yearsMonths" metric-title="HISTORY" width="700" height="150" max-years="10"></bar-chart>

@@ -24,7 +24,7 @@
       geom: {{ object.geom.json|safe|default:"null" }},
       centroid: [{{ object.headquarters_address.geom.centroid.y }}, {{ object.headquarters_address.geom.centroid.x }}],
       id: {{object.id}},
-      showParcels: {{ user.is_authenticated|yesno:"true,false"}},
+      isAuthenticated: {{ user.is_authenticated|yesno:"true,false"}},
       superUser: {{ user.is_superuser|yesno:"true,false"}},
       staff: {{ user.is_staff|yesno:"true,false"}},
       emsTransport: {{object.ems_transport|yesno:"true,false"}},
@@ -315,7 +315,7 @@
                     </div>
                     {% endverbatim %}
 
-                    <div class="text-center no-select ct-u-marginTop20" ng-if="showHeatmapCharts">
+                    <div class="text-center no-select ct-u-marginTop20" ng-if="showFireHeatmapCharts">
                         <bar-chart heatmap-class="fire" class="visible-lg-inline-block" filter-type="yearsMonths" metric-title="HISTORY" width="850" height="150" max-years="10"></bar-chart>
                         <bar-chart heatmap-class="fire" class="visible-md-inline-block" filter-type="yearsMonths" metric-title="HISTORY" width="596" height="150" max-years="8"></bar-chart>
                         <bar-chart heatmap-class="fire" class="visible-sm-inline-block" filter-type="yearsMonths" metric-title="HISTORY" width="700" height="150" max-years="10"></bar-chart>
