@@ -94,7 +94,16 @@
     }
 
     function isFireInPolygons(fire) {
-      var polygonIndex = indexOfFirePolygon(fire);
+      var polygonIndex = -1;
+      for (var i = 0; i < _polygons.length; i++) {
+        var polyData = _polygons[i];
+        var bounds = polyData.bounds;
+
+        if (!(fire.y < bounds[0][0] || fire.y > bounds[1][0] || fire.x < bounds[0][1] || fire.x > bounds[1][1])) {
+          polygonIndex = i;
+        }
+      }
+
       if (polygonIndex === -1) {
         // Not in any polygon's bounds.
         return false;
@@ -110,24 +119,6 @@
       }
 
       return inside;
-    }
-
-    function indexOfFirePolygon(fire) {
-      // Return the index of the polygon whose bounding box the fire lies within.
-      for (var i = 0; i < _polygons.length; i++) {
-        var polyData = _polygons[i];
-        var bounds = polyData.bounds;
-
-        if (!(fire.y < bounds[0][0] || fire.y > bounds[1][0] || fire.x < bounds[0][1] || fire.x > bounds[1][1])) {
-          return i;
-        }
-      }
-
-      return -1;
-    }
-
-    function isFireInPolygonsBounds(fire) {
-      return (indexOfFirePolygon(fire) !== -1);
     }
 
     function polygonBounds(coords) {
@@ -318,13 +309,7 @@
               }
 
               if (_polygons) {
-                // Only run the more expensive true point-in-polygon test if we don't have too many points. Otherwise,
-                // use the much faster check against the polygon bounds, which gives similar results for most cases.
-                if (fires.length <= 100000) {
-                  fires = fires.filter(isFireInPolygons);
-                } else {
-                  fires = fires.filter(isFireInPolygonsBounds);
-                }
+                fires = fires.filter(isFireInPolygons);
               }
 
               _crossfilter = crossfilter(fires);
