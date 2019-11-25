@@ -1,9 +1,9 @@
 'use strict';
 
 (function() {
-  var module = angular.module('fireStation.map', ['fireStation.factories', 'fireStation.mapService'])
+  var module = angular.module('fireStation.map', ['fireStation.factories', 'fireStation.mapFactoryService'])
 
-  .directive('inlineMap', ['FireDepartment', 'USGSUnit', 'map', function(FireDepartment, USGSUnit, map) {
+  .directive('inlineMap', ['FireDepartment', 'USGSUnit', 'mapFactory', function(FireDepartment, USGSUnit, mapFactory) {
     return {
       restrict: 'E',
       scope: {
@@ -13,7 +13,7 @@
       template: '',
       link: function($scope, $element, attrs) {
         var overlay = JSON.parse($scope.overlayGeom);
-        var curMap = map.initMap($element.get(0), {scrollWheelZoom: false});
+        var curMap = mapFactory.create($element.get(0), {scrollWheelZoom: false});
         var layersControl = L.control.layers().addTo(curMap);
 
         var l = L.geoJson(config.geom, {

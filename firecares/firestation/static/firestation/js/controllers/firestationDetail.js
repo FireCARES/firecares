@@ -2,7 +2,7 @@
 
 (function() {
   angular.module('fireStation.firestationDetailController', ['xeditable', 'ui.bootstrap'])
-  .controller('fireStationController', function($scope, $window, $http, Staffing, $timeout, map, FireStation, $filter, $interpolate, $compile, $analytics, WeatherWarning) {
+  .controller('fireStationController', function($scope, $window, $http, Staffing, $timeout, mapFactory, FireStation, $filter, $interpolate, $compile, $analytics, WeatherWarning, heatmap, emsHeatmap) {
     var thisFirestation = '/api/v1/firestations/' + config.id + '/';
     var serviceAreaData = null;
     var stationGeom = {
@@ -39,7 +39,7 @@
       $scope.forms = data;
     });
 
-    var map = map.initMap('map', {scrollWheelZoom: false});
+    var map = mapFactory.create('map', {scrollWheelZoom: false});
     var stationIcon = L.FireCARESMarkers.firestationmarker();
     var headquartersIcon = L.FireCARESMarkers.headquartersmarker();
     var layersControl = L.control.layers().addTo(map);
@@ -50,6 +50,7 @@
     var mouseOverAddedOpacity = 0.25; // put in settings?
     var highlightColor = 'blue';      // put in settings?
     var serviceArea, max;
+    var messagebox = L.control.messagebox({ timeout: 11000, position:'bottomright' }).addTo(map);
     var messageboxData = L.control.messagebox({ timeout: 22000, position:'bottomleft' }).addTo(map);
 
     station.bindPopup('<b>' + config.stationName + '</b>');
@@ -92,8 +93,8 @@
           fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5),
           weight: 0.8
         };
-      });      
-      messageboxData.hide();  
+      });
+      messageboxData.hide();
     });
 
     layersControl.addOverlay(serviceArea, 'Service Areas');
@@ -101,12 +102,22 @@
     if (config.district) {
       district = L.geoJson(config.district, {
         style: function (feature) {
-          return {color: '#0074D9', fillOpacity: .05, opacity:.8, weight:2};
-        }
+          return {
+            color: '#0074D9',
+            fillOpacity: 0.05,
+            opacity: 0.8,
+            weight: 2,
+            pointerEvents: 'none',
+            cursor: 'default',
+          };
+        },
+        interactive: false,
       }).addTo(map);
       layersControl.addOverlay(district, 'District');
       map.fitBounds(district.getBounds());
       map.setView(stationGeom);
+      heatmap.setClipLayer(district);
+      emsHeatmap.setClipLayer(district);
     }
     else {
       map.setView(stationGeom, 15);
@@ -119,7 +130,7 @@
 
         var weatherPolygons = [];
         var numWarnings = data.objects.length;
-        
+
         for (var i = 0; i < numWarnings; i++) {
           var warning = data.objects[i];
           var poly = L.multiPolygon(warning.warngeom.coordinates.map(function(d){return mapPolygon(d)}),{color: '#f00', weight:'1px'});
@@ -163,8 +174,84 @@
         }
 
         function mapLineString(line){
-          return line.map(function(d){return [d[1],d[0]]})  
+          return line.map(function(d){return [d[1],d[0]]})
         }
+    });
+
+    //
+    // Fire Heatmap
+    //
+    mapFactory.addFireHeatmapOverlay({
+      map: map,
+      layersControl: layersControl,
+      departmentId: config.departmentId,
+      onInit: function(fireHeatmapLayer) {
+        $scope.fireHeatmapLayer = fireHeatmapLayer;
+        $timeout(function() {
+          $scope.showFireHeatmapCharts = false;
+        });
+      },
+      onError: function(err) {
+        alert(err.message);
+      },
+      onShow: function(show) {
+        $timeout(function() {
+          $scope.showFireHeatmapCharts = show;
+
+          if(show === true) {
+            // Removes the ems heatmap and unchecks the control.
+            $scope.showEMSHeatmapCharts = false;
+            if(map.hasLayer($scope.emsHeatmapLayer)) {
+              map.removeLayer($scope.emsHeatmapLayer);
+            }
+          }
+        });
+      },
+    });
+
+    //
+    // EMS Heatmap
+    //
+    mapFactory.addEMSHeatmapOverlay({
+      map: map,
+      layersControl: layersControl,
+      departmentId: config.departmentId,
+      onInit: function(emsHeatmapLayer) {
+        $scope.emsHeatmapLayer = emsHeatmapLayer;
+        $timeout(function() {
+          $scope.showEMSHeatmapCharts = false;
+        });
+      },
+      onError: function(err) {
+        alert(err.message);
+      },
+      onShow: function(show) {
+        $timeout(function() {
+          $scope.showEMSHeatmapCharts = show;
+
+          if(show === true) {
+            // Remove the fires heatmap and unchecks the control.
+            $scope.showFireHeatmapCharts = false;
+            if(map.hasLayer($scope.fireHeatmapLayer)) {
+              map.removeLayer($scope.fireHeatmapLayer);
+            }
+          }
+        });
+      },
+    });
+
+    //
+    // Parcels
+    //
+    mapFactory.addParcelsOverlay({
+      map: map,
+      layersControl: layersControl,
+      isAuthenticated: config.isAuthenticated,
+      onShow: function(show) {
+        if (show) {
+          messagebox.show('Zoom into the map area to view parcels');
+        }
+      }
     });
 
     map.on('overlayadd', function(layer) {
@@ -218,7 +305,7 @@
 
     map.on('overlayremove', function(layer) {
       if(layer.layer.id === 'weather'){
-          $('.weather-messages').fadeOut('slow'); 
+          $('.weather-messages').fadeOut('slow');
       }
       $analytics.eventTrack('disable layer', {
         category: $scope.eventCategory + ': map',
@@ -260,7 +347,7 @@
       if (form['apparatus'] != 'Other') {
         form['other_apparatus_type'] = '';
       }
-      
+
       if (form.new_form === true) {
 
         //remove temp variables
