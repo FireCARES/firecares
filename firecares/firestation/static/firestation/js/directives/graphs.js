@@ -1386,7 +1386,7 @@
 
         var latestYear = new Date(barData[barData.length - 1].key).getFullYear();
         var oldestYear = new Date(barData[0].key).getFullYear();
-        var yearSpan = latestYear - oldestYear;
+        var yearSpan = latestYear - oldestYear + 1;
         var years = Math.min(yearSpan, maxYears);
 
         barData = normalizedBarData(barData);
