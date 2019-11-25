@@ -104,8 +104,8 @@
         style: function (feature) {
           return {
             color: '#0074D9',
-            fillOpacity: .05,
-            opacity: .8,
+            fillOpacity: 0.05,
+            opacity: 0.8,
             weight: 2,
             pointerEvents: 'none',
             cursor: 'default',

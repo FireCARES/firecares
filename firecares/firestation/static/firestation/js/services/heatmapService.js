@@ -39,19 +39,19 @@
     var _isDownloaded = false;
 
     function processData(allText) {
-      var risks = { "Unknown":0, "Low":1, "Medium":2, "High":3 };
+      var risks = { 'Unknown':0, 'Low':1, 'Medium':2, 'High':3 };
       var allTextLines = allText.split(/\r\n|\n/);
       var headers = allTextLines[0].split(',');
       var lines = [];
 
-      for (var i = 0; i < allTextLines.length; i++) {
+      for (var i = 0; i < allTextLines.length; i += 1) {
         var data = allTextLines[i].split(',');
         if (data.length !== headers.length) {
           continue;
         }
 
         var tarr = {};
-        for (var j = 0; j < headers.length; j++) {
+        for (var j = 0; j < headers.length; j += 1) {
           tarr[headers[j]] = data[j];
         }
 
@@ -95,7 +95,7 @@
 
     function isFireInPolygons(fire) {
       var polygonIndex = -1;
-      for (var i = 0; i < _polygons.length; i++) {
+      for (var i = 0; i < _polygons.length; i += 1) {
         var polyData = _polygons[i];
         var bounds = polyData.bounds;
 
@@ -112,7 +112,7 @@
       // Use ray-casting algorithm to check if the fire is in the polygon.
       var verts = _polygons[polygonIndex].verts;
       var inside = false;
-      for (var i = 0, j = verts.length - 1; i < verts.length; j = i++) {
+      for (var i = 0, j = verts.length - 1; i < verts.length; j = i, i += 1) {
         if (((verts[i][0] > fire.x) !== (verts[j][0] > fire.x)) && (fire.y < (verts[j][1] - verts[i][1]) * (fire.x - verts[i][0]) / (verts[j][0] - verts[i][0]) + verts[i][1])) {
           inside = !inside;
         }
@@ -127,7 +127,7 @@
       var xMax = Number.NEGATIVE_INFINITY;
       var yMax = Number.NEGATIVE_INFINITY;
 
-      for (var i = 0; i < coords.length; i++) {
+      for (var i = 0; i < coords.length; i += 1) {
         var x = coords[i][1];
         var y = coords[i][0];
 
@@ -169,7 +169,7 @@
       },
 
       reset: function() {
-        for (var i = 0; i < _filters.length; i++) {
+        for (var i = 0; i < _filters.length; i += 1) {
           this.resetFilter(_filters[i]);
         }
       },
@@ -211,15 +211,15 @@
           }
 
           var geometry = layer.toGeoJSON().geometry;
-          var polygonsData = (geometry.type === "Polygon") ? [geometry.coordinates] : geometry.coordinates;
+          var polygonsData = (geometry.type === 'Polygon') ? [geometry.coordinates] : geometry.coordinates;
 
           polygonsData.forEach(function(coordsArray) {
             var verts = [[0, 0]];
 
-            for (var i = 0; i < coordsArray.length; i++) {
+            for (var i = 0; i < coordsArray.length; i += 1) {
               var coords = coordsArray[i];
 
-              for (var j = 0; j < coords.length; j++) {
+              for (var j = 0; j < coords.length; j += 1) {
                 verts.push(coords[j]);
               }
 
@@ -242,7 +242,7 @@
         }
 
         var filter = _filters[filterType];
-        for (var i = 0; i < keys.length; i++) {
+        for (var i = 0; i < keys.length; i += 1) {
           if (filter.indexOf(keys[i]) === -1) {
             filter.push(keys[i]);
           }
@@ -258,7 +258,7 @@
         }
 
         var filter = _filters[filterType];
-        for (var i = 0; i < keys.length; i++) {
+        for (var i = 0; i < keys.length; i += 1) {
           var index = filter.indexOf(keys[i]);
           if (index > -1) {
             filter.splice(index, 1);
@@ -304,7 +304,7 @@
 
               var fires = processData(response.data);
               if (fires.length === 0) {
-                reject(new Error("Heatmap data is not yet available for this department."));
+                reject(new Error('Heatmap data is not yet available for this department.'));
                 return;
               }
 

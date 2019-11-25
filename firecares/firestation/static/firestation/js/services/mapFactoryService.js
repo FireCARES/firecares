@@ -185,7 +185,7 @@
         var previousParcels = {};
 
         var parcelsLayer = new L.TileLayer.MVTSource({
-          url: "https://{s}.firecares.org/parcels/{z}/{x}/{y}.pbf",
+          url: 'https://{s}.firecares.org/parcels/{z}/{x}/{y}.pbf',
           debug: false,
           mutexToggle: true,
           maxZoom: 18,
@@ -231,55 +231,55 @@
 
             var type = feature.type;
             switch (type) {
-              case 1: //'Point'
-                // unselected
-                style.color = CICO_LAYERS[feature.properties.type].color || '#3086AB';
-                style.radius = scaleDependentPointRadius;
-                // selected
-                style.selected = {
-                  color: 'rgba(255,255,0,0.5)',
-                  radius: 6
-                };
+            case 1: //'Point'
+              // unselected
+              style.color = CICO_LAYERS[feature.properties.type].color || '#3086AB';
+              style.radius = scaleDependentPointRadius;
+              // selected
+              style.selected = {
+                color: 'rgba(255,255,0,0.5)',
+                radius: 6
+              };
+              break;
+            case 2: //'LineString'
+              // unselected
+              style.color = 'rgba(161,217,155,0.8)';
+              style.size = 3;
+              // selected
+              style.selected = {
+                color: 'rgba(255,255,0,0.5)',
+                size: 6
+              };
+              break;
+            case 3: //'Polygon'
+              // unselected
+              switch (feature.properties.risk_category) {
+              case 'Low':
+                style.color = 'rgba(50%,100%,50%,0.2)';
                 break;
-              case 2: //'LineString'
-                // unselected
-                style.color = 'rgba(161,217,155,0.8)';
-                style.size = 3;
-                // selected
-                style.selected = {
-                  color: 'rgba(255,255,0,0.5)',
-                  size: 6
-                };
+              case 'Medium':
+                style.color = 'rgba(100%,75%,50%,0.2)';
                 break;
-              case 3: //'Polygon'
-                // unselected
-                switch (feature.properties.risk_category) {
-                  case 'Low':
-                    style.color = 'rgba(50%,100%,50%,0.2)';
-                    break;
-                  case 'Medium':
-                    style.color = 'rgba(100%,75%,50%,0.2)';
-                    break;
-                  case 'High':
-                    style.color = 'rgba(100%,50%,50%,0.2)';
-                    break;
-                  default:
-                    style.color = 'rgba(50%,50%,50%,0.2)';
-                    break;
-                }
+              case 'High':
+                style.color = 'rgba(100%,50%,50%,0.2)';
+                break;
+              default:
+                style.color = 'rgba(50%,50%,50%,0.2)';
+                break;
+              }
 
-                style.outline = {
-                  color: 'rgb(20,20,20)',
-                  size: 1
-                };
-                // selected
-                style.selected = {
-                  color: 'rgba(255,255,0,0.5)',
-                  outline: {
-                    color: '#d9534f',
-                    size: 3
-                  }
-                };
+              style.outline = {
+                color: 'rgb(20,20,20)',
+                size: 1
+              };
+              // selected
+              style.selected = {
+                color: 'rgba(255,255,0,0.5)',
+                outline: {
+                  color: '#d9534f',
+                  size: 3
+                }
+              };
             }
 
             return style;
