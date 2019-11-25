@@ -270,7 +270,7 @@
 
               style.outline = {
                 color: 'rgb(20,20,20)',
-                size: 1
+                size: 0.25,
               };
               // selected
               style.selected = {
