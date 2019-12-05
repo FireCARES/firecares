@@ -9,7 +9,7 @@ A quick way to get started is with Vagrant and VirtualBox.
 
 ### Requirements
 
-- [Ansible](http://docs.ansible.com/intro_installation.html)
+- [Ansible (2.8.6)](http://docs.ansible.com/intro_installation.html)
 - [Vagrant](http://www.vagrantup.com/downloads.html)
 - [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 
