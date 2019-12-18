@@ -31,7 +31,8 @@
       cfai_accredited:{{object.cfai_accredited|yesno:"true,false"}},
       boundary_verified:{{object.boundary_verified|yesno:"true,false"}},
       staffing_verified:{{object.staffing_verified|yesno:"true,false"}},
-      stations_verified:{{object.stations_verified|yesno:"true,false"}}
+      stations_verified:{{object.stations_verified|yesno:"true,false"}},
+      isAuthenticated: {{ user.is_authenticated|yesno:"true,false"}}
     }
     </script>
     {% include 'google_analytics.html' %}
