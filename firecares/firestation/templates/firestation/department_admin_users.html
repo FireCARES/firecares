@@ -27,7 +27,8 @@
       centroid: [{{ object.headquarters_address.geom.centroid.y }}, {{ object.headquarters_address.geom.centroid.x }}],
       headquarters: {{ object.headquarters_address.geom.json|safe|default:"null" }},
       headquartersName: "{{ object.name }} Headquarters",
-      id: {{ object.id }}
+      id: {{ object.id }},
+      isAuthenticated: {{ user.is_authenticated|yesno:"true,false"}}
     };
 
     var users = [

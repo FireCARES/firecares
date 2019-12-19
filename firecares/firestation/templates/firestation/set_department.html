@@ -15,7 +15,8 @@
     var config = {
       geom: {{ object.geom.json|safe }},
       centroid: [{{ object.geom.centroid.y }}, {{ object.geom.centroid.x }}],
-      id: {{object.id}}
+      id: {{object.id}},
+      isAuthenticated: {{ user.is_authenticated|yesno:"true,false"}}
     }
     </script>
 
