@@ -15,24 +15,24 @@ RUN apt-get update && \
         telnet \
         screen
 
-RUN mkdir -p /app && \
-    chmod -R 0755 /app
+RUN mkdir -p /webapps/firecares/ && \
+    chmod -R 0755 /webapps/firecares/
 
 RUN mkdir -p /mnt && \
     chmod -R 0777 /mnt/
 
 VOLUME /mnt/
 
-WORKDIR /app/
+WORKDIR /webapps/firecares/
 
-COPY requirements.txt /app/
+COPY requirements.txt /webapps/firecares/
 
 RUN pip install -r requirements.txt
 
 COPY ./firecares /webapps/firecares/
 
 RUN mkdir -p /webapps/firecares/temp /webapps/firecares/logs/ && \
-    chmod -R 0755 /app && \
+    chmod -R 0755 /webapps/firecares/ && \
     chmod -R 0777 /webapps/firecares/logs && \
     chmod -R 0777 /webapps/firecares/media
 
