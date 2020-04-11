@@ -1,4 +1,4 @@
-FROM python:2.7.16-stretch
+FROM python:3.5-stretch
 
 # FIRECARES STUFF:
 RUN apt-get update && \
@@ -6,6 +6,7 @@ RUN apt-get update && \
         build-essential \
         libcurl4-gnutls-dev \
         libgnutls28-dev \
+	libmemcached-dev \
         libssl-dev \
         libgcrypt20-dev \
         default-libmysqlclient-dev \
@@ -33,8 +34,8 @@ COPY ./firecares /webapps/firecares/
 
 RUN mkdir -p /webapps/firecares/temp /webapps/firecares/logs/ && \
     chmod -R 0755 /webapps/firecares/ && \
-    chmod -R 0777 /webapps/firecares/logs && \
-    chmod -R 0777 /webapps/firecares/media
+    chmod -R 0777 /webapps/firecares/logs
+    #chmod -R 0777 /webapps/firecares/media
 
 # Nginx crap:
 ENV NGINX_VERSION   1.16.0
