@@ -1,7 +1,7 @@
 # Makefile for building firecares
 
 
-ORG ?= prominentedgefirecares
+ORG ?= prominentedgestatengine
 REPO ?= firecares
 ENVIRONMENT ?= development
 
