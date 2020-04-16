@@ -1,4 +1,4 @@
-FROM python:3.5-stretch
+FROM python:2.7.17-stretch
 
 # FIRECARES STUFF:
 RUN apt-get update && \

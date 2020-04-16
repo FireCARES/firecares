@@ -24,18 +24,18 @@ decorator
 defusedxml
 diff-match-patch
 Django
+django-autocomplete-light==2.3.3
 django-annoying
 django-appconf
-django-autocomplete-light
 django-braces
 django-celery
 django-compressor
 django-debug-toolbar
 django-extensions
+django-generic-m2m
 -e git+https://github.com/ProminentEdge/django-favit.git@1eb9b1dbbfb65667695da08b3f16c328d1ee74c4#egg=django_favit
 django-fixture-magic
 -e git+https://github.com/meilinger/django-generic-m2m@1bcf600f2b40a1b56d211b00a01d688553a8be4f#egg=django_generic_m2m
-django-guardian
 django-import-export
 django-invitations
 django-map-widgets
