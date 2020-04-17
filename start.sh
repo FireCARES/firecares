@@ -2,10 +2,6 @@
 
 python manage.py collectstatic --noinput
 
-mkdir -p /mnt/logs /mnt/media
-
-chmod -R 0777 /mnt/
-
 chmod -R 0755 /webapps/
 
 nginx
