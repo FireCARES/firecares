@@ -23,7 +23,7 @@ class BaseFirecaresTestcase(TestCase):
         self.non_accepted_user, self.non_accepted_creds = self.create_test_user('non_accepted', 'non_accepted', has_accepted_terms=False)
 
     def assert_email_appears_valid(self, message, ensure_multipart=False):
-        print message.message()
+        print(message.message())
         if 'admin@example.com' not in message.to:
             self.assertIn('The example.com team', message.body)
 

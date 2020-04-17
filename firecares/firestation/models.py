@@ -232,8 +232,8 @@ class USGSStructureData(models.Model):
 
             if upstream_count:
                 local_count = cls.objects.all().count()
-                print 'The upstream service has: {0} features.'.format(upstream_count)
-                print 'The local model {1} has: {0} features.'.format(local_count, cls.__name__)
+                print('The upstream service has: {0} features.'.format(upstream_count))
+                print('The local model {1} has: {0} features.'.format(local_count, cls.__name__))
                 return local_count - upstream_count
 
 
@@ -619,21 +619,21 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
                         dept = FireDepartment.objects.get(id=float(row['firecares_id']))
                         dept.cfai_accredited = True
                         dept.save()
-                        print '\nSaved Count ' + dept.name
+                        print('\nSaved Count ' + dept.name)
                     else:
-                        print row['AgencyName'] + ' does not exist\n'
+                        print(row['AgencyName'] + ' does not exist\n')
                         depterrorlist = depterrorlist + row['AgencyName'] + ','
 
                 except FireDepartment.DoesNotExist:
-                    print row['AgencyName'] + ' does not exist\n'
+                    print(row['AgencyName'] + ' does not exist\n')
                     depterrorlist = depterrorlist + row['AgencyName'] + ','
                     continue
 
                 except FireDepartment.MultipleObjectsReturned:
                     depterrorlist = depterrorlist + row['AgencyName'] + ','
-                    print '\nMultiple objects returned for: ', row['AgencyName'], row['State']
+                    print('\nMultiple objects returned for: ', row['AgencyName'], row['State'])
 
-            print depterrorlist
+            print(depterrorlist)
 
     @cached_property
     def slug(self):
@@ -651,10 +651,10 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
             unincoporated = UnincorporatedPlace.objects.filter(geom__intersects=county.geom)
             station = FireStation.objects.filter(geom__intersects=county.geom)
 
-            print 'County', county.name
-            print 'Incorporated Place', incorporated.count()
-            print 'Unincorporated Place', unincoporated.count()
-            print 'Stations:', station
+            print('County', county.name)
+            print('Incorporated Place', incorporated.count())
+            print('Unincorporated Place', unincoporated.count())
+            print('Stations:', station)
 
     def __unicode__(self):
         if self.headquarters_address:
@@ -864,17 +864,17 @@ class FireStation(USGSStructureData, Archivable):
                 data['loaddate'] = datetime.datetime.fromtimestamp(data['loaddate'] / 1000.0)
                 feat = cls.objects.create(**data)
                 feat.save()
-                print 'Saved object: {0}'.format(data.get('name'))
-                print '{0} Firestations loaded.'.format(FireStation.objects.all().count())
+                print('Saved object: {0}'.format(data.get('name')))
+                print('{0} Firestations loaded.'.format(FireStation.objects.all().count()))
 
             except KeyError:
-                print '{0} failed.'.format(object)
-                print url.format(object)
+                print('{0} failed.'.format(object))
+                print(url.format(object))
 
             except IntegrityError:
-                print '{0} failed.'.format(object)
-                print url.format(object)
-                print sys.exc_info()
+                print('{0} failed.'.format(object))
+                print(url.format(object))
+                print(sys.exc_info())
 
                 try:
                     rollback()
@@ -882,9 +882,9 @@ class FireStation(USGSStructureData, Archivable):
                     pass
 
             except Exception:
-                print '{0} failed.'.format(object)
-                print url.format(object)
-                print sys.exc_info()
+                print('{0} failed.'.format(object))
+                print(url.format(object))
+                print(sys.exc_info())
 
     @property
     def district_area(self):
@@ -1212,7 +1212,7 @@ def create_quartile_views(sender, **kwargs):
         """
     cursor = connections['default'].cursor()
     # Force materialied view recreation in case there are changes in the query
-    print '(re)creating materialized view for "population_quartiles"'
+    print('(re)creating materialized view for "population_quartiles"')
     cursor.execute("DROP MATERIALIZED VIEW IF EXISTS population_quartiles;")
     cursor.execute("CREATE MATERIALIZED VIEW population_quartiles AS ({query});".format(query=query))
     cursor.execute("CREATE UNIQUE INDEX on population_quartiles (id, level);")
@@ -1276,8 +1276,8 @@ def run_update_department_task(depart_id):
     taskinspector = inspect()
     notaduplicatetask = True
 
-    # print taskinspector.reserved()
-    # print taskinspector.active()
+    # print(taskinspector.reserved())
+    # print(taskinspector.active())
 
     try:
         active_tasks = taskinspector.active().values()[0]
@@ -1285,14 +1285,14 @@ def run_update_department_task(depart_id):
 
         for q_task in queue_tasks:
             q_departmentid = q_task['args']
-            print q_departmentid
+            print(q_departmentid)
             if str(depart_id) in str(q_departmentid):
                 notaduplicatetask = False
 
         if notaduplicatetask:
             for a_task in active_tasks:
                 a_departmentid = a_task['args']
-                print a_departmentid
+                print(a_departmentid)
                 if str(depart_id) in str(a_departmentid):
                     notaduplicatetask = False
     except Exception:
@@ -1300,7 +1300,7 @@ def run_update_department_task(depart_id):
 
     if notaduplicatetask:
         # delay for 50 seconds
-        print 'Running dept update for ' + str(depart_id)
+        print('Running dept update for ' + str(depart_id))
         update.update_parcel_department_effectivefirefighting_rollup.apply_async((depart_id,), countdown=50, task_id=str(depart_id) + 'efff')
         update.get_parcel_department_hazard_level_rollup.apply_async((depart_id,), countdown=50, task_id=str(depart_id) + 'servicearea')
         update.update_department.apply_async((depart_id,), countdown=50, task_id=str(depart_id) + 'nfirs')
@@ -1415,7 +1415,7 @@ def create_national_calculations_view(sender, **kwargs):
     cursor = connections['default'].cursor()
 
     # Force materialied view recreation in case there are changes in the query
-    print '(re)creating materialized view for "national_calculations"'
+    print('(re)creating materialized view for "national_calculations"')
     cursor.execute("DROP MATERIALIZED VIEW IF EXISTS national_calculations;")
     complete_query = []
     for numlevel, level in FireDepartmentMetrics.RISK_LEVELS:

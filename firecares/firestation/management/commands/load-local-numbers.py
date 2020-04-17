@@ -32,13 +32,13 @@ firecares_id, fdid, State_Code, IAFF_local"""
             fc_id = g[g['firecares_id'].notnull()]['firecares_id'].values
 
             if fc_id.any():
-                print 'IMPORTING: {} with local numbers: {}'.format(fc_id[0], ','.join(map(str, g['IAFF_local'].values)))
+                print('IMPORTING: {} with local numbers: {}'.format(fc_id[0], ','.join(map(str, g['IAFF_local'].values))))
                 ret.append({'fc_id': fc_id[0], 'locals': ','.join(map(str, g['IAFF_local'].values))})
             else:
                 rec = df.loc[g.index[0], :]
-                print 'SKIPPING {},{}:\n{}'.format(rec['fdid'], rec['State_Code'], rec)
+                print('SKIPPING {},{}:\n{}'.format(rec['fdid'], rec['State_Code'], rec))
 
         if not dry_run:
             for r in ret:
                 if not FireDepartment.objects.filter(id=r['fc_id']).update(iaff=r['locals']):
-                    print 'MISSING Fire Department with FireCARES ID = {} for local # {}'.format(r['fc_id'], r['locals'])
+                    print('MISSING Fire Department with FireCARES ID = {} for local # {}'.format(r['fc_id'], r['locals']))

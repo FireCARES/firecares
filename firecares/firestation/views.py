@@ -635,7 +635,7 @@ class AddStationView(LoginRequiredMixin, FormView):
                 return super(AddStationView, self).form_valid(form)
 
         except Exception:
-            print 'Geocoding Problem'
+            print('Geocoding Problem')
             return "Geocode Error"
 
     def get_success_url(self):

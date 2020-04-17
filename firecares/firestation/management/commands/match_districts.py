@@ -19,15 +19,15 @@ class Command(BaseCommand):
         state_filter = geojson_file.split('/')[-1].split('-')[1]
         ds = DataSource(geojson_file)
 
-        print 'Extracted State code: {0}'.format(state_filter.upper())
+        print('Extracted State code: {0}'.format(state_filter.upper()))
         filter_stations = options.get('queryset', FireStation.objects.filter(state=state_filter.upper()))
-        print filter_stations.count()
+        print(filter_stations.count())
         for layer in ds:
             geom_list = layer.get_geoms(geos=True)
             num_geoms = len(geom_list)
             num_updated = 0
 
-            print 'Number of Districts: {0}'.format(num_geoms)
+            print('Number of Districts: {0}'.format(num_geoms))
 
             for geom in geom_list:
                 match_stations = list()
@@ -53,7 +53,7 @@ class Command(BaseCommand):
 
                 if matched_station is not None and matched_station.district is None:
                     if verbose:
-                        print 'Updated district for {0}'.format(matched_station.name)
+                        print('Updated district for {0}'.format(matched_station.name))
                     if isinstance(geom, MultiPolygon):
                         matched_station.district = geom
                     elif isinstance(geom, Polygon):
@@ -62,6 +62,6 @@ class Command(BaseCommand):
                     num_updated += 1
                 elif matched_station is not None and matched_station.district is not None:
                     if verbose:
-                        print 'District already set: No Update'
+                        print('District already set: No Update')
 
-        print 'Successfully Updated {0}/{1} Stations'.format(num_updated, num_geoms)
+        print('Successfully Updated {0}/{1} Stations'.format(num_updated, num_geoms))

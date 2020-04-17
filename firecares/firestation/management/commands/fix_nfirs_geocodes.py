@@ -50,7 +50,7 @@ class Command(BaseCommand):
         """
 
         cmd = cursor.mogrify(select, (fd.state, fd.fdid, fd.geom.centroid.wkt, options['distance']))
-        print cmd
+        print(cmd)
         cursor.execute(cmd)
 
         over_quota_exceptions = 0
@@ -60,7 +60,7 @@ class Command(BaseCommand):
             if over_quota_exceptions >= 10:
                 sys.exit('Too many consecutive timeouts.')
 
-            print 'Row: ', res
+            print('Row: ', res)
             state, fdid, num_mile, street_pre, streetname, streettype, streetsuf, city, state_id, zip5, zip4, state_abbreviation, geom, count = res
 
             update = '''
@@ -93,11 +93,11 @@ class Command(BaseCommand):
                 distance_improvement = fd.geom.centroid.distance(geom) - fd.geom.centroid.distance(results_point)
 
                 if distance_improvement > 0:
-                    print 'Moving geometry from: {geom.x}, {geom.y} to {results.longitude}, {results.latitude}.'.format(geom=geom, results=results)
-                    print 'Distance improvement: {}'.format(distance_improvement)
+                    print('Moving geometry from: {geom.x}, {geom.y} to {results.longitude}, {results.latitude}.'.format(geom=geom, results=results))
+                    print('Distance improvement: {}'.format(distance_improvement))
 
                     if not options['dry_run']:
-                        print update.format(results=results, where=where_clause)
+                        print(update.format(results=results, where=where_clause))
                         cursor.execute(update.format(results=results, where=where_clause))
 
                     self.stdout.write('{} rows updated'.format(cursor.rowcount))
@@ -115,7 +115,7 @@ class Command(BaseCommand):
                 continue
 
             over_quota_exceptions = 0
-            print '\n'
+            print('\n')
 
         if over_quota_exceptions and over_quota_exceptions == row_count:
             sys.exit('Too many consecutive timeouts.')

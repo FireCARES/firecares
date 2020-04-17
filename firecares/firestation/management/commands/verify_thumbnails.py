@@ -25,21 +25,21 @@ class Command(BaseCommand):
         fd_count = len(firedepartments)
         bad_thumbs = 0
 
-        print 'Looking up thumbnails for {cnt}'.format(cnt=fd_count)
+        print('Looking up thumbnails for {cnt}'.format(cnt=fd_count))
 
         session = requests.Session()
 
         for idx, fd in enumerate(firedepartments):
             if not idx % 10:
-                print 'Processing ({idx}/{all})'.format(idx=idx, all=len(firedepartments))
+                print('Processing ({idx}/{all})'.format(idx=idx, all=len(firedepartments)))
                 sys.stdout.flush()
 
             resp = session.head(fd.thumbnail)
             if resp.status_code != 200:
                 bad_thumbs += 1
-                print 'Bad thumbnail {url} for firepartment id: {id}'.format(id=fd.id, url=fd.thumbnail)
+                print('Bad thumbnail {url} for firepartment id: {id}'.format(id=fd.id, url=fd.thumbnail))
 
         if not firedepartments:
-            print 'Firedepartment(s) not found'
+            print('Firedepartment(s) not found')
         else:
-            print '# of bad fire department thumbnails => ({bad}/{all})'.format(bad=bad_thumbs, all=fd_count)
+            print('# of bad fire department thumbnails => ({bad}/{all})'.format(bad=bad_thumbs, all=fd_count))
