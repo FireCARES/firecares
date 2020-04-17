@@ -38,7 +38,7 @@ django-queryset-csv==0.3.1
 django-registration-redux==1.2
 django-generic-m2m
 django-static-sitemaps==4.2.1
-#GDAL==1.11.1
+#GDAL==1.11.2
 #Landscape-Client==14.12
 #matplotlib==1.4.3
 #mccabe==0.6.1
@@ -49,13 +49,11 @@ django-static-sitemaps==4.2.1
 #Twisted-Core==13.2.0
 #urllib3==1.7.1
 #us==0.9.0
-#virtualenv-clone==0.2.6
-#virtualenv==15.1.0
-#virtualenvwrapper==4.7.2
 #wcwidth==0.1.7
 #wrapt==1.11.2
 #xlrd==1.2.0
 #zope.interface==4.0.5
+virtualenv==16.0.0
 amqp==1.4.9
 boto==2.38.0
 celery==3.1.18
@@ -75,7 +73,7 @@ django-statsd-mozilla==0.3.15
 django-storages==1.1.8
 django-tastypie==0.13.1
 django-widget-tweaks==1.4.1
-Django==1.8.4
+Django==1.11
 docutils==0.13.1
 enum34==1.1.6
 et-xmlfile==1.0.1
@@ -167,4 +165,5 @@ traitlets==4.3.2
 #Twisted-Web==13.2.0
 xlwt==1.3.0
 zeep==0.23.0
-
+django-osgeo-importer==0.2.0
+django-favit==0.2.4

@@ -1,20 +1,27 @@
-FROM python:3.5-stretch
+FROM python:2.7-stretch
 
 # FIRECARES STUFF:
 RUN apt-get update && \
     apt-get install -y \
+	    libmemcached-dev \
+        binutils \
         build-essential \
-        libcurl4-gnutls-dev \
-        libgnutls28-dev \
-	libmemcached-dev \
-        libssl-dev \
-        libgcrypt20-dev \
         default-libmysqlclient-dev \
-        python-pycurl \
+        gdal-bin \
+        libcurl4-gnutls-dev \
+        libgcrypt20-dev \
+        libgnutls28-dev \
+        libproj-dev \
+        libssl-dev \
         python-dev \
-        vim \
+        python-pycurl \
+        screen \
         telnet \
-        screen
+        libgdal-dev \
+        vim
+
+ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
+ENV C_INCLUDE_PATH=/usr/include/gdal
 
 RUN mkdir -p /webapps/firecares/ && \
     chmod -R 0755 /webapps/firecares/
@@ -25,7 +32,7 @@ COPY requirements.txt /webapps/firecares/
 
 RUN pip install -r requirements.txt
 
-COPY ./firecares /webapps/firecares/
+COPY . /webapps/firecares/
 
 RUN mkdir -p /webapps/firecares/temp /webapps/firecares/logs/ && \
     chmod -R 0755 /webapps/firecares/ && \
