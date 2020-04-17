@@ -19,11 +19,6 @@ RUN apt-get update && \
 RUN mkdir -p /webapps/firecares/ && \
     chmod -R 0755 /webapps/firecares/
 
-RUN mkdir -p /mnt && \
-    chmod -R 0777 /mnt/
-
-VOLUME /mnt/
-
 WORKDIR /webapps/firecares/
 
 COPY requirements.txt /webapps/firecares/
