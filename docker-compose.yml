@@ -1,14 +1,14 @@
 version: '3'
 services:
   firecares:
-    build: .
+    build:
+      context: ./
+    image: firecares
     volumes:
-      - .:/webapps/firecares
-      - ./start.sh:/webapps/firecares/start.sh
-      - ./bin/activate_this.py:/webapps/firecares/bin/activate_this.py
       - ./static:/webapps/firecares/static/
     ports:
      - 8000:8000
      - 1337:1337
     env_file:
       - .env.local
+    command: ['./manage.py', 'runserver', '--settings=firecares.settings.local']

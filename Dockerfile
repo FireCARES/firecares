@@ -1,20 +1,4 @@
-FROM python:2.7.17-stretch
-
-# FIRECARES STUFF:
-RUN apt-get update && \
-    apt-get install -y \
-        build-essential \
-        libcurl4-gnutls-dev \
-        libgnutls28-dev \
-	libmemcached-dev \
-        libssl-dev \
-        libgcrypt20-dev \
-        default-libmysqlclient-dev \
-        python-pycurl \
-        python-dev \
-        vim \
-        telnet \
-        screen
+FROM firecares/base
 
 RUN mkdir -p /webapps/firecares/ && \
     chmod -R 0755 /webapps/firecares/
@@ -25,114 +9,22 @@ COPY requirements.txt /webapps/firecares/
 
 RUN pip install -r requirements.txt
 
-COPY ./firecares /webapps/firecares/
+RUN pip install -e git+https://github.com/ProminentEdge/django-favit.git@1eb9b1dbbfb65667695da08b3f16c328d1ee74c4#egg=django_favit
+RUN pip install -e git+https://github.com/meilinger/django-generic-m2m@1bcf600f2b40a1b56d211b00a01d688553a8be4f#egg=django_generic_m2m
+RUN pip install -e git+https://github.com/FireCARES/fire-risk.git#egg=fire_risk
+RUN pip install -e git://github.com/ProminentEdge/django-osgeo-importer.git@45aa4fb1ee091416c761a9906c457014c1a7251c#egg=django_osgeo_importer
+
+WORKDIR /webapps/firecares/
+
+COPY . .
 
 RUN mkdir -p /webapps/firecares/temp /webapps/firecares/logs/ && \
     chmod -R 0755 /webapps/firecares/ && \
     chmod -R 0777 /webapps/firecares/logs
     #chmod -R 0777 /webapps/firecares/media
 
-# Nginx crap:
-ENV NGINX_VERSION   1.16.0
-ENV NJS_VERSION     0.3.1
-ENV PKG_RELEASE     1~stretch
-
-RUN set -x \
-        && apt-get update \
-        && apt-get install --no-install-recommends --no-install-suggests -y gnupg1 apt-transport-https ca-certificates \
-        && \
-        NGINX_GPGKEY=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62; \
-        found=''; \
-        for server in \
-                ha.pool.sks-keyservers.net \
-                hkp://keyserver.ubuntu.com:80 \
-                hkp://p80.pool.sks-keyservers.net:80 \
-                pgp.mit.edu \
-        ; do \
-                echo "Fetching GPG key $NGINX_GPGKEY from $server"; \
-                apt-key adv --keyserver "$server" --keyserver-options timeout=10 --recv-keys "$NGINX_GPGKEY" && found=yes && break; \
-        done; \
-        test -z "$found" && echo >&2 "error: failed to fetch GPG key $NGINX_GPGKEY" && exit 1; \
-        apt-get remove --purge --auto-remove -y gnupg1 && rm -rf /var/lib/apt/lists/* \
-        && dpkgArch="$(dpkg --print-architecture)" \
-        && nginxPackages=" \
-                nginx=${NGINX_VERSION}-${PKG_RELEASE} \
-                nginx-module-xslt=${NGINX_VERSION}-${PKG_RELEASE} \
-                nginx-module-geoip=${NGINX_VERSION}-${PKG_RELEASE} \
-                nginx-module-image-filter=${NGINX_VERSION}-${PKG_RELEASE} \
-                nginx-module-njs=${NGINX_VERSION}.${NJS_VERSION}-${PKG_RELEASE} \
-        " \
-        && case "$dpkgArch" in \
-                amd64|i386) \
-# arches officialy built by upstream
-                        echo "deb https://nginx.org/packages/debian/ stretch nginx" >> /etc/apt/sources.list.d/nginx.list \
-                        && apt-get update \
-                        ;; \
-                *) \
-# we're on an architecture upstream doesn't officially build for
-# let's build binaries from the published source packages
-                        echo "deb-src https://nginx.org/packages/debian/ stretch nginx" >> /etc/apt/sources.list.d/nginx.list \
-                        \   
-# new directory for storing sources and .deb files
-                        && tempDir="$(mktemp -d)" \
-                        && chmod 777 "$tempDir" \
-# (777 to ensure APT's "_apt" user can access it too)
-                        \   
-# save list of currently-installed packages so build dependencies can be cleanly removed later
-                        && savedAptMark="$(apt-mark showmanual)" \
-                        \   
-# build .deb files from upstream's source packages (which are verified by apt-get)
-                        && apt-get update \
-                        && apt-get build-dep -y $nginxPackages \
-                        && ( \ 
-                                cd "$tempDir" \
-                                && DEB_BUILD_OPTIONS="nocheck parallel=$(nproc)" \
-                                        apt-get source --compile $nginxPackages \
-                        ) \ 
-# we don't remove APT lists here because they get re-downloaded and removed later
-                        \   
-# reset apt-mark's "manual" list so that "purge --auto-remove" will remove all build dependencies
-# (which is done after we install the built packages so we don't have to redownload any overlapping dependencies)
-                        && apt-mark showmanual | xargs apt-mark auto > /dev/null \
-                        && { [ -z "$savedAptMark" ] || apt-mark manual $savedAptMark; } \ 
-                        \   
-# create a temporary local APT repo to install from (so that dependency resolution can be handled by APT, as it should be)
-                        && ls -lAFh "$tempDir" \
-                        && ( cd "$tempDir" && dpkg-scanpackages . > Packages ) \ 
-                        && grep '^Package: ' "$tempDir/Packages" \
-                        && echo "deb [ trusted=yes ] file://$tempDir ./" > /etc/apt/sources.list.d/temp.list \
-# work around the following APT issue by using "Acquire::GzipIndexes=false" (overriding "/etc/apt/apt.conf.d/docker-gzip-indexes")
-#   Could not open file /var/lib/apt/lists/partial/_tmp_tmp.ODWljpQfkE_._Packages - open (13: Permission denied)
-#   ...
-#   E: Failed to fetch store:/var/lib/apt/lists/partial/_tmp_tmp.ODWljpQfkE_._Packages  Could not open file /var/lib/apt/lists/partial/_tmp_tmp.ODWljpQfkE_._Packages - open (13: Permission denied)
-                        && apt-get -o Acquire::GzipIndexes=false update \
-                        ;; \
-        esac \
-        \   
-        && apt-get install --no-install-recommends --no-install-suggests -y \
-                                                $nginxPackages \
-                                                gettext-base \
-        && apt-get remove --purge --auto-remove -y apt-transport-https ca-certificates && rm -rf /var/lib/apt/lists/* /etc/apt/sources.list.d/nginx.list \
-        \   
-# if we have leftovers from building, let's purge them (including extra, unnecessary build deps)
-        && if [ -n "$tempDir" ]; then \
-                apt-get purge -y --auto-remove \
-                && rm -rf "$tempDir" /etc/apt/sources.list.d/temp.list; \
-        fi  
-
-# forward request and error logs to docker log collector
-RUN ln -sf /dev/stdout /var/log/nginx/access.log \
-	&& ln -sf /dev/stderr /var/log/nginx/error.log
-
-RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx.conf /etc/nginx/conf.d
-
-COPY start.sh /webapps/firecares/start.sh
-
-WORKDIR /webapps/firecares/
-
 EXPOSE 8000 1337
 
 STOPSIGNAL SIGTERM
 
-CMD ["/webapps/firecares/start.sh"]
+CMD ["./start.sh"]

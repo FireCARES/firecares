@@ -69,3 +69,6 @@ celerybeat-schedule
 
 .ipynb_checkpoints
 .vscode/
+bin
+.python-version
+include

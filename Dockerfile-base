@@ -1,0 +1,29 @@
+FROM python:2.7-stretch
+
+# FIRECARES STUFF:
+RUN apt-get update && \
+    apt-get install -y \
+	    libmemcached-dev \
+        binutils \
+        build-essential \
+        ca-certificates \
+        default-libmysqlclient-dev \
+        gdal-bin \
+        libcurl4-gnutls-dev \
+        libgcrypt20-dev \
+        libgdal-dev \
+        libgnutls28-dev \
+        libproj-dev \
+        libssl-dev \
+        python-dev \
+        python-pycurl \
+        screen \
+        telnet \
+        vim
+
+ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
+ENV C_INCLUDE_PATH=/usr/include/gdal
+ENV SSL_CERT_DIR=/etc/ssl/certs
+
+RUN update-ca-certificates --fresh
+
