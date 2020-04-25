@@ -53,14 +53,14 @@ class Command(BaseCommand):
                 try:
                     fd = FireDepartment.objects.get(id=department)
                 except FireDepartment.DoesNotExist:
-                    print 'Fire Department with id {0} not found.'.format(department)
+                    print('Fire Department with id {0} not found.'.format(department))
                     return
 
-                print address
+                print(address)
 
                 address = Address.create_from_string(address, dry_run=dryrun)
                 if not address and not (latitude and longitude):
-                    print 'Cannot lookup address, stopping.'
+                    print('Cannot lookup address, stopping.')
                     return
 
                 geom = None
@@ -79,11 +79,11 @@ class Command(BaseCommand):
                                                          loaddate=datetime.now(),
                                                          ftype='Emergency Response and Law Enforcement')
 
-                    print 'station successfully created: {0}'.format(station.id)
+                    print('station successfully created: {0}'.format(station.id))
 
                 else:
-                    print 'Create new FireStation with these params: {0}'.format(dict(name=name, fdid=fdid, station_number=number,
+                    print('Create new FireStation with these params: {0}'.format(dict(name=name, fdid=fdid, station_number=number,
                                                                                       geom=geom, station_address=address, department=fd,
                                                                                       source_datadesc='FireCARES add station command.',
                                                                                       loaddate=datetime.now(),
-                                                                                      ftype='Emergency Response and Law Enforcement'))
+                                                                                      ftype='Emergency Response and Law Enforcement')))

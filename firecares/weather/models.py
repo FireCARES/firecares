@@ -69,7 +69,7 @@ class WeatherWarnings(models.Model):
                                                                'where=1=1&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false'
                                                                '&returnTrueCurves=false&outSR=&returnIdsOnly=true&returnCountOnly=false&returnZ=false&returnM=false&returnDistinctValues=false&f=json', timeout=25)
 
-        print objects.content
+        print(objects.content)
 
         object_ids = set(json.loads(objects.content)['objectIds'])
         url = 'https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Forecasts_Guidance_Warnings/watch_warn_adv/MapServer/1/{0}?f=json'
@@ -97,7 +97,7 @@ class WeatherWarnings(models.Model):
                     warningfeature.issuance = date_parse(data['issuance'])
                     warningfeature.idp_subset = data['idp_subset']
 
-                    print data['warnid'] + " Updated"
+                    print(data['warnid'] + " Updated")
 
                 else:
 
@@ -120,7 +120,7 @@ class WeatherWarnings(models.Model):
                     datapost['warnid'] = data['warnid']
 
                     warningfeature = cls.objects.create(**datapost)
-                    print 'Created Warning: {0}'.format(data.get('warnid'))
+                    print('Created Warning: {0}'.format(data.get('warnid')))
 
                 warningfeature.save()
 
@@ -132,16 +132,16 @@ class WeatherWarnings(models.Model):
                     if(intersectDepartmentList.count() > 0):
 
                         WeatherWarnings.add_warnings_to_departments(intersectDepartmentList, warningfeature)
-                        print "Total intersecting Departments " + str(intersectDepartmentList.count())
+                        print("Total intersecting Departments " + str(intersectDepartmentList.count()))
 
             except KeyError:
-                print '{0} failed.'.format(object)
-                print url.format(object)
+                print('{0} failed.'.format(object))
+                print(url.format(object))
 
             except IntegrityError:
-                print '{0} failed.'.format(object)
-                print url.format(object)
-                print sys.exc_info()
+                print('{0} failed.'.format(object))
+                print(url.format(object))
+                print(sys.exc_info())
 
                 try:
                     rollback()
@@ -149,11 +149,11 @@ class WeatherWarnings(models.Model):
                     pass
 
             except:
-                print '{0} failed.'.format(object)
-                print url.format(object)
-                print sys.exc_info()
+                print('{0} failed.'.format(object))
+                print(url.format(object))
+                print(sys.exc_info())
 
-        print '{0} Total Weather Warnings.'.format(WeatherWarnings.objects.all().count())
+        print('{0} Total Weather Warnings.'.format(WeatherWarnings.objects.all().count()))
 
     @classmethod
     def add_warnings_to_departments(self, departmentQuerySet, weatherWarnings):
@@ -181,7 +181,7 @@ class WeatherWarnings(models.Model):
 
                     deptupdate.save()
 
-                    print weatherWarnings.warnid + ' Department Warning Updated for ' + fireDept.name
+                    print(weatherWarnings.warnid + ' Department Warning Updated for ' + fireDept.name)
 
                 else:
 
@@ -200,10 +200,10 @@ class WeatherWarnings(models.Model):
                     deptupdate = DepartmentWarnings.objects.create(**dataadd)
                     deptupdate.save()
 
-                    print 'Department Warning Created'
+                    print('Department Warning Created')
 
             except:
-                print 'Error running Department Query'
+                print('Error running Department Query')
                 return
 
     @property

@@ -35,7 +35,7 @@ class Command(BaseCommand):
         """
 
         cmd = cursor.mogrify(select, (block_group, block_group))
-        print cmd
+        print(cmd)
         cursor.execute(cmd)
         over_quota_exceptions = 0
 
@@ -44,7 +44,7 @@ class Command(BaseCommand):
             if over_quota_exceptions >= 10:
                 raise GeocoderQuotaExceeded('Too many consecutive timeouts.')
 
-            print 'Row: ', res
+            print('Row: ', res)
             state, fdid, num_mile, street_pre, streetname, streettype, streetsuf, city, state_id, zip5, zip4, state_abbreviation, geom, count = res
 
             update = '''
@@ -95,11 +95,11 @@ class Command(BaseCommand):
                             self.stdout.write('Not updating since {} is a negative distance improvement'.format(distance_improvement))
                             continue
                         else:
-                            print 'Moving geometry from: {geom.x}, {geom.y} to {results.longitude}, {results.latitude}.'.format(geom=geom, results=results)
-                            print 'Distance improvement: {}'.format(distance_improvement)
+                            print('Moving geometry from: {geom.x}, {geom.y} to {results.longitude}, {results.latitude}.'.format(geom=geom, results=results))
+                            print('Distance improvement: {}'.format(distance_improvement))
 
                 if not options['dry_run']:
-                    print update.format(results=results, where=where_clause)
+                    print(update.format(results=results, where=where_clause))
                     cursor.execute(update.format(results=results, where=where_clause))
 
                 self.stdout.write('{} rows updated'.format(cursor.rowcount))
@@ -118,6 +118,6 @@ class Command(BaseCommand):
                 sleep(1)
                 continue
             over_quota_exceptions = 0
-            print '\n'
+            print('\n')
 
         cursor.execute('SET transform_null_equals TO OFF;')

@@ -53,7 +53,7 @@ def update_performance_score(id, dry_run=False):
     Updates department performance scores.
     """
 
-    print "updating performance score for {}".format(id)
+    print("updating performance score for {}".format(id))
 
     try:
         cursor = connections['nfirs'].cursor()
@@ -143,10 +143,10 @@ def update_performance_score(id, dry_run=False):
             dist = dist_model(floor_extent=False, **counts)
             record.dist_model_score = dist.gibbs_sample()
             record.dist_model_score_fire_count = dist.total_fires
-            print 'updating fdid: {2} - {3} performance score from: {0} to {1}.'.format(old_score, record.dist_model_score, fd.id, HazardLevels(record.level).name)
+            print('updating fdid: {2} - {3} performance score from: {0} to {1}.'.format(old_score, record.dist_model_score, fd.id, HazardLevels(record.level).name))
 
         except (NotEnoughRecords, ZeroDivisionError):
-            print 'Error updating DIST score: {}.'.format(traceback.format_exc())
+            print('Error updating DIST score: {}.'.format(traceback.format_exc()))
             record.dist_model_score = None
 
         if not dry_run:
@@ -156,7 +156,7 @@ def update_performance_score(id, dry_run=False):
     if not dry_run:
         missing_categories = set(risk_mapping.keys()) - set(map(lambda x: x.get('risk_category'), results))
         for r in missing_categories:
-            print 'clearing {0} level from {1} due to missing categories in aggregation'.format(r, fd.id)
+            print('clearing {0} level from {1} due to missing categories in aggregation'.format(r, fd.id))
             record, _ = fd.firedepartmentriskmodels_set.get_or_create(level=risk_mapping[r])
             record.dist_model_score = None
             record.save()
@@ -176,16 +176,16 @@ def update_performance_score(id, dry_run=False):
 
         dist = dist_model(floor_extent=False, **all_counts)
         record.dist_model_score = dist.gibbs_sample()
-        print 'updating fdid: {2} - {3} performance score from: {0} to {1}.'.format(old_score, record.dist_model_score, fd.id, HazardLevels(record.level).name)
+        print('updating fdid: {2} - {3} performance score from: {0} to {1}.'.format(old_score, record.dist_model_score, fd.id, HazardLevels(record.level).name))
 
     except (NotEnoughRecords, ZeroDivisionError):
-        print 'Error updating DIST score: {}.'.format(traceback.format_exc())
+        print('Error updating DIST score: {}.'.format(traceback.format_exc()))
         record.dist_model_score = None
 
     if not dry_run:
         record.save()
 
-    print "...updated performance score for {}".format(id)
+    print("...updated performance score for {}".format(id))
 
 
 CIVILIAN_CASUALTIES = """SELECT count(1) as count, extract(year from a.inc_date) as year, COALESCE(y.risk_category, 'N/A') as risk_level
@@ -330,14 +330,14 @@ def update_ems_heatmap(id):
 
 @app.task(queue='update')
 def update_department(id):
-    print "updating department {}".format(id)
+    print("updating department {}".format(id))
     chain(update_nfirs_counts.si(id),
           update_performance_score.si(id), calculate_department_census_geom.si(id)).delay()
 
 
 @app.task(queue='update')
 def refresh_department_views():
-    print "updating department Views"
+    print("updating department Views")
     chain(refresh_quartile_view_task.si(), refresh_national_calculations_view_task.si()).delay()
 
 
@@ -350,7 +350,7 @@ def update_nfirs_counts(id, year=None, stat=None):
     if not id:
         return
 
-    print "updating NFIRS counts for {}".format(id)
+    print("updating NFIRS counts for {}".format(id))
 
     try:
         fd = FireDepartment.objects.get(id=id)
@@ -387,7 +387,7 @@ def update_nfirs_counts(id, year=None, stat=None):
     for statistic, query, params in queries:
         counts = copy.deepcopy(years)
         cursor.execute(query, params)
-        print "...updated NFIRS counts " + str(datetime.now())
+        print("...updated NFIRS counts " + str(datetime.now()))
 
         for count, year, level in cursor.fetchall():
             mlevel = mapping[level]
@@ -399,7 +399,7 @@ def update_nfirs_counts(id, year=None, stat=None):
             total = lenient_summation(*map(lambda x: x[1], levels.items()))
             nfirs.objects.update_or_create(year=year, defaults={'count': total}, fire_department=fd, metric=statistic, level=0)
 
-    print "...updated NFIRS counts for {}".format(id)
+    print("...updated NFIRS counts for {}".format(id))
 
 
 @app.task(queue='update')
@@ -430,7 +430,7 @@ def calculate_department_census_geom(fd_id):
         fd.owned_tracts_geom = GEOSGeometry(geom[0])
         fd.save()
     else:
-        print 'No census geom - {} ({})'.format(fd.name, fd.id)
+        print('No census geom - {} ({})'.format(fd.name, fd.id))
 
 
 @app.task(queue='update', rate_limit='5/h')
@@ -439,7 +439,7 @@ def refresh_quartile_view_task(*args, **kwargs):
     Updates the Quartile Materialized Views.
     """
 
-    print "updating quartile view"
+    print("updating quartile view")
     refresh_quartile_view()
 
 
@@ -449,7 +449,7 @@ def refresh_national_calculations_view_task(*args, **kwargs):
     Updates the National Calculation View.
     """
 
-    print "updating national calculations view"
+    print("updating national calculations view")
     refresh_national_calculations_view()
 
 
@@ -566,7 +566,7 @@ def get_parcel_department_hazard_level_rollup(fd_id):
     stationlist = FireStation.objects.filter(department_id=fd_id, archived=False)
     dept = FireDepartment.objects.filter(id=fd_id)
 
-    print "Calculating Drive times for:  " + dept[0].name
+    print("Calculating Drive times for:  " + dept[0].name)
 
     try:
         #  Use Headquarters geometry if there is no Statffing assets
@@ -603,13 +603,13 @@ def get_parcel_department_hazard_level_rollup(fd_id):
         update_parcel_department_hazard_level(json.loads(getdrivetime.content)['results'][0]['value']['features'], dept[0])
 
     except KeyError:
-        print 'Drive Time Failed for ' + dept[0].name
+        print('Drive Time Failed for ' + dept[0].name)
 
     except IntegrityError:
-        print 'Drive Time Failed for ' + dept[0].name
+        print('Drive Time Failed for ' + dept[0].name)
 
     except Exception:
-        print 'Drive Time Failed for ' + dept[0].name
+        print('Drive Time Failed for ' + dept[0].name)
 
 
 def update_parcel_department_hazard_level(drivetimegeom, department):
@@ -637,7 +637,7 @@ def update_parcel_department_hazard_level(drivetimegeom, department):
         WHERE ST_WITHIN(l.wkb_geometry, drive_geom)
         """
 
-    print 'Querying Database for parcels'
+    print('Querying Database for parcels')
 
     cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': json.dumps(drivetimegeom0)})
     results0 = dictfetchall(cursor)
@@ -676,7 +676,7 @@ def update_parcel_department_hazard_level(drivetimegeom, department):
         else:
             addhazardlevelfordepartment.drivetimegeom_6_8 = GEOSGeometry(MultiPolygon(fromstr(str(drivetimegeom6)),))
 
-        print department.name + " Service Area Updated"
+        print(department.name + " Service Area Updated")
     else:
         deptservicearea = {}
         deptservicearea['department'] = department
@@ -707,7 +707,7 @@ def update_parcel_department_hazard_level(drivetimegeom, department):
             deptservicearea['drivetimegeom_6_8'] = GEOSGeometry(MultiPolygon(fromstr(str(drivetimegeom6)),))
 
         addhazardlevelfordepartment = ParcelDepartmentHazardLevel.objects.create(**deptservicearea)
-        print department.name + " Service Area Created"
+        print(department.name + " Service Area Created")
 
     addhazardlevelfordepartment.save()
 
@@ -731,15 +731,15 @@ def get_async_efff_service_status(jobid, dept_name):
     getdrivetimejobstatus = requests.get("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCount2017_V2/GPServer/PeopleCount2017/jobs/" + jobid + "?f=json")
 
     if 'results' in json.loads(getdrivetimejobstatus.content):
-        print "Drive Time Analysis finished for " + dept_name.name
+        print("Drive Time Analysis finished for " + dept_name.name)
         drivetimejobfinished = requests.get("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCount2017_V2/GPServer/PeopleCount2017/jobs/" + jobid + "/results/PeopleCount?f=pjson")
         update_parcel_effectivefirefighting_table(json.loads(drivetimejobfinished.content)['value']['features'], dept_name)
 
     elif json.loads(getdrivetimejobstatus.content)['jobStatus'] == 'esriJobFailed':
-        print "Drive Time Analysis errored for " + dept_name.name
+        print("Drive Time Analysis errored for " + dept_name.name)
 
     else:
-        print "Drive Time Analysis processing for " + dept_name.name
+        print("Drive Time Analysis processing for " + dept_name.name)
         time.sleep(20)
         get_async_efff_service_status(jobid, dept_name)
 
@@ -755,7 +755,7 @@ def update_parcel_department_effectivefirefighting_rollup(fd_id):
 
     if dept[0].owned_tracts_geom is None:
 
-        print "No geometry for the department " + dept[0].name
+        print("No geometry for the department " + dept[0].name)
 
     else:
         print "Calculating Response times and staffing for:  " + dept[0].name + ' at ' + time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())

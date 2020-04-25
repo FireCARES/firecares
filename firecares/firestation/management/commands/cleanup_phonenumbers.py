@@ -55,9 +55,9 @@ class Command(BaseCommand):
             # Save and continue to the next FD (if any)
             fd.save()
 
-        print 'Valid Numbers: {}'.format(len(valid))
-        print 'Invalid numbers: {}'.format(len(invalid))
-        print 'Invald percent: {}'.format(len(invalid) / (len(valid) + len(invalid)))
-        print 'Invalid numbers: ', map(str, invalid)
+        print('Valid Numbers: {}'.format(len(valid)))
+        print('Invalid numbers: {}'.format(len(invalid)))
+        print('Invald percent: {}'.format(len(invalid) / (len(valid) + len(invalid))))
+        print('Invalid numbers: ', map(str, invalid))
 
         print("Completed successfully!")
