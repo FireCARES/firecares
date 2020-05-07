@@ -24,7 +24,7 @@
       'fireStation.map',
       'fireStation.feedback',
       'ui.bootstrap',
-      'mapstory.uploader',
+      // 'mapstory.uploader',
       'angulartics',
       'angulartics.google.analytics'
   ])
