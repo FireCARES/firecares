@@ -1,14 +1,33 @@
 version: '3'
 services:
+
   firecares:
     build:
       context: ./
     image: firecares
     volumes:
-      - ./static:/webapps/firecares/static/
+      - ./:/webapps/firecares/
     ports:
-     - 8000:8000
+     - 0.0.0.0:8000:8000
      - 1337:1337
     env_file:
       - .env.local
-    command: ['./manage.py', 'runserver', '--settings=firecares.settings.local']
+    depends_on:
+      - postgis
+
+    command: ['./manage.py', 'runserver', '--settings=firecares.settings.local', '0.0.0.0:8000']
+
+  postgis:
+    image: mdillon/postgis
+    env_file:
+      - .env.local
+    environment:
+      - POSTGRES_PASSWORD=$DATABASE_PASSWORD
+      - POSTGRES_DB=$DATABASE_NAME
+      - POSTGRES_USER=$DATABASE_USER
+    volumes:
+      - "$HOME/postgresql:/var/lib/postgresql"
+    ports:
+      - 0.0.0.0:5432:5432
+
+
