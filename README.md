@@ -17,6 +17,14 @@ A quick way to get started is with Vagrant and VirtualBox.
 docker-compose up
 ```
 
+1. Load snapshot of Database (If you don't have .pg_conf, consult a system
+   admin for RDS host credentials)
+```
+pg_dump -d "service=exposure" -f firecares.sql
+
+psql -h 0.0.0.0 -U firecares firecares < firecares.sql
+```
+
 To make tileserver changes, see the Prominent Edge `tessera-ansible` repository, specifically the `firecares` branch
 
 ### Pre-commit configuration
