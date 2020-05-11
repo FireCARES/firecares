@@ -1,7 +1,6 @@
 from firecares.settings.base import *  # noqa
 
 INSTALLED_APPS += ('debug_toolbar', 'fixture_magic', 'django_extensions')  # noqa
-
 MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware', )  # noqa
 
 # The Django Debug Toolbar will only be shown to these client IPs.
@@ -19,6 +18,17 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'magic'
+    }
+}
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': os.getenv('DATABASE_NAME', 'firecares'),
+        'USER': os.getenv('DATABASE_USER', 'firecares'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD', 'password'),
+        'HOST': os.getenv('DATABASE_HOST', 'localhost'),
+        'PORT': os.getenv('DATABASE_PORT', '5432'),
     }
 }
 

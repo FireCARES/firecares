@@ -59,9 +59,9 @@ class Command(BaseCommand):
                     if not station.suggested_departments():
                         continue
 
-                    print "Station:    {0}".format(station.name)
-                    print "Department: {0}".format(station.suggested_departments()[0].name)
-                    print "Dept Id   : {0}".format(station.suggested_departments()[0].id)
+                    print("Station:    {0}".format(station.name))
+                    print("Department: {0}".format(station.suggested_departments()[0].name))
+                    print("Dept Id   : {0}".format(station.suggested_departments()[0].id))
                     print
 
                     to_commit.append((station.id, station.suggested_departments()[0]))
@@ -72,7 +72,7 @@ class Command(BaseCommand):
                     for id, dept in to_commit:
                         FireStation.objects.filter(id=id).update(department=dept)
 
-                    print 'Committed'
+                    print('Committed')
                     print
 
                 if resp == 'n':

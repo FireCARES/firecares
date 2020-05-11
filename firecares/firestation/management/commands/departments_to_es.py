@@ -40,5 +40,5 @@ class Command(BaseCommand):
                        country=fd.headquarters_address.country.iso_code,
                        modifed=fd.modified.isoformat())
             res = es.index(index='firecares', doc_type='department', id=fd.id, body=json.dumps(out))
-            print res
-            print 'Wrote {} to ES'.format(fd.name)
+            print(res)
+            print('Wrote {} to ES'.format(fd.name))

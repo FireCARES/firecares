@@ -7,30 +7,25 @@ The FireCARES application
 
 A quick way to get started is with Vagrant and VirtualBox.
 
-### Requirements
 
-- [Ansible (2.8.6)](http://docs.ansible.com/intro_installation.html)
-- [Vagrant](http://www.vagrantup.com/downloads.html)
-- [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+### Docker
 
+1. `.env.local`  File containing map API keys is required and can be obtained in 1Password account for Firecares.
+
+1. `docker build . -f Dockerfile-base -t firecares/base --no-cache`
+
+1. Once the `.env.local` file is in the root of the project run:
 ```
-git clone https://github.com/FireCARES/firecares.git
-git clone https://github.com/FireCARES/firecares-ansible.git
-cd firecares-ansible
-vagrant up
+docker-compose up
 ```
 
-Wait a few minutes for the magic to happen.  Access the app by going to this URL: http://192.168.33.15
+1. Load snapshot of Database (If you don't have .pg_conf, consult a system
+   admin for RDS host credentials)
+```
+pg_dump -d "service=exposure" -f firecares.sql
 
-### Development Considerations
-
-When you install FireCARES using Vagrant, the default configuration will restart the Gunicorn process on every request
-so your server-side modifications should immediately show up.
-
-For client-side changes, you currently need to manually run the `collectstatic` in order to update the static assets. You
-can run collect static from the `firecares-ansible` directory on the host machine using the following command:
-
-`ansible-playbook vagrant.yml -i vagrant_server --tags django.collectstatic`
+psql -h 0.0.0.0 -U firecares firecares < firecares.sql
+```
 
 To make tileserver changes, see the Prominent Edge `tessera-ansible` repository, specifically the `firecares` branch
 

@@ -226,11 +226,6 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         },
-        'slack_admins': {
-            'level': 'INFO',
-            'filters': ['require_debug_false'],
-            'class': 'django_slack.log.SlackExceptionHandler'
-        },
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
@@ -239,7 +234,7 @@ LOGGING = {
     },
     'loggers': {
         'django.request': {
-            'handlers': ['console', 'mail_admins', 'slack_admins'],
+            'handlers': ['console', 'mail_admins'],
             'level': 'ERROR',
             'propagate': True,
         },
@@ -368,3 +363,5 @@ MAP_WIDGETS = {
     "GOOGLE_MAP_API_KEY": GOOGLE_API_KEY
 }
 GOOGLE_MAP_API_KEY = os.getenv('GOOGLE_MAP_API_KEY', '')
+
+PROJECTION_DIRECTORY = '/tmp/'

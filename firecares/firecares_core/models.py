@@ -121,7 +121,7 @@ class Address(models.Model):
                     objs = cls.objects.create(**params)
                 return objs
             else:
-                print 'Create new address with these parameters: {0}'.format(params)
+                print('Create new address with these parameters: {0}'.format(params))
                 return cls(**params)
 
     def geocode(self):
@@ -144,7 +144,7 @@ class Address(models.Model):
     @classmethod
     def batch_geocode(cls):
         for row in cls.objects.filter(geom__isnull=True, geocode_results__isnull=True):
-            print row.get_row_display()
+            print(row.get_row_display())
             row.geocode()
 
     def __unicode__(self):

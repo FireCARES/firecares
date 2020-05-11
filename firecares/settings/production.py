@@ -13,6 +13,8 @@ DEBUG = False
 AWS_QUERYSTRING_AUTH = False
 EMAIL_USE_TLS = True
 
+SECRET_KEY = '$keb7sv^%c+_'
+
 IMIS_SSO_LOGIN_URL = 'https://my.iaff.org/Web/Contacts/SignIn_withoutCreateNewAccount.aspx?doRedirect='
 IMIS_SSO_SERVICE_URL = 'https://member.iaff.org/iaff_sso_prod/sso.asmx?WSDL'
 

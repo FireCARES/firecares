@@ -20,9 +20,9 @@ class Command(BaseCommand):
             try:
                 department = FireDepartment.objects.get(id=department)
             except FireDepartment.DoesNotExist:
-                print 'Fire Department with id {0} not found.'.format(department)
+                print('Fire Department with id {0} not found.'.format(department))
                 return
-            print 'Dumping GeoJSON for: {0}.'.format(department.name)
+            print('Dumping GeoJSON for: {0}.'.format(department.name))
 
             feature_collection = []
             feature = {'type': 'Feature', 'geometry': GeometryCollection([department.headquarters_address.geom])}
@@ -54,4 +54,4 @@ class Command(BaseCommand):
             coll = json.dumps({'type': 'FeatureCollection', 'features': feature_collection, "crs": {"type": "name", "properties": {"name": "EPSG:4326"}}}, indent=4)
             features.write(coll)
             good_request = requests.post(validate_endpoint, data=coll)
-            print good_request.json()
+            print(good_request.json())

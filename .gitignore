@@ -1,9 +1,12 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+*properties
 *.py[cod]
 
 # C extensions
 *.so
+
+.env*
 
 # Distribution / packaging
 .Python
@@ -66,3 +69,6 @@ celerybeat-schedule
 
 .ipynb_checkpoints
 .vscode/
+bin
+.python-version
+include
