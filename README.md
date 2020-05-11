@@ -12,6 +12,8 @@ A quick way to get started is with Vagrant and VirtualBox.
 
 1. `.env.local`  File containing map API keys is required and can be obtained in 1Password account for Firecares.
 
+1. `docker build . -f Dockerfile-base -t firecares/base --no-cache`
+
 1. Once the `.env.local` file is in the root of the project run:
 ```
 docker-compose up
