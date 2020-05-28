@@ -28,6 +28,9 @@ pg_dump -d "service=exposure" -f firecares.sql
 psql -h 0.0.0.0 -U firecares firecares < firecares.sql
 ```
 
+1. Finally, you should be able to open see the app in your browser by opening:
+`0.0.0.0:8000` 
+
 To make tileserver changes, see the Prominent Edge `tessera-ansible` repository, specifically the `firecares` branch
 
 ### Pre-commit configuration
