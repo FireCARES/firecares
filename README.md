@@ -9,6 +9,7 @@ A quick way to get started is with Vagrant and VirtualBox.
 
 
 ### Docker
+1. `set -a`
 
 1. `.env.local`  File containing map API keys is required and can be obtained in 1Password account for Firecares.
 
