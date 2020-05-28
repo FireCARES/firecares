@@ -1,4 +1,10 @@
-version: '3'
+version: '3.7' 
+
+networks:
+  public:
+    name: public
+    external: true
+
 services:
 
   firecares:
@@ -12,6 +18,8 @@ services:
      - 1337:1337
     env_file:
       - .env.local
+    networks:
+      - public
     depends_on:
       - postgis
 
@@ -27,7 +35,7 @@ services:
       - POSTGRES_USER=$DATABASE_USER
     volumes:
       - "$HOME/postgresql:/var/lib/postgresql"
+    networks:
+      - public
     ports:
-      - 0.0.0.0:5432:5432
-
-
+      - 0.0.0.0:$DATABASE_PORT:$DATABASE_PORT
