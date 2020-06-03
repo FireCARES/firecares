@@ -2,6 +2,7 @@ import json
 import logging
 from .forms import StaffingForm
 from .models import FireStation, Staffing, FireDepartment, ParcelDepartmentHazardLevel, EffectiveFireFightingForceLevel
+from ..utils.tastypie_geodjango import allow_geodjango_filters
 from firecares.weather.models import DepartmentWarnings
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.core.serializers.json import DjangoJSONEncoder
@@ -392,12 +393,22 @@ class WeatherWarningResource(JSONDefaultModelResourceMixin, ModelResource):
                                               update_permission_code='change_firedepartment',
                                               create_permission_code='change_firedepartment',
                                               delete_permission_code='change_firedepartment')
-        filtering = {'department': ('exact',), 'state': ('exact',), 'id': ('exact',)}
+        filtering = {
+            'department': ('exact',),
+            'state': ('exact',),
+            'id': ('exact',),
+            'issuedate': ('exact', 'range'),
+            'warngeom': ALL,
+        }
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get']
         cache = SimpleCache(timeout=120)
         serializer = PrettyJSONSerializer()
         always_return_data = True
+
+    def build_filters(self, filters=None, **kwargs):
+        allow_geodjango_filters(self._meta)
+        return super(WeatherWarningResource, self).build_filters(filters)
 
     def get_object_list(self, request):
         return super(WeatherWarningResource, self).get_object_list(request).filter(expiredate__gte=timezone.now())
