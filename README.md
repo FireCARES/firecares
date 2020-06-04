@@ -2,28 +2,26 @@ FireCARES [![Build Status](https://travis-ci.org/FireCARES/firecares.svg?branch=
 =========
 The FireCARES application
 
-
 ## Getting Started
 
 A quick way to get started is with Vagrant and VirtualBox.
 
-
 ### Docker
-1. Add `.env.local` file to project root (this file can be obtained in the 1Password account for Firecares).
+1.  Add `.env.local` file to project root (this file can be obtained in the 1Password account for Firecares).
 
-1. Run `./build.sh` to build the Docker container.
+2.  Run `./build.sh` to build the Docker container.
 
-1. Run `./run.sh` to start the Firecares app.
+3.  Run `./run.sh` to start the Firecares app.
 
-1. Load snapshot of Database (if you don't have .pg_conf, consult a system
+4.  Load snapshot of Database (if you don't have .pg_conf, consult a system
    admin for RDS host credentials)
-    ```
+    ```bash
     pg_dump -d "service=exposure" -f firecares.sql
     
     psql -h 0.0.0.0 -U firecares firecares < firecares.sql
     ```
 
-1. Finally, you should be able to open see the app in your browser by opening:
+5.  Finally, you should be able to open see the app in your browser by opening:
     `0.0.0.0:8000` 
 
 To make tileserver changes, see the Prominent Edge `tessera-ansible` repository, specifically the `firecares` branch
