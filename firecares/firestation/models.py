@@ -483,9 +483,9 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
 
         if marker and geom:
             marker = 'pin-l-embassy+0074D9({geom.x},{geom.y})/'.format(geom=geom)
-
-        return 'http://api.tiles.mapbox.com/v4/garnertb.mmlochkh/{marker}' \
-               '{geom.x},{geom.y},8/500x300.jpg?access_token={access_token}'.format(marker=marker,
+            
+        return 'https://api.mapbox.com/styles/v1/prominentedge-ipsdi/ckb8cvy2z083c1io0xsvgj01j/static/{marker}' \
+            '{geom.x},{geom.y},8/500x300?access_token={access_token}'.format(marker=marker,
                                                                                     geom=geom,
                                                                                     access_token=getattr(settings, 'MAPBOX_ACCESS_TOKEN', ''))
 
