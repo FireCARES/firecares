@@ -19,7 +19,7 @@ A quick way to get started is with Vagrant and VirtualBox.
     ```bash
     pg_dump -d "service=exposure" -f firecares.sql
     
-    psql -h 0.0.0.0 -U firecares firecares < firecares.sql
+    psql -h 0.0.0.0 -U firecares -W firecares < firecares.sql
     ```
 
 5.  Finally, you should be able to open see the app in your browser by opening:
@@ -34,6 +34,12 @@ We use [pre-commit](http://pre-commit.com/), see how to [install](http://pre-com
 ### Unit Testing
 
 You'll need the following commands to run all of the unit tests.  Tests are run on each commit automatically, so please run them yourself before you commit.
+
+#### Docker
+```
+docker exec -it firecares_firecares_1 bash -c "python ./manage.py test
+```
+
 
 ```bash
 vagrant ssh
