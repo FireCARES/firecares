@@ -485,11 +485,10 @@ class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
             marker = 'pin-l-embassy+0074D9({geom.x},{geom.y})/'.format(geom=geom)
         else:
             marker = ''
-            
         return 'https://api.mapbox.com/styles/v1/prominentedge-ipsdi/ckb8cvy2z083c1io0xsvgj01j/static/{marker}' \
             '{geom.x},{geom.y},8/500x300?access_token={access_token}'.format(marker=marker,
-                                                                                    geom=geom,
-                                                                                    access_token=getattr(settings, 'MAPBOX_ACCESS_TOKEN', ''))
+                                                                             geom=geom,
+                                                                             access_token=getattr(settings, 'MAPBOX_ACCESS_TOKEN', ''))
 
     def set_geometry_from_government_unit(self):
         geom_containers = self.government_unit_objects
