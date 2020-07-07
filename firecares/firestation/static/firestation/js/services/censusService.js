@@ -65,18 +65,18 @@
              * Fetch the state code for the given abbreviation
              * @param {String} abbreviation 
              */
-            stateAbbreviationToCode: function (abbreviation) {
+            stateAbbreviationToCode(abbreviation) {
 
                 for (var x in this.stateCodes) {
                     if (x == abbreviation)
                         return this.stateCodes[x].id;
                 }
             },
-            
+
             /** fetch the census statistical data for the given state 
              * @param {String} stateAbbreviation
             */
-            getTractData: function (stateAbbreviation) {
+            getTractData(stateAbbreviation) {
                 return new Promise((res, rej) => {
                     $http({
                         method: 'GET',
@@ -112,28 +112,29 @@
              * Take the given statistical data and build a layer with it
              * @param {Object} response 
              */
-            generateLayerJSON: function (response) {
+            generateLayerJSON(response) {
                 //extract the density values
                 var values = response.map(function (county) {
-                   
+
                     return county.DENSITY;
-                }); 
-                
+                });
+
                 var colorScale = chroma
                     .scale("OrRd")
                     .padding(0.15)
                     .domain(values, "q", 5);
 
                 function getColor(val) {
-                    return colorScale(val).hex();
+                    return colorScale(val).alpha(0.5).css();
                 }
 
                 //generate style expression
-                var colors = {};
-
-                response.forEach(function (county) {
+                var colorJSON = {};
+                var colors = {}
+                var GEOIDs = []
+                response.forEach((county) => {
                     var GEOID = county.state + county.county;
-                    
+                    GEOIDs.push(GEOID)
                     var value = county.DENSITY;
                     var color = getColor(value);
                     if (!colors[color]) {
@@ -142,30 +143,40 @@
                     colors[color].push(GEOID);
                 });
 
+
                 var colorExpression = ["match", ["get", "GEOID"]];
                 var colorQuantiles = Object.entries(colors).forEach(function ([
                     color,
                     GEOIDs
                 ]) {
                     colorExpression.push(GEOIDs, color);
+                    GEOIDs.forEach(item => { colorJSON[item] = color })
+
                 });
 
                 colorExpression.push("rgba(0,0,0,0)");
-                
+
                 // return the layer json
                 return {
-                    id: "counties",
-                    type: "fill",
-                    source: {
-                        type: "vector",
-                        tiles: [
-                            "https://gis-server.data.census.gov/arcgis/rest/services/Hosted/VT_2018_050_00_PY_D1/VectorTileServer/tile/{z}/{y}/{x}.pbf"
-                        ]
+                    url: "https://gis-server.data.census.gov/arcgis/rest/services/Hosted/VT_2018_050_00_PY_D1/VectorTileServer/tile/{z}/{y}/{x}.pbf",
+
+                    /** only keep the features with applicable styles */
+                    filter(feature) {
+
+                        if (GEOIDs.indexOf(feature.properties.GEOID) > -1)
+                            return true;
+                        else
+                            return false;
                     },
-                    "source-layer": "County",
-                    paint: {
-                        "fill-opacity": 0.8,
-                        "fill-color": colorExpression
+                    /** set the color for each feature in the layer */
+                    style(feature) {
+                        return {
+                            color: colorJSON[feature.properties.GEOID],
+                            outline: {
+                                color : '#ffffff',
+                                size : 1
+                            }
+                        };
                     }
                 }
             }

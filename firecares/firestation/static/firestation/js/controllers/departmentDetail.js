@@ -88,12 +88,14 @@
     var fires = L.featureGroup().addTo(departmentMap);
     var activeFires,activeFiresData;
     var activefireURL = 'https://wildfire.cr.usgs.gov/arcgis/rest/services/geomac_fires/FeatureServer/3/query?outFields=*&f=json&outSR=4326&inSR=4326&geometryType=esriGeometryEnvelope&geometry=';
-    
+ 
     if (showStations) {
       FireStation.query({department: config.id}).$promise.then(function(data) {
         $scope.stations = data.objects;
+        //capture the current state
         if(data.objects && data.objects.length > 0)
-          $scope.currentState = data.objects[0].state;
+          $scope.currentState = data.objects[data.objects.length-1].state;
+        
         var stationMarkers = [];
         var numFireStations = $scope.stations.length;
         for (var i = 0; i < numFireStations; i++) {
@@ -119,9 +121,12 @@
         census.getTractData($scope.currentState)
         .then((layerJSON)=>{
           //add the layer to the map
-          debugger
-          var censusLayer = L.tileLayer(layerJSON.source.tiles[0],layerJSON)
-          layersControl.addOverlay(censusLayer, 'Census Tracts');
+         
+          var mvtSource = new L.TileLayer.MVTSource(layerJSON);
+          
+          // departmentMap.addLayer(mvtSource,'Census Tract');
+          // var censusLayer = L.tileLayer(layerJSON.source.tiles[0],layerJSON)
+          layersControl.addOverlay(mvtSource, 'Census Tracts');
  
         })
         .catch((error)=>{
