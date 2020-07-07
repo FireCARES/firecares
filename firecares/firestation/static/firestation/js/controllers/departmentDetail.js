@@ -46,9 +46,12 @@
     })
   ;
 
-  JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'mapFactory', '$filter', 'FireDepartment', '$analytics', 'WeatherWarning', '$interpolate', 'FireStationandStaffing', 'ServiceAreaRollup', 'EfffChartRollup'];
 
-  function JurisdictionController($scope, $timeout, $http, FireStation, mapFactory, $filter, FireDepartment, $analytics, WeatherWarning, $interpolate, FireStationandStaffing, ServiceAreaRollup, EfffChartRollup) {
+
+
+  JurisdictionController.$inject = ['$scope', '$timeout', '$http','FireStation', 'mapFactory', '$filter', 'FireDepartment', '$analytics', 'WeatherWarning', '$interpolate', 'FireStationandStaffing', 'ServiceAreaRollup', 'EfffChartRollup','census'];
+
+  function JurisdictionController($scope, $timeout, $http, FireStation, mapFactory, $filter, FireDepartment, $analytics, WeatherWarning, $interpolate, FireStationandStaffing, ServiceAreaRollup, EfffChartRollup,census) {
     var departmentMap = mapFactory.create('map', {scrollWheelZoom: false});
     var messagebox = L.control.messagebox({ timeout: 11000, position:'bottomright' }).addTo(departmentMap);
     var messageboxData = L.control.messagebox({ timeout: 22000, position:'bottomleft' }).addTo(departmentMap);
@@ -66,6 +69,7 @@
     var mouseOverAddedOpacity = 0.25;
     var highlightColor = 'blue';
 
+    
     $scope.metrics = window.metrics;
     $scope.urls = window.urls;
     $scope.level = window.level;
@@ -84,11 +88,12 @@
     var fires = L.featureGroup().addTo(departmentMap);
     var activeFires,activeFiresData;
     var activefireURL = 'https://wildfire.cr.usgs.gov/arcgis/rest/services/geomac_fires/FeatureServer/3/query?outFields=*&f=json&outSR=4326&inSR=4326&geometryType=esriGeometryEnvelope&geometry=';
-
+    
     if (showStations) {
       FireStation.query({department: config.id}).$promise.then(function(data) {
         $scope.stations = data.objects;
-
+        if(data.objects && data.objects.length > 0)
+          $scope.currentState = data.objects[0].state;
         var stationMarkers = [];
         var numFireStations = $scope.stations.length;
         for (var i = 0; i < numFireStations; i++) {
@@ -101,7 +106,7 @@
 
         if (numFireStations > 0) {
           var stationLayer = L.featureGroup(stationMarkers);
-
+          
           // Uncomment to show Fire Stations by default
           // stationLayer.addTo(departmentMap);
           layersControl.addOverlay(stationLayer, 'Fire Stations');
@@ -110,9 +115,22 @@
             departmentMap.fitBounds(stationLayer.getBounds(), fitBoundsOptions);
           }
         }
+        //fetch the tract data for the current state
+        census.getTractData($scope.currentState)
+        .then((layerJSON)=>{
+          //add the layer to the map
+          debugger
+          var censusLayer = L.tileLayer(layerJSON.source.tiles[0],layerJSON)
+          layersControl.addOverlay(censusLayer, 'Census Tracts');
+ 
+        })
+        .catch((error)=>{
+          debugger
+        })
       });
     }
-
+    
+    
     //
     // Weather Warnings
     //
@@ -184,7 +202,7 @@
         return line.map(function(d){return [d[1],d[0]]})
       }
     });
-
+    
     if (config.geom != null) {
       countyBoundary = L.geoJson(config.geom, {
         style: function(feature) {
