@@ -120,8 +120,12 @@
         //fetch the tract data for the current state
         census.getTractData($scope.currentState)
         .then((layerJSON)=>{
+          if(!layerJSON || layerJSON.error){
+            alert('The census tract layer could not be loaded: '+layerJSON.error);
+            return;
+          }
+          
           //add the layer to the map
-         
           var mvtSource = new L.TileLayer.MVTSource(layerJSON);
           
           // departmentMap.addLayer(mvtSource,'Census Tract');
@@ -130,7 +134,7 @@
  
         })
         .catch((error)=>{
-          debugger
+          alert('The census tract layer could not be loaded: '+error);
         })
       });
     }
