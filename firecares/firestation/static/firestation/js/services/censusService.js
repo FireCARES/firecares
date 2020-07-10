@@ -78,13 +78,60 @@
             */
             getTractData(stateAbbreviation) {
                 return new Promise((res, rej) => {
+                    var stateId = this.stateAbbreviationToCode(stateAbbreviation);
+                    $http({
+                        method: 'GET',
+                        url: 'https://api.census.gov/data/2017/acs/acs5?get=NAME,B01001_001E&in=state:' + stateId +
+                            '%20county:*&for=tract:*&key=655fd4220567937e8b2c8f1041dbe01696457797'
+                    })
+                        .then(async (resp) => {
+
+                            //convert the successful response from a string array into a json array
+                            if (resp.status == 200 && resp.data?.length > 1) {
+                                var data = []
+                                var densityData = await this.getCountyDensityData(stateId);
+
+                                for (var x = 1; x < resp.data.length; x++) {
+                                    var e = {};
+                                    for (var i in resp.data[0]) {
+                                        e[resp.data[0][i]] = resp.data[x][i];
+                                    }
+                                    e.DENSITY = densityData[e.state + e.county];
+                                    data.push(e)
+                                }
+
+
+
+                                res(this.generateLayerJSON(data))
+
+                            }
+
+                            else {
+                                rej()
+                            }
+                        }, (error) => {
+
+                            rej(error);
+                        })
+
+                });
+            },
+
+
+            /**
+             * retrieve the population density data for all counties in the given state
+             * @param {String} stateId 
+             */
+            getCountyDensityData(stateId) {
+                return new Promise((res, rej) => {
                     $http({
                         method: 'GET',
                         url: 'https://api.census.gov/data/2019/pep/population' +
                             '?get=COUNTY,STATE,DENSITY,POP,NAME&for=county:*' +
-                            '&in=state:' + this.stateAbbreviationToCode(stateAbbreviation)
+                            '&in=state:' + stateId
                     })
                         .then((resp) => {
+
                             //convert the successful response from a string array into a json array
                             if (resp.status == 200 && resp.data?.length > 1) {
                                 var data = []
@@ -95,7 +142,12 @@
                                     }
                                     data.push(e)
                                 }
-                                res(this.generateLayerJSON(data))
+                                var densityData = {};
+                                for (var x in data) {
+                                    densityData[data[x].state + data[x].county] = data[x].DENSITY;
+                                }
+
+                                res(densityData)
 
                             }
 
@@ -108,32 +160,36 @@
 
                 });
             },
+
+
             /**
              * Take the given statistical data and build a layer with it
              * @param {Object} response 
              */
             generateLayerJSON(response) {
                 //extract the density values
+
                 var values = response.map(function (county) {
+                    //return Math.random() * 33;
 
-                    return county.DENSITY;
-                });
+                    return parseFloat(county.DENSITY);
+                }).sort((a, b) => a - b)
 
+
+                //define the color scale for the features
                 var colorScale = chroma
-                    .scale("OrRd")
-                    .padding(0.15)
-                    .domain(values, "q", 5);
-
+                    .scale(['#ffffff', '#33ff44'])
+                    .domain(values);
                 function getColor(val) {
-                    return colorScale(val).alpha(0.5).css();
+                    return colorScale(val).alpha(0.75).css();
                 }
 
-                //generate style expression
+                //generate style expressions for each of the features
                 var colorJSON = {};
                 var colors = {}
                 var GEOIDs = []
                 response.forEach((county) => {
-                    var GEOID = county.state + county.county;
+                    var GEOID = county.state + county.county + county.tract;
                     GEOIDs.push(GEOID)
                     var value = county.DENSITY;
                     var color = getColor(value);
@@ -142,8 +198,6 @@
                     }
                     colors[color].push(GEOID);
                 });
-
-
                 var colorExpression = ["match", ["get", "GEOID"]];
                 var colorQuantiles = Object.entries(colors).forEach(function ([
                     color,
@@ -153,12 +207,12 @@
                     GEOIDs.forEach(item => { colorJSON[item] = color })
 
                 });
-
                 colorExpression.push("rgba(0,0,0,0)");
 
                 // return the layer json
                 return {
-                    url: "https://gis-server.data.census.gov/arcgis/rest/services/Hosted/VT_2018_050_00_PY_D1/VectorTileServer/tile/{z}/{y}/{x}.pbf",
+                    //url: "https://gis-server.data.census.gov/arcgis/rest/services/Hosted/VT_2018_050_00_PY_D1/VectorTileServer/tile/{z}/{y}/{x}.pbf",
+                    url: "https://gis-server.data.census.gov/arcgis/rest/services/Hosted/VT_2018_140_00_PY_D1/VectorTileServer/tile/{z}/{y}/{x}.pbf",
 
                     /** only keep the features with applicable styles */
                     filter(feature) {
@@ -170,16 +224,18 @@
                     },
                     /** set the color for each feature in the layer */
                     style(feature) {
+
                         return {
                             color: colorJSON[feature.properties.GEOID],
                             outline: {
-                                color : '#ffffff',
-                                size : 1
+                                color: '#ffffff',
+                                size: 1
                             }
                         };
                     }
                 }
-            }
+            },
+
 
         }
     }
