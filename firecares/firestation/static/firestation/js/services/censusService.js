@@ -8,6 +8,10 @@
     CensusService.$inject = ["$http", "$q", "$rootScope"];
     function CensusService($http, $q, $rootScope) {
         return {
+            AREA_CLASS: {
+                U: 'Urban',
+                R: 'Rural'
+            },
             COLORS: {
                 U: "rgba(100,172,255,1)",//urban area
                 R: "rgba(164,255,164,1)",//rural area
@@ -81,12 +85,55 @@
                 }
             },
 
+
+            /**
+             * retrieve the population density data for all counties in the given state
+             * @param {String} stateId 
+             */
+            getCountyDensityData(stateId) {
+                return new Promise((res, rej) => {
+                    $http({
+                        method: 'GET',
+                        url: 'https://api.census.gov/data/2019/pep/population' +
+                            '?get=COUNTY,STATE,DENSITY,POP,NAME&for=county:*' +
+                            '&in=state:' + stateId
+                    })
+                        .then((resp) => {
+
+                            //convert the successful response from a string array into a json array
+                            if (resp.status == 200 && resp.data?.length > 1) {
+                                var data = []
+                                for (var x = 1; x < resp.data.length; x++) {
+                                    var e = {};
+                                    for (var i in resp.data[0]) {
+                                        e[resp.data[0][i]] = resp.data[x][i];
+                                    }
+                                    data.push(e)
+                                }
+                                var densityData = {};
+                                for (var x in data) {
+                                    densityData[data[x].state + data[x].county] = data[x].DENSITY;
+                                }
+
+                                res(densityData)
+
+                            }
+
+                            else {
+                                rej()
+                            }
+                        }, (error) => {
+                            rej(error);
+                        })
+
+                });
+            },
             /** fetch the census statistical data for the given state
              * and return a vector tile layer in JSON format
              * @param {String} stateAbbreviation
              */
-            getTractData(stateAbbreviation) {
-                return new Promise((res, rej) => {
+            getTractData(stateAbbreviation, popupCallback) {
+                return new Promise(async (res, rej) => {
 
                     var stateId = this.stateAbbreviationToCode(stateAbbreviation);
                     if (!stateId) {
@@ -95,6 +142,9 @@
                             'error': 'The state ID is invalid.'
                         })
                     }
+
+                    var densityData = await this.getCountyDensityData(stateId);
+
                     //get the list of tracts for the selected state
                     $http({
                         method: "GET",
@@ -112,10 +162,15 @@
                                 })
                             } else {
                                 var features = {};
-                                //assign colors to each of the features based on its rural/urban classification
+                                //merge the population density, area classifications, and feature colors together
                                 for (var x in resp.data.features) {
                                     let data = resp.data.features[x].attributes;
-                                    features[(data.STATE + data.COUNTY + data.TRACT)] = this.COLORS[data.UR] || this.COLORS.default
+
+                                    features[(data.STATE + data.COUNTY + data.TRACT)] = {
+                                        density: densityData[data.STATE+data.COUNTY],
+                                        UR: this.AREA_CLASS[data.UR] || 'unknown',
+                                        color: this.COLORS[data.UR] || this.COLORS.default
+                                    }
                                 }
 
                                 // return the layer json
@@ -130,20 +185,22 @@
                                     /** set the color for each feature in the layer */
                                     style(feature) {
                                         return {
-                                            color: features[feature.properties.GEOID]
+                                            color: features[feature.properties.GEOID].color
                                         };
                                     },
-
-                                });
+                                    onClick(event) {
+                                        if (event.feature?.properties?.GEOID)
+                                            popupCallback(event,features[event.feature.properties.GEOID]);
+                                    }
+                                })
                             }
-                        },
-                        (error) => {
-                            rej(error)
-                        }
-                    )
-                })
-            },
 
-        };
+                        });
+                });
+            }
+        }
     }
-})();
+})()
+
+
+

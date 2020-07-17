@@ -69,6 +69,11 @@
     var mouseOverAddedOpacity = 0.25;
     var highlightColor = 'blue';
 
+    //create a global popup and add it to the map
+    var popupRef = new L.Marker({lat : 0,lng:0 }, {
+        draggable: false
+    });
+    departmentMap.addLayer(popupRef);
     
     $scope.metrics = window.metrics;
     $scope.urls = window.urls;
@@ -89,6 +94,8 @@
     var activeFires,activeFiresData;
     var activefireURL = 'https://wildfire.cr.usgs.gov/arcgis/rest/services/geomac_fires/FeatureServer/3/query?outFields=*&f=json&outSR=4326&inSR=4326&geometryType=esriGeometryEnvelope&geometry=';
  
+  
+
     if (showStations) {
       FireStation.query({department: config.id}).$promise.then(function(data) {
         $scope.stations = data.objects;
@@ -117,8 +124,21 @@
             departmentMap.fitBounds(stationLayer.getBounds(), fitBoundsOptions);
           }
         }
+
+        /** define the callback for displaying the census tract popup */
+        var popupCallback = (event,data)=>{
+          
+          if (event.feature?.properties?.GEOID){
+              popupRef.setLatLng(event.latlng)
+              popupRef.bindPopup(`<p>
+              Area Class: ${data.UR}<br />
+              Population Density: ${data.density}
+              </p>`)
+              popupRef.openPopup();
+          }
+        }
         //fetch the tract data for the current state
-        census.getTractData($scope.currentState)
+        census.getTractData($scope.currentState,popupCallback)
         .then((layerJSON)=>{
           if(!layerJSON || layerJSON.error){
             alert('The census tract layer could not be loaded: '+layerJSON.error);
@@ -131,6 +151,8 @@
           // departmentMap.addLayer(mvtSource,'Census Tract');
           // var censusLayer = L.tileLayer(layerJSON.source.tiles[0],layerJSON)
           layersControl.addOverlay(mvtSource, 'Census Tracts');
+          
+          
  
         })
         .catch((error)=>{
