@@ -530,14 +530,13 @@ class FireStationTests(BaseFirecaresTestcase):
         lafd.save()
 
         # ensure a fd with no geometry uses the headquarters address location
-        self.assertEqual(lafd.generate_thumbnail(), 'http://api.tiles.mapbox.com/v4/garnertb.mmlochkh/pin-l-embassy+0074D9(-118.421704266,34.0970046338)/-118.421704266,34.0970046338,8/500x300.jpg?access_token={0}'.format(settings.MAPBOX_ACCESS_TOKEN))
-
+        self.assertEqual(lafd.generate_thumbnail(), 'https://api.mapbox.com/styles/v1/prominentedge-ipsdi/ckb8cvy2z083c1io0xsvgj01j/static/pin-l-embassy+0074D9(-118.421704266,34.0970046338)/-118.421704266,34.0970046338,8/500x300?access_token={0}'.format(settings.MAPBOX_ACCESS_TOKEN))
         # ensure a fd with a geometry uses the centroid of the geometry
         lafd.geom = MultiPolygon([lafd_poly])
-        self.assertEqual(lafd.generate_thumbnail(), 'http://api.tiles.mapbox.com/v4/garnertb.mmlochkh/pin-l-embassy+0074D9(-118.411704266,34.1070046338)/-118.411704266,34.1070046338,8/500x300.jpg?access_token={0}'.format(settings.MAPBOX_ACCESS_TOKEN))
+        self.assertEqual(lafd.generate_thumbnail(), 'https://api.mapbox.com/styles/v1/prominentedge-ipsdi/ckb8cvy2z083c1io0xsvgj01j/static/pin-l-embassy+0074D9(-118.411704266,34.1070046338)/-118.411704266,34.1070046338,8/500x300?access_token={0}'.format(settings.MAPBOX_ACCESS_TOKEN))
 
         # ensure the marker is not in the url when marker=False
-        self.assertEqual(lafd.generate_thumbnail(marker=False), 'http://api.tiles.mapbox.com/v4/garnertb.mmlochkh/False-118.411704266,34.1070046338,8/500x300.jpg?access_token={0}'.format(settings.MAPBOX_ACCESS_TOKEN))
+        self.assertEqual(lafd.generate_thumbnail(marker=False), 'https://api.mapbox.com/styles/v1/prominentedge-ipsdi/ckb8cvy2z083c1io0xsvgj01j/static/-118.411704266,34.1070046338,8/500x300?access_token={0}'.format(settings.MAPBOX_ACCESS_TOKEN))
 
     def test_department_list_view(self):
         """
