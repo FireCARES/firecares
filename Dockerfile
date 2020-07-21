@@ -1,4 +1,4 @@
-FROM firecares/base
+FROM prominentedgestatengine/firecares:base
 
 RUN mkdir -p /webapps/firecares/ && \
     chmod -R 0755 /webapps/firecares/
