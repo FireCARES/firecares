@@ -12,6 +12,7 @@ TAG=${BRANCH}-${SHA}-${ENVIRONMENT}
 
 build:
 	docker build \
+	--network=host \
 	-t $(ORG)/$(REPO):${TAG} \
 	--no-cache \
 	.
