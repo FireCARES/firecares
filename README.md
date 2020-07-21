@@ -89,3 +89,12 @@ python manage.py collectstatic --noinput -l --clear
 ### Testing osgeo importer within FireCARES
 
 In order to test the osgeo_importer functionality within FireCARES, specifically being able to step via debugger into specific celery processes, you will need to ensure that `CELERY_ALWAYS_EAGER = True`; however, this will not yield a resulting task state other than `PENDING` so items that depend on a celery result will never finish (eg. the osgeo upload dialog will never close on its own).  Additionally, in order to support a multi-node deployment, celery results are stored using the memcached backend and the actual uploaded file is pushed/pulled to/from an S3 bucket as specified by `OSGEO_STORAGE_BUCKET_NAME` before being acted-upon by GDAL, but specifying a bucket name is not necessary for local development as the FireCARES importer and inspector can handle these tasks using a local filesystem.
+
+----
+
+## Building Dockerfiles:
+* All images depend on Dockerfile-base.  This is built one time only; no job in Jenkins:
+```
+make build-base
+make push-base
+```
