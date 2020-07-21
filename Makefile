@@ -17,9 +17,21 @@ build:
 	.
 	echo "TAG=${TAG}" > tag.properties
 
+build-base:
+	docker build \
+	-f Dockerfile-base \
+	-t prominentedgestatengine/firecares:base \
+	--no-cache \
+	.
+	echo "TAG=${TAG}" > tag.properties
+
 push:
 	docker push \
 	$(ORG)/$(REPO):${TAG}
+
+push-base:
+	docker push \
+	prominentedgestatengine/firecares:base
 
 run:
 	docker run -it \

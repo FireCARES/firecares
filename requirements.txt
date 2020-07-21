@@ -1,4 +1,3 @@
-alog
 amqp==1.4.9
 anyjson==0.3.3
 appnope==0.1.0
