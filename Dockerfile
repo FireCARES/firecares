@@ -18,7 +18,7 @@ RUN mkdir -p /webapps/firecares/temp /webapps/firecares/logs/ && \
     chmod -R 0777 /webapps/firecares/logs
     #chmod -R 0777 /webapps/firecares/media
 
-EXPOSE 8000 1337
+EXPOSE 8000
 
 STOPSIGNAL SIGTERM
 
