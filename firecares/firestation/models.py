@@ -6,6 +6,8 @@ import csv
 import codecs
 import os
 import re
+import logging
+import alog
 from .managers import PriorityDepartmentsManager, CalculationManager
 from django.conf import settings
 from django.contrib.gis.db import models
@@ -34,6 +36,8 @@ from .metrics import FireDepartmentMetrics
 from guardian.shortcuts import assign_perm, remove_perm, get_users_with_perms
 from annoying.fields import JSONField
 
+def p(msg):
+    alog.info(msg)
 
 class HazardLevels(IntChoiceEnum):
     All = 0
@@ -1272,39 +1276,45 @@ def run_update_department_task(depart_id):
     """
     from firecares.tasks import update
     from celery.task.control import inspect
-
+    
     # Check for status of the current celery queue
     taskinspector = inspect()
     notaduplicatetask = True
 
     # print(taskinspector.reserved())
     # print(taskinspector.active())
-
+    
     try:
         active_tasks = taskinspector.active().values()[0]
+        p(0)
         queue_tasks = taskinspector.reserved().values()[0]
-
+        p(1)
         for q_task in queue_tasks:
             q_departmentid = q_task['args']
-            print(q_departmentid)
+            p(q_departmentid)
             if str(depart_id) in str(q_departmentid):
                 notaduplicatetask = False
-
+        p(2)
         if notaduplicatetask:
             for a_task in active_tasks:
                 a_departmentid = a_task['args']
-                print(a_departmentid)
+                p(a_departmentid)
                 if str(depart_id) in str(a_departmentid):
                     notaduplicatetask = False
-    except Exception:
-        return 'No Data in celery queue'
+    except Exception as e:
+        p('run_update_department_task error')
+        p(e) 
+        # return 'No Data in celery queue'
 
     if notaduplicatetask:
         # delay for 50 seconds
-        print('Running dept update for ' + str(depart_id))
+        
+        p('Running dept update for ' + str(depart_id))
         update.update_parcel_department_effectivefirefighting_rollup.apply_async((depart_id,), countdown=50, task_id=str(depart_id) + 'efff')
         update.get_parcel_department_hazard_level_rollup.apply_async((depart_id,), countdown=50, task_id=str(depart_id) + 'servicearea')
         update.update_department.apply_async((depart_id,), countdown=50, task_id=str(depart_id) + 'nfirs')
+    else:
+        p('this is a duplicate task')
 
 
 @when_not_testing

@@ -1,13 +1,18 @@
 import json
 import logging
+import datetime
+import time
+import alog
 from .forms import StaffingForm
-from .models import FireStation, Staffing, FireDepartment, ParcelDepartmentHazardLevel, EffectiveFireFightingForceLevel
+from .models import run_update_department_task, FireStation, Staffing, FireDepartment, ParcelDepartmentHazardLevel, EffectiveFireFightingForceLevel
 from firecares.weather.models import DepartmentWarnings
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf.urls import url
 from django.contrib.gis import geos
 from django.http import HttpResponse
+import dateutil.parser
+
 from tastypie import fields
 from tastypie.authentication import SessionAuthentication, ApiKeyAuthentication, MultiAuthentication, Authentication
 from tastypie.authorization import DjangoAuthorization
@@ -23,7 +28,10 @@ from guardian.core import ObjectPermissionChecker
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
+def p(msg):
+    alog.info(msg)
 
+ 
 
 # Note this is from one of my other projects, not sure it is actually needed or not.
 class SessionAuth(SessionAuthentication):
@@ -408,7 +416,8 @@ class GetServiceAreaInfo(JSONDefaultModelResourceMixin, ModelResource):
     Get Service area info based on Drive Times for Department ID
     """
     department = fields.ForeignKey(FireDepartmentResource, 'department', null=True)
-
+     
+    
     class Meta:
         resource_name = 'getserviceareainfo'
         authorization = GuardianAuthorization(delegate_to_property='department',
@@ -416,7 +425,7 @@ class GetServiceAreaInfo(JSONDefaultModelResourceMixin, ModelResource):
                                               update_permission_code='change_firedepartment',
                                               create_permission_code='change_firedepartment',
                                               delete_permission_code='change_firedepartment')
-
+    
         #  Return the departement rollup info for service areas
         queryset = ParcelDepartmentHazardLevel.objects.all()
 
@@ -425,6 +434,52 @@ class GetServiceAreaInfo(JSONDefaultModelResourceMixin, ModelResource):
         detail_allowed_methods = ['get', 'post']
         serializer = PrettyJSONSerializer()
         always_return_data = True
+
+class GetData(JSONDefaultModelResourceMixin, ModelResource):
+    
+    def is_date_expired(date_string):
+        expiration_date = time.time() - (180*86400)
+        date_in_seconds = dateutil.parser.parse(date_string)
+        return expiration_date > int(date_in_seconds.strftime('%s'))
+             
+
+    def obj_get_list(self, bundle, **kwargs):
+        p('getting data 1')  
+         
+        if bundle.request.method == 'GET':
+            related_id = bundle.request.GET['department']
+            # create new object if it doesn't exist and populate with `related_id`
+            # ...
+        objects = ModelResource.obj_get_list(self, bundle, **kwargs)
+ 
+        expiration_date = time.time() - (180*86400)
+        date_in_seconds = int(objects[0].modified.strftime('%s'))
+        # if the data is too old, refresh it
+        if expiration_date > date_in_seconds:
+            run_update_department_task(related_id)
+            p('object updated')
+            objects = ModelResource.obj_get_list(self, bundle, **kwargs)
+
+        return objects
+
+
+
+    department = fields.ForeignKey(FireDepartmentResource, 'department', null=True)
+    class Meta:
+        resource_name = 'getdata'
+        authorization = GuardianAuthorization(delegate_to_property='department',
+                                              view_permission_code=None,
+                                              update_permission_code='change_firedepartment',
+                                              create_permission_code='change_firedepartment',
+                                              delete_permission_code='change_firedepartment')
+
+        queryset = ParcelDepartmentHazardLevel.objects.all()
+        filtering = {'department': ('exact',), 'id': ('exact',)}
+        list_allowed_methods = ['get', 'post']
+        detail_allowed_methods = ['get', 'post']
+        serializer = PrettyJSONSerializer()
+        always_return_data = True
+
 
 
 class GetEFFFInfo(JSONDefaultModelResourceMixin, ModelResource):

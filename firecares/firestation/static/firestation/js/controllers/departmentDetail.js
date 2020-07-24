@@ -46,9 +46,9 @@
     })
   ;
 
-  JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'mapFactory', '$filter', 'FireDepartment', '$analytics', 'WeatherWarning', '$interpolate', 'FireStationandStaffing', 'ServiceAreaRollup', 'EfffChartRollup'];
+  JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'mapFactory', '$filter', 'FireDepartment', '$analytics', 'WeatherWarning', '$interpolate', 'FireStationandStaffing', 'ServiceAreaRollup', 'EfffChartRollup','isochroneService'];
 
-  function JurisdictionController($scope, $timeout, $http, FireStation, mapFactory, $filter, FireDepartment, $analytics, WeatherWarning, $interpolate, FireStationandStaffing, ServiceAreaRollup, EfffChartRollup) {
+  function JurisdictionController($scope, $timeout, $http, FireStation, mapFactory, $filter, FireDepartment, $analytics, WeatherWarning, $interpolate, FireStationandStaffing, ServiceAreaRollup, EfffChartRollup,isochroneService) {
     var departmentMap = mapFactory.create('map', {scrollWheelZoom: false});
     var messagebox = L.control.messagebox({ timeout: 11000, position:'bottomright' }).addTo(departmentMap);
     var messageboxData = L.control.messagebox({ timeout: 22000, position:'bottomleft' }).addTo(departmentMap);
@@ -80,11 +80,14 @@
     $scope.parcel_efff_counts = "";
     $scope.department_personnel_counts = " Personnel/Assets Available";
     $scope.uploadBoundary = false;
+    // var serviceAreaLayer = L.geoJson().addTo(departmentMap)
+    var isoLayer;
     var layersControl = L.control.layers().addTo(departmentMap);
     var fires = L.featureGroup().addTo(departmentMap);
     var activeFires,activeFiresData;
     var activefireURL = 'https://wildfire.cr.usgs.gov/arcgis/rest/services/geomac_fires/FeatureServer/3/query?outFields=*&f=json&outSR=4326&inSR=4326&geometryType=esriGeometryEnvelope&geometry=';
-
+    
+    
     if (showStations) {
       FireStation.query({department: config.id}).$promise.then(function(data) {
         $scope.stations = data.objects;
@@ -109,6 +112,21 @@
           if (config.geom === null) {
             departmentMap.fitBounds(stationLayer.getBounds(), fitBoundsOptions);
           }
+          //extract coordinates for all firestations
+          var coords = $scope.stations.map(station=>{return station.geom.coordinates.reverse()})
+          //get the isochrone data
+          isochroneService.getIsochrones({
+            minutes: 10,
+            profile:'walking',
+            coorsArray:coords
+          })
+          .then((data)=>{
+            
+            //add the isochrone data to the service area layer
+            // isoLayer = L.featureGroup(data)
+            // layersControl.addOverlay(isoLayer, 'Isochrones')
+            // serviceAreaLayer.addData(data)
+          })
         }
       });
     }
@@ -559,6 +577,7 @@
                 var travelTimeGeom = [traveltime0, traveltime4, traveltime6];
 
                 serviceAreaData = travelTimeGeom;
+                debugger
                 serviceArea.addData(travelTimeGeom);
                 layer.setStyle(function(feature) {
                   return {

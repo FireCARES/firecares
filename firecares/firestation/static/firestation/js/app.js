@@ -14,6 +14,7 @@
       'fireStation.firestationDetailController',
       'fireStation.performanceScoreController',
       'fireStation.weatherWarning',
+      'fireStation.isochroneService',
       'fireStation.mapFactoryService',
       'fireStation.heatmapService',
       'fireStation.emsHeatmapService',
