@@ -4,8 +4,6 @@ python manage.py collectstatic --noinput
 
 chmod -R 0755 /webapps/
 
-nginx
-
 # Start Gunicorn processes
 # Gunicorn requires a reverse proxy to serve
 # static content...
