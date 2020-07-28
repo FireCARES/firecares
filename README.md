@@ -14,14 +14,26 @@ A quick way to get started is with Vagrant and VirtualBox.
 
 3.  Run `./run.sh` to start the Firecares app.
 
-4.  Load snapshot of Database (if you don't have .pg_conf, consult a system
+4.  Load snapshot of Firecares Database (if you don't have .pg_conf, consult a system
     admin for RDS host credentials)
     ```bash
+    psql -h 0.0.0.0 -U firecares -p 5433 -W -c 'create database firecares' 
+    
     pg_dump -d "service=exposure" -f firecares.sql
     
     psql -h 0.0.0.0 -U firecares -W firecares < firecares.sql
     ```
-
+    
+4.  Load snapshot of NFIRS Database (if you don't have .pg_conf, consult a system
+    admin for RDS host credentials)
+    ```bash
+    psql -h 0.0.0.0 -U firecares -p 5433 -W -c 'create database nfirs' 
+    
+    pg_dump -d "service=nfirs" --schema=public -f nfirs.sql
+    
+    psql -h 0.0.0.0 -U firecares -W nfirs < nfirs.sql
+    ```
+    
 5.  Finally, you should be able to open see the app in your browser by opening:
     `0.0.0.0:8000` 
 
