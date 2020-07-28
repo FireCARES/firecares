@@ -1,5 +1,11 @@
 #!/bin/bash
 
+print('### settings begin ###')
+
+python manage.py diffsettings --all
+
+print('### settings end ###')
+
 python manage.py collectstatic --noinput
 
 chmod -R 0755 /webapps/
