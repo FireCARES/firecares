@@ -18,7 +18,7 @@ services:
     command: ['./manage.py', 'runserver', '--settings=firecares.settings.local', '0.0.0.0:8000']
 
   postgis:
-    image: mdillon/postgis
+    image: mdillon/postgis:9.6
     env_file:
       - .env.local
     environment:
