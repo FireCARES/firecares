@@ -29,6 +29,17 @@ DATABASES = {
         'PASSWORD': os.getenv('DATABASE_PASSWORD', 'password'),
         'HOST': os.getenv('DATABASE_HOST', 'localhost'),
         'PORT': os.getenv('DATABASE_PORT', '5432'),
+    },
+    'nfirs': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': os.getenv('NFIRS_DATABASE_NAME', 'nfirs'),
+        'USER': os.getenv('NFIRS_DATABASE_USER', 'firecares'),
+        'PASSWORD': os.getenv('NFIRS_DATABASE_PASSWORD', 'password'),
+        'PORT': os.getenv('NFIRS_DATABASE_PORT', '5432'),
+        'HOST': os.getenv('NFIRS_DATABASE_HOST', 'localhost'),
+        'TEST': {
+            'MIRROR': 'default'
+        }
     }
 }
 

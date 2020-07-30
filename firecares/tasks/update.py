@@ -644,7 +644,6 @@ def get_parcel_department_hazard_level_rollup(fd_id):
                     getdrivetime = requests.get(url)
                     drivegetdata['coors_'+str(minutes)]['geometry']['coordinates'].append(json.loads(getdrivetime.content)['features'][0]['geometry']['coordinates'])
                     
-                    p(str(len(drivegetdata['coors_'+str(minutes)]['geometry']['coordinates'])))
                     
                     # # p(json.loads(getdrivetime.content)) 
                     # if len(drivegetdata['coors_'+str(minutes)]) > 0:
@@ -656,7 +655,8 @@ def get_parcel_department_hazard_level_rollup(fd_id):
                     # p(getdrivetime)
             
             # p(drivegetdata)
-        update_parcel_department_hazard_level([drivegetdata['coors_4'],drivegetdata['coors_6'],drivegetdata['coors_8']], dept[0])
+        
+        update_parcel_department_hazard_level([drivegetdata['coors_4']['geometry'],drivegetdata['coors_6']['geometry'],drivegetdata['coors_8']['geometry']], dept[0])
         # update_parcel_department_hazard_level(output_template, dept[0])
         # update_parcel_department_hazard_level(json.loads(getdrivetime.content)['results'][0]['value']['features'], dept[0])
 
