@@ -267,9 +267,15 @@ NOSE_ARGS = [
 
 HEATMAP_BUCKET = 'firecares-test'
 
+# REDIS
+REDIS_URL = "redis://{host}:{port}/1".format(
+    host=os.getenv('REDIS_HOST', 'localhost'),
+    port=os.getenv('REDIS_PORT', '6379')
+)
+
 # Celery settings.
 BROKER_URL = os.getenv('BROKER_URL', 'amqp://guest:guest@127.0.0.1//')
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'amqp')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', REDIS_URL)
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', None)
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', None)
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', None)
@@ -296,11 +302,17 @@ HELIX_ACCEPTED_CHIEF_ADMIN_TITLES = ['Fire Chief', '2-3 Crossed Bugle Chief Offi
 
 STATICSITEMAPS_ROOT_SITEMAP = 'firecares.urls.sitemaps'
 
-CELERY_DEFAULT_QUEUE = "default"
+# CELERY
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_BROKER_URL = REDIS_URL
+CELERY_CREATE_MISSING_QUEUES = True
 CELERY_DEFAULT_EXCHANGE = "default"
 CELERY_DEFAULT_EXCHANGE_TYPE = "direct"
+CELERY_DEFAULT_QUEUE = "default"
 CELERY_DEFAULT_ROUTING_KEY = "default"
-CELERY_CREATE_MISSING_QUEUES = True
+CELERY_RESULT_BACKEND = REDIS_URL
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
 
 CELERY_IMPORTS = (
     'firecares.tasks.cache',
