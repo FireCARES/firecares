@@ -10,7 +10,10 @@ BRANCH=$(shell git rev-parse --symbolic-full-name --abbrev-ref HEAD)
 
 TAG=${BRANCH}-${SHA}-${ENVIRONMENT}
 
+.PHONY: build
+
 build:
+	docker pull $(ORG)/$(REPO):base && \
 	docker build \
 	--network=host \
 	-t $(ORG)/$(REPO):${TAG} \

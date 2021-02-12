@@ -30,3 +30,10 @@ services:
     ports:
       - 0.0.0.0:$DATABASE_PORT:$DATABASE_PORT
     command: -p $DATABASE_PORT
+
+  redis-service:
+    image: redis
+    env_file:
+      - .env.local
+    ports:
+      - 0.0.0.0:6372

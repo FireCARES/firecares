@@ -1,15 +1,10 @@
 FROM prominentedgestatengine/firecares:base
 
-RUN mkdir -p /webapps/firecares/ && \
-    chmod -R 0755 /webapps/firecares/
-
-WORKDIR /webapps/firecares/
-
 COPY requirements.txt /webapps/firecares/
 
-RUN pip install -r requirements.txt
-
 WORKDIR /webapps/firecares/
+
+RUN pip install -r requirements.txt
 
 COPY . .
 

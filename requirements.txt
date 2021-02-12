@@ -1,4 +1,4 @@
-amqp==1.4.9
+alog
 anyjson==0.3.3
 appnope==0.1.0
 asn1crypto==0.22.0
@@ -12,7 +12,7 @@ beautifulsoup4==4.5.3
 billiard==3.3.0.23
 boto==2.38.0
 cached-property==1.3.0
-celery==3.1.18
+celery[redis]==3.1.18
 certifi==2017.4.17
 cffi==1.12.3
 cryptography==2.5
@@ -42,6 +42,7 @@ django-oauth-toolkit==0.12.0
 django-phonenumber-field==0.7.2
 django-polymorphic==1.3.1
 django-queryset-csv==0.3.1
+django-redis==4.4.1
 django-registration-redux==1.2
 django-reversion==1.10.1
 django-slack==4.1.0
@@ -61,10 +62,10 @@ GDAL==2.1.3
 geonode-avatar==2.1.6
 geonode-user-accounts==1.0.13
 geopy==1.9.1
-git+https://github.com/FireCARES/pinax-theme-bootstrap-account.git#egg=pinax_theme_bootstrap_account
 git+https://github.com/FireCARES/django-osgeo-importer.git#egg=django_osgeo_importer
 git+https://github.com/FireCARES/fire-risk.git@6ec5ba4ad4908f9dc6b7cd6b7de9c26936663577#egg=fire_risk
 git+https://github.com/FireCARES/geonode@1363829ebd7ef130c8e2d690b6ed17c50cde04ad#egg=geonode
+git+https://github.com/FireCARES/pinax-theme-bootstrap-account.git#egg=pinax_theme_bootstrap_account
 git+https://github.com/meilinger/django-generic-m2m@1bcf600f2b40a1b56d211b00a01d688553a8be4f#egg=django_generic_m2m
 git+https://github.com/ProminentEdge/django-favit.git@1eb9b1dbbfb65667695da08b3f16c328d1ee74c4#egg=django_favit
 gunicorn==19.7.1
@@ -95,7 +96,7 @@ phonenumbers==8.3.3
 pickleshare==0.7.4
 Pillow==3.1.1
 prompt-toolkit==1.0.13
-psycopg2==2.7
+psycopg2==2.7.3
 ptvsd==4.3.2
 ptyprocess==0.5.1
 pyasn1==0.2.3
@@ -111,6 +112,7 @@ pytest==2.7.0
 python-dateutil==2.5.3
 python-memcached==1.57
 PyYAML==3.13
+redis==2.10.6
 requests-mock==1.2.0
 requests-oauthlib==0.7.0
 requests==2.19.1
@@ -130,6 +132,7 @@ urllib3<1.24,>=1.21.1
 us==0.9.0
 virtualenv==16.7.10
 wcwidth==0.1.7
+whitenoise==4.1.4
 wrapt==1.11.2
 xlrd==1.2.0
 xlwt==1.3.0
