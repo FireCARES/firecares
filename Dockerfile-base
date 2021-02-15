@@ -43,8 +43,6 @@ RUN mkdir -p /webapps/firecares/temp /webapps/firecares/logs/ && \
     chmod -R 0777 /webapps/firecares/logs
     #chmod -R 0777 /webapps/firecares/media
 
-RUN chown -R $USER:$USER /webapps/firecares/
-
 WORKDIR /webapps/firecares/
 
 COPY requirements.txt /webapps/firecares/
