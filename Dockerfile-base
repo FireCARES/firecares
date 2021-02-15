@@ -1,5 +1,14 @@
 FROM python:2.7-stretch
 
+ARG USER=firecares
+ARG UID=1000
+ARG GID=1000
+ARG PW=firecares
+
+# Option1: Using unencrypted password/ specifying password
+RUN useradd -m ${USER} --uid=${UID} && echo "${USER}:${PW}" | \
+      chpasswd
+
 # FIRECARES STUFF:
 RUN apt-get update && \
     apt-get install -y \
@@ -27,11 +36,19 @@ ENV SSL_CERT_DIR=/etc/ssl/certs
 
 RUN update-ca-certificates --fresh
 
-RUN mkdir -p /webapps/firecares/ && \
-    chmod -R 0755 /webapps/firecares/
+USER root
+
+RUN mkdir -p /webapps/firecares/temp /webapps/firecares/logs/ && \
+    chmod -R 0755 /webapps/firecares/ && \
+    chmod -R 0777 /webapps/firecares/logs
+    #chmod -R 0777 /webapps/firecares/media
+
+RUN chown -R $USER:$USER /webapps/firecares/
 
 WORKDIR /webapps/firecares/
 
 COPY requirements.txt /webapps/firecares/
 
 RUN pip install -r requirements.txt
+
+USER ${UID}:${GID}
