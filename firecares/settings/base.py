@@ -1,5 +1,5 @@
 import os
-from kombu import Queue
+from kombu import Queue, Connection
 import sys
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -67,7 +67,7 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = '/var/www/firecares/media/'
+MEDIA_ROOT = '/webapps/firecares/media/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -78,8 +78,7 @@ MEDIA_URL = '/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = '/var/www/firecares/static/'
-
+STATIC_ROOT = '/webapps/firecares/static/'
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
 STATIC_URL = '/static/'
@@ -90,7 +89,12 @@ STATICFILES_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     os.path.join(PROJECT_ROOT, 'static'),
+    os.path.join(PROJECT_ROOT, 'firestation/static'),
 )
+
+# WHITENOISE
+WHITENOISE_ROOT = STATIC_ROOT
+WHITENOISE_USE_FINDERS = True
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -133,6 +137,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -148,7 +153,6 @@ ROOT_URLCONF = 'firecares.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'firecares.wsgi.application'
-
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
@@ -267,9 +271,12 @@ NOSE_ARGS = [
 
 HEATMAP_BUCKET = 'firecares-test'
 
-# Celery settings.
-BROKER_URL = os.getenv('BROKER_URL', 'amqp://guest:guest@127.0.0.1//')
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'amqp')
+# REDIS
+REDIS_URL = "redis://{host}:{port}/1".format(
+    host=os.getenv('REDIS_HOST', 'redis-service'),
+    port=os.getenv('REDIS_PORT', '6379')
+)
+
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', None)
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', None)
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', None)
@@ -296,11 +303,17 @@ HELIX_ACCEPTED_CHIEF_ADMIN_TITLES = ['Fire Chief', '2-3 Crossed Bugle Chief Offi
 
 STATICSITEMAPS_ROOT_SITEMAP = 'firecares.urls.sitemaps'
 
-CELERY_DEFAULT_QUEUE = "default"
+# CELERY
+CELERY_ACCEPT_CONTENT = ['pickle']
+CELERY_BROKER_URL = REDIS_URL
+CELERY_CREATE_MISSING_QUEUES = True
 CELERY_DEFAULT_EXCHANGE = "default"
 CELERY_DEFAULT_EXCHANGE_TYPE = "direct"
+CELERY_DEFAULT_QUEUE = "default"
 CELERY_DEFAULT_ROUTING_KEY = "default"
-CELERY_CREATE_MISSING_QUEUES = True
+CELERY_RESULT_BACKEND = REDIS_URL
+CELERY_RESULT_SERIALIZER = 'pickle'
+CELERY_TASK_SERIALIZER = 'pickle'
 
 CELERY_IMPORTS = (
     'firecares.tasks.cache',
@@ -312,6 +325,8 @@ CELERY_IMPORTS = (
     'firecares.tasks.weather_task',
     'firecares.tasks.predictions'
 )
+
+connection = Connection(REDIS_URL)
 
 CELERY_QUEUES = [
     Queue('default', routing_key='default'),

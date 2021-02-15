@@ -2,19 +2,17 @@ import os
 from firecares.settings.base import *  # noqa
 from celery.schedules import crontab
 
+ALLOWED_HOSTS = ['*']
+
 AWS_S3_CUSTOM_DOMAIN = os.getenv('AWS_S3_CUSTOM_DOMAIN', None)
 AWS_S3_URL_PROTOCOL = os.getenv('AWS_S3_URL_PROTOCOL', 'http:')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', None)
-COMPRESS_URL = os.getenv("COMPRESS_URL", None)
-COMPRESS_STORAGE = "storages.backends.s3boto.S3BotoStorage"
-STATICFILES_STORAGE = "storages.backends.s3boto.S3BotoStorage"
-STATIC_URL = COMPRESS_URL
+COMPRESS_CSS_HASHING_METHOD = 'hash'
 DEBUG = False
 AWS_QUERYSTRING_AUTH = False
 EMAIL_USE_TLS = True
 
 SECRET_KEY = '$keb7sv^%c+_'
-
 IMIS_SSO_LOGIN_URL = 'https://my.iaff.org/Web/Contacts/SignIn_withoutCreateNewAccount.aspx?doRedirect='
 IMIS_SSO_SERVICE_URL = 'https://member.iaff.org/iaff_sso_prod/sso.asmx?WSDL'
 
@@ -30,6 +28,18 @@ HELIX_FUNCTIONAL_TITLE_URL = HELIX_ROOT + '/App/api/v2/Membership/FuncTitle/'
 STATICSITEMAPS_URL = 'https://firecares.org/static/'
 STATICSITEMAPS_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 STATICSITEMAPS_ROOT_DIR = ''
+
+# CACHE
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        },
+        "KEY_PREFIX": "firecares"
+    }
+}
 
 CELERYBEAT_SCHEDULE = {
     # Executes nightly at midnight.

@@ -5,11 +5,11 @@ services:
   firecares:
     build:
       context: ./
-    image: firecares
+    image: prominentedgestatengine/firecares
     volumes:
       - ./:/webapps/firecares/
     ports:
-     - 0.0.0.0:8000:8000
+      - 0.0.0.0:8000:8000
     env_file:
       - .env.local
     depends_on:
@@ -18,7 +18,7 @@ services:
     command: ['./manage.py', 'runserver', '--settings=firecares.settings.local', '0.0.0.0:8000']
 
   postgis:
-    image: mdillon/postgis
+    image: mdillon/postgis:9.6
     env_file:
       - .env.local
     environment:
@@ -30,3 +30,10 @@ services:
     ports:
       - 0.0.0.0:$DATABASE_PORT:$DATABASE_PORT
     command: -p $DATABASE_PORT
+
+  redis-service:
+    image: redis
+    env_file:
+      - .env.local
+    ports:
+      - 0.0.0.0:6372

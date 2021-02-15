@@ -1,24 +1,32 @@
 
 from __future__ import absolute_import
+
+import alog
 import boto
 import os
 import mimetypes
 import requests
 from celery import Celery
 from django.conf import settings
+
+from firecares.settings.base import REDIS_URL
 from firecares.utils.s3put import singlepart_upload
 from celery.task import current
 
 # set the default Django settings module for the 'celery' program.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'firecares.settings.local')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'firecares.settings')
 
 app = Celery('firecares')
 
 # Using a string here means the worker will not have to
 # pickle the object when using Windows.
-app.config_from_object('django.conf:settings')
+config = app.config_from_object('django.conf:settings')
+
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
+app.conf.BROKER_URL = REDIS_URL
+
+alog.info(alog.pformat(app.conf))
 
 def download_file(url, download_to=None):
 

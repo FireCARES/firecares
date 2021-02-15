@@ -1,6 +1,13 @@
 from firecares.settings.base import *  # noqa
 
 INSTALLED_APPS += ('debug_toolbar', 'fixture_magic', 'django_extensions')  # noqa
+
+for i, app in enumerate(INSTALLED_APPS):
+    if app == 'django.contrib.staticfiles':
+        insert_point = i
+
+INSTALLED_APPS.insert(insert_point,'whitenoise.runserver_nostatic')
+
 MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware', )  # noqa
 
 # The Django Debug Toolbar will only be shown to these client IPs.

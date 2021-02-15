@@ -1,22 +1,14 @@
 FROM prominentedgestatengine/firecares:base
 
-RUN mkdir -p /webapps/firecares/ && \
-    chmod -R 0755 /webapps/firecares/
-
-WORKDIR /webapps/firecares/
+USER 1000:1000
 
 COPY requirements.txt /webapps/firecares/
 
-RUN pip install -r requirements.txt
-
 WORKDIR /webapps/firecares/
 
-COPY . .
+RUN pip install -r requirements.txt
 
-RUN mkdir -p /webapps/firecares/temp /webapps/firecares/logs/ && \
-    chmod -R 0755 /webapps/firecares/ && \
-    chmod -R 0777 /webapps/firecares/logs
-    #chmod -R 0777 /webapps/firecares/media
+COPY . .
 
 EXPOSE 8000
 

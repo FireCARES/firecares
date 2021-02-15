@@ -1,3 +1,4 @@
+import alog as alog
 from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Max, Min
@@ -22,6 +23,7 @@ def fire_department_search(request):
     Required context variables for fire department search.
     """
     context = cache.get('fire_department_search_context')
+
     if context:
         return context
 

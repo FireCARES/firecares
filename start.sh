@@ -1,10 +1,10 @@
 #!/bin/bash
 
-print('### settings begin ###')
+echo '### settings begin ###'
 
 python manage.py diffsettings --all
 
-print('### settings end ###')
+echo '### settings end ###'
 
 python manage.py collectstatic --noinput
 
