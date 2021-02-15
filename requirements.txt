@@ -111,7 +111,7 @@ pytest-cov==2.5.1
 pytest==2.7.0
 python-dateutil==2.5.3
 python-memcached==1.57
-PyYAML==3.13
+PyYAML==5.1
 redis==2.10.6
 requests-mock==1.2.0
 requests-oauthlib==0.7.0
