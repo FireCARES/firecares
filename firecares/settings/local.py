@@ -1,6 +1,6 @@
 from firecares.settings.base import *  # noqa
 
-INSTALLED_APPS += ('debug_toolbar', 'fixture_magic', 'django_extensions')  # noqa
+INSTALLED_APPS.extend(['debug_toolbar', 'fixture_magic', 'django_extensions']) # noqa
 
 for i, app in enumerate(INSTALLED_APPS):
     if app == 'django.contrib.staticfiles':

@@ -160,7 +160,7 @@ TEMPLATE_DIRS = (
     os.path.join(PROJECT_ROOT, 'templates'),
 )
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -195,7 +195,7 @@ INSTALLED_APPS = (
     'import_export',
     'tastypie',
     'mapwidgets'
-)
+]
 
 OSGEO_IMPORTER = 'firecares.importers.GeoDjangoImport'
 OSGEO_INSPECTOR = 'firecares.importers.GeoDjangoInspector'
