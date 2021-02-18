@@ -31,6 +31,8 @@ from firecares.utils import dictfetchall, lenient_summation
 def p(msg):
     alog.info(msg)
 
+ISOCHRONE_BREAKS = ['4', '6', '8']
+HTTP_TOO_MANY_REQUESTS = 429
 
 def update_scores():
     for fd in FireDepartment.objects.filter(archived=False):
@@ -553,6 +555,88 @@ def calculate_story_distribution(fd_id):
         rm.floor_count_coefficients = {'shape': samp[0], 'loc': samp[1], 'scale': samp[2]}
         rm.save()
 
+def get_mapbox_isochrone_geometry(x, y, params):
+    keep_trying = True
+    delay = 1
+
+    url = 'https://api.mapbox.com/isochrone/v1/mapbox/driving/{x},{y}'.format(
+        x=x,
+        y=y,
+    )
+
+    while keep_trying:
+        try:
+            response = requests.get(url, params=params)
+            response.raise_for_status()
+            keep_trying = False
+        except Exception as e:
+            print('Mapbox API error: {}'.format(e))
+            print('Reattempting in {} seconds'.format(delay))
+            time.sleep(delay)
+            # exponential backoff
+            delay *= 2
+
+    if 'features' not in response.json():
+        return None
+
+    return json.dumps(response.json()['features'][0]['geometry'])
+
+@app.task(queue='dataanalysis')
+def update_station_service_areas():
+    for firestation in FireStation.objects.filter(archived=False):
+        if not (firestation.service_area_0_4 and firestation.service_area_4_6 and firestation.service_area_6_8):
+            update_station_service_area(firestation)
+        else:
+            p('Fire station {id}: {dept} # {station_number} already has drive times'.format(
+                id=firestation.id,
+                dept=firestation.department,
+                station_number=firestation.station_number,
+                )
+            )
+
+def update_station_service_area(firestation):
+    isochrone_geometries = []
+
+    for minute in ISOCHRONE_BREAKS:
+        params = {
+            'contours_minutes': minute,
+            'polygons': 'true',
+            'access_token': settings.MAPBOX_ACCESS_TOKEN
+        }
+
+        raw_geometry = get_mapbox_isochrone_geometry(firestation.geom.x, firestation.geom.y, params)
+
+        if not raw_geometry:
+            p('Service area not found for {id}: {dept} # {station_number}'.format(
+                id=firestation.id,
+                dept=firestation.department,
+                station_number=firestation.station_number,
+                ))
+            return
+
+        # prevents bad/self-intersecting geometries
+        isochrone_geometries.append(GEOSGeometry(raw_geometry).buffer(0))
+
+    # difference the lesser isochrones from the greater ones
+    isochrone_geometries[0]
+    isochrone_geometries[1] = isochrone_geometries[1].difference(isochrone_geometries[0])
+    isochrone_geometries[2] = isochrone_geometries[2].difference(isochrone_geometries[1]).difference(isochrone_geometries[0])
+
+    def to_multipolygon(geom):
+        return GEOSGeometry(MultiPolygon(fromstr(geom.geojson),)) if geom.geom_type == 'Polygon' else geom
+
+    firestation.service_area_0_4 = to_multipolygon(isochrone_geometries[0])
+    firestation.service_area_4_6 = to_multipolygon(isochrone_geometries[1])
+    firestation.service_area_6_8 = to_multipolygon(isochrone_geometries[2])
+
+    firestation.save()
+
+    p('Fire station {id}: {dept} # {station_number} drive times updated'.format(
+        id=firestation.id,
+        dept=firestation.department,
+        station_number=firestation.station_number,
+        )
+    )
 
 @app.task(queue='dataanalysis')
 def create_parcel_department_hazard_level_rollup_all():
@@ -570,121 +654,67 @@ def get_parcel_department_hazard_level_rollup(fd_id):
     """
     stationlist = FireStation.objects.filter(department_id=fd_id, archived=False)
     dept = FireDepartment.objects.filter(id=fd_id)
-    logging.getLogger(__name__).info('get_parcel_department_hazard_level_rollup')
-    p("Calculating Drive times for:  " + dept[0].name)
-    try:
-        cursor = connections['nfirs'].cursor()
-        p(cursor)
-    except Exception as er:
-        p(traceback.format_exc())
-        
-    try:
-        #  Use Headquarters geometry if there is no Statffing assets
-        if len(stationlist) < 1:
-            drivetimeurl = 'https://geo.firecares.org/?f=json&Facilities={"features":[{"geometry":{"x":' + str(dept[0].headquarters_geom.x) + ',"spatialReference":{"wkid":4326},"y":' + str(dept[0].headquarters_geom.y) + '}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4&Break_Values=4 6 8&returnZ=false&returnM=false'
-            getdrivetime = requests.get(drivetimeurl)
 
-        else:
-            drivetimegeom = []
-            for fireStation in stationlist:
-                stationasset = {}
-                stationasset["spatialReference"] = {"wkid": 4326}
-                stationasset["y"] = round(fireStation.geom.y, 5)
-                stationasset["x"] = round(fireStation.geom.x, 5)
-                stationgeom = {}
-                stationgeom["geometry"] = stationasset
-                drivetimegeom.append(stationgeom)
+    if not dept:
+        print('Department {} not found.'.format(fd_id))
+        return
 
-            drivepostdata = {}
-            drivepostdata['f'] = 'pjson'
-            drivepostdata['returnZ'] = False
-            drivepostdata['returnM'] = False
-            drivepostdata['env:outSR'] = 4326
-            drivepostdata['Break_Values'] = '4 6 8'
-            drivepostfeatures = {}
-            drivepostfeatures['features'] = drivetimegeom
-            drivepostfeatures['geometryType'] = "esriGeometryPoint"
-            drivepostdata['Facilities'] = json.dumps(drivepostfeatures)
-            
-            drivegetdata = {
-                'features':drivepostfeatures['features'],
-                'minutes': [4,6,8],
-                
-                'coors_4':{
-                    'geometry':{
-                        'type':"MultiPolygon",
-                        'coordinates':[]
-                    }
-                },
-                'coors_6':{
-                    'geometry':{
-                        'type':"MultiPolygon",
-                        'coordinates':[]
-                    }
-                },
-                'coors_8':{
-                    'geometry':{
-                        'type':"MultiPolygon",
-                        'coordinates':[]
-                    }
-                },
-            }
-            
-            # GET URL (timing out)
-            
-            # getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/101ServerServiceAreaOct2012/GPServer/101ServerServiceAreaOct2012/execute", data=drivepostdata)
-            getdrivetime = ''
-            p(drivegetdata['features'])
-            for feature in drivegetdata['features']:
-                for minutes in drivegetdata.get('minutes'):
-                    p(minutes)
-                    p(str(feature['geometry']['y']) + ' ---- ' + str(feature['geometry']['x']))
-                    url = 'https://api.mapbox.com/isochrone/v1/mapbox/driving/'+str(feature['geometry']['x'])+','+str(feature['geometry']['y'])+'?contours_minutes='+str(minutes)+'&polygons=true&access_token='+settings.MAPBOX_ACCESS_TOKEN
-                    p(url)
-                    getdrivetime = requests.get(url)
-                    drivegetdata['coors_'+str(minutes)]['geometry']['coordinates'].append(json.loads(getdrivetime.content)['features'][0]['geometry']['coordinates'])
-                    
-                    
-                    # # p(json.loads(getdrivetime.content)) 
-                    # if len(drivegetdata['coors_'+str(minutes)]) > 0:
-                    #     drivegetdata['coors_'+str(minutes)]['features']
-                    #     # drivegetdata['coors_'+str(minutes)].append(json.loads(getdrivetime.content)[0])
-                    # else:
-                    #     drivegetdata['coors_'+str(minutes)] = json.loads(getdrivetime.content)
-                    # p('**************************************************************')
-                    # p(getdrivetime)
-            
-            # p(drivegetdata)
-        
-        update_parcel_department_hazard_level([drivegetdata['coors_4']['geometry'],drivegetdata['coors_6']['geometry'],drivegetdata['coors_8']['geometry']], dept[0])
-        # update_parcel_department_hazard_level(output_template, dept[0])
-        # update_parcel_department_hazard_level(json.loads(getdrivetime.content)['results'][0]['value']['features'], dept[0])
+    dept = dept[0]
 
-    except KeyError as ke:
-        p('Drive Time Failed for ' + dept[0].name)
-        p(traceback.format_exc())
-    except IntegrityError as ie:
-        p('Drive Time Failed for ' + dept[0].name)
-        p(traceback.format_exc())
-    except Exception as e:
-        p('Drive Time Failed for ' + dept[0].name)
-        p(traceback.format_exc())
+    p("Calculating Drive times for:  " + dept.name)
 
-def update_parcel_department_hazard_level(drivetimegeom, department):
+    # use headquarters if no stations
+    station_geometries = [{
+        "y": round(firestation.geom.y, 5),
+        "x": round(firestation.geom.x, 5),
+    } for firestation in stationlist] if stationlist else [{
+            'y': round(dept.headquarters_geom.y, 5),
+            'x': round(dept.headquarters_geom.x, 5),
+        }]
+
+    isochrone_geometries = []
+
+    for minute in ISOCHRONE_BREAKS:
+        isochrone_geom = None
+        params = {
+            'contours_minutes': minute,
+            'polygons': 'true',
+            'access_token': settings.MAPBOX_ACCESS_TOKEN
+        }
+
+        for station_geometry in station_geometries:
+            raw_geometry = get_mapbox_isochrone_geometry(station_geometry['x'], station_geometry['y'], params)
+
+            if not raw_geometry:
+                p('Service area not found for {id}: {dept} # {station_number}'.format(
+                    id=firestation.id,
+                    dept=firestation.department,
+                    station_number=firestation.station_number,
+                ))
+                continue
+
+            # prevents bad/self-intersecting geometries
+            buffered_geometry = GEOSGeometry(raw_geometry).buffer(0)
+            # union all of the equivalent isochrone polygons for each station
+            isochrone_geom = isochrone_geom.union(buffered_geometry) if isochrone_geom else buffered_geometry
+
+        isochrone_geometries.append(isochrone_geom)
+
+    # difference out the lesser isochrones from the greater ones
+    isochrone_geometries[2] = isochrone_geometries[2].difference(isochrone_geometries[1]).difference(isochrone_geometries[0])
+    isochrone_geometries[1] = isochrone_geometries[1].difference(isochrone_geometries[0])
+
+    update_parcel_department_hazard_level(isochrone_geometries, dept)
+
+def update_parcel_department_hazard_level(isochrone_geometries, department):
     """
     Intersect with Parcel layer and update parcel_department_hazard_level table
     0-4 minutes
     4-6 minutes
     6-8 minutes
     """
-
-    drivetimegeom0 = arcgis2geojson(drivetimegeom[2]['geometry'])
-    drivetimegeom4 = arcgis2geojson(drivetimegeom[1]['geometry'])
-    drivetimegeom6 = arcgis2geojson(drivetimegeom[0]['geometry'])
-
     cursor = connections['nfirs'].cursor()
 
-    # TESTGEOM = "SELECT ST_AREA(ST_GeomFromGeoJSON(%(drive_geom)s),false) As area"
     QUERY_INTERSECT_FOR_PARCEL_DRIVETIME = """SELECT sum(case when l.risk_category = 'Low' THEN 1 ELSE 0 END) as low,
         sum(CASE WHEN l.risk_category = 'Medium' THEN 1 ELSE 0 END) as medium,
         sum(CASE WHEN l.risk_category = 'High' THEN 1 ELSE 0 END) high,
@@ -697,12 +727,14 @@ def update_parcel_department_hazard_level(drivetimegeom, department):
 
     p('Querying Database for parcels')
 
-    cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': json.dumps(drivetimegeom0)})
-    results0 = dictfetchall(cursor)
-    cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': json.dumps(drivetimegeom4)})
-    results4 = dictfetchall(cursor)
-    cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': json.dumps(drivetimegeom6)})
-    results6 = dictfetchall(cursor)
+    results = []
+
+    for geom in isochrone_geometries:
+        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': geom.geojson})
+        results.append(dictfetchall(cursor))
+
+    results0, results4, results6 = results
+    drivetimegeom_0_4, drivetimegeom_4_6, drivetimegeom_6_8 = isochrone_geometries
 
     # Overwrite/Update service area is already registered
     if ParcelDepartmentHazardLevel.objects.filter(department_id=department.id):
@@ -721,18 +753,9 @@ def update_parcel_department_hazard_level(drivetimegeom, department):
         addhazardlevelfordepartment.parcelcount_unknown_4_6 = results4[0]['unknown']
         addhazardlevelfordepartment.parcelcount_unknown_6_8 = results6[0]['unknown']
 
-        if drivetimegeom0['type'] == 'MultiPolygon':
-            addhazardlevelfordepartment.drivetimegeom_0_4 = GEOSGeometry(json.dumps(drivetimegeom0))
-        else:
-            addhazardlevelfordepartment.drivetimegeom_0_4 = GEOSGeometry(MultiPolygon(fromstr(str(drivetimegeom0)),))
-        if drivetimegeom4['type'] == 'MultiPolygon':
-            addhazardlevelfordepartment.drivetimegeom_4_6 = GEOSGeometry(json.dumps(drivetimegeom4))
-        else:
-            addhazardlevelfordepartment.drivetimegeom_4_6 = GEOSGeometry(MultiPolygon(fromstr(str(drivetimegeom4)),))
-        if drivetimegeom6['type'] == 'MultiPolygon':
-            addhazardlevelfordepartment.drivetimegeom_6_8 = GEOSGeometry(json.dumps(drivetimegeom6))
-        else:
-            addhazardlevelfordepartment.drivetimegeom_6_8 = GEOSGeometry(MultiPolygon(fromstr(str(drivetimegeom6)),))
+        addhazardlevelfordepartment.drivetimegeom_0_4 = drivetimegeom_0_4 if drivetimegeom_0_4.geom_type == 'MultiPolygon' else GEOSGeometry(MultiPolygon(fromstr(drivetimegeom_0_4.geojson)))
+        addhazardlevelfordepartment.drivetimegeom_4_6 = drivetimegeom_4_6 if drivetimegeom_4_6.geom_type == 'MultiPolygon' else GEOSGeometry(MultiPolygon(fromstr(drivetimegeom_4_6.geojson)))
+        addhazardlevelfordepartment.drivetimegeom_6_8 = drivetimegeom_6_8 if drivetimegeom_6_8.geom_type == 'MultiPolygon' else GEOSGeometry(MultiPolygon(fromstr(drivetimegeom_6_8.geojson)))
 
         p(department.name + " Service Area Updated")
     else:
