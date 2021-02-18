@@ -768,6 +768,9 @@ class FireStation(USGSStructureData, Archivable):
     station_number = models.IntegerField(null=True, blank=True)
     station_address = models.ForeignKey(Address, null=True, blank=True)
     district = models.MultiPolygonField(null=True, blank=True)
+    service_area_0_4 = models.MultiPolygonField(null=True, blank=True)
+    service_area_4_6 = models.MultiPolygonField(null=True, blank=True)
+    service_area_6_8 = models.MultiPolygonField(null=True, blank=True)
     objects = models.GeoManager()
 
     @classmethod
@@ -1276,14 +1279,14 @@ def run_update_department_task(depart_id):
     """
     from firecares.tasks import update
     from celery.task.control import inspect
-    
+
     # Check for status of the current celery queue
     taskinspector = inspect()
     notaduplicatetask = True
 
     # print(taskinspector.reserved())
     # print(taskinspector.active())
-    
+
     try:
         active_tasks = taskinspector.active().values()[0]
         p(0)
@@ -1303,12 +1306,12 @@ def run_update_department_task(depart_id):
                     notaduplicatetask = False
     except Exception as e:
         p('run_update_department_task error')
-        p(e) 
+        p(e)
         # return 'No Data in celery queue'
 
     if notaduplicatetask:
         # delay for 50 seconds
-        
+
         p('Running dept update for ' + str(depart_id))
         update.update_parcel_department_effectivefirefighting_rollup.apply_async((depart_id,), countdown=50, task_id=str(depart_id) + 'efff')
         update.get_parcel_department_hazard_level_rollup.apply_async((depart_id,), countdown=50, task_id=str(depart_id) + 'servicearea')
