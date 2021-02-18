@@ -9,7 +9,6 @@
       x: config.geom.coordinates[0],
       y: config.geom.coordinates[1]
     };
-    var serviceAreaURL = $interpolate('https://geo.firecares.org/?f=json&Facilities={"features":[{"geometry":{"x":{{x}},"spatialReference":{"wkid":4326},"y":{{y}}}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=4,4,4&Break_Values=4 6 8&returnZ=false&returnM=false')(stationGeom);
 
     $scope.station = FireStation.get({id: config.id});
 
@@ -49,7 +48,7 @@
     var district = null;
     var mouseOverAddedOpacity = 0.25; // put in settings?
     var highlightColor = 'blue';      // put in settings?
-    var serviceArea, max;
+    var serviceArea, max = null;
     var messagebox = L.control.messagebox({ timeout: 11000, position:'bottomright' }).addTo(map);
     var messageboxData = L.control.messagebox({ timeout: 22000, position:'bottomleft' }).addTo(map);
 
@@ -73,16 +72,16 @@
 
     serviceArea = L.geoJson(null, {
       onEachFeature: function(feature, layer) {
-          layer.bindLabel(feature.properties.Name + ' minutes');
-          /*var popup = layer.bindPopup(feature.properties.Name + ' minutes');
-          popup.on("popupclose", function(e) {
-            e.layer.setStyle({weight: 0.8, fillOpacity:-(feature.properties.ToBreak * 0.8 - max) / (max * 1.3), fillColor: '#33cc33'});
-          });*/
+        layer.bindLabel(feature.properties.Name + ' minutes');
+        var popup = layer.bindPopup(feature.properties.Name + ' minutes');
+        popup.on("popupclose", function(e) {
+          e.layer.setStyle({weight: 0.8, fillOpacity:-(feature.properties.ToBreak * 0.8 - max) / (max * 1.3), fillColor: '#33cc33'});
+        });
 
-          layer.on('click', function(e) {
-            messageboxData.showforever(feature.properties.Name + ' minutes');
-            layer.setStyle({fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5) + mouseOverAddedOpacity, fillColor: highlightColor});
-          });
+        layer.on('click', function(e) {
+          messageboxData.showforever(feature.properties.Name + ' minutes');
+          layer.setStyle({fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5) + mouseOverAddedOpacity, fillColor: highlightColor});
+        });
       }
     });
 
@@ -260,32 +259,43 @@
         $('.weather-messages').fadeIn('slow');
         $scope.showDetails = false;
       }
-      else if ( layer._leaflet_id === serviceArea._leaflet_id && !serviceAreaData) {
+      else if (layer._leaflet_id === serviceArea._leaflet_id && !serviceAreaData) {
         map.spin(true);
-        $http({
-          method: 'GET',
-          url: serviceAreaURL
-        }).then(function success(resp) {
-          esri2geo.toGeoJSON(resp.data.results[0].value, function(_, geojson) {
-            var values = geojson.features.map(function(val, idx) {
-              return val.properties.ToBreak;
-            });
-            max = Math.max.apply(null, values);
-            serviceAreaData = geojson;
-            serviceArea.addData(geojson);
-            layer.setStyle(function(feature) {
-              return {
-                fillColor: '#33cc33',
-                fillOpacity: -(feature.properties.ToBreak * 0.8 - max) / (max * 1.5),
-                weight: 0.8
-              };
-            });
-            map.fitBounds(serviceArea);
-            map.spin(false);
-          });
-        }, function error(err) {
-          map.spin(false);
+
+        serviceAreaData = Object.keys($scope.station).reduce(function (acc, key) {
+          if (!/service_area/.test(key)) {
+            return acc;
+          }
+
+          var minutes = /\d_\d$/.exec(key)[0].split('_');
+          var feature = {
+            properties: {
+              ToBreak: parseInt(minutes[1], 10),
+              Name: 'Travel time: ' + minutes.join(' - '),
+            },
+            geometry: $scope.station[key],
+            type: 'Feature',
+          }
+
+          max = Math.max(max, feature.properties.ToBreak);
+
+          acc.push(feature);
+          return acc;
+        }, []);
+
+        serviceArea.addData(serviceAreaData);
+
+        layer.setStyle(function(feature) {
+          var fillOpacity = -(feature.properties.ToBreak * 0.8 - max) / (max * 1.2);
+          return {
+            fillColor: '#33cc33',
+            fillOpacity: fillOpacity,
+            color: '#003300',
+            weight: 0.8
+          };
         });
+        map.fitBounds(serviceArea);
+        map.spin(false);
       }
     });
 
