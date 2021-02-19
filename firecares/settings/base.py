@@ -14,7 +14,7 @@ DEPARTMENT_ADMIN_VERIFIERS = (
 DATA_FEEDBACK_EMAILS = ()
 
 MANAGERS = ADMINS
-TESTING = sys.argv[1:2] == ['test']
+TESTING = sys.argv[1:2] == ['test'] or os.getenv('TEST')
 
 DATABASES = {
     'default': {
