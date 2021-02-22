@@ -624,7 +624,7 @@ def update_station_service_area(firestation):
     isochrone_geometries[2] = isochrone_geometries[2].difference(isochrone_geometries[1]).difference(isochrone_geometries[0])
 
     def to_multipolygon(geom):
-        return GEOSGeometry(MultiPolygon(fromstr(geom.geojson),)) if geom.geom_type == 'Polygon' else geom
+        return GEOSGeometry(MultiPolygon(fromstr(geom.geojson),)) if geom.geom_type != 'MultiPolygon' else geom
 
     firestation.service_area_0_4 = to_multipolygon(isochrone_geometries[0])
     firestation.service_area_4_6 = to_multipolygon(isochrone_geometries[1])
