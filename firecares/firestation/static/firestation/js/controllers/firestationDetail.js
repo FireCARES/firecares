@@ -2,9 +2,10 @@
 
 (function() {
   angular.module('fireStation.firestationDetailController', ['xeditable', 'ui.bootstrap'])
-  .controller('fireStationController', function($scope, $window, $http, Staffing, $timeout, mapFactory, FireStation, $filter, $interpolate, $compile, $analytics, WeatherWarning, heatmap, emsHeatmap) {
+    .controller('fireStationController', function ($scope, $window, $http, Staffing, $timeout, mapFactory, FireStation, FireStationServiceAreas, $filter, $interpolate, $compile, $analytics, WeatherWarning, heatmap, emsHeatmap) {
     var thisFirestation = '/api/v1/firestations/' + config.id + '/';
     var serviceAreaData = null;
+    var serviceAreaKeyPattern = /service_area_\d+_\d+$/;
     var stationGeom = {
       x: config.geom.coordinates[0],
       y: config.geom.coordinates[1]
@@ -255,47 +256,82 @@
 
     map.on('overlayadd', function(layer) {
       layer = layer.layer;
-      if(layer.id === 'weather'){
+      if (layer.id === 'weather') {
         $('.weather-messages').fadeIn('slow');
         $scope.showDetails = false;
-      }
-      else if (layer._leaflet_id === serviceArea._leaflet_id && !serviceAreaData) {
+      } else if (layer._leaflet_id === serviceArea._leaflet_id && !serviceAreaData) {
         map.spin(true);
+        var serviceAreaGeometriesToFeatures = function (serviceAreaGeometries) {
+          return Promise.resolve(
+            Object.entries(serviceAreaGeometries)
+              .filter(function (entry) {
+                var [key, geometry] = entry;
+                return serviceAreaKeyPattern.test(key);
+              })
+              .map(function (entry) {
+                var [key, geometry] = entry;
+                var match = serviceAreaKeyPattern.exec(key);
+                var minutes = match[0].split('_');
+                var feature = {
+                  properties: {
+                    ToBreak: parseInt(minutes[minutes.length-1], 10),
+                    Name: 'Travel time: ' + minutes.join(' - '),
+                  },
+                  geometry: geometry,
+                  type: 'Feature',
+                }
 
-        serviceAreaData = Object.keys($scope.station).reduce(function (acc, key) {
-          if (!/service_area/.test(key)) {
-            return acc;
+                max = Math.max(max, feature.properties.ToBreak);
+
+                return feature;
+              }));
+        }
+
+        var fetchServiceAreaData = function () {
+          var serviceAreaKeys = Object.keys($scope.station).filter(function (key) {
+            return serviceAreaKeyPattern.test(key);
+          });
+
+          var shouldFetchData = false;
+          serviceAreaKeys.forEach(function (key) {
+            if (!$scope.station[key]) {
+              shouldFetchData = true;
+            }
+          });
+
+          if (!shouldFetchData) {
+            var data = {};
+            serviceAreaKeys.forEach(function (key) {
+              data[key] = $scope.station[key];
+            });
+            return Promise.resolve(data);
           }
 
-          var minutes = /\d_\d$/.exec(key)[0].split('_');
-          var feature = {
-            properties: {
-              ToBreak: parseInt(minutes[1], 10),
-              Name: 'Travel time: ' + minutes.join(' - '),
-            },
-            geometry: $scope.station[key],
-            type: 'Feature',
-          }
+          return FireStationServiceAreas.query({ id: config.id }).$promise;
+        };
 
-          max = Math.max(max, feature.properties.ToBreak);
+        fetchServiceAreaData()
+          .then(serviceAreaGeometriesToFeatures)
+          .then(function (serviceAreas) {
+            serviceAreaData = serviceAreas;
+            serviceArea.addData(serviceAreaData);
 
-          acc.push(feature);
-          return acc;
-        }, []);
-
-        serviceArea.addData(serviceAreaData);
-
-        layer.setStyle(function(feature) {
-          var fillOpacity = -(feature.properties.ToBreak * 0.8 - max) / (max * 1.2);
-          return {
-            fillColor: '#33cc33',
-            fillOpacity: fillOpacity,
-            color: '#003300',
-            weight: 0.8
-          };
-        });
-        map.fitBounds(serviceArea);
-        map.spin(false);
+            layer.setStyle(function(feature) {
+              var fillOpacity = -(feature.properties.ToBreak * 0.8 - max) / (max * 1.2);
+              return {
+                fillColor: '#33cc33',
+                fillOpacity: fillOpacity,
+                color: '#003300',
+                weight: 0.8
+              };
+            });
+            map.fitBounds(serviceArea);
+            map.spin(false);
+          })
+          .catch(function (e) {
+            map.spin(false);
+            console.error(e);
+          });
       }
     });
 
@@ -502,5 +538,5 @@
       $scope.shp = null;
       angular.element("form[name='boundaryUpload']").get(0).reset();
     };
-  })
+  });
 })();
