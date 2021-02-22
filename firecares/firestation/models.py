@@ -1325,7 +1325,13 @@ def update_station(sender, instance, **kwargs):
     """
     Updates Drive time and service area calculations after Station change
     """
-    if(instance.department_id):
+    update_fields = kwargs['update_fields']
+
+    # do not run the department update if the fields be updated are exclusively service areas
+    if update_fields and all(field.startswith('service_area') for field in update_fields):
+        return
+
+    if instance.department_id:
         run_update_department_task(instance.department_id)
 
 
