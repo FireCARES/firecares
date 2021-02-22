@@ -559,9 +559,10 @@ def get_mapbox_isochrone_geometry(x, y, params):
     keep_trying = True
     delay = 1
 
-    url = 'https://api.mapbox.com/isochrone/v1/mapbox/driving/{x},{y}'.format(
+    url = '{base_url}/isochrone/v1/mapbox/driving/{x},{y}'.format(
         x=x,
         y=y,
+        base_url=settings.MAPBOX_BASE_URL,
     )
 
     while keep_trying:
