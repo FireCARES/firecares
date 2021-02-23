@@ -12,6 +12,7 @@ from boto.s3.key import Key
 from StringIO import StringIO
 from django.db.utils import IntegrityError
 from firecares.utils.arcgis2geojson import arcgis2geojson
+from firecares.utils import to_multipolygon
 from celery import chain
 from firecares.celery import app
 from django.conf import settings
@@ -623,9 +624,6 @@ def update_station_service_area(firestation):
     isochrone_geometries[1] = isochrone_geometries[1].difference(isochrone_geometries[0])
     isochrone_geometries[2] = isochrone_geometries[2].difference(isochrone_geometries[1]).difference(isochrone_geometries[0])
 
-    def to_multipolygon(geom):
-        return GEOSGeometry(MultiPolygon(fromstr(geom.geojson),)) if geom.geom_type != 'MultiPolygon' else geom
-
     firestation.service_area_0_4 = to_multipolygon(isochrone_geometries[0])
     firestation.service_area_4_6 = to_multipolygon(isochrone_geometries[1])
     firestation.service_area_6_8 = to_multipolygon(isochrone_geometries[2])
@@ -705,6 +703,9 @@ def get_parcel_department_hazard_level_rollup(fd_id):
     isochrone_geometries[2] = isochrone_geometries[2].difference(isochrone_geometries[1]).difference(isochrone_geometries[0])
     isochrone_geometries[1] = isochrone_geometries[1].difference(isochrone_geometries[0])
 
+    # conver to MultiPolygon geometries
+    isochrone_geometries = [to_multipolygon(geom) for geom in isochrone_geometries]
+
     update_parcel_department_hazard_level(isochrone_geometries, dept)
 
 def update_parcel_department_hazard_level(isochrone_geometries, department):
@@ -754,9 +755,9 @@ def update_parcel_department_hazard_level(isochrone_geometries, department):
         addhazardlevelfordepartment.parcelcount_unknown_4_6 = results4[0]['unknown']
         addhazardlevelfordepartment.parcelcount_unknown_6_8 = results6[0]['unknown']
 
-        addhazardlevelfordepartment.drivetimegeom_0_4 = drivetimegeom_0_4 if drivetimegeom_0_4.geom_type == 'MultiPolygon' else GEOSGeometry(MultiPolygon(fromstr(drivetimegeom_0_4.geojson)))
-        addhazardlevelfordepartment.drivetimegeom_4_6 = drivetimegeom_4_6 if drivetimegeom_4_6.geom_type == 'MultiPolygon' else GEOSGeometry(MultiPolygon(fromstr(drivetimegeom_4_6.geojson)))
-        addhazardlevelfordepartment.drivetimegeom_6_8 = drivetimegeom_6_8 if drivetimegeom_6_8.geom_type == 'MultiPolygon' else GEOSGeometry(MultiPolygon(fromstr(drivetimegeom_6_8.geojson)))
+        addhazardlevelfordepartment.drivetimegeom_0_4 = drivetimegeom_0_4
+        addhazardlevelfordepartment.drivetimegeom_4_6 = drivetimegeom_4_6
+        addhazardlevelfordepartment.drivetimegeom_6_8 = drivetimegeom_6_8
 
         p(department.name + " Service Area Updated")
     else:
@@ -775,18 +776,9 @@ def update_parcel_department_hazard_level(isochrone_geometries, department):
         deptservicearea['parcelcount_unknown_4_6'] = results4[0]['unknown']
         deptservicearea['parcelcount_unknown_6_8'] = results6[0]['unknown']
 
-        if drivetimegeom0['type'] == 'MultiPolygon':
-            deptservicearea['drivetimegeom_0_4'] = GEOSGeometry(json.dumps(drivetimegeom0))
-        else:
-            deptservicearea['drivetimegeom_0_4'] = GEOSGeometry(MultiPolygon(fromstr(str(drivetimegeom0)),))
-        if drivetimegeom4['type'] == 'MultiPolygon':
-            deptservicearea['drivetimegeom_4_6'] = GEOSGeometry(json.dumps(drivetimegeom4))
-        else:
-            deptservicearea['drivetimegeom_4_6'] = GEOSGeometry(MultiPolygon(fromstr(str(drivetimegeom4)),))
-        if drivetimegeom6['type'] == 'MultiPolygon':
-            deptservicearea['drivetimegeom_6_8'] = GEOSGeometry(json.dumps(drivetimegeom6))
-        else:
-            deptservicearea['drivetimegeom_6_8'] = GEOSGeometry(MultiPolygon(fromstr(str(drivetimegeom6)),))
+        deptservicearea['drivetimegeom_0_4'] = drivetimegeom_0_4
+        deptservicearea['drivetimegeom_4_6'] = drivetimegeom_4_6
+        deptservicearea['drivetimegeom_6_8'] = drivetimegeom_6_8
 
         addhazardlevelfordepartment = ParcelDepartmentHazardLevel.objects.create(**deptservicearea)
         p(department.name + " Service Area Created")
