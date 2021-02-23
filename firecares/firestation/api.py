@@ -328,7 +328,7 @@ class FireStationResource(JSONDefaultModelResourceMixin, ModelResource):
 
     def prepend_urls(self):
         return [
-            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/service-area%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_service_areas'), name="api_get_firestation_service_areas"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\d+)/service-area%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_service_areas'), name="api_get_firestation_service_areas"),
         ]
 
     def get_service_areas(self, request, **kwargs):
@@ -357,8 +357,8 @@ class FireStationResource(JSONDefaultModelResourceMixin, ModelResource):
 
             # make requests to mapbox and store the service areas
             url = '{base_url}/isochrone/v1/mapbox/driving/{x},{y}'.format(
-                x=firestation.geom.x,
-                y=firestation.geom.y,
+                x=round(firestation.geom.x, 5),
+                y=round(firestation.geom.y, 5),
                 base_url=MAPBOX_BASE_URL,
             )
 
