@@ -26,8 +26,6 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 app.conf.BROKER_URL = REDIS_URL
 
-alog.info(alog.pformat(app.conf))
-
 def download_file(url, download_to=None):
 
     if not download_to:
