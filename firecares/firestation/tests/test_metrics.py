@@ -9,10 +9,11 @@ from django.db import connections
 from django.test.client import Client
 from firecares.settings.base import MAPBOX_ACCESS_TOKEN
 from firecares.firecares_core.tests.base import BaseFirecaresTestcase
-from firecares.firestation.models import FireDepartment, FireDepartmentRiskModels, PopulationClassQuartile, HazardLevels, ParcelDepartmentHazardLevel, EffectiveFireFightingForceLevel
+from firecares.firestation.models import FireDepartment, FireDepartmentRiskModels, FireStation, PopulationClassQuartile, HazardLevels, ParcelDepartmentHazardLevel, EffectiveFireFightingForceLevel
 from firecares.firestation.templatetags.firecares_tags import quartile_text, risk_level
 from firecares.tasks.update import (update_performance_score, dist_model_for_hazard_level, update_nfirs_counts,
-                                    calculate_department_census_geom, calculate_structure_counts, get_parcel_department_hazard_level_rollup, update_parcel_effectivefirefighting_table)
+                                    calculate_department_census_geom, calculate_structure_counts, get_parcel_department_hazard_level_rollup, update_parcel_effectivefirefighting_table,
+                                    update_station_service_area)
 from firecares.firecares_core.models import Address, Country
 from fire_risk.models import DIST, DISTMediumHazard, DISTHighHazard
 
@@ -430,3 +431,18 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         addedefffAreafordepartment = existingrecord[0]
 
         self.assertEqual(addedefffAreafordepartment.department_id, lafd.id)
+
+    def test_update_station_service_area(self):
+        station = FireStation.objects.create(station_number=777, name='Service Area Test Station', geom=Point(-82.5910049, 35.5785769))
+
+        self.assertIsNone(station.service_area_0_4)
+        self.assertIsNone(station.service_area_4_6)
+        self.assertIsNone(station.service_area_6_8)
+
+        update_station_service_area(station)
+
+        station = FireStation.objects.get(id=station.id)
+
+        self.assertIsNotNone(station.service_area_0_4)
+        self.assertIsNotNone(station.service_area_4_6)
+        self.assertIsNotNone(station.service_area_6_8)

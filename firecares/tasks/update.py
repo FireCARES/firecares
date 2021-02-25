@@ -628,7 +628,7 @@ def update_station_service_area(firestation):
     firestation.service_area_4_6 = to_multipolygon(isochrone_geometries[1])
     firestation.service_area_6_8 = to_multipolygon(isochrone_geometries[2])
 
-    firestation.save(update_fields=['service_area_0_4', 'service_area_4_6', 'service_area"6_8'])
+    firestation.save(update_fields=['service_area_0_4', 'service_area_4_6', 'service_area_6_8'])
 
     p('Fire station {id}: {dept} # {station_number} drive times updated'.format(
         id=firestation.id,
