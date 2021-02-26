@@ -105,7 +105,7 @@ Pygments==2.2.0
 PyJWT==1.7.1
 pylibmc==1.5.2
 pylint==1.9.5
-pyOpenSSL==17.2.0
+pyOpenSSL==17.5.0
 pyparsing==2.4.3
 pytest-cov==2.5.1
 pytest==2.7.0
