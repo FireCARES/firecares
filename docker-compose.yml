@@ -1,4 +1,4 @@
-version: '3.7' 
+version: '3.7'
 
 services:
 
@@ -14,8 +14,6 @@ services:
       - .env.local
     depends_on:
       - postgis
-
-    command: ['./manage.py', 'runserver', '--settings=firecares.settings.local', '0.0.0.0:8000']
 
   postgis:
     image: mdillon/postgis:9.6
@@ -36,4 +34,4 @@ services:
     env_file:
       - .env.local
     ports:
-      - 0.0.0.0:6372
+      - 0.0.0.0:6372:6372

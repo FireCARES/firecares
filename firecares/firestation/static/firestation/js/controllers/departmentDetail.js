@@ -80,6 +80,7 @@
     $scope.parcel_efff_counts = "";
     $scope.department_personnel_counts = " Personnel/Assets Available";
     $scope.uploadBoundary = false;
+    var serviceAreaLayer = L.geoJson().addTo(departmentMap)
     var layersControl = L.control.layers().addTo(departmentMap);
     var fires = L.featureGroup().addTo(departmentMap);
     var activeFires,activeFiresData;
@@ -523,16 +524,14 @@
       //
       departmentMap.on('overlayadd', function(layer) {
         layer = layer.layer;
-        if ( layer._leaflet_id === serviceArea._leaflet_id && serviceAreaData){
+        if (layer._leaflet_id === serviceArea._leaflet_id && serviceAreaData) {
           showServiceAreaChart(true);
         }
-        else if ( layer._leaflet_id === serviceArea._leaflet_id && !serviceAreaData) {
-
+        else if (layer._leaflet_id === serviceArea._leaflet_id && !serviceAreaData) {
           departmentMap.spin(true);
 
           // Get Service Area rollup data base on Department
           ServiceAreaRollup.query({department: config.id}).$promise.then(function(data) {
-
             if(data.objects.length > 0){
               // Add Hazard Layer Info Template
               $scope.parcel_hazard_level_counts = [

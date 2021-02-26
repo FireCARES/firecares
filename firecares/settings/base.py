@@ -14,7 +14,7 @@ DEPARTMENT_ADMIN_VERIFIERS = (
 DATA_FEEDBACK_EMAILS = ()
 
 MANAGERS = ADMINS
-TESTING = sys.argv[1:2] == ['test']
+TESTING = sys.argv[1:2] == ['test'] or os.getenv('TEST')
 
 DATABASES = {
     'default': {
@@ -160,7 +160,7 @@ TEMPLATE_DIRS = (
     os.path.join(PROJECT_ROOT, 'templates'),
 )
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -195,7 +195,7 @@ INSTALLED_APPS = (
     'import_export',
     'tastypie',
     'mapwidgets'
-)
+]
 
 OSGEO_IMPORTER = 'firecares.importers.GeoDjangoImport'
 OSGEO_INSPECTOR = 'firecares.importers.GeoDjangoInspector'
@@ -281,8 +281,11 @@ AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', None)
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', None)
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', None)
 AWS_REGION = os.getenv('AWS_REGION', 'us-east-1')
-MAPBOX_ACCESS_TOKEN = os.getenv('MAPBOX_ACCESS_TOKEN', None)
 GOOGLE_ANALYTICS_TRACKING_ID = os.getenv('GOOGLE_ANALYTICS_TRACKING_ID', None)
+
+# MAPBOX
+MAPBOX_BASE_URL = 'https://api.mapbox.com'
+MAPBOX_ACCESS_TOKEN = os.getenv('MAPBOX_ACCESS_TOKEN', None)
 
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login'
