@@ -115,7 +115,7 @@ PyYAML==3.13
 redis==2.10.6
 requests-mock==1.2.0
 requests-oauthlib==0.7.0
-requests==2.19.1
+requests==2.20.0
 scandir==1.5
 scipy==0.17.0
 simplegeneric==0.8.1
