@@ -1,6 +1,4 @@
 # Makefile for building firecares
-
-
 ORG ?= prominentedgestatengine
 REPO ?= firecares
 ENVIRONMENT ?= development
@@ -20,6 +18,15 @@ build:
 	--no-cache \
 	.
 	echo "TAG=${TAG}" > tag.properties
+
+test:
+	pip install docker-compose
+	docker-compose down 2>1 || true
+	docker-compose build
+	docker-compose up -d
+	sleep 10
+	docker exec -it firecares_firecares_1 bash -c "python ./manage.py test --noinput"
+	docker-compose down
 
 build-base:
 	docker build \
