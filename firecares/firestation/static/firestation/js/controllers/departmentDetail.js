@@ -607,71 +607,87 @@
         if ( layer._leaflet_id === efffArea._leaflet_id && efffAreaData){
           showEFFFChart(true);
         }
-        else if ( layer._leaflet_id === efffArea._leaflet_id && !efffAreaData) {
-
+        else if (layer._leaflet_id === efffArea._leaflet_id && !efffAreaData) {
           departmentMap.spin(true);
 
           // Get Efff rollup data base on Department
           EfffChartRollup.query({department: config.id}).$promise.then(function(data) {
+            if (data.objects.length > 0) {
+              var erfData = data.objects[0];
 
-            if(data.objects.length > 0){
               $scope.parcel_efff_counts = [
-                {label:"# Parcels Covered", "42+ High Hazards (10.17min)": data.objects[0].parcelcount_high_43_plus, "15+ Unknown Hazards (8min)": data.objects[0].parcelcount_unknown_15_26, "27+ Medium Hazards (8min)": data.objects[0].parcelcount_medium_27_42, "15+ Low Hazards (8min)": data.objects[0].parcelcount_low_15_26, '38': false},
-                {label:"% Parcel Coverage", "42+ High Hazards (10.17min)": data.objects[0].perc_covered_high_43_plus, "15+ Unknown Hazards (8min)": data.objects[0].perc_covered_unknown_15_26, "27+ Medium Hazards (8min)": data.objects[0].perc_covered_medium_27_42, "15+ Low Hazards (8min)": data.objects[0].perc_covered_low_15_26, '38': false}
+                {
+                  label: "# Parcels Covered",
+                  [`${config.emsTransport ? '38' : '42'}+ High Hazards (10 min)`]: erfData.parcel_count_high,
+                  "15+ Unknown Hazards (8min)": erfData.parcel_count_unknown,
+                  "27+ Medium Hazards (8min)": erfData.parcel_count_medium,
+                  "15+ Low Hazards (8min)": erfData.parcel_count_low,
+                },
+                {
+                  label:"% Parcel Coverage",
+                  [`${config.emsTransport ? '38' : '42'}+ High Hazards (10 min)`]: erfData.percent_covered_high,
+                  "15+ Unknown Hazards (8min)": erfData.percent_covered_unknown,
+                  "27+ Medium Hazards (8min)": erfData.percent_covered_medium,
+                  "15+ Low Hazards (8min)": erfData.percent_covered_low,
+                }
               ];
 
-              // Add Efff Layer and graphic chart if there is geometry
-              if(data.objects[0].drivetimegeom_15_26){
+              efffAreaData = [
+                {
+                  type: "Feature",
+                  properties: {
+                    Name: "Response Time: 8 min",
+                    ToBreak: "15+ Personnel Available",
+                    tocolor: '#74ac49',
+                    hazard: 'Low'
+                  },
+                  geometry: erfData.erf_area_low || null,
+                },
+                {
+                  type: "Feature",
+                  properties: {
+                    Name: "Response Time: 8 min",
+                    ToBreak: "27+ Personnel Available",
+                    tocolor: '#f9b380',
+                    hazard: 'Medium'
+                  },
+                  geometry: erfData.erf_area_medium || null,
+                },
+                {
+                  type: 'Feature',
+                  properties: {
+                    Name: 'Response Time: 10 min',
+                    ToBreak: `${config.emsTransport ? '38' : '42'}+ Personnel Available`,
+                    tocolor: '#f89983',
+                    hazard: 'High'
+                  },
+                  geometry: erfData.erf_area_high || null,
+                },
+              ];
 
-                //merge geometries
-                var traveltime0 = { "type": "Feature",
-                  "properties": {"Name": "Travel Time: 8 min", "ToBreak":"15+ Personnel Available", "tocolor": '#74ac49', "hazard":'Low'},
-                  "geometry": data.objects[0].drivetimegeom_15_26||null
-                }
-                var traveltime4 = { "type": "Feature",
-                  "properties": {"Name": "Travel Time: 8 min", "ToBreak":"27+ Personnel Available", "tocolor":'#f9b380', "hazard":'Medium'},
-                  "geometry": data.objects[0].drivetimegeom_27_42||null
-                }
+              efffArea.addData(efffAreaData);
 
-                if(config.emsTransport){
-                  var traveltime6 = { "type": "Feature",
-                    "properties": {"Name": "Travel Time: 10.17 min", "ToBreak":"38+ Personnel Available", "tocolor":'#f89983', "hazard":'High'},
-                    "geometry": data.objects[0].drivetimegeom_38_plus||null
-                  }
-                  $scope.parcel_efff_counts = [
-                    {label:"# Parcels Covered", "38+ High Hazards (10.17min)": data.objects[0].parcelcount_high38_plus, "15+ Unknown Hazards (8min)": data.objects[0].parcelcount_unknown_15_26, "27+ Medium Hazards (8min)": data.objects[0].parcelcount_medium_27_42, "15+ Low Hazards (8min)": data.objects[0].parcelcount_low_15_26, '38': true},
-                    {label:"% Parcel Coverage", "38+ High Hazards (10.17min)": data.objects[0].perc_covered_high38_plus, "15+ Unknown Hazards (8min)": data.objects[0].perc_covered_unknown_15_26, "27+ Medium Hazards (8min)": data.objects[0].perc_covered_medium_27_42, "15+ Low Hazards (8min)": data.objects[0].perc_covered_low_15_26, '38': true}
-                  ];
-                }
-                else{
-                  var traveltime6 = { "type": "Feature",
-                    "properties": {"Name": "Travel Time: 10.17 min", "ToBreak":"42+ Personnel Available", "tocolor":'#f89983', "hazard":'High'},
-                    "geometry": data.objects[0].drivetimegeom_43_plus||null
-                  }
-                }
+              layer.setStyle(function (feature) {
+                return {
+                  fillColor: feature.properties.tocolor,
+                  fillOpacity: .4, weight:1, color:'#fff', opacity:.8
+                };
+              });
 
-                var travelTimeGeom = [traveltime0, traveltime4, traveltime6];
-                efffAreaData = travelTimeGeom;
-                efffArea.addData(travelTimeGeom);
-                layer.setStyle(function(feature) {
-                  return {
-                    fillColor: feature.properties.tocolor,
-                    fillOpacity: .4, weight:1, color:'#fff', opacity:.8
-                  };
-                });
-                departmentMap.fitBounds(efffArea);
-                messagebox.show('Effective Fire Fighting Force added to the map.');
-              }
-            }
-            // Return no data if department hasn't been calculated yet
-            else{
+              departmentMap.fitBounds(efffArea);
+
+              messagebox.show('Effective Fire Fighting Force added to the map.');
+            } else {
+              // Return no data if department hasn't been calculated yet
               $scope.parcel_efff_counts = [
-                {label:"Personnel Coverage", "42+ High Hazards (10.17min)": 0, "15+ Unknown Hazards (8min)": 0, "27+ Medium Hazards (8min)": 0, "15+ Low Hazards (8min)": 0}
+                {label:"Personnel Coverage", "42+ High Hazards (10 min)": 0, "15+ Unknown Hazards (8min)": 0, "27+ Medium Hazards (8min)": 0, "15+ Low Hazards (8min)": 0}
               ];
 
               messagebox.show('Effective Fire Fighting Force requires valid Personnel entries.');
             }
+
             departmentMap.spin(false);
+
             showEFFFChart(true);
 
             document.addEventListener("efffHighlight", function (e) {
@@ -684,6 +700,7 @@
                 }
               };
             });
+
             document.addEventListener("uNefffHighlight", function (e) {
               for (var l in efffArea._layers) {
                 efffArea._layers[l].setStyle({weight: 0.1, fillOpacity:0.4, fillColor: efffArea._layers[l].feature.properties.tocolor, color:'#fff', opacity:.8});

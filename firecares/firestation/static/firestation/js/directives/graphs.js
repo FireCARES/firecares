@@ -1012,22 +1012,24 @@
           color['High'] = 'rgba(248,153,131,0.9)';
           color['Unknown'] = 'rgba(50%,50%,50%,0.6)';
 
-          if (dataset[0][38]) {
-            var options = ["15+ Low Hazards (8min)", '27+ Medium Hazards (8min)', '38+ High Hazards (10.17min)', '15+ Unknown Hazards (8min)'];
-            var nametitle = {};
-            nametitle['15+ Low Hazards (8min)'] = 'Low';
-            nametitle['27+ Medium Hazards (8min)'] = 'Medium';
-            nametitle['38+ High Hazards (10.17min)'] = 'High';
-            nametitle['15+ Unknown Hazards (8min)'] = 'Unknown';
-          }
-          else {
-            var options = ["15+ Low Hazards (8min)", '27+ Medium Hazards (8min)', '42+ High Hazards (10.17min)', '15+ Unknown Hazards (8min)'];
-            var nametitle = {};
-            nametitle['15+ Low Hazards (8min)'] = 'Low';
-            nametitle['27+ Medium Hazards (8min)'] = 'Medium';
-            nametitle['42+ High Hazards (10.17min)'] = 'High';
-            nametitle['15+ Unknown Hazards (8min)'] = 'Unknown';
-          }
+          var options = Object.keys(dataset[0])
+            .filter(function (key) { return key !== 'label' })
+            .sort(function (keyA, keyB) {
+              if (/unknown/i.test(keyA)) {
+                return 1;
+              } else if (/unknown/i.test(keyB)) {
+                return -1;
+              }
+
+              return keyA > keyB ? 1 : -1;
+            });
+
+          var riskLevelRegex = /(high|medium|low|unknown)/i;
+          var nametitle = {};
+
+          options.forEach(function (option) {
+            nametitle[option] = riskLevelRegex.exec(option)[0];
+          });
 
           var xAxis = d3.svg.axis()
             .scale(x0)
