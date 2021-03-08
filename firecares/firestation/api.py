@@ -1,3 +1,4 @@
+import re
 import json
 import logging
 import requests
@@ -5,6 +6,7 @@ from .forms import StaffingForm
 from .models import FireStation, Staffing, FireDepartment, ParcelDepartmentHazardLevel, EffectiveFireFightingForceLevel
 from firecares.weather.models import DepartmentWarnings
 from firecares.settings.base import MAPBOX_BASE_URL, MAPBOX_ACCESS_TOKEN
+from firecares.utils import to_multipolygon
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf.urls import url
@@ -345,16 +347,17 @@ class FireStationResource(JSONDefaultModelResourceMixin, ModelResource):
         try:
             firestation = FireStation.objects.get(pk=kwargs['pk'])
         except DoesNotExist as e:
-            return HttpNotFound('Station {} not found'.format(kwargs['pk']))
+            return HttpResponse(
+                status=404,
+                reason='Station {} not found'.format(kwargs['pk'])
+            )
 
-        service_area_geoms = { 'service_area_{}'.format(boundary): getattr(firestation, 'service_area_{}'.format(boundary), None) for boundary in ['0_4', '4_6', '6_8'] }
+        service_area_attrs = sorted(attr for attr in dir(firestation) if attr.startswith('service_area'))
+        service_area_geoms = { service_area_attr: getattr(firestation, service_area_attr, None) for service_area_attr in service_area_attrs }
 
         # if the service area geometries are not in the database, fetch them from mapbox and
         # cache them in the database
         if not all(service_area_geoms.values()):
-            def to_multipolygon(geom):
-                return geos.GEOSGeometry(geos.MultiPolygon(geos.fromstr(geom.geojson),)) if geom.geom_type != 'MultiPolygon' else geom
-
             # make requests to mapbox and store the service areas
             url = '{base_url}/isochrone/v1/mapbox/driving/{x},{y}'.format(
                 x=round(firestation.geom.x, 5),
@@ -364,7 +367,7 @@ class FireStationResource(JSONDefaultModelResourceMixin, ModelResource):
 
             for service_area in service_area_geoms:
                 params = {
-                    'contours_minutes': service_area[-1],
+                    'contours_minutes': re.findall(r'\d+$', service_area)[0],
                     'polygons': 'true',
                     'access_token': MAPBOX_ACCESS_TOKEN,
                 }
@@ -372,15 +375,18 @@ class FireStationResource(JSONDefaultModelResourceMixin, ModelResource):
                 res = requests.get(url, params=params)
 
                 if 'features' not in res.json():
-                    return HttpNotFound('No matching service area geometries found for this station\'s location')
+                    return HttpResponse(
+                        status=404,
+                        reason='No matching service area geometries found for this station\'s location'
+                    )
 
                 raw_geometry = json.dumps(res.json()['features'][0]['geometry'])
                 isochrone_geom = geos.GEOSGeometry(raw_geometry).buffer(0)
 
                 service_area_geoms[service_area] = isochrone_geom
 
-            service_area_geoms['service_area_6_8'] = service_area_geoms['service_area_6_8'].difference(service_area_geoms['service_area_4_6']).difference(service_area_geoms['service_area_0_4'])
-            service_area_geoms['service_area_4_6'] = service_area_geoms['service_area_4_6'].difference(service_area_geoms['service_area_0_4'])
+            for i in reversed(range(1, len(service_area_attrs))):
+                service_area_geoms[service_area_attrs[i]] = service_area_geoms[service_area_attrs[i]].difference(service_area_geoms[service_area_attrs[i-1]])
 
             # some may be Polygons, need to coerce them to MultiPolygon
             for service_area, service_area_geom in service_area_geoms.items():
