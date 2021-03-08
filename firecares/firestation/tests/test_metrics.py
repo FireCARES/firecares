@@ -13,7 +13,7 @@ from firecares.firestation.models import FireDepartment, FireDepartmentRiskModel
 from firecares.firestation.templatetags.firecares_tags import quartile_text, risk_level
 from firecares.tasks.update import (update_performance_score, dist_model_for_hazard_level, update_nfirs_counts,
                                     calculate_department_census_geom, calculate_structure_counts, get_parcel_department_hazard_level_rollup, update_parcel_effectivefirefighting_table,
-                                    update_station_service_area)
+                                    update_station_service_area, update_station_erf_area)
 from firecares.firecares_core.models import Address, Country
 from fire_risk.models import DIST, DISTMediumHazard, DISTHighHazard
 
@@ -365,7 +365,6 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         self.assertEqual(lafd.metrics.structure_counts_by_risk_category.all, sum(ret[0]))
 
     def load_mock_drivetime(self, filename):
-
         with open(os.path.join(os.path.dirname(__file__), filename), 'r') as f:
             return f.read()
 
@@ -386,9 +385,6 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         response = requests.head(url, allow_redirects=True, params=params)
         self.assertEqual(response.status_code, 200)
 
-        mockdrivetime = json.loads(self.load_mock_drivetime('mock/drivetimemock.json'))
-        self.assertEqual(len(mockdrivetime['results'][0]['value']['features']), 3)
-
         ret = [(543338L, 236418L, 19695L, 1069L)]
         mock_cur = mock_connections['nfirs'].cursor.return_value
         mock_cur.description = [('low',), ('medium',), ('high',), ('unknown',)]
@@ -408,12 +404,7 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
 
     @mock.patch('firecares.tasks.update.connections')
     def test_calculate_efff_area_metrics(self, mock_connections):
-        iaffurl = "http://gis.iaff.org/arcgis/rest/services/Production/PeopleCountOct2012/GPServer/PeopleCountOct2012/execute"
-
-        response = requests.head(iaffurl, allow_redirects=True)
-        self.assertEqual(response.status_code, 200)
-
-        mockdrivetime = json.loads(self.load_mock_drivetime('mock/efffmock.json'))
+        mock_erf_area = self.load_mock_drivetime('mock/erf_area_low.json')
 
         ret = [(543338L, 236418L, 19695L, 1069L)]
         mock_cur = mock_connections['nfirs'].cursor.return_value
@@ -423,10 +414,12 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         us = Country.objects.create(iso_code='US', name='United States')
         address = Address.objects.create(address_line1='Test', country=us,
                                          geom=Point(-118.42170426600454, 34.09700463377199))
-        lafd = FireDepartment.objects.create(name='Los Angeles', population=0, population_class=9, state='CA',
+        lafd = FireDepartment.objects.create(name='Los Angeles', population=2000000, population_class=9, state='CA',
                                              headquarters_address=address, featured=0, archived=0)
 
-        update_parcel_effectivefirefighting_table(mockdrivetime['results'][0]['value']['features'], lafd)
+        lafd.metrics.structure_counts_by_risk_category.low = 20000
+
+        update_parcel_effectivefirefighting_table(mock_erf_area, 'low', lafd)
         existingrecord = EffectiveFireFightingForceLevel.objects.filter(department_id=lafd.id)
         addedefffAreafordepartment = existingrecord[0]
 
@@ -435,14 +428,25 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
     def test_update_station_service_area(self):
         station = FireStation.objects.create(station_number=777, name='Service Area Test Station', geom=Point(-82.5910049, 35.5785769))
 
-        self.assertIsNone(station.service_area_0_4)
-        self.assertIsNone(station.service_area_4_6)
-        self.assertIsNone(station.service_area_6_8)
+        service_area_attrs = [attr for attr in dir(station) if attr.startswith('service_area')]
 
-        update_station_service_area(station)
+        for service_area_attr in service_area_attrs:
+            self.assertIsNone(getattr(station, service_area_attr))
 
-        station = FireStation.objects.get(id=station.id)
+        station = update_station_service_area(station)
 
-        self.assertIsNotNone(station.service_area_0_4)
-        self.assertIsNotNone(station.service_area_4_6)
-        self.assertIsNotNone(station.service_area_6_8)
+        for service_area_attr in service_area_attrs:
+            self.assertIsNotNone(getattr(station, service_area_attr))
+
+    def test_update_station_erf_area(self):
+        station = FireStation.objects.create(station_number=778, name='ERF Area Test Station', geom=Point(-82.5910049, 35.5785769))
+
+        erf_area_attrs = [attr for attr in dir(station) if attr.startswith('erf_area')]
+
+        for erf_area_attr in erf_area_attrs:
+            self.assertIsNone(getattr(station, erf_area_attr))
+
+        station = update_station_erf_area(station)
+
+        for erf_area_attr in erf_area_attrs:
+            self.assertIsNotNone(getattr(station, erf_area_attr))
