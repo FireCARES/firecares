@@ -653,9 +653,8 @@ def update_station_service_area(firestation):
         isochrone_geometries.append(GEOSGeometry(raw_geometry).buffer(0))
 
     # difference the lesser isochrones from the greater ones
-    isochrone_geometries[0]
-    isochrone_geometries[1] = isochrone_geometries[1].difference(isochrone_geometries[0])
-    isochrone_geometries[2] = isochrone_geometries[2].difference(isochrone_geometries[1]).difference(isochrone_geometries[0])
+    for i in reversed(range(1, len(isochrone_geometries))):
+        isochrone_geometries[i] = isochrone_geometries[i].difference(isochrone_geometries[i-1])
 
     firestation.service_area_0_4 = to_multipolygon(isochrone_geometries[0])
     firestation.service_area_4_6 = to_multipolygon(isochrone_geometries[1])
