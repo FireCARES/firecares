@@ -803,7 +803,7 @@ class FireStation(USGSStructureData, Archivable):
                     if station.station_number:
                         station.station_number = int(station.station_number)
 
-                station.save()
+                station.save(update_fields=['department', 'station_address', 'address', 'geom', 'city', 'zipcode', 'state', 'station_number'])
             else:
                 station = None
         except Exception:
@@ -1332,11 +1332,8 @@ def update_station(sender, instance, **kwargs):
     """
     update_fields = kwargs['update_fields']
 
-    # do not run the department update if the fields be updated are exclusively service areas
-    if update_fields and all(field.startswith('service_area') for field in update_fields):
-        return
-
-    if instance.department_id:
+    # only run the department update task if the station's geometry has changed
+    if update_fields and 'geom' in update_fields and instance.department_id:
         run_update_department_task(instance.department_id)
 
 
@@ -1345,7 +1342,7 @@ def update_station_from_staffing(sender, instance, **kwargs):
     """
     Updates Drive time and service area calculations after Station Staffin change
     """
-    if(instance.firestation):
+    if instance.firestation:
         fid = FireStation.objects.filter(usgsstructuredata_ptr_id=instance.firestation)[0].department_id
         run_update_department_task(fid)
 
