@@ -1007,8 +1007,14 @@ def update_parcel_effectivefirefighting_table(erf_geom, risk_level, department):
         efffl = EffectiveFireFightingForceLevel(department=department)
 
     setattr(efffl, 'parcel_count_{}'.format(risk_level), result[risk_level])
-    setattr(efffl, 'percent_covered_{}'.format(risk_level),
-        round(100 * float(result[risk_level]) / float(getattr(department.metrics.structure_counts_by_risk_category, risk_level)), 2))
+
+    structure_counts = getattr(department.metrics.structure_counts_by_risk_category, risk_level)
+
+    percent_covered = 100 if structure_counts == 0 else (
+        round(100 * float(result[risk_level]) / float(structure_counts), 2)
+    )
+
+    setattr(efffl, 'percent_covered_{}'.format(risk_level), percent_covered)
 
     if erf_geom:
         setattr(efffl, 'erf_area_{}'.format(risk_level), to_multipolygon(fromstr(erf_geom)))
