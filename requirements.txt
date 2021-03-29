@@ -101,7 +101,7 @@ ptvsd==4.3.2
 ptyprocess==0.5.1
 pyasn1==0.2.3
 pycparser==2.17
-Pygments==2.2.0
+Pygments==2.7.4
 PyJWT==1.7.1
 pylibmc==1.5.2
 pylint==1.9.5
