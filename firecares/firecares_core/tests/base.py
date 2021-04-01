@@ -50,7 +50,7 @@ class BaseFirecaresTestcase(TestCase):
         return user, dict(username=username, password=password)
 
     def create_firestation(self, **kwargs):
-        return FireStation.objects.create(station_number=25, name='Test Station', geom=Point(35, -77),
+        return FireStation.objects.create(station_number=25, name='Test Station', geom=Point(-120.5665792, 35.1263567),
                                           **kwargs)
 
     def load_la_department(self):

@@ -7,11 +7,13 @@ from django.contrib.gis.geos import Point, GEOSGeometry
 from django.core.management import call_command
 from django.db import connections
 from django.test.client import Client
+from firecares.settings.base import MAPBOX_ACCESS_TOKEN
 from firecares.firecares_core.tests.base import BaseFirecaresTestcase
-from firecares.firestation.models import FireDepartment, FireDepartmentRiskModels, PopulationClassQuartile, HazardLevels, ParcelDepartmentHazardLevel, EffectiveFireFightingForceLevel
+from firecares.firestation.models import FireDepartment, FireDepartmentRiskModels, FireStation, PopulationClassQuartile, HazardLevels, ParcelDepartmentHazardLevel, EffectiveFireFightingForceLevel
 from firecares.firestation.templatetags.firecares_tags import quartile_text, risk_level
 from firecares.tasks.update import (update_performance_score, dist_model_for_hazard_level, update_nfirs_counts,
-                                    calculate_department_census_geom, calculate_structure_counts, get_parcel_department_hazard_level_rollup, update_parcel_effectivefirefighting_table)
+                                    calculate_department_census_geom, calculate_structure_counts, get_parcel_department_hazard_level_rollup, update_parcel_effectivefirefighting_table,
+                                    update_station_service_area)
 from firecares.firecares_core.models import Address, Country
 from fire_risk.models import DIST, DISTMediumHazard, DISTHighHazard
 
@@ -369,9 +371,19 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
 
     @mock.patch('firecares.tasks.update.connections')
     def test_calculate_service_area_metrics(self, mock_connections):
-        iaffurl = "http://gis.iaff.org/arcgis/rest/services/Production/101ServerServiceAreaOct2012/GPServer/101ServerServiceAreaOct2012/execute"
+        hq_location = Point(-118.42170426600454, 34.09700463377199)
+        url = 'https://api.mapbox.com/isochrone/v1/mapbox/driving/{x},{y}'.format(
+            x=hq_location.x,
+            y=hq_location.y,
+        )
 
-        response = requests.head(iaffurl, allow_redirects=True)
+        params = {
+            'polygons': 'true',
+            'contours_minutes': '4',
+            'access_token': MAPBOX_ACCESS_TOKEN,
+        }
+
+        response = requests.head(url, allow_redirects=True, params=params)
         self.assertEqual(response.status_code, 200)
 
         mockdrivetime = json.loads(self.load_mock_drivetime('mock/drivetimemock.json'))
@@ -384,7 +396,7 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
 
         us = Country.objects.create(iso_code='US', name='United States')
         address = Address.objects.create(address_line1='Test', country=us,
-                                         geom=Point(-118.42170426600454, 34.09700463377199))
+                                         geom=hq_location)
         lafd = FireDepartment.objects.create(name='Los Angeles', population=0, population_class=9, state='CA',
                                              headquarters_address=address, featured=0, archived=0)
 
@@ -419,3 +431,18 @@ class FireDepartmentMetricsTests(BaseFirecaresTestcase):
         addedefffAreafordepartment = existingrecord[0]
 
         self.assertEqual(addedefffAreafordepartment.department_id, lafd.id)
+
+    def test_update_station_service_area(self):
+        station = FireStation.objects.create(station_number=777, name='Service Area Test Station', geom=Point(-82.5910049, 35.5785769))
+
+        self.assertIsNone(station.service_area_0_4)
+        self.assertIsNone(station.service_area_4_6)
+        self.assertIsNone(station.service_area_6_8)
+
+        update_station_service_area(station)
+
+        station = FireStation.objects.get(id=station.id)
+
+        self.assertIsNotNone(station.service_area_0_4)
+        self.assertIsNotNone(station.service_area_4_6)
+        self.assertIsNotNone(station.service_area_6_8)

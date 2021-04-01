@@ -3,8 +3,9 @@
 echo '### settings begin ###'
 
 python manage.py diffsettings --all
-
 echo '### settings end ###'
+
+python manage.py migrate
 
 python manage.py collectstatic --noinput
 

@@ -180,6 +180,27 @@ class FireStationTests(BaseFirecaresTestcase):
         with self.assertRaises(Staffing.DoesNotExist):
             Staffing.objects.get(id=capability.id)
 
+    def test_service_areas(self):
+        """
+        Tests getting service areas via the API
+        """
+        url = '{0}{1}/service-area/'.format(reverse('api_dispatch_list',
+                                                   args=[self.current_api_version, 'firestations']), self.fire_station.id)
+
+        client = Client()
+        client.login(**self.admin_creds)
+
+        response = client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        station = FireStation.objects.get(pk=self.fire_station.id)
+
+        service_areas = json.loads(response.content)
+
+        self.assertEqual(service_areas['service_area_0_4'], json.loads(station.service_area_0_4.geojson))
+        self.assertEqual(service_areas['service_area_4_6'], json.loads(station.service_area_4_6.geojson))
+        self.assertEqual(service_areas['service_area_6_8'], json.loads(station.service_area_6_8.geojson))
+
     def test_response_capability_form_validation(self):
         """
         Tests capability validation via a Form object.

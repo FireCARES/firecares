@@ -2,6 +2,7 @@ import inspect
 import numbers
 import re
 from django.conf import settings
+from django.contrib.gis.geos import GEOSGeometry, MultiPolygon, fromstr
 from enum import IntEnum
 from functools import wraps
 
@@ -62,6 +63,9 @@ def get_property(obj, prop):
             return a()
         else:
             return a
+
+def to_multipolygon(geom):
+    return GEOSGeometry(MultiPolygon(fromstr(geom.geojson),)) if geom.geom_type != 'MultiPolygon' else geom
 
 
 class IntChoiceEnum(IntEnum):
