@@ -34,6 +34,39 @@ def p(msg):
     alog.info(msg)
 
 ISOCHRONE_BREAKS = ['4', '6', '8']
+
+# There are two different total response times for effective response force:
+# 8 minutes for low and medium risk parcels
+# 10 minutes for high risk parcels
+# The mapbox API gives us drive time isochrones, however this does not factor in
+# alarm processing time and turnout time. According to Lori at IPSDI, the drive
+# time plus alarm processing plus turnout time should be less than or equal to
+# the times above. She said shaving three minutes off of the allowable drive time
+# would be the correct calculation for adjusting the drive times.
+RISK_LEVEL_ERF_DRIVE_TIMES = {
+    'unknown': 5,
+    'low': 5,
+    'medium': 5,
+    'high': 7,
+    }
+RISK_LEVEL_ERF_AREAS = {
+    'low': 'erf_area_low',
+    'medium': 'erf_area_medium',
+    'high': 'erf_area_high',
+    'unknown': 'erf_area_unknown',
+    }
+RISK_LEVEL_MINIMUM_STAFFING_NO_EMS = {
+    'low': 15,
+    'medium': 27,
+    'high': 42,
+    'unknown': 15,
+    }
+RISK_LEVEL_MINIMUM_STAFFING = {
+    'low': 15,
+    'medium': 27,
+    'high': 38,
+    'unknown': 15,
+    }
 HTTP_TOO_MANY_REQUESTS = 429
 
 def update_scores():
@@ -622,9 +655,8 @@ def update_station_service_area(firestation):
         isochrone_geometries.append(GEOSGeometry(raw_geometry).buffer(0))
 
     # difference the lesser isochrones from the greater ones
-    isochrone_geometries[0]
-    isochrone_geometries[1] = isochrone_geometries[1].difference(isochrone_geometries[0])
-    isochrone_geometries[2] = isochrone_geometries[2].difference(isochrone_geometries[1]).difference(isochrone_geometries[0])
+    for i in reversed(range(1, len(isochrone_geometries))):
+        isochrone_geometries[i] = isochrone_geometries[i].difference(isochrone_geometries[i-1])
 
     firestation.service_area_0_4 = to_multipolygon(isochrone_geometries[0])
     firestation.service_area_4_6 = to_multipolygon(isochrone_geometries[1])
@@ -632,12 +664,60 @@ def update_station_service_area(firestation):
 
     firestation.save(update_fields=['service_area_0_4', 'service_area_4_6', 'service_area_6_8'])
 
-    p('Fire station {id}: {dept} # {station_number} drive times updated'.format(
+    p('Fire station {id}: {dept} #{station_number} drive times updated'.format(
         id=firestation.id,
         dept=firestation.department,
         station_number=firestation.station_number,
         )
     )
+
+    return firestation
+
+@app.task(queue='dataanalysis')
+def update_station_erf_areas():
+    for firestation in FireStation.objects.filter(archived=False):
+        if not all([firestation.erf_area_low, firestation.erf_area_medium, firestation.erf_area_high, firestation_erf_area_unknown]):
+            update_station_erf_area(firestation)
+            firestation.save(update_fields=['erf_area_low', 'erf_area_medium', 'erf_area_high', 'erf_area_unknown'])
+        else:
+            p('Fire station {id}: {dept} # {station_number} already has erf areas'.format(
+                id=firestation.id,
+                dept=firestation.department,
+                station_number=firestation.station_number,
+                )
+            )
+
+def update_station_erf_area(firestation):
+    for risk_level, minute in RISK_LEVEL_ERF_DRIVE_TIMES.items():
+        params = {
+            'contours_minutes': minute,
+            'polygons': 'true',
+            'access_token': settings.MAPBOX_ACCESS_TOKEN
+        }
+
+        raw_geometry = get_mapbox_isochrone_geometry(firestation.geom.x, firestation.geom.y, params)
+
+        if not raw_geometry:
+            p('Service area not found for {id}: {dept} # {station_number}'.format(
+                id=firestation.id,
+                dept=firestation.department,
+                station_number=firestation.station_number,
+                ))
+            return
+
+        # prevents bad/self-intersecting geometries
+        erf_geometry = to_multipolygon(GEOSGeometry(raw_geometry).buffer(0))
+
+        setattr(firestation, 'erf_area_{}'.format(risk_level), erf_geometry)
+
+    p('Fire station {id}: {dept} #{station_number} ERF areas updated'.format(
+        id=firestation.id,
+        dept=firestation.department,
+        station_number=firestation.station_number,
+        )
+    )
+
+    return firestation
 
 @app.task(queue='dataanalysis')
 def create_parcel_department_hazard_level_rollup_all():
@@ -787,7 +867,6 @@ def update_parcel_department_hazard_level(isochrone_geometries, department):
 
     addhazardlevelfordepartment.save()
 
-
 @app.task(queue='dataanalysis')
 def create_effective_firefighting_rollup_all():
     """
@@ -796,277 +875,152 @@ def create_effective_firefighting_rollup_all():
     for fd in FireDepartment.objects.values_list('id', flat=True):
         update_parcel_department_effectivefirefighting_rollup(fd)
 
-
-def get_async_efff_service_status(jobid, dept_name):
-    """
-    Check status for Drive Time Asynchronous Webservice until there is a results value then call the results url to get json geom
-    results: {
-        PeopleCount: {
-        paramUrl: "results/PeopleCount
-    """
-    getdrivetimejobstatus = requests.get("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCount2017_V2/GPServer/PeopleCount2017/jobs/" + jobid + "?f=json")
-
-    if 'results' in json.loads(getdrivetimejobstatus.content):
-        p("Drive Time Analysis finished for " + dept_name.name)
-        drivetimejobfinished = requests.get("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCount2017_V2/GPServer/PeopleCount2017/jobs/" + jobid + "/results/PeopleCount?f=pjson")
-        update_parcel_effectivefirefighting_table(json.loads(drivetimejobfinished.content)['value']['features'], dept_name)
-
-    elif json.loads(getdrivetimejobstatus.content)['jobStatus'] == 'esriJobFailed':
-        p("Drive Time Analysis errored for " + dept_name.name)
-
-    else:
-        p("Drive Time Analysis processing for " + dept_name.name)
-        time.sleep(20)
-        get_async_efff_service_status(jobid, dept_name)
-
-
 @app.task(queue='dataanalysis')
 def update_parcel_department_effectivefirefighting_rollup(fd_id):
     """
     Update for one department for the effective fire fighting force
     """
-    stationlist = FireStation.objects.filter(department_id=fd_id)
-    dept = FireDepartment.objects.filter(id=fd_id)
-    staffingtotal = "1"  # assume staffing minimum of 1 for now
+    stations = FireStation.objects.filter(department_id=fd_id)
+    dept = FireDepartment.objects.get(id=fd_id)
+    # assume staffing minimum of 1 for now
+    staffingtotal = "1"
 
-    if dept[0].owned_tracts_geom is None:
+    if dept.owned_tracts_geom is None:
+        p("No geometry for the department " + dept.name)
+        return
 
-        p("No geometry for the department " + dept[0].name)
+    p('Calculating response times and staffing for: {dept_id}: {dept_name} at {t}'.format(
+        t=time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
+        dept_name=dept.name,
+        dept_id=dept.id
+        )
+    )
 
-    else:
-        print "Calculating Response times and staffing for:  " + dept[0].name + ' at ' + time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+    # No stations are present, only hq
+    if not stations:
+        stations = [Firestation(geom=dept.headquarters_geom)]
 
-        try:
-            #  Use Headquarters geometry if there is no Statffing assets
-            if len(stationlist) < 1:
-                drivetimeurl = 'http://gis.iaff.org/arcgis/rest/services/Production/PeopleCountOct2012/GPServer/PeopleCountOct2012/execute?f=json&Facilities={"features":[{"geometry":{"x":' + str(dept[0].headquarters_geom.x) + ',"spatialReference":{"wkid":4326},"y":' + str(dept[0].headquarters_geom.y) + '}}],"geometryType":"esriGeometryPoint"}&env:outSR=4326&text_input=' + staffingtotal + '&returnZ=false&returnM=false'
-                getdrivetime = requests.get(drivetimeurl)
+    for station in stations:
+        if not all(getattr(station, erf_area_attr) for erf_area_attr in RISK_LEVEL_ERF_AREAS.values()):
+            station = update_station_erf_area(station)
+            # Do not save in the case that this is a temp station created from hq geom above
+            if station.pk:
+                station.save(update_fields=['erf_area_low', 'erf_area_medium', 'erf_area_high', 'erf_area_unknown'])
 
-            else:
-                drivetimegeom = []
-                staffingtotal = ""
-                for fireStation in stationlist:
-                    # staffing
-                    assetlist = Staffing.objects.filter(firestation_id=fireStation.id)
-                    stationstafftotal = 0
-                    for staff in assetlist:
-                        stationstafftotal = stationstafftotal + staff.personnel
+    # There are different staffing requirements for the high
+    # risk category depending on if EMS transport is available
+    risk_level_minimum_staffing = RISK_LEVEL_MINIMUM_STAFFING if dept.ems_transport else RISK_LEVEL_MINIMUM_STAFFING_NO_EMS
 
-                    if stationstafftotal <= 0:
-                        continue
+    for risk_level, erf_area in RISK_LEVEL_ERF_AREAS.items():
+        print 'Calculating effective response force extent for department: {department}, risk level: {risk_level}'.format(
+            department=dept.id,
+            risk_level=risk_level,
+            )
+        geom = get_efff_geometry([station.id for station in stations], erf_area, risk_level_minimum_staffing[risk_level])
+        print 'Updating effective response force parcel data for department: {department}, risk level: {risk_level}'.format(
+            department=dept.id,
+            risk_level=risk_level,
+            )
 
-                    # geometry
-                    stationasset = {}
-                    stationasset["spatialReference"] = {"wkid": 4326}
-                    stationasset["y"] = round(fireStation.geom.y, 5)
-                    stationasset["x"] = round(fireStation.geom.x, 5)
-                    stationgeom = {}
-                    stationgeom["geometry"] = stationasset
-                    drivetimegeom.append(stationgeom)
-                    staffingtotal = staffingtotal + str(stationstafftotal) + ','
+        update_parcel_effectivefirefighting_table(geom, risk_level, dept)
 
-                drivepostdata = {}
-                drivepostdata['f'] = 'pjson'
-                drivepostdata['returnZ'] = False
-                drivepostdata['returnM'] = False
-                drivepostdata['env:outSR'] = 4326
-                drivepostdata['text_input'] = staffingtotal[:-1]
-                drivepostfeatures = {}
-                drivepostfeatures['features'] = drivetimegeom
-                drivepostfeatures['geometryType'] = "esriGeometryPoint"
-                drivepostdata['Facilities'] = json.dumps(drivepostfeatures)
+def get_efff_geometry(station_ids, erf_area, minimum_staffing):
+    cursor = connections['default'].cursor()
 
-                # need to run async so it doesn't time out
-                # getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCountOct2012/GPServer/PeopleCountOct2012/execute", data=drivepostdata)
-                getdrivetime = requests.post("http://gis.iaff.org/arcgis/rest/services/Production/PeopleCount2017_V2/GPServer/PeopleCount2017/submitJob", data=drivepostdata)
+    EFF_QUERY = """
+        DROP SEQUENCE IF EXISTS polyseq;
+        CREATE TEMP SEQUENCE polyseq;
 
-            get_async_efff_service_status(json.loads(getdrivetime.content)['jobId'], dept[0])
+        WITH stations AS (
+            SELECT usgsstructuredata_ptr_id AS id, ST_SetSRID({erf_area}, 4326) AS geom FROM firestation_firestation
+            WHERE usgsstructuredata_ptr_id IN ({station_ids})
+        ), boundaries AS (
+            SELECT ST_Union(ST_ExteriorRing(areas.geom)) AS geom
+                FROM (
+                    SELECT (ST_Dump(s.geom)).geom AS geom
+                    FROM stations s
+                    ) as areas
+        ), polys AS (
+            SELECT nextval('polyseq') AS id, (ST_Dump(ST_Polygonize(b.geom))).geom AS geom FROM boundaries b
+        ), staffing AS (
+            SELECT p.personnel, p.id, s.geom
+            FROM stations AS s
+            JOIN (
+                SELECT SUM(fs.personnel) as personnel, fs.firestation_id AS id
+                FROM firestation_staffing AS fs
+                JOIN stations AS st
+                ON st.id = fs.firestation_id
+                GROUP BY fs.firestation_id
+            ) AS p
+            ON s.id = p.id
+        ), erf_totals AS (
+            SELECT SUM(s.personnel)::int AS personnel, p.id AS id
+            FROM polys p
+            JOIN staffing s
+            ON ST_Contains(s.geom, ST_PointOnSurface(p.geom))
+            GROUP BY p.id
+        )
 
-        except KeyError:
-            print 'Drive Time Failed for ' + dept[0].name
+        SELECT ST_AsGeoJSON(ST_Union(p.geom)) AS geom
+        FROM erf_totals e
+        JOIN polys p
+        ON e.id = p.id
+        WHERE e.personnel >= {minimum_staffing};
+    """.format(
+        erf_area=erf_area,
+        station_ids=', '.join(str(_) for _ in station_ids),
+        minimum_staffing=minimum_staffing,
+    )
 
-        except IntegrityError:
-            print 'Drive Time Failed for ' + dept[0].name
+    # this could take a long time
+    cursor.execute(EFF_QUERY)
+    geom = dictfetchall(cursor)[0]['geom']
 
-        except Exception:
-            print 'Drive Time Failed for ' + dept[0].name
+    return geom
 
-
-def update_parcel_effectivefirefighting_table(drivetimegeom, department):
+def update_parcel_effectivefirefighting_table(erf_geom, risk_level, department):
     """
     Intersect with Parcel layer and update parcel_department_hazard_level table
     """
+    risk_category_comparison = 'l.risk_category IS NULL' if risk_level == 'unknown' else "l.risk_category = '{}'".format(risk_level.capitalize())
 
-    # drivetimegeomLT15 = None
-    drivetimegeomLT27 = None
-    drivetimegeomLT42 = None
-    drivetimegeomGT38 = None
-    drivetimegeomGT41 = None
-
-    for responseJSON in drivetimegeom:
-        if arcgis2geojson(responseJSON['geometry'])['type'] == 'MultiPolygon':
-            responsegeom = GEOSGeometry(json.dumps(arcgis2geojson(responseJSON['geometry'])))
-        else:
-            responsegeom = GEOSGeometry(MultiPolygon(fromstr(str(arcgis2geojson(responseJSON['geometry']))),))
-
-        # Dissolve/Union Geometry
-        # if(responseJSON['attributes']['SUM_StaffLong'] < 15):
-        #     if drivetimegeomLT15 is None:
-        #         drivetimegeomLT15 = responsegeom
-        #     else:
-        #         drivetimegeomLT15 = drivetimegeomLT15.union(responsegeom)
-        if(responseJSON['attributes']['SUM_StaffLong'] > 14):
-            if drivetimegeomLT27 is None:
-                drivetimegeomLT27 = responsegeom
-            else:
-                drivetimegeomLT27 = drivetimegeomLT27.union(responsegeom)
-        if(responseJSON['attributes']['SUM_StaffLong'] > 26):
-            if drivetimegeomLT42 is None:
-                drivetimegeomLT42 = responsegeom
-            else:
-                drivetimegeomLT42 = drivetimegeomLT42.union(responsegeom)
-        if(responseJSON['attributes']['SUM_StaffLong'] > 38):
-            if drivetimegeomGT38 is None:
-                drivetimegeomGT38 = responsegeom
-            else:
-                drivetimegeomGT38 = drivetimegeomGT38.union(responsegeom)
-        if(responseJSON['attributes']['SUM_StaffLong'] > 41):
-            if drivetimegeomGT41 is None:
-                drivetimegeomGT41 = responsegeom
-            else:
-                drivetimegeomGT41 = drivetimegeomGT41.union(responsegeom)
+    QUERY_INTERSECT_FOR_PARCEL_DRIVETIME = """
+        SELECT SUM(CASE WHEN {risk_category_comparison} THEN 1 ELSE 0 END) AS {risk_level}
+        FROM parcel_risk_category_local l
+        JOIN (SELECT ST_SetSRID(ST_GeomFromGeoJSON(%(erf_geom)s), 4326) as drive_geom) x
+        ON drive_geom && l.wkb_geometry
+        WHERE ST_Within(l.wkb_geometry, drive_geom)
+    """.format(
+        risk_level=risk_level,
+        risk_category_comparison=risk_category_comparison,
+    )
 
     cursor = connections['nfirs'].cursor()
-    QUERY_INTERSECT_FOR_PARCEL_DRIVETIME = """SELECT sum(case when l.risk_category = 'Low' THEN 1 ELSE 0 END) as low,
-        sum(CASE WHEN l.risk_category = 'Medium' THEN 1 ELSE 0 END) as medium,
-        sum(CASE WHEN l.risk_category = 'High' THEN 1 ELSE 0 END) high,
-        sum(CASE WHEN l.risk_category is null THEN 1 ELSE 0 END) as unknown
-        FROM parcel_risk_category_local l
-        JOIN (SELECT ST_SetSRID(ST_GeomFromGeoJSON(%(drive_geom)s), 4326) as drive_geom) x
-        ON drive_geom && l.wkb_geometry
-        WHERE ST_WITHIN(l.wkb_geometry, drive_geom)
-        """
+    cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {
+        'erf_geom': erf_geom,
+        })
 
-    # option to limit dept track and ST_WITHIN(l.wkb_geometry, %(owned_geom)s)
-    # option to collect info on 0 14 personnel fighting force
-    # saving overhead because under 15 isn't used right now - would have to add database entry below
-    # if drivetimegeomLT15:
-    #   cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomLT15.json, 'owned_geom': department.geom.wkb})
-    #   results0 = dictfetchall(cursor)
-    if drivetimegeomLT27:
-        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomLT27.intersection(department.owned_tracts_geom).json, 'owned_geom': department.owned_tracts_geom.wkb})
-        results15 = dictfetchall(cursor)
-        if results15:
-            if results15[0]['unknown'] is None:
-                results15[0]['unknown'] = 0
-            if results15[0]['low'] is None:
-                results15[0]['low'] = 0
-    if drivetimegeomLT42:
-        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomLT42.intersection(department.owned_tracts_geom).json, 'owned_geom': department.owned_tracts_geom.wkb})
-        results27 = dictfetchall(cursor)
-        if results27:
-            if results27[0]['medium'] is None:
-                results27[0]['medium'] = 0
-    if drivetimegeomGT38:
-        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomGT38.intersection(department.owned_tracts_geom).json, 'owned_geom': department.owned_tracts_geom.wkb})
-        results38 = dictfetchall(cursor)
-        if results38:
-            if results38[0]['high'] is None:
-                results38[0]['high'] = 0
-    if drivetimegeomGT41:
-        cursor.execute(QUERY_INTERSECT_FOR_PARCEL_DRIVETIME, {'drive_geom': drivetimegeomGT41.intersection(department.owned_tracts_geom).json, 'owned_geom': department.owned_tracts_geom.wkb})
-        results42 = dictfetchall(cursor)
-        if results15:
-            if results42[0]['high'] is None:
-                results42[0]['high'] = 0
+    result = dictfetchall(cursor)[0]
+    result[risk_level] = result[risk_level] or 0
 
-    # Overwrite/Update efff area if already loaded
-    if EffectiveFireFightingForceLevel.objects.filter(department_id=department.id):
-        existingrecord = EffectiveFireFightingForceLevel.objects.filter(department_id=department.id)
-        addefffdepartment = existingrecord[0]
+    try:
+        efffl = EffectiveFireFightingForceLevel.objects.get(department=department.id)
+    except EffectiveFireFightingForceLevel.DoesNotExist:
+        efffl = EffectiveFireFightingForceLevel(department=department)
 
-        # there is an 'all' value for future calculations on the total
-        addefffdepartment.perc_covered_low_15_26 = 0
-        addefffdepartment.perc_covered_unknown_15_26 = 0
-        addefffdepartment.perc_covered_medium_27_42 = 0
-        addefffdepartment.perc_covered_high38_plus = 0
-        addefffdepartment.perc_covered_high_43_plus = 0
+    setattr(efffl, 'parcel_count_{}'.format(risk_level), result[risk_level])
 
-        if drivetimegeomLT27:
-            addefffdepartment.parcelcount_low_15_26 = results15[0]['low']
-            addefffdepartment.parcelcount_unknown_15_26 = results15[0]['unknown']
-            addefffdepartment.perc_covered_low_15_26 = round(100 * (float(results15[0]['low']) / float(department.metrics.structure_counts_by_risk_category.low)), 2)
-            addefffdepartment.perc_covered_unknown_15_26 = round(100 * (float(results15[0]['unknown']) / float(department.metrics.structure_counts_by_risk_category.unknown)), 2)
+    structure_counts = getattr(department.metrics.structure_counts_by_risk_category, risk_level)
 
-            if isinstance(drivetimegeomLT27, MultiPolygon):
-                addefffdepartment.drivetimegeom_15_26 = drivetimegeomLT27
-            else:
-                addefffdepartment.drivetimegeom_15_26 = MultiPolygon(drivetimegeomLT27)
-        if drivetimegeomLT42:
-            addefffdepartment.parcelcount_medium_27_42 = results27[0]['medium']
-            addefffdepartment.perc_covered_medium_27_42 = round(100 * (float(results27[0]['medium']) / float(department.metrics.structure_counts_by_risk_category.medium)), 2)
-            if isinstance(drivetimegeomLT42, MultiPolygon):
-                addefffdepartment.drivetimegeom_27_42 = drivetimegeomLT42
-            else:
-                addefffdepartment.drivetimegeom_27_42 = MultiPolygon(drivetimegeomLT42)
-        if drivetimegeomGT38:
-            addefffdepartment.parcelcount_high38_plus = results38[0]['high']
-            addefffdepartment.perc_covered_high38_plus = round(100 * (float(results38[0]['high']) / float(department.metrics.structure_counts_by_risk_category.high)), 2)
-            if isinstance(drivetimegeomGT38, MultiPolygon):
-                addefffdepartment.drivetimegeom_38_plus = drivetimegeomGT38
-            else:
-                addefffdepartment.drivetimegeom_38_plus = MultiPolygon(drivetimegeomGT38)
-        if drivetimegeomGT41:
-            addefffdepartment.parcelcount_high_43_plus = results42[0]['high']
-            addefffdepartment.perc_covered_high_43_plus = round(100 * (float(results42[0]['high']) / float(department.metrics.structure_counts_by_risk_category.high)), 2)
-            if isinstance(drivetimegeomGT41, MultiPolygon):
-                addefffdepartment.drivetimegeom_43_plus = drivetimegeomGT41
-            else:
-                addefffdepartment.drivetimegeom_43_plus = MultiPolygon(drivetimegeomGT41)
+    percent_covered = 100 if structure_counts == 0 else (
+        round(100 * float(result[risk_level]) / float(structure_counts), 2)
+    )
 
-        print department.name + " EFFF Area Updated" + ' at ' + time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+    setattr(efffl, 'percent_covered_{}'.format(risk_level), percent_covered)
 
-    else:
-        deptefffarea = {}
-        deptefffarea['department'] = department
-        deptefffarea['perc_covered_low_15_26'] = 0
-        deptefffarea['perc_covered_unknown_15_26'] = 0
-        deptefffarea['perc_covered_medium_27_42'] = 0
-        deptefffarea['perc_covered_high38_plus'] = 0
-        deptefffarea['perc_covered_high_43_plus'] = 0
+    if erf_geom:
+        setattr(efffl, 'erf_area_{}'.format(risk_level), to_multipolygon(fromstr(erf_geom)))
 
-        if drivetimegeomLT27:
-            deptefffarea['parcelcount_low_15_26'] = results15[0]['low']
-            deptefffarea['parcelcount_unknown_15_26'] = results15[0]['unknown']
-            deptefffarea['perc_covered_low_15_26'] = round(100 * (float(results15[0]['low']) / float(department.metrics.structure_counts_by_risk_category.low)), 2)
-            deptefffarea['perc_covered_unknown_15_26'] = round(100 * (float(results15[0]['unknown']) / float(department.metrics.structure_counts_by_risk_category.unknown)), 2)
-            if isinstance(drivetimegeomLT27, MultiPolygon):
-                deptefffarea['drivetimegeom_15_26'] = drivetimegeomLT27
-            else:
-                deptefffarea['drivetimegeom_15_26'] = MultiPolygon(drivetimegeomLT27)
-        if drivetimegeomLT42:
-            deptefffarea['parcelcount_medium_27_42'] = results27[0]['medium']
-            deptefffarea['perc_covered_medium_27_42'] = round(100 * (float(results27[0]['medium']) / float(department.metrics.structure_counts_by_risk_category.medium)), 2)
-            if isinstance(drivetimegeomLT42, MultiPolygon):
-                deptefffarea['drivetimegeom_27_42'] = drivetimegeomLT42
-            else:
-                deptefffarea['drivetimegeom_27_42'] = MultiPolygon(drivetimegeomLT42)
-        if drivetimegeomGT38:
-            deptefffarea['parcelcount_high38_plus'] = results38[0]['high']
-            deptefffarea['perc_covered_high38_plus'] = round(100 * (float(results38[0]['high']) / float(department.metrics.structure_counts_by_risk_category.high)), 2)
-            if isinstance(drivetimegeomGT38, MultiPolygon):
-                deptefffarea['drivetimegeom_38_plus'] = drivetimegeomGT38
-            else:
-                deptefffarea['drivetimegeom_38_plus'] = MultiPolygon(drivetimegeomGT38)
-        if drivetimegeomGT41:
-            deptefffarea['parcelcount_high_43_plus'] = results42[0]['high']
-            deptefffarea['perc_covered_high_43_plus'] = round(100 * (float(results42[0]['high']) / float(department.metrics.structure_counts_by_risk_category.high)), 2)
-            if isinstance(drivetimegeomGT41, MultiPolygon):
-                deptefffarea['drivetimegeom_43_plus'] = drivetimegeomGT41
-            else:
-                deptefffarea['drivetimegeom_43_plus'] = MultiPolygon(drivetimegeomGT41)
+    efffl.save()
 
-        addefffdepartment = EffectiveFireFightingForceLevel.objects.create(**deptefffarea)
-        print department.name + " EFFF Area Created" + ' at ' + time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
-
-    addefffdepartment.save()
+    p('ERF area updated for department {}, risk level {}'.format(department.id, risk_level))

@@ -253,7 +253,6 @@ class IntersectingDepartmentLog(models.Model):
     def __unicode__(self):
         return u'Removed {} from {}.'.format(self.removed_department.name, self.parent.name)
 
-
 class FireDepartment(RecentlyUpdatedMixin, Archivable, models.Model):
     """
     Models Fire Departments.
@@ -771,6 +770,12 @@ class FireStation(USGSStructureData, Archivable):
     service_area_0_4 = models.MultiPolygonField(null=True, blank=True)
     service_area_4_6 = models.MultiPolygonField(null=True, blank=True)
     service_area_6_8 = models.MultiPolygonField(null=True, blank=True)
+
+    erf_area_low = models.MultiPolygonField(null=True, blank=True)
+    erf_area_medium = models.MultiPolygonField(null=True, blank=True)
+    erf_area_high = models.MultiPolygonField(null=True, blank=True)
+    erf_area_unknown = models.MultiPolygonField(null=True, blank=True)
+
     objects = models.GeoManager()
 
     @classmethod
@@ -798,7 +803,7 @@ class FireStation(USGSStructureData, Archivable):
                     if station.station_number:
                         station.station_number = int(station.station_number)
 
-                station.save()
+                station.save(update_fields=['department', 'station_address', 'address', 'geom', 'city', 'zipcode', 'state', 'station_number'])
             else:
                 station = None
         except Exception:
@@ -1327,11 +1332,8 @@ def update_station(sender, instance, **kwargs):
     """
     update_fields = kwargs['update_fields']
 
-    # do not run the department update if the fields be updated are exclusively service areas
-    if update_fields and all(field.startswith('service_area') for field in update_fields):
-        return
-
-    if instance.department_id:
+    # only run the department update task if the station's geometry has changed
+    if update_fields and 'geom' in update_fields and instance.department_id:
         run_update_department_task(instance.department_id)
 
 
@@ -1340,7 +1342,7 @@ def update_station_from_staffing(sender, instance, **kwargs):
     """
     Updates Drive time and service area calculations after Station Staffin change
     """
-    if(instance.firestation):
+    if instance.firestation:
         fid = FireStation.objects.filter(usgsstructuredata_ptr_id=instance.firestation)[0].department_id
         run_update_department_task(fid)
 
@@ -1517,22 +1519,18 @@ class EffectiveFireFightingForceLevel(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     department = models.ForeignKey(FireDepartment, null=True, blank=True)
-    parcelcount_low_15_26 = models.IntegerField(null=True, blank=True)
-    parcelcount_medium_27_42 = models.IntegerField(null=True, blank=True)
-    parcelcount_high38_plus = models.IntegerField(null=True, blank=True)
-    parcelcount_high_43_plus = models.IntegerField(null=True, blank=True)
-    parcelcount_unknown_15_26 = models.IntegerField(null=True, blank=True)
-    perc_covered_low_15_26 = models.FloatField(null=True, blank=True)
-    perc_covered_medium_27_42 = models.FloatField(null=True, blank=True)
-    perc_covered_high38_plus = models.FloatField(null=True, blank=True)
-    perc_covered_high_43_plus = models.FloatField(null=True, blank=True)
-    perc_covered_unknown_15_26 = models.FloatField(null=True, blank=True)
-    drivetimegeom_014 = models.MultiPolygonField(null=True, blank=True)
-    drivetimegeom_15_26 = models.MultiPolygonField(null=True, blank=True)
-    drivetimegeom_27_42 = models.MultiPolygonField(null=True, blank=True)
-    drivetimegeom_38_plus = models.MultiPolygonField(null=True, blank=True)
-    drivetimegeom_43_plus = models.MultiPolygonField(null=True, blank=True)
-
+    parcel_count_low = models.IntegerField(null=True, blank=True)
+    parcel_count_medium = models.IntegerField(null=True, blank=True)
+    parcel_count_high = models.IntegerField(null=True, blank=True)
+    parcel_count_unknown = models.IntegerField(null=True, blank=True)
+    percent_covered_low = models.FloatField(null=True, blank=True)
+    percent_covered_medium = models.FloatField(null=True, blank=True)
+    percent_covered_high = models.FloatField(null=True, blank=True)
+    percent_covered_unknown = models.FloatField(null=True, blank=True)
+    erf_area_low = models.MultiPolygonField(null=True, blank=True)
+    erf_area_medium = models.MultiPolygonField(null=True, blank=True)
+    erf_area_high = models.MultiPolygonField(null=True, blank=True)
+    erf_area_unknown = models.MultiPolygonField(null=True, blank=True)
 
 class Note(models.Model):
     class Meta:
