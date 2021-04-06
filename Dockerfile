@@ -1,6 +1,6 @@
 FROM prominentedgestatengine/firecares:base
 
-USER 1000:1000
+USER firecares
 
 COPY requirements.txt /webapps/firecares/
 
@@ -9,6 +9,12 @@ WORKDIR /webapps/firecares/
 RUN pip install -r requirements.txt
 
 COPY . .
+
+USER root
+
+RUN chown -R firecares /webapps/firecares/
+
+USER firecares
 
 EXPOSE 8000
 
