@@ -663,20 +663,31 @@
                   },
                   geometry: erfData.erf_area_high || null,
                 },
-              ];
-
-              efffArea.addData(efffAreaData);
-
-              layer.setStyle(function (feature) {
-                return {
-                  fillColor: feature.properties.tocolor,
-                  fillOpacity: .4, weight:1, color:'#fff', opacity:.8
-                };
+              ].filter(function(feature) {
+                return feature.geometry;
               });
 
-              departmentMap.fitBounds(efffArea);
+              if (efffAreaData.length) {
+                efffArea.addData(efffAreaData);
 
-              messagebox.show('Effective Fire Fighting Force added to the map.');
+                layer.setStyle(function (feature) {
+                  return {
+                    fillColor: feature.properties.tocolor,
+                    fillOpacity: .4, weight:1, color:'#fff', opacity:.8
+                  };
+                });
+
+                departmentMap.fitBounds(efffArea);
+
+                messagebox.show('Effective Fire Fighting Force added to the map.');
+              } else {
+                // Return no data if department hasn't been calculated yet
+                $scope.parcel_efff_counts = [
+                  {label:"Personnel Coverage", "42+ High Hazards (10 min)": 0, "15+ Unknown Hazards (8min)": 0, "27+ Medium Hazards (8min)": 0, "15+ Low Hazards (8min)": 0}
+                ];
+
+                messagebox.show('Effective Fire Fighting Force requires valid Personnel entries.');
+              }
             } else {
               // Return no data if department hasn't been calculated yet
               $scope.parcel_efff_counts = [

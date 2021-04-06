@@ -898,7 +898,7 @@ def update_parcel_department_effectivefirefighting_rollup(fd_id):
 
     # No stations are present, only hq
     if not stations:
-        stations = [Firestation(geom=dept.headquarters_geom)]
+        return
 
     for station in stations:
         if not all(getattr(station, erf_area_attr) for erf_area_attr in RISK_LEVEL_ERF_AREAS.values()):
@@ -912,15 +912,15 @@ def update_parcel_department_effectivefirefighting_rollup(fd_id):
     risk_level_minimum_staffing = RISK_LEVEL_MINIMUM_STAFFING if dept.ems_transport else RISK_LEVEL_MINIMUM_STAFFING_NO_EMS
 
     for risk_level, erf_area in RISK_LEVEL_ERF_AREAS.items():
-        print 'Calculating effective response force extent for department: {department}, risk level: {risk_level}'.format(
+        p('Calculating effective response force extent for department: {department}, risk level: {risk_level}'.format(
             department=dept.id,
             risk_level=risk_level,
-            )
+            ))
         geom = get_efff_geometry([station.id for station in stations], erf_area, risk_level_minimum_staffing[risk_level])
-        print 'Updating effective response force parcel data for department: {department}, risk level: {risk_level}'.format(
+        p('Updating effective response force parcel data for department: {department}, risk level: {risk_level}'.format(
             department=dept.id,
             risk_level=risk_level,
-            )
+            ))
 
         update_parcel_effectivefirefighting_table(geom, risk_level, dept)
 
@@ -1012,9 +1012,12 @@ def update_parcel_effectivefirefighting_table(erf_geom, risk_level, department):
 
     structure_counts = getattr(department.metrics.structure_counts_by_risk_category, risk_level)
 
-    percent_covered = 100 if structure_counts == 0 else (
-        round(100 * float(result[risk_level]) / float(structure_counts), 2)
-    )
+    if structure_counts is not None:
+        percent_covered = 100 if structure_counts == 0 else (
+            round(100 * float(result[risk_level]) / float(structure_counts), 2)
+        )
+    else:
+        percent_covered = None
 
     setattr(efffl, 'percent_covered_{}'.format(risk_level), percent_covered)
 
