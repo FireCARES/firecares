@@ -9,6 +9,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--dept', nargs='*', help='Specify one or more department ids (omission will process all departments)')
+        parser.add_argument('--async', dest='async', action='store_true', default=False)
 
     def handle(self, *args, **options):
         departments = options.get('dept')
@@ -17,4 +18,7 @@ class Command(BaseCommand):
             departments = [value['id'] for value in FireDepartment.objects.values('id')]
 
         for department in departments:
-            update_parcel_department_effectivefirefighting_rollup(department)
+            if options.get('async'):
+                update_parcel_department_effectivefirefighting_rollup.delay(department)
+            else:
+                update_parcel_department_effectivefirefighting_rollup(department)
