@@ -48,7 +48,7 @@ def task_exists(name, args=None, kwargs=None):
     from celery.task.control import inspect
     inspector = inspect()
 
-    print(inspector.app.backend.url)
+    print 'inspector.app.backend.url: {}'.format(inspector.app.backend.url)
 
     def matches(task):
         if name not in task['name']:
