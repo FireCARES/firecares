@@ -12,7 +12,6 @@ from django.conf import settings
 
 from firecares.settings.base import REDIS_URL
 from firecares.utils.s3put import singlepart_upload
-from celery.task.control import inspect
 from celery.task import current
 
 # set the default Django settings module for the 'celery' program.
@@ -46,6 +45,7 @@ def task_exists(name, args=None, kwargs=None):
     args = args or tuple()
     kwargs = kwargs or {}
 
+    from celery.task.control import inspect
     inspector = inspect()
 
     def matches(task):
