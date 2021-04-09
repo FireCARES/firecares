@@ -339,12 +339,16 @@ def update_department(id):
     chain(update_nfirs_counts.si(id),
           update_performance_score.si(id), calculate_department_census_geom.si(id)).delay()
 
-
 @app.task(queue='update')
 def refresh_department_views():
     p("updating department Views")
     chain(refresh_quartile_view_task.si(), refresh_national_calculations_view_task.si()).delay()
 
+@app.task(queue='update')
+def update_all_nfirs_counts(years=None):
+    p('updating all department nfirs stats')
+    for fdid in FireDepartment.objects.filter(archived=False).values_list('id', flat=True):
+        update_nfirs_counts(fdid, years)
 
 @app.task(queue='update')
 def update_nfirs_counts(id, year=None, stat=None):
@@ -444,6 +448,26 @@ def update_nfirs_counts(id, year=None, stat=None):
         cursor.execute('DROP TABLE {}'.format(tmp_table_name))
 
     p("updated NFIRS counts for {}: {}".format(id, fd.name))
+
+@app.task(queue='update')
+def refresh_nfirs_views(view_name=None):
+    view_names = {
+        'joint_incidentaddress',
+        'joint_buildingfires',
+        'joint_ffcasualty',
+        'joint_civiliancasualty',
+        'joint_fireincident',
+        }
+
+    if view_name in view_names:
+        view_names = [view_name]
+
+    for name in view_names:
+        with connections['nfirs'].cursor() as cursor:
+            p('refreshing materiazlied view {}'.format(name))
+            cursor.execute('REFRESH MATERIALIZED VIEW {}'.format(name))
+            p('refreshing materiazlied view complete {}'.format(name))
+
 
 @app.task(queue='update')
 def calculate_department_census_geom(fd_id):
