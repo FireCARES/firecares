@@ -6,11 +6,13 @@ import boto
 import os
 import mimetypes
 import requests
+from ast import literal_eval
 from celery import Celery
 from django.conf import settings
 
 from firecares.settings.base import REDIS_URL
 from firecares.utils.s3put import singlepart_upload
+from celery.task.control import inspect
 from celery.task import current
 
 # set the default Django settings module for the 'celery' program.
@@ -40,6 +42,38 @@ def download_file(url, download_to=None):
                 f.flush()
     return download_to
 
+def task_exists(name, args=None, kwargs=None):
+    args = args or tuple()
+    kwargs = kwargs or {}
+
+    inspector = inspect()
+
+    def matches(task):
+        if name not in task['name']:
+            return False
+
+        if args != literal_eval(task['args']):
+            return False
+
+        if kwargs != literal_eval(task['kwargs']):
+            return False
+
+        return True
+
+    tasks = []
+
+    for active_tasks in inspector.active().values():
+        tasks.extend(active_tasks)
+
+    for scheduled_tasks in inspector.scheduled().values():
+        tasks.extend(scheduled_tasks)
+
+    for reserved_tasks in inspector.reserved().values():
+        tasks.extend(reserved_tasks)
+
+    relevant_tasks = [t for t in tasks if matches(t)]
+
+    return relevant_tasks or False
 
 @app.task(bind=True)
 def debug_task(self):
