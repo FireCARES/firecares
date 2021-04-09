@@ -7,6 +7,8 @@ from .models import FireStation, Staffing, FireDepartment, ParcelDepartmentHazar
 from firecares.weather.models import DepartmentWarnings
 from firecares.settings.base import MAPBOX_BASE_URL, MAPBOX_ACCESS_TOKEN
 from firecares.utils import to_multipolygon
+from firecares.celery import task_exists
+from firecares.tasks.update import update_nfirs_counts, update_all_nfirs_counts, refresh_nfirs_views
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf.urls import url
@@ -18,6 +20,7 @@ from tastypie.authorization import DjangoAuthorization
 from tastypie.cache import SimpleCache
 from tastypie.constants import ALL
 from tastypie.contrib.gis.resources import ModelResource
+from tastypie.resources import Resource
 from tastypie.exceptions import Unauthorized, TastypieError
 from tastypie.http import HttpGone, HttpMultipleChoices
 from tastypie.serializers import Serializer
@@ -202,6 +205,92 @@ class GuardianAuthorization(DjangoAuthorization):
         return self.generic_item_check(object_list, bundle,
                                        self.delete_permission_code)
 
+class NfirsResource(Resource):
+    """
+    NFIRS-specific API calls
+    """
+    class Meta:
+        resource_name = 'nfirs'
+        authentication = ApiKeyAuthentication()
+        list_allowed_methods = ['get', 'post']
+        serializer = PrettyJSONSerializer()
+
+    def prepend_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/update%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('update_nfirs'), name="api_update_nfirs"),
+            url(r"^(?P<resource_name>%s)/refresh%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('refresh_nfirs'), name="api_refresh_nfirs"),
+        ]
+
+    def update_nfirs(self, request, **kwargs):
+        self.method_check(request, allowed=['post'])
+        self.is_authenticated(request)
+
+        years = None
+        if request.GET.get('years'):
+            years = [int(year) for year in request.GET.get('years').split(',')]
+
+        if request.GET.get('department_id'):
+            args = (request.GET.get('department_id'), years)
+
+            existing_tasks = task_exists('update_nfirs_counts', args)
+
+            # make sure the task is not already being processed
+            if not existing_tasks:
+                task = update_nfirs_counts.apply_async(args=args)
+            else:
+                task = existing_tasks[0]
+        else:
+            args = (years,)
+
+            existing_tasks = task_exists('update_all_nfirs_counts', args)
+
+            # make sure the task is not already being processed
+            if not existing_tasks:
+                task = update_all_nfirs_counts.apply_async(args=args)
+            else:
+                task = existing_tasks[0]
+
+        task_info = task if isinstance(task, dict) else {
+            'id': task.id,
+            'state': task.state,
+            'status': task.status,
+        }
+
+        return HttpResponse(
+            json.dumps(task_info),
+            content_type='application/json',
+        )
+
+    def refresh_nfirs(self, request, **kwargs):
+        self.method_check(request, allowed=['post'])
+        self.is_authenticated(request)
+
+        view_name = None
+        task = None
+
+        if request.GET.get('name'):
+            view_name = request.GET.get('name')
+
+        args = (view_name,)
+
+        existing_tasks = task_exists('refresh_nfirs_views', args)
+
+        # make sure the task is not already being processed
+        if not existing_tasks:
+            task = refresh_nfirs_views.apply_async(args=args)
+        else:
+            task = existing_tasks[0]
+
+        task_info = task if isinstance(task, dict) else {
+            'id': task.id,
+            'state': task.state,
+            'status': task.status,
+        }
+
+        return HttpResponse(
+            json.dumps(task_info),
+            content_type='application/json',
+        )
 
 class FireDepartmentResource(JSONDefaultModelResourceMixin, ModelResource):
     """
