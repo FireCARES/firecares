@@ -385,7 +385,8 @@ def update_nfirs_counts(id, year=None, stat=None):
 
     tmp_table_name = 'tmp_{state}_{fdids}_{years}'.format(
         state=params['state'],
-        fdids='_'.join(str(fdid) for fdid in params['fdid']),
+        # some departments have a single ' ' character for the fdid
+        fdids='_'.join(str(fdid).replace(' ', '_') for fdid in params['fdid']),
         years='_'.join(str(year) for year in params['years'])
         )
 
