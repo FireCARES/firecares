@@ -1,9 +1,10 @@
 
 from __future__ import absolute_import
 
+import os
+import sys
 import alog
 import boto
-import os
 import mimetypes
 import requests
 from ast import literal_eval
@@ -49,6 +50,7 @@ def task_exists(name, args=None, kwargs=None):
     inspector = inspect()
 
     print 'inspector.app.backend.url: {}'.format(inspector.app.backend.url)
+    sys.stdout.flush()
 
     def matches(task):
         if name not in task['name']:
