@@ -47,10 +47,7 @@ def task_exists(name, args=None, kwargs=None):
     args = args or tuple()
     kwargs = kwargs or {}
 
-    from kombu import Queue, Connection
-    connection = Connection(REDIS_URL)
-    from celery.task.control import inspect
-    inspector = inspect()
+    inspector = app.control.inspect()
 
     print 'inspector.app.backend.url: {}'.format(inspector.app.backend.url)
     sys.stdout.flush()
