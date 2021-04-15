@@ -27,6 +27,7 @@ config = app.config_from_object('django.conf:settings')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 app.conf.BROKER_URL = REDIS_URL
+app.conf.result_backend = REDIS_URL
 
 def download_file(url, download_to=None):
 
