@@ -27,6 +27,7 @@ config = app.config_from_object('django.conf:settings')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 app.conf.BROKER_URL = REDIS_URL
+app.conf.result_backend = REDIS_URL
 
 def download_file(url, download_to=None):
 
@@ -46,8 +47,7 @@ def task_exists(name, args=None, kwargs=None):
     args = args or tuple()
     kwargs = kwargs or {}
 
-    from celery.task.control import inspect
-    inspector = inspect()
+    inspector = app.control.inspect()
 
     print 'inspector.app.backend.url: {}'.format(inspector.app.backend.url)
     sys.stdout.flush()
