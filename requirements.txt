@@ -25,7 +25,7 @@ django-autocomplete-light==2.3.3
 django-braces==1.11.0
 django-celery==3.1.17
 django-compressor==1.5
-django-debug-toolbar==1.5
+django-debug-toolbar==1.11.1
 django-downloadview==1.9
 django-extensions==1.5.9
 django-fixture-magic==0.0.7
