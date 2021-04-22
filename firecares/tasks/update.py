@@ -348,7 +348,7 @@ def refresh_department_views():
 def update_all_nfirs_counts(years=None):
     p('updating all department nfirs stats')
     for fdid in FireDepartment.objects.filter(archived=False).values_list('id', flat=True):
-        update_nfirs_counts(fdid, years)
+        update_nfirs_counts.delay(fdid, years)
 
 @app.task(queue='update')
 def update_nfirs_counts(id, year=None, stat=None):
