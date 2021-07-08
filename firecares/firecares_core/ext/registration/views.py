@@ -5,7 +5,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.humanize.templatetags import humanize
 from django.core.mail import EmailMultiAlternatives
 from django.http import JsonResponse
-from django.http.response import HttpResponseBadRequest, HttpResponseNotFound
+from django.http.response import HttpResponseBadRequest, HttpResponseNotFound, Http404
 from django.shortcuts import redirect
 from django.template import loader
 from django.views.generic import TemplateView
@@ -29,12 +29,18 @@ class RegistrationPreregisterView(FormView):
 
     def get(self, request):
         if 'department' in request.GET:
-            fd = FireDepartment.objects.get(id=request.GET['department'])
+            try:
+                fd = FireDepartment.objects.get(id=request.GET['department'])
+            except FireDepartment.DoesNotExist:
+                raise Http404()
+
             admins = fd.get_department_admins()
+
             if not admins:
                 request.session['message'] = 'We\'re sorry, a IAFC Official or Local Officer needs to enable FireCARES on this department before your account can be approved by the department.'
                 request.session['message_title'] = 'FireCARES not enabled for {}'.format(fd.name)
                 return redirect('show_message')
+
         return super(RegistrationPreregisterView, self).get(request)
 
 
