@@ -46,9 +46,12 @@
     })
   ;
 
-  JurisdictionController.$inject = ['$scope', '$timeout', '$http', 'FireStation', 'mapFactory', '$filter', 'FireDepartment', '$analytics', 'WeatherWarning', '$interpolate', 'FireStationandStaffing', 'ServiceAreaRollup', 'EfffChartRollup'];
 
-  function JurisdictionController($scope, $timeout, $http, FireStation, mapFactory, $filter, FireDepartment, $analytics, WeatherWarning, $interpolate, FireStationandStaffing, ServiceAreaRollup, EfffChartRollup) {
+
+
+  JurisdictionController.$inject = ['$scope', '$timeout', '$http','FireStation', 'mapFactory', '$filter', 'FireDepartment', '$analytics', 'WeatherWarning', '$interpolate', 'FireStationandStaffing', 'ServiceAreaRollup', 'EfffChartRollup','census'];
+
+  function JurisdictionController($scope, $timeout, $http, FireStation, mapFactory, $filter, FireDepartment, $analytics, WeatherWarning, $interpolate, FireStationandStaffing, ServiceAreaRollup, EfffChartRollup,census) {
     var departmentMap = mapFactory.create('map', {scrollWheelZoom: false});
     var messagebox = L.control.messagebox({ timeout: 11000, position:'bottomright' }).addTo(departmentMap);
     var messageboxData = L.control.messagebox({ timeout: 22000, position:'bottomleft' }).addTo(departmentMap);
@@ -66,6 +69,12 @@
     var mouseOverAddedOpacity = 0.25;
     var highlightColor = 'blue';
 
+    //create a global popup and add it to the map
+    var popupRef = new L.Marker({lat : 0,lng:0 }, {
+        draggable: false
+    });
+    departmentMap.addLayer(popupRef);
+    
     $scope.metrics = window.metrics;
     $scope.urls = window.urls;
     $scope.level = window.level;
@@ -85,11 +94,16 @@
     var fires = L.featureGroup().addTo(departmentMap);
     var activeFires,activeFiresData;
     var activefireURL = 'https://wildfire.cr.usgs.gov/arcgis/rest/services/geomac_fires/FeatureServer/3/query?outFields=*&f=json&outSR=4326&inSR=4326&geometryType=esriGeometryEnvelope&geometry=';
+ 
+  
 
     if (showStations) {
       FireStation.query({department: config.id}).$promise.then(function(data) {
         $scope.stations = data.objects;
-
+        //capture the current state
+        if(data.objects && data.objects.length > 0)
+          $scope.currentState = data.objects[data.objects.length-1].state;
+        
         var stationMarkers = [];
         var numFireStations = $scope.stations.length;
         for (var i = 0; i < numFireStations; i++) {
@@ -102,7 +116,7 @@
 
         if (numFireStations > 0) {
           var stationLayer = L.featureGroup(stationMarkers);
-
+          
           // Uncomment to show Fire Stations by default
           // stationLayer.addTo(departmentMap);
           layersControl.addOverlay(stationLayer, 'Fire Stations');
@@ -111,9 +125,44 @@
             departmentMap.fitBounds(stationLayer.getBounds(), fitBoundsOptions);
           }
         }
+
+        /** define the callback for displaying the census tract popup */
+        var popupCallback = (event,data)=>{
+          
+          if (event.feature?.properties?.GEOID){
+              popupRef.setLatLng(event.latlng)
+              popupRef.bindPopup(`<p>
+              Area Class: ${data.UR}<br />
+              Population Density: ${data.density}
+              </p>`)
+              popupRef.openPopup();
+          }
+        }
+        //fetch the tract data for the current state
+        census.getTractData($scope.currentState,popupCallback)
+        .then((layerJSON)=>{
+          if(!layerJSON || layerJSON.error){
+            alert('The census tract layer could not be loaded: '+layerJSON.error);
+            return;
+          }
+          
+          //add the layer to the map
+          var mvtSource = new L.TileLayer.MVTSource(layerJSON);
+          
+          // departmentMap.addLayer(mvtSource,'Census Tract');
+          // var censusLayer = L.tileLayer(layerJSON.source.tiles[0],layerJSON)
+          layersControl.addOverlay(mvtSource, 'Census Tracts');
+          
+          
+ 
+        })
+        .catch((error)=>{
+          alert('The census tract layer could not be loaded: '+error);
+        })
       });
     }
-
+    
+    
     //
     // Weather Warnings
     //
@@ -185,7 +234,7 @@
         return line.map(function(d){return [d[1],d[0]]})
       }
     });
-
+    
     if (config.geom != null) {
       countyBoundary = L.geoJson(config.geom, {
         style: function(feature) {
