@@ -3,7 +3,7 @@ anyjson==0.3.3
 appnope==0.1.0
 asn1crypto==0.22.0
 astroid==1.6.6
-Babel==2.3.4
+Babel==2.9.1
 backports-abc==0.5
 backports.functools-lru-cache==1.5
 backports.shutil-get-terminal-size==1.0.0
