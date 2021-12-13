@@ -81,7 +81,7 @@ jellyfish==0.2.1
 jsonfield==1.0.3
 kombu==3.0.37
 lazy-object-proxy==1.4.3
-lxml==3.5.0
+lxml==4.6.5
 mccabe==0.6.1
 mock==2.0.0
 ndg-httpsclient==0.4.0
