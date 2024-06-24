@@ -10,7 +10,8 @@ from firecares.utils import lenient_summation
 
 class Command(BaseCommand):
     help = """Imports prediction data into FireCARES.  Expects incoming CSV data to have columns including:
-fc_dept_id, lr.fire, mr.fire, hr.fires, lr.injuries, mr.injuries, hr.injuries, lr.deaths.1se, mr.deaths.1se, hr.deaths, lr.sz2, mr.sz2, hr.sz2, lr.sz3, mr.sz3, hr.sz3
+fc_dept_id, lr.fire, mr.fire, hr.fires, lr.injuries, mr.injuries, hr.injuries, lr.deaths.1se, mr.deaths.1se,
+hr.deaths, lr.sz2, mr.sz2, hr.sz2, lr.sz3, mr.sz3, hr.sz3, ems
     """
 
     def add_arguments(self, parser):
@@ -42,7 +43,11 @@ fc_dept_id, lr.fire, mr.fire, hr.fires, lr.injuries, mr.injuries, hr.injuries, l
                 'lr.sz2', 'mr.sz2', 'hr.sz2', 'lr.sz3', 'mr.sz3', 'hr.sz3',
                 'lr_beyond_room', 'lr_beyond_structure',
                 'mr_beyond_room', 'mr_beyond_structure',
-                'hr_beyond_room', 'hr_beyond_structure']
+                'hr_beyond_room', 'hr_beyond_structure',
+                'ems']
+
+        # Convert everything to numbers
+        df = df.convert_objects(convert_numeric=True)
 
         df['lr_beyond_room'] = df.apply(lambda row: row['lr.fire'] * row['lr.sz2'], axis=1)
         df['lr_beyond_structure'] = df.apply(lambda row: row['lr.fire'] * row['lr.sz2'] * row['lr.sz3'], axis=1)
@@ -89,6 +94,7 @@ fc_dept_id, lr.fire, mr.fire, hr.fires, lr.injuries, mr.injuries, hr.injuries, l
                 low.risk_model_fires_size0 = None
                 low.risk_model_fires_size1 = lr_beyond_room if valid(lr_beyond_room) else low.risk_model_fires_size1
                 low.risk_model_fires_size2 = lr_beyond_structure if valid(lr_beyond_structure) else low.risk_model_fires_size2
+                low.risk_model_ems = None
                 self.calculate_derived_values(low)
 
                 medium.risk_model_deaths = row['mr.deaths.1se'] if valid(row['mr.deaths.1se']) else medium.risk_model_deaths
@@ -97,6 +103,7 @@ fc_dept_id, lr.fire, mr.fire, hr.fires, lr.injuries, mr.injuries, hr.injuries, l
                 medium.risk_model_fires_size0 = None
                 medium.risk_model_fires_size1 = mr_beyond_room if valid(mr_beyond_room) else medium.risk_model_fires_size1
                 medium.risk_model_fires_size2 = mr_beyond_structure if valid(mr_beyond_structure) else medium.risk_model_fires_size2
+                medium.risk_model_ems = None
                 self.calculate_derived_values(medium)
 
                 high.risk_model_deaths = row['hr.deaths'] if valid(row['hr.deaths']) else high.risk_model_deaths
@@ -105,6 +112,7 @@ fc_dept_id, lr.fire, mr.fire, hr.fires, lr.injuries, mr.injuries, hr.injuries, l
                 high.risk_model_fires_size0 = None
                 high.risk_model_fires_size1 = hr_beyond_room if valid(hr_beyond_room) else high.risk_model_fires_size1
                 high.risk_model_fires_size2 = hr_beyond_structure if valid(hr_beyond_structure) else high.risk_model_fires_size2
+                high.risk_model_ems = None
                 self.calculate_derived_values(high)
 
                 all_level.risk_model_deaths = lenient_summation(low.risk_model_deaths, medium.risk_model_deaths, high.risk_model_deaths)
@@ -113,6 +121,7 @@ fc_dept_id, lr.fire, mr.fire, hr.fires, lr.injuries, mr.injuries, hr.injuries, l
                 all_level.risk_model_fires_size0 = None
                 all_level.risk_model_fires_size1 = lenient_summation(low.risk_model_fires_size1, medium.risk_model_fires_size1, high.risk_model_fires_size1)
                 all_level.risk_model_fires_size2 = lenient_summation(low.risk_model_fires_size2, medium.risk_model_fires_size2, high.risk_model_fires_size2)
+                all_level.risk_model_ems = row['ems'] if valid(row['ems']) else all_level.risk_model_ems
                 self.calculate_derived_values(all_level)
 
                 # No data for "unknown" risk level in terms of predictions...
